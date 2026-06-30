@@ -1,0 +1,11 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /stautoparts/
+
+    # If the request is for a real file or directory, skip
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # Forward all requests to public/index.php
+    RewriteRule ^(.*)$ public/$1 [L,QSA]
+</IfModule>

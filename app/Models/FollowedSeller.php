@@ -1,0 +1,34 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;   
+use App\Traits\TracksIsDeleted;
+
+class FollowedSeller extends Model
+{
+    use SoftDeletes, TracksIsDeleted;
+
+    protected $fillable = [
+        'user_id',
+        'seller_name',
+        'location',
+        'products',
+        'rating',
+        'followers',
+        'description',
+        'is_deleted',
+    ];
+
+    protected $casts = [
+        'products' => 'integer',
+        'rating' => 'decimal:1',
+        'followers' => 'integer',
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+}

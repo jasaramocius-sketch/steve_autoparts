@@ -1,0 +1,99 @@
+@extends('admin.layouts.app')
+@section('page-title', 'Edit Blog')
+@section('content')
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">Edit Blog</h5>
+    </div>
+    <div class="card-body">
+        <form action="{{ route('admin.blogs.update', $blog->id) }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('PUT')
+
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <label class="form-label">Title *</label>
+                    <input type="text" name="title" class="form-control @error('title') is-invalid @enderror" value="{{ old('title', $blog->title) }}" required>
+                    @error('title') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-control @error('status') is-invalid @enderror">
+                        <option value="draft" {{ (old('status', $blog->status) ?? 'draft') === 'draft' ? 'selected' : '' }}>Draft</option>
+                        <option value="published" {{ (old('status', $blog->status) ?? 'draft') === 'published' ? 'selected' : '' }}>Published</option>
+                    </select>
+                    @error('status') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Category</label>
+                    <select name="blog_category_id" class="form-control @error('blog_category_id') is-invalid @enderror">
+                        <option value="">None</option>
+                        @foreach($blogCategories as $cat)
+                            <option value="{{ $cat->id }}" {{ old('blog_category_id', $blog->blog_category_id ?? '') == $cat->id ? 'selected' : '' }}>
+                                {{ $cat->name }}
+                            </option>
+                            @foreach($cat->children as $child)
+                                <option value="{{ $child->id }}" {{ old('blog_category_id', $blog->blog_category_id ?? '') == $child->id ? 'selected' : '' }}>
+                                    &nbsp;&nbsp;&nbsp;{{ $child->name }}
+                                </option>
+                            @endforeach
+                        @endforeach
+                    </select>
+                    @error('blog_category_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Category</label>
+                    <select name="blog_category_id" class="form-control @error('blog_category_id') is-invalid @enderror">
+                        <option value="">None</option>
+                        @foreach($blogCategories as $cat)
+                            <option value="{{ $cat->id }}" {{ old('blog_category_id', $blog->blog_category_id ?? '') == $cat->id ? 'selected' : '' }}>
+                                {{ $cat->name }}
+                            </option>
+                            @foreach($cat->children as $child)
+                                <option value="{{ $child->id }}" {{ old('blog_category_id', $blog->blog_category_id ?? '') == $child->id ? 'selected' : '' }}>
+                                    &nbsp;&nbsp;&nbsp;{{ $child->name }}
+                                </option>
+                            @endforeach
+                        @endforeach
+                    </select>
+                    @error('blog_category_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
+
+                <div class="col-md-12">
+                    <label class="form-label">Content</label>                    
+                    <textarea id="editor"
+                        name="details"
+                        class="form-control @error('details') is-invalid @enderror"
+                        rows="10">{{ old('details', $blog->details) }}</textarea>
+                    @error('details') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Image (Upload)</label>
+                    <input type="file" name="image" class="form-control @error('image') is-invalid @enderror">
+                    @error('image') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    @if($blog->image)
+                        <small class="text-muted">Current Image: {{ $blog->image }}</small>
+                    @endif
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Image (URL)</label>
+                    <input type="url" name="image_url" class="form-control @error('image_url') is-invalid @enderror" value="{{ old('image_url') }}" placeholder="https://example.com/image.jpg">
+                    @error('image_url') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    <small class="text-muted">Provide a URL to download the image from (only if no file uploaded).</small>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button class="btn btn-primary"><i class="fas fa-save"></i> Update</button>
+                <a href="{{ route('admin.blogs.index') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@endsection
