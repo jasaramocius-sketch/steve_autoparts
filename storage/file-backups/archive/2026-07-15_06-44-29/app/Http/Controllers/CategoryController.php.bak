@@ -1,0 +1,232 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Category;
+use App\Models\Product;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
+
+class CategoryController extends Controller
+{
+    // Admin / Staff Categories
+    public function index(Request $request)
+    {
+        $trashed = $request->has('trashed');
+        $search = $request->get('search', '');
+
+        $sortBy = in_array($request->sort_by, ['id', 'name', 'products_count', 'status']) ? $request->sort_by : 'id';
+        $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
+        $perPage = in_array((int)$request->per_page, [10, 20, 50, 100]) ? (int)$request->per_page : 10;
+
+        if ($trashed) {
+            $categories = Category::onlyTrashed()->withCount('products')
+                ->orderBy('deleted_at', 'desc')->paginate($perPage);
+        } else {
+            $categories = Category::withCount('products');
+
+            if ($search !== '') {
+                $categories->where(function($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('slug', 'like', "%{$search}%");
+                });
+            }
+
+            if ($sortBy === 'products_count') {
+                $categories->orderBy('products_count', $sortDir);
+            } else {
+                $categories->orderBy($sortBy, $sortDir);
+            }
+
+            $categories = $categories->paginate($perPage);
+        }
+
+        $categories->appends($request->query())->onEachSide(1);
+
+        return view('admin.categories.index', compact('categories', 'search', 'sortBy', 'sortDir'));
+    }
+
+    public function restore($id)
+    {
+        Category::onlyTrashed()->findOrFail($id)->restore();
+        return redirect()->route('admin.categories.index')->with('success', 'Category restored successfully.');
+    }
+
+    public function forceDelete($id)
+    {
+        $category = Category::onlyTrashed()->findOrFail($id);
+        $category->forceDelete();
+        return redirect()->route('admin.categories.index')->with('success', 'Category permanently deleted.');
+    }
+
+    // User Categories Page
+    public function toggleStatus($id)
+    {
+        $category = Category::findOrFail($id);
+        $category->status = !$category->status;
+        $category->save();
+        return back()->with('success', 'Category status updated successfully.');
+    }
+
+    public function showCategories(Request $request)
+    {
+        $search = $request->get('search', '');
+        $sort = $request->get('sort', 'latest');
+
+        $topCategories = Category::topLevel()
+            ->where('status', true)
+            ->withCount(['products' => fn($q) => $q->where('status', true)])
+            ->with(['children' => function ($q) {
+                $q->where('status', true)
+                  ->withCount(['products' => fn($q2) => $q2->where('status', true)])
+                  ->with(['children' => function ($q2) {
+                      $q2->where('status', true)
+                         ->withCount(['products' => fn($q3) => $q3->where('status', true)]);
+                  }]);
+            }]);
+
+        if ($search !== '') {
+            $topCategories->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%");
+            });
+        }
+
+        $topCategories = $topCategories->get();
+
+        $categories = $topCategories;
+
+        $categories = $categories->map(function ($category) {
+            $descIds = $category->getAllDescendantIds();
+            $category->total_products_count = Product::whereIn('category_id', $descIds)
+                ->where('status', true)
+                ->count();
+            return $category;
+        });
+
+        if ($sort === 'name') {
+            $categories = $categories->sortBy('name')->values();
+        } elseif ($sort === 'oldest') {
+            $categories = $categories->sortBy('created_at')->values();
+        } else {
+            $categories = $categories->sortByDesc('created_at')->values();
+        }
+
+        return view('categories', compact('categories'));
+    }
+    // Create Form
+    public function create()
+    {
+        $parents = Category::whereNull('parent_id')->get();
+
+        return view('admin.categories.create', compact('parents'));
+    }
+
+    // Store Category
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'image_url' => 'nullable|url',
+        ]);
+
+        $category = new Category();
+        $category->name = $request->name;
+        $category->slug = \Illuminate\Support\Str::slug($request->name);
+        $category->parent_id = $request->parent_id;
+        $category->status = $request->boolean('status', true);
+
+        if ($request->filled('image_from_manager')) {
+            $sourcePath = public_path($request->image_from_manager);
+            if (file_exists($sourcePath)) {
+                $filename = time() . '_' . uniqid() . '.' . pathinfo($request->image_from_manager, PATHINFO_EXTENSION);
+                $destDir = public_path('assets/images/categories');
+                if (!is_dir($destDir)) mkdir($destDir, 0775, true);
+                copy($sourcePath, $destDir . '/' . $filename);
+                $category->image = $filename;
+            }
+        } elseif ($request->hasFile('image')) {
+            $category->image = saveImageWithWebp($request->file('image'), 'assets/images/categories');
+        } elseif ($request->filled('image_url')) {
+            try {
+                $url = $request->input('image_url');
+                $filename = saveImageFromUrlWithWebp($url, 'assets/images/categories');
+                if ($filename === null) {
+                    return back()->withInput()->withErrors(['image_url' => 'Could not download image from the provided URL.']);
+                }
+                $category->image = $filename;
+            } catch (\Exception $e) {
+                return back()->withInput()->withErrors(['image_url' => 'An error occurred while downloading the image: ' . $e->getMessage()]);
+            }
+        }
+
+        $category->save();
+
+        return redirect()->route('admin.categories.index')
+            ->with('success', 'Category created successfully.');
+    }
+
+    // Edit Form
+    public function edit($id)
+    {
+        $category = Category::findOrFail($id);
+        $parents = Category::whereNull('parent_id')->get();
+
+        return view('admin.categories.edit', compact('category', 'parents'));
+    }
+
+    // Update Category
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'required',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'image_url' => 'nullable|url',
+        ]);
+
+        $category = Category::findOrFail($id);
+        $category->name = $request->name;
+        $category->slug = \Illuminate\Support\Str::slug($request->name);
+        $category->parent_id = $request->parent_id;
+        $category->status = $request->boolean('status', true);
+
+        if ($request->filled('image_from_manager')) {
+            $sourcePath = public_path($request->image_from_manager);
+            if (file_exists($sourcePath)) {
+                $filename = time() . '_' . uniqid() . '.' . pathinfo($request->image_from_manager, PATHINFO_EXTENSION);
+                $destDir = public_path('assets/images/categories');
+                if (!is_dir($destDir)) mkdir($destDir, 0775, true);
+                copy($sourcePath, $destDir . '/' . $filename);
+                $category->image = $filename;
+            }
+        } elseif ($request->hasFile('image')) {
+            $category->image = saveImageWithWebp($request->file('image'), 'assets/images/categories');
+        } elseif ($request->filled('image_url')) {
+            try {
+                $url = $request->input('image_url');
+                $filename = saveImageFromUrlWithWebp($url, 'assets/images/categories');
+                if ($filename === null) {
+                    return back()->withInput()->withErrors(['image_url' => 'Could not download image from the provided URL.']);
+                }
+                $category->image = $filename;
+            } catch (\Exception $e) {
+                return back()->withInput()->withErrors(['image_url' => 'An error occurred while downloading the image: ' . $e->getMessage()]);
+            }
+        }
+        
+        $category->save();
+
+        return redirect()->route('admin.categories.index')
+            ->with('success', 'Category updated successfully');
+    }
+
+    // Delete Category
+    public function destroy($id)
+    {
+        Category::findOrFail($id)->delete();
+
+        return redirect()->route('admin.categories.index')
+            ->with('success', 'Category deleted successfully');
+    }
+}

@@ -1,0 +1,207 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Blog;
+use App\Models\Category;
+use App\Models\Product;
+use App\Models\Brand;
+use App\Models\Faq;
+use App\Models\HomePageSection;
+use App\Models\Page;
+
+class HomeController extends Controller
+{
+    private function formatCategoryName(string $slug): string
+    {
+        $names = [
+            'Engine-Parts' => 'Engine Parts',
+            'Body-Exterior' => 'Body & Exterior',
+            'Interior-Parts' => 'Interior Parts',
+            'Electrical-Lighting' => 'Electrical & Lighting',
+            'Brakes-Brake-Parts' => 'Brakes & Brake Parts',
+            'Transmission-Drivetrain' => 'Transmission & Drivetrain',
+            'Suspension-Steering' => 'Suspension & Steering',
+        ];
+
+        return $names[$slug] ?? ucwords(str_replace('-', ' ', $slug));
+    }
+
+    private function getCategories()
+    {
+        return Category::whereNull('parent_id')
+            ->where('status', true)
+            ->orderBy('name')
+            ->get()
+            ->map(function ($category) {
+                $categoryIds = $category->getAllDescendantIds();
+                return [
+                    'name' => $category->name,
+                    'slug' => $category->slug,
+                    'image' => $category->getDisplayImagePath(),
+                    'count' => Product::whereIn('category_id', $categoryIds)->where('status', true)->count(),
+                ];
+            });
+    }
+
+    private function getCategoryImage(string $slug): string
+    {
+        $images = [
+            'engine-parts' => '1730804224silver-device-with-white-cover-that-says-word-it-minpng.png',
+            'body-exterior' => '173080421331792401shockabsorber2-minpng.png',
+            'interior-parts' => '1730804204oval-shaped-car-mirror-minpng.png',
+            'electrical-lighting' => '1730804142c1b1489eb0545231cf0bfa44a827e2ae-minpng.png',
+            'brakes-brake-parts' => '173080413017369231014177a5f-cedb-407a-8a1d-a6aa0f40249d-minpng.png',
+            'transmission-drivetrain' => '1730804110engineering-concept-project-heating-house-thermostatic-valve-copper-fitting-project-minpng.png',
+            'suspension-steering' => '1730804093huelpful-steering-wheel-isolated-white-background-minpng.png',
+        ];
+
+        return $images[strtolower($slug)] ?? 'test.webp';
+    }
+
+    private function getDefaultCategories()
+    {
+        return [];
+    }
+
+    private function getFeaturedProducts()
+    {
+        return Product::where('status', true)->where('added_by', 'admin')->where('featured', true)->latest()->take(8)->get();
+    }
+
+    public function index()
+    {
+        $categories = $this->getCategories();
+
+        $sections = HomePageSection::where('status', true)
+            ->orderBy('order')
+            ->get()
+            ->keyBy('section_name');
+
+        $exploreSection = $sections->get('explore_products');
+        $exploreTabs = $this->buildExploreTabs($exploreSection);
+
+        $featuredProducts = $this->getFeaturedProducts();
+        if ($featuredProducts->isEmpty()) {
+            $featuredProducts = Product::where('status', true)->where('added_by', 'admin')->inRandomOrder()->take(8)->get();
+        }
+
+        $heroSection = $sections->get('hero');
+        $bannerSections = $sections->filter(fn($s) => str_starts_with($s->section_name, 'banner_'));
+
+        $bestSelling = Product::where('status', true)->where('added_by', 'admin')->where('product_type', 'best_selling')->latest()->take(8)->get();
+        if ($bestSelling->isEmpty()) {
+            $bestSelling = Product::where('status', true)->where('added_by', 'admin')->inRandomOrder()->take(8)->get();
+        }
+
+        $latestPosts = Blog::where('status', 'published')->latest()->take(2)->get();
+
+        $brandsSection = $sections->get('top_brands_heading');
+        $brandsLimit = $brandsSection?->extra_data['brands_limit'] ?? 'all';
+        $brandsQuery = Brand::where('status', true);
+        if ($brandsLimit !== 'all') {
+            $brandsQuery->take((int) $brandsLimit);
+        }
+        $brands = $brandsQuery->get();
+
+        return view('home', compact('categories', 'featuredProducts', 'exploreTabs', 'heroSection', 'bannerSections', 'bestSelling', 'sections', 'latestPosts', 'brands'));
+    }
+
+    private function buildExploreTabs($section): array
+    {
+        $extra = $section?->extra_data ?? [];
+        $tabs = $extra['tabs'] ?? [];
+
+        // Migrate old format (keyed by product_type) to new format
+        if (empty($tabs)) {
+            $oldKeys = ['new_arrival' => 'New Arrivals', 'trending' => 'Trending', 'best_selling' => 'Best Selling', 'popular' => 'Popular'];
+            foreach ($oldKeys as $key => $label) {
+                $ids = $extra[$key] ?? [];
+                if (!empty($ids)) {
+                    $tabs[] = ['label' => $label, 'product_ids' => $ids];
+                }
+            }
+        }
+
+        $result = [];
+        foreach ($tabs as $i => $tab) {
+            $ids = $tab['product_ids'] ?? [];
+            if (empty($ids)) {
+                continue;
+            }
+            $products = Product::where('status', true)->where('added_by', 'admin')
+                ->whereIn('id', $ids)
+                ->latest()
+                ->take(8)
+                ->get();
+
+            if ($products->isEmpty()) {
+                $products = Product::where('status', true)->where('added_by', 'admin')
+                    ->inRandomOrder()->take(8)->get();
+            }
+
+            $result[] = [
+                'label' => $tab['label'] ?? ('Tab ' . ($i + 1)),
+                'products' => $products,
+            ];
+        }
+
+        if (empty($result)) {
+            $result[] = [
+                'label' => 'New Arrivals',
+                'products' => Product::where('status', true)->where('added_by', 'admin')->latest()->take(8)->get(),
+            ];
+        }
+
+        return $result;
+    }
+
+    public function about() { return view('pages.about'); }
+    public function contact() { return view('pages.contact'); }
+    public function blog() { return view('pages.blog'); }
+    public function page($slug)
+    {
+        $page = Page::where('slug', $slug)->where('status', true)->firstOrFail();
+        return view('pages.show', compact('page'));
+    }
+    public function faq()
+    {
+        $faqs = Faq::where('status', true)->orderBy('order')->get();
+        return view('pages.faq', compact('faqs'));
+    }
+    public function privacy()
+    {
+        $page = Page::where('slug', 'privacy-policy')->where('status', true)->first();
+        if ($page) {
+            return view('pages.show', compact('page'));
+        }
+        return view('pages.privacy');
+    }
+
+    public function terms()
+    {
+        $page = Page::where('slug', 'terms-conditions')->where('status', true)->first();
+        if ($page) {
+            return view('pages.show', compact('page'));
+        }
+        return view('pages.terms');
+    }
+    public function returnPolicy()
+    {
+        $page = Page::where('slug', 'return-policy')->where('status', true)->first();
+        if ($page) {
+            return view('pages.show', compact('page'));
+        }
+        return view('pages.return-policy');
+    }
+
+    public function supportPolicy()
+    {
+        $page = Page::where('slug', 'support-policy')->where('status', true)->first();
+        if ($page) {
+            return view('pages.show', compact('page'));
+        }
+        return view('pages.support-policy');
+    }
+}

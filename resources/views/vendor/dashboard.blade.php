@@ -45,7 +45,7 @@
           <li class="nav-item mt-4">
             <form action="{{ route('logout') }}" method="POST">
               @csrf
-              <button type="submit" class="nav-link w-100 text-start d-flex align-items-center gap-2 border-0 bg-transparent text-danger" style="border-radius: 6px; font-weight: 500;">
+              <button type="submit" class="nav-link w-100 text-start d-flex align-items-center gap-2 border-0 bg-transparent text-danger steve-btn" style="border-radius: 6px; font-weight: 500;">
                 <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
               </button>
             </form>
@@ -127,7 +127,7 @@
                 <h3 style="color: #1f0300; font-weight: 600; margin: 0;">My Catalog</h3>
                 <p class="text-muted mb-0">View, manage, and add new products to your seller catalog.</p>
               </div>
-              <button class="template-btn" data-bs-toggle="collapse" data-bs-target="#addProductForm" style="background-color: var(--primary); border-color: var(--primary); color: #fff; border: none; padding: 8px 16px; border-radius: 4px; font-weight: 600;">
+              <button class="template-btn steve-btn" data-bs-toggle="collapse" data-bs-target="#addProductForm" style="background-color: var(--primary); border-color: var(--primary); color: #fff; border: none; padding: 8px 16px; border-radius: 4px; font-weight: 600;">
                 + Add Product
               </button>
             </div>
@@ -164,7 +164,7 @@
                       <input type="number" name="stock" class="form-control" placeholder="e.g. 50" required>
                     </div>
                   </div>
-                  <button type="submit" class="template-btn" style="background-color: var(--primary); border-color: var(--primary); color: #fff; border: none; padding: 10px 24px; border-radius: 4px; font-weight: 600;">
+                  <button type="submit" class="template-btn steve-btn" style="background-color: var(--primary); border-color: var(--primary); color: #fff; border: none; padding: 10px 24px; border-radius: 4px; font-weight: 600;">
                     Save Product
                   </button>
                 </form>
@@ -280,7 +280,7 @@
                 </div>
                 <div class="col-md-6 mb-3">
                   <label class="form-label" style="font-weight: 500; font-size: 14px;">Shop Hotline *</label>
-                  <input type="text" name="phone" class="form-control" value="{{ $profile['phone'] }}" required>
+                  <input type="tel" name="phone" class="form-control" inputmode="numeric" value="{{ $profile['phone'] }}" required>
                 </div>
                 <div class="col-md-6 mb-3">
                   <label class="form-label" style="font-weight: 500; font-size: 14px;">Country *</label>
@@ -295,7 +295,7 @@
                   <input type="text" name="address" class="form-control" value="{{ $profile['address'] }}" required>
                 </div>
               </div>
-              <button type="submit" class="template-btn mt-3" style="background-color: var(--primary); border-color: var(--primary); color: #fff; border: none; padding: 10px 24px; border-radius: 4px; font-weight: 600; text-transform: uppercase;">
+              <button type="submit" class="template-btn mt-3 steve-btn" style="background-color: var(--primary); border-color: var(--primary); color: #fff; border: none; padding: 10px 24px; border-radius: 4px; font-weight: 600; text-transform: uppercase;">
                 Save Shop Config
               </button>
             </form>

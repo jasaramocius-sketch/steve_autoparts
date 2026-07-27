@@ -1,0 +1,136 @@
+@extends('admin.layouts.app')
+
+@section('page-title', 'Staff')
+
+@section('content')
+
+<div class="container-fluid">
+
+    <div class="card shadow-sm">
+
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">Staff Management</h3>
+
+            @if(Auth::check() && in_array(Auth::user()->role, ['master_admin', 'admin']))
+                <a href="{{ route('admin.staff.create') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add Staff
+                </a>
+            @endif
+        </div>
+
+        <div class="card-body">
+
+            @php $staffList = $users ?? $staffs ?? collect(); @endphp
+
+            <div class="d-flex justify-content-between align-items-center px-0 pb-2">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="text-muted small">Show</span>
+                    <select class="form-select form-select-sm" style="width: auto;" onchange="window.location.href=this.value">
+                        @foreach([10, 20, 50, 100] as $n)
+                            <option value="{{ request()->fullUrlWithQuery(['per_page' => $n]) }}" {{ (int)request('per_page', 10) === $n ? 'selected' : '' }}>{{ $n }}</option>
+                        @endforeach
+                    </select>
+                    <span class="text-muted small">per page</span>
+                </div>
+                <div class="text-muted small">
+                    Showing {{ $staffList->firstItem() }}-{{ $staffList->lastItem() }} of {{ $staffList->total() }}
+                </div>
+            </div>
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered table-striped align-middle">
+
+                    <thead class="table-dark">
+                        <tr>
+                            <th><a href="{{ sortUrl('id', $sortBy, $sortDir) }}" class="text-decoration-none text-white">ID {!! sortIndicator('id', $sortBy, $sortDir) !!}</a></th>
+                            <th>Image</th>
+                            <th><a href="{{ sortUrl('name', $sortBy, $sortDir) }}" class="text-decoration-none text-white">Name {!! sortIndicator('name', $sortBy, $sortDir) !!}</a></th>
+                            <th><a href="{{ sortUrl('email', $sortBy, $sortDir) }}" class="text-decoration-none text-white">Email Address {!! sortIndicator('email', $sortBy, $sortDir) !!}</a></th>
+                            <th><a href="{{ sortUrl('role', $sortBy, $sortDir) }}" class="text-decoration-none text-white">Role {!! sortIndicator('role', $sortBy, $sortDir) !!}</a></th>
+                            <th><a href="{{ sortUrl('created_at', $sortBy, $sortDir) }}" class="text-decoration-none text-white">Joined {!! sortIndicator('created_at', $sortBy, $sortDir) !!}</a></th>
+                            <th width="180">Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        @forelse($staffList as $user)
+
+                            <tr>
+
+                                <td>{{ $user->id }}</td>
+
+                                <td>
+                                    <img
+                                        src="{{ asset('assets/images/customers/' . ($user->image ?? 'default.png')) }}"
+                                        width="60"
+                                        class="rounded"
+                                        alt="{{ $user->name }}">
+                                </td>
+
+                                <td>{{ $user->name }}</td>
+
+                                <td>{{ $user->email }}</td>
+
+                                <td>
+                                    <span class="badge bg-light text-primary border border-primary-subtle">
+                                        {{ ucfirst($user->role) }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    {{ $user->created_at->format('d M Y') }}
+                                </td>
+
+                                <td>
+
+                                    <a href="{{ route('admin.staff.edit', $user->id) }}"
+                                       class="btn btn-warning btn-sm">
+                                        Edit
+                                    </a>
+
+                                    <form action="{{ route('admin.staff.destroy', $user->id) }}"
+                                          method="POST"
+                                          style="display:inline">
+
+                                        @csrf
+                                        @method('DELETE')
+
+                                        <button type="submit"
+                                                class="btn btn-danger btn-sm steve-btn"
+                                                onclick="return confirm('Delete this staff member?')">
+                                            Delete
+                                        </button>
+
+                                    </form>
+
+                                </td>
+
+                            </tr>
+
+                        @empty
+
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-muted">No results found.</td>
+                            </tr>
+
+                        @endforelse
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            @if($staffList->hasPages())
+                <div class="d-flex justify-content-center">{{ $staffList->links() }}</div>
+            @endif
+
+        </div>
+
+    </div>
+
+</div>
+
+@endsection

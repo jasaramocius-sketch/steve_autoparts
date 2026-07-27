@@ -1,0 +1,92 @@
+@extends('admin.layouts.app')
+@section('page-title', 'Add Blog')
+@section('content')
+
+<div class="card border-0 shadow-sm">
+    <!-- <div class="card-header bg-white">
+        <h5 class="mb-0">Add Blog</h5>
+    </div> -->
+    <div class="card-body">
+        <form action="{{ route('admin.blogs.store') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <label class="form-label">Title *</label>
+                    <input type="text" name="title" class="form-control @error('title') is-invalid @enderror" value="{{ old('title') }}" required>
+                    @error('title') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-control @error('status') is-invalid @enderror">
+                        <option value="draft" {{ old('status') === 'draft' ? 'selected' : '' }}>Draft</option>
+                        <option value="published" {{ old('status') === 'published' ? 'selected' : '' }}>Published</option>
+                    </select>
+                    @error('status') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Category</label>
+                    <select name="blog_category_id" class="form-control @error('blog_category_id') is-invalid @enderror">
+                        <option value="">None</option>
+                        @foreach($blogCategories as $cat)
+                            <option value="{{ $cat->id }}" {{ old('blog_category_id', $blog->blog_category_id ?? '') == $cat->id ? 'selected' : '' }}>
+                                {{ $cat->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('blog_category_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
+
+                <div class="col-md-12">
+                    <label class="form-label">Content</label>
+                    <textarea id="editor"
+                        name="details"
+                        class="form-control texteditor @error('details') is-invalid @enderror"
+                        rows="10">{{ old('details') }}</textarea>
+
+                    @error('details')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <!-- <div class="col-md-6">
+                    <label class="form-label">Image (Upload)</label>
+                    <input type="file" name="image" class="form-control @error('image') is-invalid @enderror">
+                    @error('image') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    <input type="hidden" name="image_from_manager" id="image_from_manager_blog_image">
+                    <div id="impPreview_blog_image" class="d-none mt-2"></div>
+                    <button type="button" class="btn btn-sm btn-outline-primary mt-1" onclick="impOpen_blog_image()">
+                        <i class="fas fa-images me-1"></i> Browse Image Manager
+                    </button>
+                </div> -->
+
+                <div class="col-md-6">
+                    <label class="form-label">Image (URL)</label>
+                    <input type="url" name="image_url" class="form-control @error('image_url') is-invalid @enderror" value="{{ old('image_url') }}" placeholder="https://example.com/image.jpg">
+                    @error('image_url') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    <small class="text-muted">Provide a URL to download the image from (only if no file uploaded).</small>                    
+                </div>
+                <div class="">
+                <button type="button" class="btn btn-sm btn-outline-primary mt-1" onclick="impOpen_blog_image()">
+                    <i class="fas fa-images me-1"></i> Browse Image Manager
+                </button>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <label class="form-label">Image (Upload)</label>
+                    <input type="file" name="image" class="form-control @error('image') is-invalid @enderror">
+                    @error('image') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    <input type="hidden" name="image_from_manager" id="image_from_manager_blog_image">
+                <div id="impPreview_blog_image" class="d-none mt-2"></div>
+                <button class="btn btn-primary steve-btn"><i class="fas fa-save"></i> Save</button>
+                <a href="{{ route('admin.blogs.index') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@include('admin.partials.image-manager-picker', ['pickerId' => 'blog_image', 'targetInput' => 'image_from_manager'])
+
+@endsection

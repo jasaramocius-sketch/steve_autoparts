@@ -1,0 +1,76 @@
+Date,Task Number,Category,Task Name,Task Purpose,Files Changed,Status
+2026-06-16,1,Bootstrap,Project init - Users table migration,Foundation database schema for user authentication and management,"2026_06_16_000000_create_users_table.php, AdminMiddleware.php, UserSeeder.php",Completed
+2026-06-16,2,Bootstrap,PHP info test,Verify PHP version and extensions on server,public/info.php,Completed
+2026-06-17,3,Database,Core tables - Orders/Order Items/Wishlists,Core e-commerce tables for order management and user wishlists,3 migrations,Completed
+2026-06-17,4,Database,Core tables - Vehicles/Addresses/Notifications,User vehicle storage delivery addresses and notification system,3 migrations,Completed
+2026-06-17,5,Database,Products table migration,Main product catalog table with all attributes,2026_06_17_061020_create_products_table.php,Completed
+2026-06-17,6,Database,Compares table,Product comparison functionality storage,2026_06_17_070000_create_compares_table.php,Completed
+2026-06-17,7,Bootstrap,PHP info test,Additional PHP configuration verification,public/phpinfo.php,Completed
+2026-06-18,8,Database,Followed sellers + Category fields + Child category,Product categorization and seller following system,"3 migrations",Completed
+2026-06-18,9,Database,Categories table restructure,Categories table with foreign key on products,2026_06_18_100000_create_categories_table_and_update_products.php,Completed
+2026-06-18,10,Assets,Dynamic styles + Toastr CSS,Frontend CSS framework and notification styling,"dynamic-styles.css (136KB), toastr.min.css",Completed
+2026-06-18,11,Database,Blogs table,Blog content management table,2026_06_18_115746_create_blogs_table.php,Completed
+2026-06-18,12,Seeders,ProductSeeder + DatabaseSeeder,Sample product data and database seeder setup,2 seeders,Completed
+2026-06-19,13,Auth,Role/status on users + auth config,User role management and authentication configuration,"2026_06_19_073425_add_role_status_to_users_table.php, config/auth.php",Completed
+2026-06-19,14,Auth,Admin + Staff controllers + middleware,Admin and staff dashboard controllers with sidebar,"AdminDashboardController, StaffDashboardController, sidebar.blade.php",Completed
+2026-06-19,15,Auth,Admin + Staff table migrations,Admin and staff user database tables,"admins_table, staff_table",Completed
+2026-06-22,16,Assets,Bootstrap CSS,Bootstrap 5 CSS framework for responsive design,bootstrap.min.css,Completed
+2026-06-22,17,Database,Category Seeder,Category seed data for 7 top-level categories,CategorySeeder.php,Completed
+2026-06-22,18,Admin,Role column migration,Role column finalized on users table,2026_06_19_080126_add_role_to_users_table.php,Completed
+2026-06-23,19,Admin,Middleware stack - Admin/Staff/Role/VerifyActiveUser,Complete authentication middleware chain for access control,4 middleware files,Completed
+2026-06-23,20,Features,CheckoutController + ProfileController,Base checkout and profile controller stubs,2 controllers,Completed
+2026-06-23,21,Database,Product type + stock columns,Extended product attributes for type and inventory,"2 migrations",Completed
+2026-06-23,22,Layout,Navigation menu partial,Main navigation menu for storefront,resources/views/partials/nav-menu.blade.php,Completed
+2026-06-25,23,Features,Contact system,Contact form submissions with database storage,"contacts migration + ContactController",Completed
+2026-06-26,24,Features,Blog categories,Blog category hierarchy with parent-child relationships,"3 migrations (table + FK + parent_id)",Completed
+2026-06-26,25,Assets,jQuery UI + nice-select CSS,UI component libraries for interactive elements,"jquery-ui.css, nice-select.css",Completed
+2026-06-26,26,Currency,Currency helper + config,Currency conversion support with 8 currencies,"app/Helpers/currency.php, config/currencies.php",Completed
+2026-06-26,27,Admin,AdminController + staff/admins tables,Admin panel structure with role-based access,"AdminController, admin/staff migrations",Completed
+2026-06-26,28,Database,Soft deletes migration,Soft delete support on all database tables,2026_06_22_065629_add_soft_deletes_to_all_tables.php,Completed
+2026-06-29,29,Database,Images table,Image management system for product and blog images,2026_06_29_052726_create_images_table.php,Completed
+2026-06-29,30,Localization,Language files + SetLocale middleware,Multi-language support with 6 languages,"messages.php (17KB), languages.php, SetLocale.php",Completed
+2026-06-29,31,Features,Followed sellers + welcome page,Frontend pages for seller following and welcome,"followed-sellers.blade.php, welcome.blade.php (72KB)",Completed
+2026-06-29,32,Admin,Admin dashboard view,Admin panel dashboard with statistics,admin/dashboard.blade.php,Completed
+2026-06-29,33,Database,is_deleted column on all tables,Soft delete column added to all database tables,2026_06_29_130032_add_is_deleted_to_all_tables.php,Completed
+2026-06-30,34,Helper,Dynamic Copyright Year,Automate copyright year update in footer,"app/Helpers/date.php + footer views",Completed
+2026-06-30,35,Features,NewsletterController,Newsletter subscription for marketing email collection,"app/Http/Controllers/NewsletterController.php + route import",Completed
+2026-06-30,36,Config,Unirate Currency API URL,Live currency exchange rates integration,AppServiceProvider.php,Completed
+2026-06-30,37,Database,is_active to status rename,Standardize boolean field naming across entire codebase,"Migration + 6 models + 8 controllers + 22+ blades",Completed
+2026-06-30,38,Admin,Brand Status Toggle,Quick enable/disable brands without opening edit form,"BrandController + route + index blade",Completed
+2026-06-30,39,Database,is_deleted fillable fix,Fix silent soft-delete failures in 16 models,"16 models + 2 migrations",Completed
+2026-06-30,40,Features,FAQ System,Dynamic FAQ with admin management and frontend accordion,"Faq model + CRUD + migration + frontend accordion",Completed
+2026-06-30,41,Middleware,NoCache Middleware fix,Fix StreamedResponse compatibility in cache control,NoCache.php,Completed
+2026-06-30,42,Checkout,Checkout fields on orders,Additional columns for checkout data capture,Migration,Completed
+2026-06-30,43,Auth,Auth forms styling,Consistent styling on login and register forms,7 auth blade files,Completed
+2026-06-30,44,Admin,Password reset tables migration,Password reset support for user accounts,Migration,Completed
+2026-07-03,45,Checkout,Address Management,AJAX address CRUD with aiz-megabox cards in checkout,"set_default migration + AddressController + modal CRUD",Completed
+2026-07-03,46,Checkout,Order Confirmed page,Order success page - Step 5 of checkout flow,order-confirmed.blade.php,Completed
+2026-07-03,47,Checkout,Checkout Steps partial,Shared border-bottom-6px step indicator for all checkout pages,checkout-steps.blade.php,Completed
+2026-07-06,48,Product,Single Product Redesign,Zenis template layout with vertical gallery and sidebar,"product.blade.php (~1054 lines)",Completed
+2026-07-06,49,Product,Vehicle columns on products,Brand/Year/Make/Model fields for auto parts filtering,"Migration + model + admin forms",Completed
+2026-07-06,50,Product,Tab labels migration,Tab label and policy text columns for product page,2026_07_06_000000_add_tab_labels_to_products_table.php,Completed
+2026-07-06,51,Checkout,Payment Page,COD/Card/PayPal options with Stripe card form,payment.blade.php,Completed
+2026-07-06,52,Checkout,Delivery Info - Store Pickup,Store pickup option alongside home delivery,delivery-info.blade.php,Completed
+2026-07-06,53,Checkout,Users table alignment + payment details migration,Schema alignment with live site and payment fields,2 migrations,Completed
+2026-07-07,54,Orders,Order Cancel Feature,Allow users to cancel pending orders,OrderController@destroy,Completed
+2026-07-07,55,Orders,Invoice View,PDF-ready invoice template with route fix,"invoice.blade.php + route fix",Completed
+2026-07-08,56,Admin,Sortable tables helpers,Reusable sort functions for admin index tables,"app/helpers.php (sortUrl/sortIndicator) + composer.json",Completed
+2026-07-08,57,Product,Product features column,JSON column for product feature lists,Migration,Completed
+2026-07-08,58,Features,Contact page route fix,Fix missing Blade syntax on form action,contact.blade.php,Completed
+2026-07-08,59,Blog,Blog layout polish,Previous/next navigation and search button styling,"blog/index.blade.php, blog/show.blade.php",Completed
+2026-07-08,60,UI,Pagination Redesign,Results info line and smart 5-page window,gs-pagination.blade.php,Completed
+2026-07-08,61,Compare,Compare page fixes,Cart integration and MySQL subquery limit fix,"compare.blade.php + CompareController",Completed
+2026-07-08,62,Helper,imgTag helper fix,Null alt text handling and missing image placeholder,app/Helpers/image.php,Completed
+2026-07-09,63,Admin,Revisions System,Admin model change tracking with field-level diff,"revisions table + Revisable trait + 14 models + admin views",Completed
+2026-07-09,64,Admin,File Audit System,Real-time file change tracking with diff view,"file:audit command + Node.js watcher + admin UI",Completed
+2026-07-09,65,Features,Policy Pages (DB-driven),Terms/Privacy/Return/Support policies editable from admin,"4 routes + HomeController + Page model",Completed
+2026-07-09,66,Features,Static Page Route,Dynamic page rendering from database by slug,"GET /page/{slug} + show.blade.php",Completed
+2026-07-09,67,Fix,Wishlist Header Count,Guest and auth fallback for wishlist and compare counts,AppServiceProvider.php,Completed
+2026-07-09,68,Fix,Dashboard Cart 500 Error,Replace non-existent Cart model with session-based count,dashboard.blade.php,Completed
+2026-07-09,69,CSS,steve-btn global class,Consistent button styling across entire storefront,"custom.css + style.css",Completed
+2026-07-09,70,CSS,Fixed heights removed,Remove rigid heights for natural button sizing,"style.css (8 classes) + auth forms (6) + product + addresses",Completed
+2026-07-09,71,CSS,steve-btn added to matching buttons,Apply branded button class to all CTA buttons,"home, tracking, invoice, shop, 404, terms, privacy",Completed
+2026-07-09,72,CSS,Utility classes migrated,Move utility classes from layout to custom stylesheet,"layouts/app.blade.php -> custom.css",Completed
+2026-07-09,73,Fix,Cart add-to-cart flow fix,Fix cart incorrectly updating wishlist and compare counters,CartController + script.js,Completed
+2026-07-09,74,Fix,Category image fallback,Handle missing category images with placeholder,CategoryController + category views,Completed
+2026-07-09,75,UI,Homepage slider autoplay,Enable autoplay for homepage carousel sections,home.blade.php + script.js,Completed
