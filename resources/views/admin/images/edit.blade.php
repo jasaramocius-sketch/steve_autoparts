@@ -1,4 +1,7 @@
 @extends('admin.layouts.app')
+{{-- Add your custom page ID and classes right here --}}
+@section('page-id', 'admin-images-edit-page')
+@section('page-class', 'admin-images-edit-page')
 @section('page-title', 'Edit Image - ' . $image->original_name)
 @section('content')
 <div class="container-fluid px-0">

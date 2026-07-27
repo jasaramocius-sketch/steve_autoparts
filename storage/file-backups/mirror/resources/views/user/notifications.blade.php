@@ -1,5 +1,7 @@
 @extends('user.layouts.dashboard')
-
+{{-- Add your custom page ID and classes right here --}}
+@section('page-id', 'user-notifications-page')
+@section('page-class', 'user-notifications-page')
 @section('dashboard-content')
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">Notifications

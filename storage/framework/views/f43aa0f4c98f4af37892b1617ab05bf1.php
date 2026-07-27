@@ -344,7 +344,7 @@
                 <path d="M18 6L6 18M6 6L18 18" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
         </div>
-        <div class="mobile-menu-account px-3 py-2 border-bottom mobile-view-auth-btns mb-2">
+        <div class="mobile-menu-account px-3 py-3 border-bottom mobile-view-auth-btns mb-2">
             <?php if(Auth::check()): ?>
                 <div class="d-flex align-items-center gap-2">
                     <?php if(Auth::user()->avatar): ?>

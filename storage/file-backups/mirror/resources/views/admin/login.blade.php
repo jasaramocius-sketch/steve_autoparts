@@ -1,5 +1,7 @@
 @extends('layouts.app')
-
+{{-- Add your custom page ID and classes right here --}}
+@section('page-id', 'admin-login-page')
+@section('page-class', 'admin-login-page')
 @section('content')
 
 <div class="container pt-5" style="margin: 100px auto; ">

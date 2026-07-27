@@ -10,7 +10,7 @@
         <input type="text" name="search" class="form-control form-control-sm" placeholder="Search..."
             value="<?php echo e($search ?? ''); ?>" style="font-size:12px;height:30px;" onchange="this.form.submit()">
         <?php if(!empty($search)): ?>
-            <a href="<?php echo e(route('user.reviews', array_filter(['status' => $statusFilter ?? '']))); ?>" class="btn btn-sm btn-outline-secondary" style="height:30px;padding:0 6px;font-size:11px;">
+            <a href="<?php echo e(route('user.reviews', array_filter(['status' => $statusFilter ?? '']))); ?>" class="btn btn-sm btn-outline-secondary" style="padding:6px 10px;font-size:11px;line-height:1.6;">
                 <i class="fas fa-times"></i>
             </a>
         <?php endif; ?>
@@ -46,8 +46,8 @@
                                 <i class="fas fa-image text-muted"></i>
                             </div>
                         <?php endif; ?>
-                        <div>
-                            <a href="<?php echo e(route('product', $item['product_slug'])); ?>" class="fw-semibold text-dark text-decoration-none" style="font-size:14px;"><?php echo e($item['product_name']); ?></a>
+                        <div class="review-page-table-product-name">
+                            <a href="<?php echo e(route('product', $item['product_slug'])); ?>" class="fw-semibold text-decoration-none"><?php echo e($item['product_name']); ?></a>
                         </div>
                     </div>
                 </td>

@@ -1,3 +1,5 @@
+<?php $__env->startSection('page-id', 'user-orders-page'); ?>
+<?php $__env->startSection('page-class', 'user-orders-page'); ?>
 <?php $__env->startSection('dashboard-content'); ?>
 
 <?php

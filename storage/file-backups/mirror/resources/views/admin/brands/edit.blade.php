@@ -1,4 +1,7 @@
 @extends('admin.layouts.app')
+{{-- Add your custom page ID and classes right here --}}
+@section('page-id', 'admin-edit-brand-page')
+@section('page-class', 'admin-edit-brand-page')
 @section('page-title', 'Edit Brand')
 @section('content')
 

@@ -1,4 +1,7 @@
 @extends('layouts.app')
+{{-- Add your custom page ID and classes right here --}}
+@section('page-id', 'checkout-page')
+@section('page-class', 'checkout-page')
 @section('title', 'Checkout' . ' - ' . config('app.name', 'StAutoparts'))
 @section('content')
 

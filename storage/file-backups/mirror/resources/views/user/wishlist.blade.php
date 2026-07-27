@@ -1,5 +1,7 @@
 @extends('user.layouts.dashboard')
-
+{{-- Add your custom page ID and classes right here --}}
+@section('page-id', 'user-wishlist-page')
+@section('page-class', 'user-wishlist-page')
 @section('dashboard-content')
 
 <div class="d-flex justify-content-between align-items-center mb-4">

@@ -1,5 +1,7 @@
 @extends('admin.layouts.app')
-
+{{-- Add your custom page ID and classes right here --}}
+@section('page-id', 'admin-home-edit-page')
+@section('page-class', 'admin-home-edit-page')
 @section('page-title', 'Edit' . ' ' . ucfirst(str_replace('_', ' ', $section->section_name)))
 
 @section('content')

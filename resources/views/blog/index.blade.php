@@ -1,5 +1,7 @@
 @extends('layouts.app')
-
+{{-- Add your custom page ID and classes right here --}}
+@section('page-id', 'blog-page')
+@section('page-class', 'blog-page')
 @section('title', (isset($category) ? $category->name : 'Blogs') . ' - ' . config('app.name', 'StAutoparts'))
 
 @section('content')
@@ -55,7 +57,7 @@
             <h5 class="widget-title">Categories</h5>
             <ul class="cat-wrapper">
               @foreach($categories as $cat)
-              <li><a href="{{ route('blog.category', $cat->slug) }}">{{ $cat->name }} ({{ $cat->blogs_count }})</a></li>
+              <a href="{{ route('blog.category', $cat->slug) }}" class="blog-page-cat-list"><i class="fas fa-arrow-right ms-1"></i> {{ $cat->name }} ({{ $cat->blogs_count }})</a>
               @endforeach
             </ul>
           </div>

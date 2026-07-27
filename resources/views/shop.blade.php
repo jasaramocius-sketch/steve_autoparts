@@ -1,4 +1,7 @@
 @extends('layouts.app')
+{{-- Add your custom page ID and classes right here --}}
+@section('page-id', 'shop-page')
+@section('page-class', 'shop-page')
 @section('title', (isset($pageTitle) ? $pageTitle : (isset($currentChildcategory) ? $currentChildcategory->name : (isset($currentSubcategory) ? $currentSubcategory->name : (isset($currentCategory) ? $currentCategory->name : 'Shop')))) . ' - StAutoparts')
 
 @section('content')
@@ -57,18 +60,40 @@
         @endif
       </h2>
       <ul class="bread-menu">
-        <li><a href="{{ route('home') }}">Home</a></li>
-        <li style="color: var(--primary)">Shop</li>
-        @if(isset($currentCategory))
-          <li><a href="{{ route('category', ['slug' => $currentCategory->slug]) }}">{{ $currentCategory->name }}</a></li>
+    <li><a href="{{ route('home') }}">Home</a></li>
+    <li><a href="{{ route('shop') }}">Shop</a></li>
+
+    @if(isset($currentCategory))
+        @if(isset($currentSubcategory) || isset($currentChildcategory))
+            <li>
+                <a href="{{ route('category', ['slug' => $currentCategory->slug]) }}">
+                    {{ $currentCategory->name }}
+                </a>
+            </li>
+        @else
+            <li style="color: var(--primary);">{{ $currentCategory->name }}</li>
         @endif
-        @if(isset($currentSubcategory))
-          <li><a href="{{ route('subcategory', ['parent' => $currentCategory->slug, 'child' => $currentSubcategory->slug]) }}">{{ $currentSubcategory->name }}</a></li>
-        @endif
+    @endif
+
+    @if(isset($currentSubcategory))
         @if(isset($currentChildcategory))
-          <li><a href="javascript:void(0)">{{ $currentChildcategory->name }}</a></li>
+            <li>
+                <a href="{{ route('subcategory', [
+                    'parent' => $currentCategory->slug,
+                    'child' => $currentSubcategory->slug
+                ]) }}">
+                    {{ $currentSubcategory->name }}
+                </a>
+            </li>
+        @else
+            <li style="color: var(--primary);">{{ $currentSubcategory->name }}</li>
         @endif
-      </ul>
+    @endif
+
+    @if(isset($currentChildcategory))
+        <li style="color: var(--primary);">{{ $currentChildcategory->name }}</li>
+    @endif
+</ul>
     </div>
   </div>
 </section>
@@ -81,14 +106,6 @@
       <!-- Sidebar -->
       <div class="col-lg-3">
         <div class="shop-sidebar-wrapper">
-        <button class="shop-sidebar-toggle d-lg-none border-0 bg-transparent p-2 w-100 text-start steve-btn" type="button" style="border-radius:6px; background:#fff; box-shadow:0 0 0 1px rgba(0,0,0,0.08);">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-          </svg>
-          <span class="ms-2 fw-500">Filters</span>
-        </button>
         <div class="btn-wrapper d-flex gap-2 sidebar-grid-list-view-wrapper d-lg-none">
           <button type="button" class="view-btn active steve-btn" data-layout="grid" title="Grid View">
             <i class="fas fa-th-large"></i>
@@ -100,6 +117,15 @@
         </div>
         <div class="shop-sidebar-overlay"></div>
         <div class="gs-product-sidebar-wrapper">
+          <div class="shop-sidebar-close-div">
+            <button class="shop-sidebar-close bg-transparent p-2 steve-btn justify-content-end" type="button" aria-label="Close filters">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+              <!-- <span class="ms-1" style="font-size:14px;">Close</span> -->
+            </button>
+          </div>
 
           <!-- Categories Widget -->
           <div class="single-product-widget shadow-sm rounded border">
@@ -376,19 +402,28 @@
           </script>
           @endif
 
-        </div>
-        <!-- <button class="shop-sidebar-close d-lg-none border-0 bg-transparent p-2 steve-btn" type="button" aria-label="Close filters d-none">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button> -->
+        </div>        
       </div>
+
+      <!-- Floating Filter Toggle Button (Mobile) -->
+      <button class="shop-sidebar-toggle-float d-lg-none" type="button" aria-label="Toggle filters">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="4" y1="21" x2="4" y2="14"></line>
+          <line x1="4" y1="10" x2="4" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12" y2="3"></line>
+          <line x1="20" y1="21" x2="20" y2="16"></line>
+          <line x1="20" y1="12" x2="20" y2="3"></line>
+          <line x1="1" y1="14" x2="7" y2="14"></line>
+          <line x1="9" y1="8" x2="15" y2="8"></line>
+          <line x1="17" y1="16" x2="23" y2="16"></line>
+        </svg>
+      </button>
       <script>
       document.addEventListener('DOMContentLoaded', function() {
         var sidebar = document.querySelector('.gs-product-sidebar-wrapper');
         var overlay = document.querySelector('.shop-sidebar-overlay');
-        var toggle = document.querySelector('.shop-sidebar-toggle');
+        var toggle = document.querySelector('.shop-sidebar-toggle-float');
         var close = document.querySelector('.shop-sidebar-close');
 
         function openSidebar() {

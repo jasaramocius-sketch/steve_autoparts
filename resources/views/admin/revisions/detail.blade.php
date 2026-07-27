@@ -1,4 +1,7 @@
 @extends('admin.layouts.app')
+{{-- Add your custom page ID and classes right here --}}
+@section('page-id', 'admin-revisions-detail-page')
+@section('page-class', 'admin-revisions-detail-page')
 @section('page-title', 'Revision #' . $rev->id)
 @section('content')
 

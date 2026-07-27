@@ -1,5 +1,7 @@
 @extends('user.layouts.dashboard')
-
+{{-- Add your custom page ID and classes right here --}}
+@section('page-id', 'user-reviews-page')
+@section('page-class', 'user-reviews-page')
 @section('dashboard-content')
 
 <div class="user-reviews-page">
@@ -12,7 +14,7 @@
         <input type="text" name="search" class="form-control form-control-sm" placeholder="Search..."
             value="{{ $search ?? '' }}" style="font-size:12px;height:30px;" onchange="this.form.submit()">
         @if(!empty($search))
-            <a href="{{ route('user.reviews', array_filter(['status' => $statusFilter ?? ''])) }}" class="btn btn-sm btn-outline-secondary" style="height:30px;padding:0 6px;font-size:11px;">
+            <a href="{{ route('user.reviews', array_filter(['status' => $statusFilter ?? ''])) }}" class="btn btn-sm btn-outline-secondary" style="padding:6px 10px;font-size:11px;line-height:1.6;">
                 <i class="fas fa-times"></i>
             </a>
         @endif
@@ -48,8 +50,8 @@
                                 <i class="fas fa-image text-muted"></i>
                             </div>
                         @endif
-                        <div>
-                            <a href="{{ route('product', $item['product_slug']) }}" class="fw-semibold text-dark text-decoration-none" style="font-size:14px;">{{ $item['product_name'] }}</a>
+                        <div class="review-page-table-product-name">
+                            <a href="{{ route('product', $item['product_slug']) }}" class="fw-semibold text-decoration-none">{{ $item['product_name'] }}</a>
                         </div>
                     </div>
                 </td>

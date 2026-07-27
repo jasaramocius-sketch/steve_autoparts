@@ -23,7 +23,14 @@ class DashboardController extends Controller
         $user = Auth::user();
 
         $ordersByStatus = Order::selectRaw("status, COUNT(*) as count")->groupBy('status')->get();
-        $monthlyRevenue = Order::selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, SUM(total_amount) as total")->groupBy('month')->orderBy('month')->take(12)->get();
+
+        $dbRevenue = Order::selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, SUM(total_amount) as total")->groupBy('month')->orderBy('month')->take(12)->pluck('total', 'month');
+
+        $monthlyRevenueData = collect();
+        for ($i = 11; $i >= 0; $i--) {
+            $key = now()->subMonths($i)->format('Y-m');
+            $monthlyRevenueData->put($key, (float) ($dbRevenue->get($key) ?? 0));
+        }
 
         return view('admin.dashboard', [
             'totalOrders' => Order::count(),
@@ -33,9 +40,9 @@ class DashboardController extends Controller
             'pendingOrders' => Order::where('status', 'pending')->count(),
             'recentOrders' => Order::with('user')->latest()->take(5)->get(),
             'ordersByStatus' => $ordersByStatus,
-            'monthlyRevenue' => $monthlyRevenue,
+            'monthlyRevenue' => $monthlyRevenueData,
             'ordersByStatusJson' => $ordersByStatus->pluck('count', 'status'),
-            'monthlyRevenueJson' => $monthlyRevenue->pluck('total', 'month'),
+            'monthlyRevenueJson' => $monthlyRevenueData,
             'topProducts' => collect(),
             'user' => $user,
         ]);
@@ -148,7 +155,14 @@ class DashboardController extends Controller
         }
 
         $ordersByStatus = Order::selectRaw("status, COUNT(*) as count")->groupBy('status')->get();
-        $monthlyRevenue = Order::selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, SUM(total_amount) as total")->groupBy('month')->orderBy('month')->take(12)->get();
+
+        $dbRevenue = Order::selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, SUM(total_amount) as total")->groupBy('month')->orderBy('month')->take(12)->pluck('total', 'month');
+
+        $monthlyRevenueData = collect();
+        for ($i = 11; $i >= 0; $i--) {
+            $key = now()->subMonths($i)->format('Y-m');
+            $monthlyRevenueData->put($key, (float) ($dbRevenue->get($key) ?? 0));
+        }
 
         return view('admin.dashboard', [
             'totalOrders' => Order::count(),
@@ -158,9 +172,9 @@ class DashboardController extends Controller
             'pendingOrders' => Order::where('status', 'pending')->count(),
             'recentOrders' => Order::with('user')->latest()->take(5)->get(),
             'ordersByStatus' => $ordersByStatus,
-            'monthlyRevenue' => $monthlyRevenue,
+            'monthlyRevenue' => $monthlyRevenueData,
             'ordersByStatusJson' => $ordersByStatus->pluck('count', 'status'),
-            'monthlyRevenueJson' => $monthlyRevenue->pluck('total', 'month'),
+            'monthlyRevenueJson' => $monthlyRevenueData,
             'topProducts' => $topProducts,
         ]);
     }

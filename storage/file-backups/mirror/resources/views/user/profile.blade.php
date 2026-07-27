@@ -1,5 +1,7 @@
 @extends('user.layouts.dashboard')
-
+{{-- Add your custom page ID and classes right here --}}
+@section('page-id', 'user-profile-page')
+@section('page-class', 'user-profile-page')
 @section('dashboard-content')
 
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 mb-4">

@@ -1,5 +1,7 @@
 @extends('user.layouts.dashboard')
-
+{{-- Add your custom page ID and classes right here --}}
+@section('page-id', 'user-followed-sellers-page')
+@section('page-class', 'user-followed-sellers-page')
 @section('dashboard-content')
 
 <section>

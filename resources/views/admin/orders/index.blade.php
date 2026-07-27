@@ -1,5 +1,9 @@
 @extends('admin.layouts.app')
+{{-- Add your custom page ID and classes right here --}}
+@section('page-id', 'admin-orders-index-page')
+@section('page-class', 'admin-orders-index-page')
 @section('page-title', 'Orders')
+
 @section('content')
 
 <div class="d-flex justify-content-between align-items-center mb-3">

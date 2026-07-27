@@ -153,7 +153,7 @@ class ShopController extends Controller
 
         $productsQuery = Product::where('status', true);
         $this->filterProducts($request, $productsQuery);
-        $products = $productsQuery->paginate(9)->onEachSide(1)->withQueryString();
+        $products = $productsQuery->paginate(24)->onEachSide(1)->withQueryString();
 
         return view('shop', array_merge(
             compact('products', 'selectedVehicle'),
@@ -171,7 +171,7 @@ class ShopController extends Controller
     {
         $productsQuery = Product::where('status', true);
         $this->filterProducts($request, $productsQuery);
-        $products = $productsQuery->paginate(9)->onEachSide(1)->withQueryString();
+        $products = $productsQuery->paginate(24)->onEachSide(1)->withQueryString();
         $pageTitle = 'Classified Products';
 
         return view('shop', array_merge(
@@ -212,7 +212,7 @@ class ShopController extends Controller
 
         $productsQuery = Product::whereIn('category_id', $categoryIds)->where('status', true);
         $this->filterProducts($request, $productsQuery);
-        $products = $productsQuery->paginate(9)->onEachSide(1)->withQueryString();
+        $products = $productsQuery->paginate(24)->onEachSide(1)->withQueryString();
 
         return view('shop', array_merge(
             compact('products', 'currentCategory'),
@@ -240,7 +240,7 @@ class ShopController extends Controller
 
         $productsQuery = Product::whereIn('category_id', $categoryIds)->where('status', true);
         $this->filterProducts($request, $productsQuery);
-        $products = $productsQuery->paginate(9)->onEachSide(1)->withQueryString();
+        $products = $productsQuery->paginate(24)->onEachSide(1)->withQueryString();
 
         return view('shop', array_merge(
             compact('products', 'currentCategory', 'currentSubcategory', 'currentChildcategory'),

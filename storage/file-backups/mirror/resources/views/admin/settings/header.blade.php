@@ -1,7 +1,8 @@
 @extends('admin.layouts.app')
-
+{{-- Add your custom page ID and classes right here --}}
+@section('page-id', 'admin-settings-header-page')
+@section('page-class', 'admin-settings-header-page')
 @section('page-title', 'Header Settings')
-
 @section('content')
 <div class="container-fluid admin-settings-header">
     <div class="row mb-4">

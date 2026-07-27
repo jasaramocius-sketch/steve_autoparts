@@ -1,5 +1,7 @@
 @extends('layouts.app')
-
+{{-- Add your custom page ID and classes right here --}}
+@section('page-id', 'blog-show-page')
+@section('page-class', 'blog-show-page')
 @section('title', $blog->title . ' - ' . config('app.name', 'StAutoparts'))
 
 @section('content')
@@ -80,15 +82,21 @@
           <div class="col-md-6">
             @if($previous)
               <small class="text-muted d-block">Previous Post</small>
-              <a href="{{ route('blog.show', $previous->slug) }}">{{ $previous->title }}</a>
+              <div class="a-tag-hover-color">
+                <i class="fas fa-arrow-left"></i>
+                <a href="{{ route('blog.show', $previous->slug) }}">{{ $previous->title }}</a>
+              </div>
             @else
               <small class="text-muted d-block">Previous Post</small>
-            @endif
+            @endif  
           </div>
           <div class="col-md-6 text-md-end">
             @if($next)
               <small class="text-muted d-block">Next Post</small>
-              <a href="{{ route('blog.show', $next->slug) }}">{{ $next->title }}</a>
+              <div class="a-tag-hover-color">
+                <a href="{{ route('blog.show', $next->slug) }}">{{ $next->title }}</a>
+                <i class="fas fa-arrow-right"></i>            
+              </div>
             @else
               <small class="text-muted d-block">Next Post</small>
             @endif
@@ -110,7 +118,7 @@
         <div class="gs-blog-sidebar-wrapper right-side">
 
           <!-- Search Widget -->
-          <div class="single-blog-widget">
+          <!-- <div class="single-blog-widget">
             <h5 class="widget-title">Search</h5>
             <form class="search-form" action="{{ route('blog') }}" method="GET">
               <input class="input-box" type="text" name="search" placeholder="Find anything...">
@@ -120,17 +128,17 @@
                 </svg>
               </button>
             </form>
-          </div>
+          </div> -->
 
           <!-- Categories Widget -->
-          <div class="single-blog-widget">
+          <!-- <div class="single-blog-widget">
             <h5 class="widget-title">Categories</h5>
             <ul class="cat-wrapper">
               @foreach($categories as $cat)
               <li><a href="{{ route('blog.category', $cat->slug) }}">{{ $cat->name }} ({{ $cat->blogs_count }})</a></li>
               @endforeach
             </ul>
-          </div>
+          </div> -->
 
           <!-- Recent Posts Widget -->
           <div class="single-blog-widget">

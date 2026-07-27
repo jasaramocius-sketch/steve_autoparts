@@ -98,15 +98,21 @@
           <div class="col-md-6">
             <?php if($previous): ?>
               <small class="text-muted d-block">Previous Post</small>
-              <a href="<?php echo e(route('blog.show', $previous->slug)); ?>"><?php echo e($previous->title); ?></a>
+              <div class="a-tag-hover-color">
+                <i class="fas fa-arrow-left"></i>
+                <a href="<?php echo e(route('blog.show', $previous->slug)); ?>"><?php echo e($previous->title); ?></a>
+              </div>
             <?php else: ?>
               <small class="text-muted d-block">Previous Post</small>
-            <?php endif; ?>
+            <?php endif; ?>  
           </div>
           <div class="col-md-6 text-md-end">
             <?php if($next): ?>
               <small class="text-muted d-block">Next Post</small>
-              <a href="<?php echo e(route('blog.show', $next->slug)); ?>"><?php echo e($next->title); ?></a>
+              <div class="a-tag-hover-color">
+                <a href="<?php echo e(route('blog.show', $next->slug)); ?>"><?php echo e($next->title); ?></a>
+                <i class="fas fa-arrow-right"></i>            
+              </div>
             <?php else: ?>
               <small class="text-muted d-block">Next Post</small>
             <?php endif; ?>
@@ -128,7 +134,7 @@
         <div class="gs-blog-sidebar-wrapper right-side">
 
           <!-- Search Widget -->
-          <div class="single-blog-widget">
+          <!-- <div class="single-blog-widget">
             <h5 class="widget-title">Search</h5>
             <form class="search-form" action="<?php echo e(route('blog')); ?>" method="GET">
               <input class="input-box" type="text" name="search" placeholder="Find anything...">
@@ -138,17 +144,17 @@
                 </svg>
               </button>
             </form>
-          </div>
+          </div> -->
 
           <!-- Categories Widget -->
-          <div class="single-blog-widget">
+          <!-- <div class="single-blog-widget">
             <h5 class="widget-title">Categories</h5>
             <ul class="cat-wrapper">
               <?php $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $cat): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
               <li><a href="<?php echo e(route('blog.category', $cat->slug)); ?>"><?php echo e($cat->name); ?> (<?php echo e($cat->blogs_count); ?>)</a></li>
               <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </ul>
-          </div>
+          </div> -->
 
           <!-- Recent Posts Widget -->
           <div class="single-blog-widget">

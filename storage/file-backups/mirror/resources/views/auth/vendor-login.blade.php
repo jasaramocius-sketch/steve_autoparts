@@ -1,5 +1,8 @@
 @extends('layouts.app')
-@section('title', 'Vendor Login - StAutoparts')
+{{-- Add your custom page ID and classes right here --}}
+@section('page-id', 'auth-vendor-login-page')
+@section('page-class', 'auth-vendor-login-page')
+@section('page-title', 'Vendor Login - StAutoparts')
 @section('content')
 
 <!-- Banner Hero Section -->

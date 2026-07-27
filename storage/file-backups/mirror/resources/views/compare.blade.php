@@ -1,5 +1,7 @@
 @extends('layouts.app')
-
+{{-- Add your custom page ID and classes right here --}}
+@section('page-id', 'compare-page')
+@section('page-class', 'compare-page')
 @section('title', 'Compare Products' . ' - ' . config('app.name', 'StAutoparts'))
 
 @section('content')

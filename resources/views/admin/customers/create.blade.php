@@ -1,4 +1,7 @@
 @extends('admin.layouts.app')
+{{-- Add your custom page ID and classes right here --}}
+@section('page-id', 'admin-customers-create-page')
+@section('page-class', 'admin-customers-create-page')
 @section('page-title', isset($user) ? 'Edit User' : 'Add Customer')
 @section('content')
 

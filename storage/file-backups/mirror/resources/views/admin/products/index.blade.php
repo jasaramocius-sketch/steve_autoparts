@@ -1,4 +1,7 @@
 @extends('admin.layouts.app')
+{{-- Add your custom page ID and classes right here --}}
+@section('page-id', 'admin-products-index-page')
+@section('page-class', 'admin-products-index-page')
 @section('page-title', 'All Products')
 @section('content')
 
@@ -7,7 +10,7 @@
 <div class="d-flex justify-content-between align-items-center mb-3 gap-2">
     <div class=""></div>
     <div class="d-flex gap-2 flex-wrap admin-product-page-important-btn">
-        <a href="{{ route('admin.products.import-form') }}" class="btn btn-outline-primary product-import-export-btn"><i class="fas fa-upload"></i> Import</a>
+        <a href="{{ route('admin.products.import-form') }}" class="btn btn-outline-primary product-import-export-btn steve-btn"><i class="fas fa-upload"></i> Import</a>
         <a href="{{ route('admin.products.export-csv') }}" class="btn btn-outline-secondary product-import-export-btn"><i class="fas fa-download"></i> Export CSV</a>
         <a href="{{ route('admin.products.create') }}" class="btn btn-primary"><i class="fas fa-plus"></i> Add Product</a>
     </div>

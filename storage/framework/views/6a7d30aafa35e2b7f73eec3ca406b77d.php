@@ -181,7 +181,7 @@
         <div class="acc-info-wrapper">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h4 class="mb-0">Your Vehicles</h4>
-                <a href="<?php echo e(route('user.vehicles')); ?>" class="text-decoration-none small">View All <i class="fas fa-arrow-right ms-1"></i></a>
+                <a href="<?php echo e(route('user.vehicles')); ?>" class="text-decoration-none small a-tag-hover-color">View All <i class="fas fa-arrow-right ms-1"></i></a>
             </div>
             <?php if(isset($userVehicles) && $userVehicles->count() > 0): ?>
                 <div class="row g-3">

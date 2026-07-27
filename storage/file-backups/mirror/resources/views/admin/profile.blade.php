@@ -1,6 +1,8 @@
 @extends('admin.layouts.app')
+{{-- Add your custom page ID and classes right here --}}
+@section('page-id', 'admin-profile-page')
+@section('page-class', 'admin-profile-page')
 @section('page-title', 'My Profile')
-
 @section('content')
 
 @if($errors->any())
@@ -49,7 +51,7 @@
 
                     <div class="mb-3">
                         <label class="form-label">Email Address</label>
-                        <input type="email" name="email" class="form-control text-transform-capitalize" value="{{ $user->email }}" required>
+                        <input type="email" name="email" class="form-control text-transform-capitalize" value="{{ $user->email }}" readonly>
                     </div>
 
                     <div class="mb-3">

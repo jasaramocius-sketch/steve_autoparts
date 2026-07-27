@@ -1,4 +1,7 @@
 @extends('admin.layouts.app')
+{{-- Add your custom page ID and classes right here --}}
+@section('page-id', 'admin-products-import-page')
+@section('page-class', 'admin-products-import-page')
 @section('page-title', 'Import Products')
 @section('content')
 

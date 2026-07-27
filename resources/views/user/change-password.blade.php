@@ -1,5 +1,7 @@
 @extends('user.layouts.dashboard')
-
+{{-- Add your custom page ID and classes right here --}}
+@section('page-id', 'user-password-page')
+@section('page-class', 'user-password-page')
 @section('dashboard-content')
 
 <form action="{{ route('user.change.password.update') }}" method="POST">

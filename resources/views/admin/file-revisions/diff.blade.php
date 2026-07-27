@@ -1,4 +1,7 @@
 @extends('admin.layouts.app')
+{{-- Add your custom page ID and classes right here --}}
+@section('page-id', 'admin-file-diff-page')
+@section('page-class', 'admin-file-diff-page')
 @section('page-title', 'File Diff #' . $rev->id)
 @section('content')
 

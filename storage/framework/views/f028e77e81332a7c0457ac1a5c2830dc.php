@@ -1,3 +1,5 @@
+<?php $__env->startSection('page-id', 'blog-page'); ?>
+<?php $__env->startSection('page-class', 'blog-page'); ?>
 <?php $__env->startSection('title', (isset($category) ? $category->name : 'Blogs') . ' - ' . config('app.name', 'StAutoparts')); ?>
 
 <?php $__env->startSection('content'); ?>
@@ -53,7 +55,7 @@
             <h5 class="widget-title">Categories</h5>
             <ul class="cat-wrapper">
               <?php $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $cat): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-              <li><a href="<?php echo e(route('blog.category', $cat->slug)); ?>"><?php echo e($cat->name); ?> (<?php echo e($cat->blogs_count); ?>)</a></li>
+              <a href="<?php echo e(route('blog.category', $cat->slug)); ?>" class="blog-page-cat-list"><i class="fas fa-arrow-right ms-1"></i> <?php echo e($cat->name); ?> (<?php echo e($cat->blogs_count); ?>)</a>
               <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </ul>
           </div>

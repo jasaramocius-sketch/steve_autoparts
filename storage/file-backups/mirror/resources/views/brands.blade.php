@@ -1,5 +1,7 @@
 @extends('layouts.app')
-
+{{-- Add your custom page ID and classes right here --}}
+@section('page-id', 'brands-page')
+@section('page-class', 'brands-page')
 @section('title', 'All Brands' . ' - ' . config('app.name', 'StAutoparts'))
 
 @section('content')

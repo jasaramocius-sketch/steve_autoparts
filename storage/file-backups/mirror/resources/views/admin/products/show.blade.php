@@ -1,4 +1,7 @@
 @extends('admin.layouts.app')
+{{-- Add your custom page ID and classes right here --}}
+@section('page-id', 'admin-products-show-page')
+@section('page-class', 'admin-products-show-page')
 @section('page-title', 'Product Details — ' . $product->name)
 @section('content')
 

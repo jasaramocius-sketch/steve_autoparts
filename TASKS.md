@@ -1790,7 +1790,7 @@ if ($request->filled('image_from_manager')) {
 bash .opencode/skills/sync-skills.sh
 
 # After updating skills, mark as synced
-echo 1754 > .opencode/skills/.last_sync
+echo 1825 > .opencode/skills/.last_sync
 ```
 
 ## 130. Featured Products Swiper Breakpoints Fix
@@ -1823,3 +1823,25 @@ echo 1754 > .opencode/skills/.last_sync
 
 - `resources/views/layouts/app.blade.php:168`:
   - Removed `.hero-slider-wrapper:not(.slick-initialized)` from FOUC prevention CSS (hero is static, no longer needs to wait for Slick init)
+
+## 132. Monthly Revenue Chart — Fill Missing Months with Zero
+
+**Problem:** Monthly Revenue bar chart on admin dashboard only showed months that had orders. If only one month had orders, only that bar appeared. Months with zero revenue were completely missing.
+
+**Root cause:** `Order::selectRaw("...SUM(total_amount)...")->groupBy('month')` only returns rows for months that have orders. No orders = no row = no bar on chart.
+
+**Solution:** Query DB for existing months, then generate all last 12 months in PHP and fill missing months with 0 revenue.
+
+**Files changed:**
+
+- `app/Http/Controllers/AdminController.php:34-55`:
+  - Changed `$monthlyRevenue = ...->get()` to `->pluck('total', 'month')`
+  - Added `for ($i = 11; $i >= 0; $i--)` loop generating last 12 months via `now()->subMonths($i)->format('Y-m')`
+  - Missing months get `0` revenue, existing months get actual `total_amount` sum
+  - Passed `$monthlyRevenueData` as both `monthlyRevenue` and `monthlyRevenueJson`
+
+- `app/Http/Controllers/DashboardController.php:25-43` (admin dashboard method):
+  - Same fix as AdminController
+
+- `app/Http/Controllers/DashboardController.php:157-178` (second admin method):
+  - Same fix as AdminController
