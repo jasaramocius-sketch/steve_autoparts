@@ -1845,3 +1845,115 @@ echo 1825 > .opencode/skills/.last_sync
 
 - `app/Http/Controllers/DashboardController.php:157-178` (second admin method):
   - Same fix as AdminController
+
+## 133. Global Button System — 10 Style Groups + Modifiers + Bridge Classes
+
+**Problem:** 19+ unique button designs across the project with no consistency. New buttons had to duplicate styles manually.
+
+**Solution:** Created a standalone 1299-line global button system (`buttons.css`) with 10 style groups, 14 color variants, 5 sizes, 3 shapes, and bridge classes that preserve all existing old CSS.
+
+**Files changed/created:**
+- `resources/css/buttons.css` — **new** (1299 lines): 10 style groups + bridge classes
+- `resources/css/app.css` — added `@import 'buttons.css';`
+- `public/css/app.css` — appended buttons.css content (now 2689 lines)
+- `storage/file-backups/css-backup-20260728/` — backup of original CSS files
+
+**10 Style Groups:**
+1. `.btn-solid` — CTA solid (matches old `.template-btn`)
+2. `.btn-outline-style` — outlined CTA (matches `.template-btn.outline-btn`)
+3. `.btn-icon-style` — 36×36 icon square (matches `.product-action-btn`/`.view-btn`/`.back-btn`)
+4. `.btn-submit-style` — full-width submit (matches `.btn-forms`/`.btn-auth`/`.add-to-cart-btn`)
+5. `.btn-header-action-style` — header action
+6. `.btn-circle-style` — circular icon
+7. `.btn-qty-style` — quantity +/- buttons
+8. `.btn-hero-outline-style` — hero outline
+9. `.btn-slider-nav-style` — slider nav arrows
+10. `.btn-search-style` — search button
+
+**Color modifiers:** `btn-primary-style`, `btn-secondary-style`, `btn-danger-style`, `btn-success-style`, `btn-warning-style`, `btn-info-style`, `btn-dark-style`, `btn-light-style`, `btn-white-style`, `btn-link-style`, `btn-ghost-style`, `btn-red-style`, `btn-green-style`, `btn-blue-style`
+
+**Size modifiers:** `btn-xs`, `btn-sm`, `btn-md`, `btn-lg`, `btn-xl`
+
+**Shape modifiers:** `btn-pill` (9999px), `btn-square` (0px)
+
+**Bridges preserved:** `template-btn`, `steve-btn`, `product-action-btn`, `view-btn`, `back-btn`, `btn-forms`, `btn-auth`, `add-to-cart-btn`, `add-cart`, `add-to-wishlist-btn`, `wishlist-btn`, `buy-now`, `action-btn`, `template-btn.outline-btn`, `template-btn.lg-btn`, `template-btn.md-btn`, `template-btn.sm-btn`, `template-btn.dark-outline`, `template-btn.dark-btn`, `template-btn.black-btn`, `template-btn.outlinee-btn`, `nav-link.steve-btn`
+
+**File Revisions:**
+| File | Event | Timestamp |
+|---|---|---|
+| `resources/css/buttons.css` | Updated | 2026-07-28 13:41:19 |
+| `public/assets/front/css/style.css` | Updated | 2026-07-28 13:52:23 |
+
+**Note:** `public/css/app.css` and `resources/css/app.css` have no File Revision record — watcher was not running when these were modified.
+
+## 134. Category Sidebar Style Fix — Shop Page
+
+**Problem:** Category sidebar had inconsistent colors (`#000` on top level vs other levels) and mismatched font-size inline styles (15px/14px).
+
+**Files changed:**
+- `resources/views/shop.blade.php` — unified colors to `#1f0300`, removed inconsistent font-size inline styles, added `a-tag-text-hover` class to sub/child levels
+
+**File Revisions:**
+| File | Event | Timestamp |
+|---|---|---|
+| `resources/views/shop.blade.php` | Updated | 2026-07-28 12:18:45 |
+
+## 135. Tooltip Stuck-on-Right-Click Fix
+
+**Problem:** Right-click → Esc → tooltip stays stuck because Bootstrap's tooltip handler doesn't listen for `contextmenu` event.
+
+**Files changed:**
+- `public/assets/front/js/script.js:868-886` — added `contextmenu` handler to hide tooltip on right-click before browser menu opens; added global `Escape` key handler to remove `.show` from all stuck `.tooltip` elements
+
+**File Revisions:**
+| File | Event | Timestamp |
+|---|---|---|
+| `public/assets/front/js/script.js` | Updated | 2026-07-28 13:25:42 |
+
+## 136. Grid/List Button Style Sync — Categories Page
+
+**Problem:** Categories page `.view-btn` had no inline styles, causing visual mismatch with shop page's grid/list buttons.
+
+**Files changed:**
+- `resources/views/categories.blade.php` — added inline CSS for `.category-toolbar .view-btn` matching shop page's `.product-nav-wrapper .btn-wrapper .view-btn` (42×42px, border primary, white bg, rounded 8px, active = primary bg)
+
+**File Revisions:**
+| File | Event | Timestamp |
+|---|---|---|
+| `resources/views/categories.blade.php` | Updated | 2026-07-28 13:30:20 |
+
+## 137. Typo Fix — "Secrch" → "Search"
+
+**Files changed:**
+- `resources/views/layouts/app.blade.php:299` — `"Secrch"` → `"Search"`
+
+**File Revisions:**
+| File | Event | Timestamp |
+|---|---|---|
+| `resources/views/layouts/app.blade.php` | Updated | 2026-07-28 13:26:01 |
+
+## 138. Product Page Buttons — Match Shop Now Button Style
+
+**Problem:** Product page Buy Now / Add to Cart buttons used `product-action-btn` class (36×36 icon button) + inline `border-radius:4px`, while Shop Now (`template-btn`) has `padding: 16px 40px, border-radius: 8px`. Tabs (Description/Buy & Return Policy/Reviews) had `border: 1px solid #030712` and smaller padding.
+
+**Changes:**
+- Buy Now: `btn steve-btn text-white px-4 product-action-btn buy-now` + inline styles → `template-btn steve-btn w-100 buy-now`
+- Add to Cart: same → `template-btn steve-btn w-100`
+- Submit Review: `btn btn-primary steve-btn` → `template-btn steve-btn`
+- Tabs: added `template-btn` class; `.tab-product-des-wrapper .nav-link` CSS updated to match `template-btn` (padding 16px 40px, bg var(--primary), border none, color #fff, hover=var(--hov-primary))
+- Tab responsive styles: removed fixed height constraints
+
+**Files changed:**
+- `resources/views/product.blade.php` — 5 button/tab modifications
+- `public/assets/front/css/style.css:13131-13177` — tab CSS rewritten to match template-btn
+- `public/css/app.css:2581` — bridge `border-radius` 4→8px
+- `resources/css/buttons.css:1191` — source `border-radius` 4→8px
+
+**File Revisions:**
+| File | Event | Timestamp |
+|---|---|---|
+| `public/assets/front/css/style.css` | Updated | 2026-07-29 05:12:19 |
+| `resources/views/product.blade.php` | Updated | 2026-07-28 13:51:20 |
+| `resources/css/buttons.css` | Updated | 2026-07-28 13:41:19 |
+
+**Note:** `public/css/app.css` has no File Revision record — watcher was not running when manually appended. To capture, restart file watcher and re-trigger edit.

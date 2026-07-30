@@ -14,10 +14,17 @@ class ContactController extends Controller
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
         $perPage = in_array((int)$request->per_page, [10, 20, 50, 100]) ? (int)$request->per_page : 20;
 
-        $contacts = Contact::with('product')
-            ->orderBy($sortBy, $sortDir)
-            ->paginate($perPage);
+        $query = Contact::with('product');
 
+        if ($source = $request->query('source')) {
+            if ($source === 'product') {
+                $query->whereNotNull('product_id');
+            } elseif ($source === 'contact') {
+                $query->whereNull('product_id');
+            }
+        }
+
+        $contacts = $query->orderBy($sortBy, $sortDir)->paginate($perPage);
         $contacts->appends($request->query())->onEachSide(1);
 
         return view('admin.contacts.index', compact('contacts', 'sortBy', 'sortDir'));

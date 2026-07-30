@@ -70,6 +70,8 @@ $(document).ready(function () {
   $searchIcon.on("click", function () {
     $searchBar.addClass("show");
     $overlay.addClass("active");
+    var t = bootstrap.Tooltip.getInstance(this);
+    if (t) { t.hide(); t.disable(); }
   });
 
 
@@ -165,6 +167,8 @@ $(document).ready(function () {
     $mobileMenu.removeClass("active");
     $overlay.removeClass("active");
     $searchBar.removeClass("show");
+    var t = bootstrap.Tooltip.getInstance($searchIcon[0]);
+    if (t) t.enable();
   });
 
   // close search bar on Escape
@@ -172,6 +176,8 @@ $(document).ready(function () {
     if (e.key === 'Escape') {
       $searchBar.removeClass('show');
       $overlay.removeClass('active');
+      var t = bootstrap.Tooltip.getInstance($searchIcon[0]);
+      if (t) t.enable();
     }
   });
 
@@ -524,43 +530,7 @@ document.querySelectorAll('.change-qty').forEach(button => {
       });
   });
 });
-/*Categories Page Script */
-$('#listBtn').click(function () {
 
-  $('#categoryContainer').addClass('list-view');
-
-  $('#gridBtn').removeClass('active');
-  $('#listBtn').addClass('active');
-
-});
-
-$('#gridBtn').click(function () {
-
-  $('#categoryContainer').removeClass('list-view');
-
-  $('#listBtn').removeClass('active');
-  $('#gridBtn').addClass('active');
-
-});
-
-$(document).ready(function () {
-
-  $('.subcategory-list').hide();
-
-  $('#gridBtn').click(function () {
-
-    $('.category-stats').show();
-    $('.subcategory-list').hide();
-
-  });
-
-  $('#listBtn').click(function () {
-
-    $('.subcategory-list').show();
-
-  });
-
-});
 
 $(document).ready(function () {
 
@@ -701,10 +671,14 @@ $(document).ready(function () {
   $('#searchIcon').on('click', function (e) {
     e.stopPropagation();
     $('#searchBar').toggleClass('active');
+    var t = bootstrap.Tooltip.getInstance(this);
+    if (t) { t.hide(); t.disable(); }
   });
   $(document).on('click', function (e) {
     if (!$(e.target).closest('#searchBar').length && !$(e.target).closest('#searchIcon').length) {
       $('#searchBar').removeClass('active');
+      var t = bootstrap.Tooltip.getInstance($('#searchIcon')[0]);
+      if (t) t.enable();
     }
   });
 
@@ -864,6 +838,30 @@ $(document).ready(function () {
 document.addEventListener('DOMContentLoaded', function () {
   const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
   [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
+
+  // Also init Bootstrap tooltips on action buttons with title (e.g. modal triggers that can't have data-bs-toggle="tooltip")
+  document.querySelectorAll('.action-btn[title]:not([data-bs-toggle="tooltip"])').forEach(function(el) {
+    new bootstrap.Tooltip(el);
+  });
+
+  // FIX: Dismiss tooltip on right-click (contextmenu) before browser menu opens
+  document.addEventListener('contextmenu', function(e) {
+    var trigger = e.target.closest('[data-bs-toggle="tooltip"], .action-btn[title]');
+    if (trigger) {
+      var tooltipInstance = bootstrap.Tooltip.getInstance(trigger);
+      if (tooltipInstance) tooltipInstance.hide();
+    }
+  });
+
+  // FIX: Dismiss ALL stuck tooltips on Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.tooltip.show').forEach(function(tooltipEl) {
+        tooltipEl.classList.remove('show');
+        tooltipEl.style.display = '';
+      });
+    }
+  });
 });
 
 // Search Suggestions AJAX

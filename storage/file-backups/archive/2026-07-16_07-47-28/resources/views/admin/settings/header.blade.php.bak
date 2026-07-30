@@ -166,7 +166,7 @@
                             ? 'items[' + grandparentIndex + '][children][' + parentIndex + '][children]'
                             : 'items[' + parentIndex + '][children]';
                         var childIndex = index;
-                        return '<div class="child-item input-group input-group-sm mb-1" data-index="' + childIndex + '">' +
+                        return '<div class="child-item input-group mb-1" data-index="' + childIndex + '">' +
                             '<input type="text" class="form-control form-control-sm child-label" placeholder="Label" value="' + (child.label || '') + '">' +
                             '<input type="text" class="form-control form-control-sm child-url" placeholder="URL" value="' + (child.url || '') + '">' +
                             '<button type="button" class="action-btn btn-cancel remove-child" title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
@@ -330,7 +330,7 @@
                                     '</div></div>';
                                 $container.append(html);
                             } else {
-                                var html = '<div class="child-item input-group input-group-sm mb-1">' +
+                                var html = '<div class="child-item input-group mb-1">' +
                                     '<input type="text" class="form-control form-control-sm child-label" placeholder="Label">' +
                                     '<input type="text" class="form-control form-control-sm child-url" placeholder="URL">' +
                                     '<button type="button" class="btn btn-outline-danger btn-sm remove-child steve-btn" title="Remove"><i class="fas fa-times"></i></button>' +
@@ -346,7 +346,7 @@
                         $(document).on('click', '.add-subchild', function() {
                             var $container = $(this).siblings('.subchildren-container');
                             var count = $container.children('.child-item').length;
-                            var html = '<div class="child-item input-group input-group-sm mb-1">' +
+                            var html = '<div class="child-item input-group mb-1">' +
                                 '<input type="text" class="form-control form-control-sm child-label" placeholder="Label">' +
                                 '<input type="text" class="form-control form-control-sm child-url" placeholder="URL">' +
                                 '<button type="button" class="btn btn-outline-danger btn-sm remove-child steve-btn" title="Remove"><i class="fas fa-times"></i></button>' +

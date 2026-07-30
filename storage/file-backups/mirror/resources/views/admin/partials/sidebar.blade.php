@@ -3,7 +3,7 @@
         <a class="d-block py-15px mr-3 ml-0" href="{{ route('home') }}">
                             <img src="{{ asset('assets/images/' . (\App\Models\Setting::get('header_logo') ?? 'BwSkuSZ7ZYGWPc4Zk3CfeFzcn49dHpx3143n4WKS.png')) }}" alt="SteveAutoPartsInc." class="mw-100 h-80px h-md-50px" height="40">
                          STEVE Autoparts</a>
-        <button class="sidebar-close-btn d-md-none" id="sidebarCloseBtn" title="Close sidebar">
+        <button class="sidebar-close-btn d-md-none" id="sidebarCloseBtn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Close sidebar">
             <i class="fas fa-times"></i>
         </button>
     </div>

@@ -8,6 +8,7 @@
     $activeCategoryUrls = $activeCategoryUrls ?? [];
     $routeAliases = [
         '/product' => ['/shop'],
+        '/category' => ['/shop'],
     ];
     $aliasedMenuUrl = '';
     foreach ($routeAliases as $prefix => $targets) {
@@ -28,7 +29,7 @@
         $hasChildren = !empty($children);
         $menuUrl = $url === '#' ? '' : url($url);
         $isActive = $menuUrl && ($currentUrl === $menuUrl || $currentUrl === $menuUrl . '/');
-        if (!$isActive && $menuUrl && $url !== '/') {
+        if (!$isActive && $menuUrl && $url !== '/' && $url !== '') {
             $isActive = str_starts_with($currentUrl, $menuUrl . '/') || str_starts_with($currentUrl, $menuUrl . '?');
         }
         if (!$isActive && $menuUrl && $aliasedMenuUrl && $menuUrl === $aliasedMenuUrl) {

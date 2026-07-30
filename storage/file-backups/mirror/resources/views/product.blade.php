@@ -63,7 +63,7 @@
 
 .details_slider_thumb {
     display: block;
-    min-height: 450px;
+    /* min-height: 450px; */
 }
 .details_slider_thumb .swiper-slide img {
     width: 100%;
@@ -722,10 +722,10 @@
                 </div>
                 <div class="details_btn_area">
                   <div class="buy-now-btn">
-                    <button type="submit" name="buy_now" value="1" class="btn steve-btn text-white px-4 product-action-btn buy-now" style="background:var(--primary,#e62e04);border:none;border-radius:4px;font-size:15px;font-weight:500;cursor:pointer;width:100%;">Buy Now</button>
+                    <button type="submit" name="buy_now" value="1" class="template-btn steve-btn w-100 buy-now">Buy Now</button>
                     </div>
                     <div class="add-cart-btn">
-                    <button type="submit" class="btn steve-btn text-white px-4 product-action-btn" style="background:var(--primary,#e62e04);border:none;border-radius:4px;font-size:15px;font-weight:500;cursor:pointer;width:100%;">Add to Cart</button>
+                    <button type="submit" class="template-btn steve-btn w-100">Add to Cart</button>
                     </div>
                   </div>
               </form>
@@ -770,13 +770,13 @@
         <div class="tab-product-des-wrapper mt-5 pt-4">
           <ul class="nav nav-tabs" id="myTab" role="tablist">
             <li class="nav-item" role="presentation">
-              <button class="nav-link steve-btn active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description-tab-pane" type="button" role="tab" aria-controls="description-tab-pane" aria-selected="true">Description</button>
+              <button class="nav-link template-btn steve-btn active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description-tab-pane" type="button" role="tab" aria-controls="description-tab-pane" aria-selected="true">Description</button>
             </li>
             <li class="nav-item" role="presentation">
-              <button class="nav-link steve-btn" id="policy-tab" data-bs-toggle="tab" data-bs-target="#policy-tab-pane" type="button" role="tab" aria-controls="policy-tab-pane" aria-selected="false">Buy / Return Policy</button>
+              <button class="nav-link template-btn steve-btn" id="policy-tab" data-bs-toggle="tab" data-bs-target="#policy-tab-pane" type="button" role="tab" aria-controls="policy-tab-pane" aria-selected="false">Buy / Return Policy</button>
             </li>
             <li class="nav-item" role="presentation">
-              <button class="nav-link steve-btn" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews-tab-pane" type="button" role="tab" aria-controls="reviews-tab-pane" aria-selected="false">Reviews ({{ collect($product['reviews_data'] ?? [])->where('deleted', false)->count() }})</button>
+              <button class="nav-link template-btn steve-btn" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews-tab-pane" type="button" role="tab" aria-controls="reviews-tab-pane" aria-selected="false">Reviews ({{ collect($product['reviews_data'] ?? [])->where('deleted', false)->count() }})</button>
             </li>
           </ul>
           <div class="tab-content" id="myTabContent">
@@ -821,11 +821,11 @@
                   <div class="mb-3">
                     <label class="form-label fw-semibold">Review Images</label>
                     <input type="file" id="reviewImagesInput" multiple accept="image/jpg,image/jpeg,image/png,image/webp" class="d-none">
-                    <button type="button" class="btn btn-outline-secondary btn-sm" id="reviewImagesBrowseBtn"><i class="fas fa-cloud-upload-alt"></i> Browse</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm steve-btn" id="reviewImagesBrowseBtn"><i class="fas fa-cloud-upload-alt"></i> Browse</button>
                     <span class="text-muted ms-2" style="font-size:12px;">Max 5 images, 2MB each</span>
                     <div id="reviewImagesPreview" class="d-flex flex-wrap gap-2 mt-2"></div>
                   </div>
-                  <button type="button" class="btn btn-primary steve-btn" id="submitReviewBtn">Submit Review</button>
+                  <button type="button" class="template-btn steve-btn" id="submitReviewBtn">Submit Review</button>
                 </div>
 
                 <!-- Reviews List -->
@@ -842,7 +842,7 @@
                         <small class="text-muted">{{ $review['date'] ?? '' }}</small>
                         @auth
                           @if(($review['user_id'] ?? null) == Auth::id())
-                            <button type="button" class="btn btn-sm btn-outline-danger ms-auto delete-review-btn" data-review-id="{{ $review['id'] ?? '' }}" title="Delete review" style="padding:2px 8px;font-size:12px;">
+                            <button type="button" class="btn btn-sm btn-outline-danger ms-auto delete-review-btn" data-review-id="{{ $review['id'] ?? '' }}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Delete review" style="padding:2px 8px;font-size:12px;">
                               <i class="fas fa-trash"></i>
                             </button>
                           @endif
@@ -968,9 +968,9 @@
       <h3 style="font-weight: 600;">Related Products</h3>
       <p class="text-muted">Explore other premium products in this category</p>
     </div>
-    <div class="row g-4">
+    <div class="related-products-grid d-grid">
       @foreach($related as $rel)
-        <div class="col-md-6 col-lg-3">
+        <div class="grid-item">
           <div class="single-product h-100 shadow-sm border overflow-hidden">
             <div class="img-wrapper">
               <a href="{{ route('product', $rel['slug']) }}">
@@ -1350,7 +1350,7 @@ if (submitReviewBtn) {
               <div class="d-flex align-items-center gap-2 mb-1">
                 <h6 class="mb-0 fw-semibold">${review.name}</h6>
                 <small class="text-muted">${review.date}</small>
-                <button type="button" class="btn btn-sm btn-outline-danger ms-auto delete-review-btn" data-review-id="${review.id}" title="Delete review" style="padding:2px 8px;font-size:12px;">
+                <button type="button" class="btn btn-sm btn-outline-danger ms-auto delete-review-btn" data-review-id="${review.id}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Delete review" style="padding:2px 8px;font-size:12px;">
                   <i class="fas fa-trash"></i>
                 </button>
               </div>

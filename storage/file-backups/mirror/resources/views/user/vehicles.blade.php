@@ -4,7 +4,7 @@
 @section('page-class', 'user-vehicles-page')
 @section('dashboard-content')
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">My Vehicles</h4>
+    <h4 class="h4-style mb-0">My Vehicles</h4>
     <button class="btn btn-primary btn-sm steve-btn" data-bs-toggle="modal" data-bs-target="#addVehicleModal">+ Add Vehicle</button>
 </div>
 
@@ -27,7 +27,7 @@
                 </button>
                 <form action="{{ route('user.vehicles.destroy', $vehicle->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Remove this vehicle?')">
                     @csrf @method('DELETE')
-                    <button class="action-btn btn-cancel" title="Delete">
+                    <button class="action-btn btn-cancel" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Delete">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="3 6 5 6 21 6"></polyline>
                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>

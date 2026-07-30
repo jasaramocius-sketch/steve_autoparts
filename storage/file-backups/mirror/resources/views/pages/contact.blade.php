@@ -38,30 +38,49 @@
                 <div class="card border-0 shadow-sm">
                     <div class="card-body p-4">
                         <h4 class="mb-4">Contact Information</h4>
-                        <div class="mb-4">
+                        <div class="mb-4 d-flex gap-2 ">
+                            <div class="">
+                            <i class="fas fa-user-alt me-2 w-fit"></i>
+                            </div>
+                            <div class="">
                             <strong>Address</strong>
                             <p class="text-muted mb-0">
                                 123 Business Street,<br>
                                 Ahmedabad, Gujarat, India
-                            </p>
+                            </p></div>
                         </div>
-                        <div class="mb-4">
-                            <strong>Phone</strong>
-                            <p class="text-muted mb-0">
+                        <div class="mb-4 d-flex gap-2 ">
+                            <div class="">
+                            <i class="fas fa-user-alt me-2 w-fit"></i>
+                            </div>
+                            <div class="">
+                            <strong>Phone</strong></br>
+                            <a href="tel:+919876543210" class="text-muted mb-0 a-tag-hover-color-red">
                                 +91 98765 43210
-                            </p>
+                            </a>
                         </div>
-                        <div class="mb-4">
-                            <strong>Email Address</strong>
-                            <p class="text-muted mb-0">
-                                info@example.com
-                            </p>
                         </div>
-                        <div class="mb-4">
+                        <div class="mb-4 d-flex gap-2 ">
+                            <div class="">
+                            <i class="fas fa-envelope me-2 w-fit"></i>
+                            </div>
+                            <div class="">
+                            <strong>Email Address</strong></br>
+                            <a href="mailto:help@steveautoparts.com" class="text-muted mb-0 a-tag-hover-color-red">
+                                help@steveautoparts.com
+                            </a>
+                        </div>
+                        </div>
+                        <div class="mb-4 d-flex gap-2 ">
+                            <div class="">
+                            <i class="fas fa-clock me-2 w-fit"></i>
+                            </div>
+                            <div class="">
                             <strong>Working Hours</strong>
                             <p class="text-muted mb-0">
                                 Mon - Sat: 9:00 AM - 6:00 PM
                             </p>
+                        </div>
                         </div>
                     </div>
                 </div>

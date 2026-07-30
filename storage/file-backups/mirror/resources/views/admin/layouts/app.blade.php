@@ -80,7 +80,7 @@
         @media (max-width:360px) {
             .admin-content { padding:8px; }
             .admin-navbar { padding:0 8px; min-height:50px; }
-            .admin-navbar .page-title { font-size:13px; }
+            .admin-navbar .page-title { font-size:12px; }
             .admin-navbar .nav-actions { gap:4px; }
             .admin-navbar .user-dropdown { padding:2px 4px; }
             .admin-content .card-body h3 { font-size:1rem; }
@@ -140,6 +140,35 @@ $(document).ready(function() {
     @if(session('error')) toastr.error("{{ session('error') }}"); @endif
     @if(session('warning')) toastr.warning("{{ session('warning') }}"); @endif
     @if(session('info')) toastr.info("{{ session('info') }}"); @endif
+
+    // Bootstrap tooltips for action buttons
+    var tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipTriggerList.forEach(function(el) {
+        new bootstrap.Tooltip(el);
+    });
+    // For elements with title that can't have data-bs-toggle="tooltip" (e.g. modal triggers)
+    document.querySelectorAll('.action-btn[title]:not([data-bs-toggle="tooltip"])').forEach(function(el) {
+        new bootstrap.Tooltip(el);
+    });
+
+    // FIX: Dismiss tooltip on right-click (contextmenu) before browser menu opens
+    document.addEventListener('contextmenu', function(e) {
+        var trigger = e.target.closest('[data-bs-toggle="tooltip"], .action-btn[title]');
+        if (trigger) {
+            var tooltipInstance = bootstrap.Tooltip.getInstance(trigger);
+            if (tooltipInstance) tooltipInstance.hide();
+        }
+    });
+
+    // FIX: Dismiss ALL stuck tooltips on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.tooltip.show').forEach(function(tooltipEl) {
+                tooltipEl.classList.remove('show');
+                tooltipEl.style.display = '';
+            });
+        }
+    });
 });
 </script>
 
@@ -202,6 +231,31 @@ document.addEventListener('error', function(e) {
     img.setAttribute('data-fallback', '1');
     img.src = '{{ asset("assets/images/placeholder.png") }}';
 }, true);
+</script>
+<script>
+document.querySelectorAll('.form-select').forEach(function(el) {
+    var wrapper = document.createElement('span');
+    wrapper.className = 'form-select-wrapper';
+    el.parentNode.insertBefore(wrapper, el);
+    wrapper.appendChild(el);
+
+    el.addEventListener('mousedown', function() {
+        wrapper.classList.toggle('focused');
+    });
+    el.addEventListener('blur', function() {
+        wrapper.classList.remove('focused');
+    });
+    el.addEventListener('change', function() {
+        wrapper.classList.remove('focused');
+    });
+    el.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            wrapper.classList.remove('focused');
+        } else if (e.key === ' ' || e.key === 'Enter') {
+            wrapper.classList.toggle('focused');
+        }
+    });
+});
 </script>
 @stack('page-builder-js')
 @stack('scripts')

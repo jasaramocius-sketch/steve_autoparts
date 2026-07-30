@@ -131,7 +131,7 @@
                             </button>
                         </form>
                         <button type="button"
-                                class="btn btn-outline-secondary btn-sm compare-remove-btn steve-btn"
+                                class="btn btn-outline-secondary compare-remove-btn steve-btn"
                                 data-url="{{ route('compare.remove', $item->id) }}"
                                 data-id="{{ $item->id }}">
                             Remove

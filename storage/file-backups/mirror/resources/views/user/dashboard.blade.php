@@ -13,7 +13,9 @@
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.42.0/dist/tabler-icons.min.css" media="all" onload="this.media='all'">
 <div style="font-family: 'Inter', sans-serif; width: 100%; background: #fff; padding: 4px;">
-<div style="font-size: 26px; font-weight: 700; color: #1e2433; margin-bottom: 20px;">Dashboard</div>
+<div class="dashboard-header mb-3">
+    <h4 class="h4-style mb-0">Dashboard</h4>
+</div>
 <div class="dashboard-stats">
 
     <!-- Total Spent -->
@@ -209,23 +211,23 @@
 <div class="dashboard-row dashboard-wishlist-block-2">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="mb-0">My Wishlist</h4>
-        <a href="{{ route('user.wishlist') }}" class="text-decoration-none small">View All <i class="fas fa-arrow-right ms-1"></i></a>
+        <a href="{{ route('user.wishlist') }}" class="text-decoration-none small a-tag-hover-color">View All <i class="fas fa-arrow-right ms-1"></i></a>
     </div>
-    <div class="row">
-        @forelse($wishlist->take(6) as $item)
+    <div class="d-grid wishlist-page-products">
+        @forelse($wishlist->take(3) as $item)
+        <div class="wishlist-page-products-items">
             @php
                 $product = $item->product ?? $item;
                 $wishlistId = isset($item->id) ? $item->id : null;
             @endphp
-            <div class="col-lg-4 col-md-6 mb-4">
-                @include('partials.product-card', [
-                    'product' => $product,
-                    'wishlistItemId' => $wishlistId,
-                    'showRemoveWishlistIcon' => true,
-                    'colClass' => '',
-                ])
+            @include('partials.product-card', [
+                'product' => $product,
+                'wishlistItemId' => $wishlistId,
+                'showRemoveWishlistIcon' => true,
+                'colClass' => 'col-lg-4 col-md-6 mb-4',
+            ])
             </div>
-        @empty
+        @empty        
             <div class="col-12">
                 <div class="text-muted small">No products in wishlist.</div>
             </div>

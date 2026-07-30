@@ -4,7 +4,7 @@
 
 <div class="gs-order-track-section">
     <div class="ud-page-title-box">
-        <h3 style="margin:0;">Order Tracking</h3>
+        <h4 class="h4-style mb-0">Order Tracking</h4>
     </div>
 
     <p style="margin-top:12px;font-size:18px;color:#4c3533;">Track your order status by entering your order number below.</p>
@@ -75,7 +75,7 @@
                 <div class="ordered-products" style="margin-top:24px;">
                     <h5>Ordered Products</h5>
                     <div class="table-responsive">
-                        <table class="table">
+                        <table class="table table-hover">
                             <thead class="ordered-tbg">
                                 <tr>
                                     <th><span class="title">Product</span></th>

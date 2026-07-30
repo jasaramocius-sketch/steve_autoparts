@@ -15,11 +15,14 @@ class PageController extends Controller
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
         $perPage = in_array((int)$request->per_page, [10, 20, 50, 100]) ? (int)$request->per_page : 10;
 
-        if ($request->has('trashed')) {
-            $pages = Page::onlyTrashed()->orderBy($sortBy, $sortDir)->paginate($perPage);
-        } else {
-            $pages = Page::orderBy($sortBy, $sortDir)->paginate($perPage);
+        $query = Page::query();
+        if ($search = $request->query('search')) {
+            $query->where('title', 'like', "%{$search}%");
         }
+        if ($request->has('trashed')) {
+            $query->onlyTrashed();
+        }
+        $pages = $query->orderBy($sortBy, $sortDir)->paginate($perPage);
         $pages->appends($request->query())->onEachSide(1);
 
         return view('admin.pages.index', compact('pages', 'sortBy', 'sortDir'));

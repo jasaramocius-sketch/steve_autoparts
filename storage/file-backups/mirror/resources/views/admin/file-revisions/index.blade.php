@@ -22,7 +22,7 @@
         <div class="d-flex justify-content-between align-items-center px-3 pt-3 pb-2">
             <div class="d-flex align-items-center gap-2">
                 <span class="text-muted small">Show</span>
-                <select class="form-select form-select-sm" style="width: auto;" onchange="window.location.href=this.value">
+                <select class="form-selectge="window.location.href=this.value">
                     @foreach([10, 20, 50, 100] as $n)
                         <option value="{{ request()->fullUrlWithQuery(['per_page' => $n]) }}" {{ (int)request('per_page', 20) === $n ? 'selected' : '' }}>{{ $n }}</option>
                     @endforeach
@@ -72,11 +72,11 @@
                         </td>
                         <td class="table-action-col">
                             <div class="d-flex gap-1 action-buttons revision-action-buttons">
-                                <a href="{{ route('admin.file-revisions.diff', $rev->id) }}" class="btn btn-sm btn-outline-info steve-btn" title="View Diff">
+                                <a href="{{ route('admin.file-revisions.diff', $rev->id) }}" class="btn btn-sm btn-outline-info steve-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="View Diff">
                                     <i class="fas fa-code-branch"></i>
                                 </a>
                                 @if($rev->backup_path)
-                                    <a href="{{ route('admin.file-revisions.download', $rev->id) }}" class="btn btn-sm btn-outline-secondary steve-btn" title="Download backup">
+                                    <a href="{{ route('admin.file-revisions.download', $rev->id) }}" class="btn btn-sm btn-outline-secondary steve-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Download backup">
                                         <i class="fas fa-download"></i>
                                     </a>
                                 @endif

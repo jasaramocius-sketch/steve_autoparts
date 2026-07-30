@@ -144,7 +144,7 @@
     @media (max-width: 991px) {
       .aiz-plus-minus { width: fit-content; }
     }
-    .icon-circle .cart-count {
+    /* .icon-circle .cart-count {
     background: var(--primary);
     width: 25px;
     height: 25px;
@@ -163,7 +163,7 @@
     -webkit-box-align: center;
     -ms-flex-align: center;
     align-items: center;
-}
+} */
 
 /* Prevent slider FOUC - hide sliders until initialized */
 .home-cate-slider:not(.swiper-initialized),
@@ -296,7 +296,7 @@
                     </div>
                     <div class="nav-right d-flex align-items-center gap-3">
                         <div class="icon-circle">
-                            <button id="searchIcon" class="p-0" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Secrch">
+                            <button id="searchIcon" class="p-0" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Search">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                                     <path d="M21 21L17.5001 17.5M20 11.5C20 16.1944 16.1944 20 11.5 20C6.80558 20 3 16.1944 3 11.5C3 6.80558 6.80558 3 11.5 3C16.1944 3 20 6.80558 20 11.5Z" stroke="#1F0300" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
                                 </svg>
@@ -384,13 +384,41 @@
                 aria-labelledby="main-menu-tab">
                 <div class="mobile-menu-widget">
                     <ul class="mobile-nav-menu">
-                        @php $mobileMenu = json_decode(\App\Models\Setting::get('nav_menu', '[]'), true); @endphp
+                        @php
+                            $mobileMenu = json_decode(\App\Models\Setting::get('nav_menu', '[]'), true);
+                            $mobileCurrentUrl = url()->current();
+                            $mobileBasePath = rtrim(parse_url(url('/'), PHP_URL_PATH) ?? '', '/');
+                            $mobileCurrentPath = parse_url($mobileCurrentUrl, PHP_URL_PATH) ?? '/';
+                            $mobileRelativePath = $mobileBasePath !== '' && str_starts_with($mobileCurrentPath, $mobileBasePath) ? substr($mobileCurrentPath, strlen($mobileBasePath)) : $mobileCurrentPath;
+                            $activeCategoryUrls = $activeCategoryUrls ?? [];
+                            $mobileRouteAliases = ['/product' => ['/shop'], '/category' => ['/shop']];
+                            $mobileAliasedMenuUrl = '';
+                            foreach ($mobileRouteAliases as $prefix => $targets) {
+                                if (str_starts_with($mobileRelativePath, $prefix . '/') || $mobileRelativePath === $prefix) {
+                                    foreach ($targets as $target) { $mobileAliasedMenuUrl = url($target); break; }
+                                    break;
+                                }
+                            }
+                        @endphp
                         @foreach($mobileMenu as $item)
                             @php
                                 $children = $item['children'] ?? [];
                                 $hasChildren = !empty($children);
+                                $rawItemUrl = $item['url'] ?? '';
+                                $itemUrl = ($rawItemUrl !== '' && $rawItemUrl !== '#') ? $rawItemUrl : '/';
+                                $itemFullUrl = url($itemUrl);
+                                $isActive = $itemFullUrl === $mobileCurrentUrl || $itemFullUrl === rtrim($mobileCurrentUrl, '/');
+                                if (!$isActive && $itemUrl !== '/') {
+                                    $isActive = str_starts_with($mobileCurrentUrl, $itemFullUrl . '/') || str_starts_with($mobileCurrentUrl, $itemFullUrl . '?');
+                                }
+                                if (!$isActive && $mobileAliasedMenuUrl && $itemFullUrl === $mobileAliasedMenuUrl) {
+                                    $isActive = true;
+                                }
+                                if (!$isActive && !empty($activeCategoryUrls) && in_array($itemFullUrl, $activeCategoryUrls)) {
+                                    $isActive = true;
+                                }
                             @endphp
-                            <li class="{{ $hasChildren ? 'has-children' : '' }}">
+                            <li class="{{ $hasChildren ? 'has-children' : '' }} {{ $isActive ? 'active' : '' }}">
                                 @if($hasChildren)
                                     <div class="mobile-menu-item-row d-flex align-items-center">
                                         <a href="{{ url($item['url'] ?? '#') }}">{{ $item['label'] ?? '' }}</a>
@@ -401,8 +429,18 @@
                                             @php
                                                 $subChildren = $child['children'] ?? [];
                                                 $hasSubChildren = !empty($subChildren);
+                                                $rawChildUrl = $child['url'] ?? '';
+                                                $childUrl = ($rawChildUrl !== '' && $rawChildUrl !== '#') ? $rawChildUrl : '/';
+                                                $childFullUrl = url($childUrl);
+                                                $childActive = $childFullUrl === $mobileCurrentUrl || $childFullUrl === rtrim($mobileCurrentUrl, '/');
+                                                if (!$childActive && $childUrl !== '/') {
+                                                    $childActive = str_starts_with($mobileCurrentUrl, $childFullUrl . '/') || str_starts_with($mobileCurrentUrl, $childFullUrl . '?');
+                                                }
+                                                if (!$childActive && !empty($activeCategoryUrls) && in_array($childFullUrl, $activeCategoryUrls)) {
+                                                    $childActive = true;
+                                                }
                                             @endphp
-                                            <li class="{{ $hasSubChildren ? 'has-children' : '' }}">
+                                            <li class="{{ $hasSubChildren ? 'has-children' : '' }} {{ $childActive ? 'active' : '' }}">
                                                 @if($hasSubChildren)
                                                     <div class="mobile-menu-item-row d-flex align-items-center">
                                                         <a href="{{ url($child['url'] ?? '#') }}">{{ $child['label'] ?? '' }}</a>
@@ -410,7 +448,19 @@
                                                     </div>
                                                     <ul class="mobile-submenu">
                                                         @foreach($subChildren as $sub)
-                                                            <li><a href="{{ url($sub['url'] ?? '#') }}">{{ $sub['label'] ?? '' }}</a></li>
+                                                            @php
+                                                            $rawSubUrl = $sub['url'] ?? '';
+                                                            $subUrl = ($rawSubUrl !== '' && $rawSubUrl !== '#') ? $rawSubUrl : '/';
+                                                            $subFullUrl = url($subUrl);
+                                                            $subActive = $subFullUrl === $mobileCurrentUrl || $subFullUrl === rtrim($mobileCurrentUrl, '/');
+                                                            if (!$subActive && $subUrl !== '/') {
+                                                                $subActive = str_starts_with($mobileCurrentUrl, $subFullUrl . '/') || str_starts_with($mobileCurrentUrl, $subFullUrl . '?');
+                                                            }
+                                                            if (!$subActive && !empty($activeCategoryUrls) && in_array($subFullUrl, $activeCategoryUrls)) {
+                                                                $subActive = true;
+                                                            }
+                                                            @endphp
+                                                            <li class="{{ $subActive ? 'active' : '' }}"><a href="{{ url($sub['url'] ?? '#') }}">{{ $sub['label'] ?? '' }}</a></li>
                                                         @endforeach
                                                     </ul>
                                                 @else
@@ -434,11 +484,35 @@
                 <div class="mobile-menu-widget">
                     <div class="product-cat-widget">
                         <ul class="list-unstyled mb-0">
+                            @php
+                                $catRoute = function($slug) { return url('/category/' . $slug); };
+                                $subcatRoute = function($parent, $child) { return url('/category/' . $parent . '/' . $child); };
+                                $subchildRoute = function($parent, $child, $subchild) { return url('/category/' . $parent . '/' . $child . '/' . $subchild); };
+                            @endphp
                             @foreach($mobileCategoryTree as $topCat)
-                                <li class="main-list mb-3">
+                                @php
+                                    $topCatUrl = $catRoute($topCat->slug);
+                                    $topActive = $mobileCurrentUrl === $topCatUrl || $mobileCurrentUrl === $topCatUrl . '/' || (!empty($activeCategoryUrls) && in_array($topCatUrl, $activeCategoryUrls));
+                                    $hasActiveChild = false;
+                                    if ($topCat->children->count() > 0 && !$topActive) {
+                                        foreach ($topCat->children as $subCat) {
+                                            $subCatUrl = $subcatRoute($topCat->slug, $subCat->slug);
+                                            if ($mobileCurrentUrl === $subCatUrl || $mobileCurrentUrl === $subCatUrl . '/' || (!empty($activeCategoryUrls) && in_array($subCatUrl, $activeCategoryUrls))) {
+                                                $hasActiveChild = true; break;
+                                            }
+                                            foreach ($subCat->children as $childCat) {
+                                                $childCatUrl = $subchildRoute($topCat->slug, $subCat->slug, $childCat->slug);
+                                                if ($mobileCurrentUrl === $childCatUrl || $mobileCurrentUrl === $childCatUrl . '/' || (!empty($activeCategoryUrls) && in_array($childCatUrl, $activeCategoryUrls))) {
+                                                    $hasActiveChild = true; break 2;
+                                                }
+                                            }
+                                        }
+                                    }
+                                @endphp
+                                <li class="main-list mb-3 {{ $topActive || $hasActiveChild ? 'active' : '' }}">
                                     <div class="d-flex justify-content-between align-items-center gap-3">
                                         @if($topCat->descendant_count > 0)
-                                            <a href="{{ route('category', $topCat->slug) }}" class="text-decoration-none flex-grow-1" style="color: #1f0300; font-weight: 400; font-size: 15px;">
+                                            <a href="{{ route('category', $topCat->slug) }}" class="text-decoration-none flex-grow-1 {{ $topActive || $hasActiveChild ? 'fw-bold' : '' }}" style="color: {{ $topActive || $hasActiveChild ? 'var(--primary)' : '#1f0300' }}; font-weight: {{ $topActive || $hasActiveChild ? '600' : '400' }}; font-size: 15px;">
                                                 {{ $topCat->name }}
                                                 <span class="text-muted" style="font-size: 13px; font-weight: 400;">({{ $topCat->descendant_count }})</span>
                                             </a>
@@ -457,12 +531,26 @@
                                     </div>
 
                                     @if($topCat->children->count() > 0)
-                                        <ul id="mobcat_{{ $topCat->id }}" class="collapse ms-3 mt-2 list-unstyled">
+                                        @php $showTop = $topActive || $hasActiveChild; @endphp
+                                        <ul id="mobcat_{{ $topCat->id }}" class="collapse ms-3 mt-2 list-unstyled {{ $showTop ? 'show' : '' }}">
                                             @foreach($topCat->children as $subCat)
-                                                <li class="mb-2">
+                                                @php
+                                                    $subCatUrl = $subcatRoute($topCat->slug, $subCat->slug);
+                                                    $subActive = $mobileCurrentUrl === $subCatUrl || $mobileCurrentUrl === $subCatUrl . '/' || (!empty($activeCategoryUrls) && in_array($subCatUrl, $activeCategoryUrls));
+                                                    $hasActiveSubChild = false;
+                                                    if ($subCat->children->count() > 0 && !$subActive) {
+                                                        foreach ($subCat->children as $childCat) {
+                                                            $childCatUrl = $subchildRoute($topCat->slug, $subCat->slug, $childCat->slug);
+                                                            if ($mobileCurrentUrl === $childCatUrl || $mobileCurrentUrl === $childCatUrl . '/' || (!empty($activeCategoryUrls) && in_array($childCatUrl, $activeCategoryUrls))) {
+                                                                $hasActiveSubChild = true; break;
+                                                            }
+                                                        }
+                                                    }
+                                                @endphp
+                                                <li class="mb-2 {{ $subActive || $hasActiveSubChild ? 'active' : '' }}">
                                                     <div class="d-flex justify-content-between align-items-center gap-3">
                                                         @if($subCat->descendant_count > 0)
-                                                            <a href="{{ route('subcategory', ['parent' => $topCat->slug, 'child' => $subCat->slug]) }}" class="text-decoration-none flex-grow-1" style="color: #1f0300; font-weight: 400; font-size: 15px;">
+                                                            <a href="{{ route('subcategory', ['parent' => $topCat->slug, 'child' => $subCat->slug]) }}" class="text-decoration-none flex-grow-1 {{ $subActive || $hasActiveSubChild ? 'fw-bold' : '' }}" style="color: {{ $subActive || $hasActiveSubChild ? 'var(--primary)' : '#1f0300' }}; font-weight: {{ $subActive || $hasActiveSubChild ? '600' : '400' }}; font-size: 15px;">
                                                                 {{ $subCat->name }}
                                                                 <span class="text-muted" style="font-size: 12px; font-weight: 400;">({{ $subCat->descendant_count }})</span>
                                                             </a>
@@ -481,11 +569,16 @@
                                                     </div>
 
                                                     @if($subCat->children->count() > 0)
-                                                        <ul id="mobcat_{{ $subCat->id }}" class="collapse ms-3 mt-1 list-unstyled">
+                                                        @php $showSub = $subActive || $hasActiveSubChild; @endphp
+                                                        <ul id="mobcat_{{ $subCat->id }}" class="collapse ms-3 mt-1 list-unstyled {{ $showSub ? 'show' : '' }}">
                                                             @foreach($subCat->children as $childCat)
-                                                                <li class="my-1">
+                                                                @php
+                                                                    $childCatUrl = $subchildRoute($topCat->slug, $subCat->slug, $childCat->slug);
+                                                                    $childActive = $mobileCurrentUrl === $childCatUrl || $mobileCurrentUrl === $childCatUrl . '/' || (!empty($activeCategoryUrls) && in_array($childCatUrl, $activeCategoryUrls));
+                                                                @endphp
+                                                                <li class="my-1 {{ $childActive ? 'active' : '' }}">
                                                                     @if($childCat->descendant_count > 0)
-                                                                        <a href="{{ route('subcategory', ['parent' => $topCat->slug, 'child' => $subCat->slug, 'subchild' => $childCat->slug]) }}" class="text-decoration-none" style="color: #1f0300; font-weight: 400; font-size: 14px;">
+                                                                        <a href="{{ route('subcategory', ['parent' => $topCat->slug, 'child' => $subCat->slug, 'subchild' => $childCat->slug]) }}" class="text-decoration-none {{ $childActive ? 'fw-bold' : '' }}" style="color: {{ $childActive ? 'var(--primary)' : '#1f0300' }}; font-weight: {{ $childActive ? '600' : '400' }}; font-size: 14px;">
                                                                             {{ $childCat->name }}
                                                                             <span class="text-muted" style="font-size: 12px; font-weight: 400;">({{ $childCat->descendant_count }})</span>
                                                                         </a>
@@ -503,6 +596,8 @@
                                             @endforeach
                                         </ul>
                                     @endif
+
+                                    
                                 </li>
                             @endforeach
                         </ul>
@@ -511,6 +606,26 @@
             </div>
         </div>
     </div>
+
+    <script>
+    // Highlight parent categories when a child is active
+    (function() {
+        var catTab = document.getElementById('categories');
+        if (!catTab) return;
+        catTab.querySelectorAll('.product-cat-widget li.active').forEach(function(li) {
+            var collapse = li.closest('.collapse');
+            while (collapse) {
+                var parentLi = collapse.closest('li');
+                if (parentLi) {
+                    parentLi.classList.add('active');
+                    collapse = parentLi.closest('.collapse');
+                } else {
+                    collapse = null;
+                }
+            }
+        });
+    })();
+    </script>
 
     <!-- search bar -->
     <div class="search-bar" id="searchBar">
@@ -572,7 +687,7 @@
         </div> -->
         <div class="container">
             <div class="row footer-row gy-3">
-                <div class="col-lg-3 col-md-6 col-12 left-info">
+                <div class="col-lg-4 col-md-6 col-12 left-info">
                     <a class="header-logo-wrapper" href="{{ route('home') }}">
                         {!! imgTag('assets/images/' . (\App\Models\Setting::get('footer_logo') ?? '1730281141Whitepng.png'), 'logo', 'logo mb-3') !!}
                     </a>
@@ -602,7 +717,7 @@
                         <li class="mb-2"><a href="{{ route('contact') }}" class="text-secondary">Contact</a></li>
                     </ul>
                 </div>
-                <div class="col-lg-3 col-md-6 col-12 customer-service-col">
+                <div class="col-lg-2 col-md-6 col-12 customer-service-col">
                         <h6 class="text-white mb-3">Customer Service</h6>
                         <ul class="list-unstyled">
                             <li class="mb-2">
@@ -678,7 +793,7 @@
     <script src="{{ asset('assets/front/js/slick.js') }}"></script>
     <script src="{{ asset('assets/front/js/swiper-bundle.min.js') }}"></script>
     <script src="{{ asset('assets/front/js/jquery-ui.js') }}"></script>
-    <script src="{{ asset('assets/front/js/nice-select.js') }}"></script>
+    <script src="{{ asset('assets/front/js/nice-select.js') }}?v={{ filemtime(public_path('assets/front/js/nice-select.js')) }}"></script>
     <script src="{{ asset('assets/front/js/wow.js') }}"></script>
     <script src="{{ asset('assets/front/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('assets/front/js/toastr.min.js') }}"></script>
@@ -722,15 +837,35 @@
         document.querySelector('.mobile-menu')?.classList.remove('active');
         this.classList.remove('active');
     });
+    // Auto-expand parent submenus of active items
+    document.querySelectorAll('.mobile-nav-menu li.active').forEach(function(li) {
+        var submenu = li.closest('.mobile-submenu');
+        while (submenu) {
+            var parentLi = submenu.closest('li');
+            if (parentLi) {
+                parentLi.classList.add('expanded');
+                parentLi.querySelector('.mobile-submenu-toggle')?.classList.add('open');
+                submenu.classList.add('open');
+            }
+            submenu = parentLi ? parentLi.closest('.mobile-submenu') : null;
+        }
+    });
     // Mobile submenu accordion toggle
     document.querySelectorAll('.mobile-submenu-toggle').forEach(function(el) {
         el.addEventListener('click', function(e) {
             e.stopPropagation();
-            var submenu = this.closest('li').querySelector('.mobile-submenu');
+            var li = this.closest('li');
+            var submenu = li.querySelector('.mobile-submenu');
             if (submenu) {
+                var wasOpen = submenu.classList.contains('open');
                 submenu.classList.toggle('open');
+                this.classList.toggle('open');
+                if (!wasOpen) {
+                    li.classList.add('expanded');
+                } else if (!submenu.querySelector('li.active')) {
+                    li.classList.remove('expanded');
+                }
             }
-            this.classList.toggle('open');
         });
     });
     // Escape key to close mobile menu
@@ -743,6 +878,40 @@
     });
 </script>
 
+<script>
+document.querySelectorAll('.form-select').forEach(function(el) {
+    var wrapper = document.createElement('span');
+    wrapper.className = 'form-select-wrapper';
+    el.parentNode.insertBefore(wrapper, el);
+    wrapper.appendChild(el);
+
+    el.addEventListener('mousedown', function() {
+        wrapper.classList.toggle('focused');
+    });
+    el.addEventListener('blur', function() {
+        wrapper.classList.remove('focused');
+    });
+    el.addEventListener('change', function() {
+        wrapper.classList.remove('focused');
+    });
+    el.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            wrapper.classList.remove('focused');
+        } else if (e.key === ' ' || e.key === 'Enter') {
+            wrapper.classList.toggle('focused');
+        }
+    });
+});
+
+// Close on outside click — single click outside removes focused class
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.form-select-wrapper')) {
+        document.querySelectorAll('.form-select-wrapper.focused').forEach(function(w) {
+            w.classList.remove('focused');
+        });
+    }
+});
+</script>
     @yield('scripts')
     @stack('page-builder-js')
 </body>

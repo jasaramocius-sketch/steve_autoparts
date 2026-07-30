@@ -18,7 +18,7 @@
 @endphp
 <div class="user-order-page">
 <div class="dashboard-topbar">
-    <h4 class="mb-0" style="font-size:1.5rem;font-weight:600;color:#1f0300;">Purchase History</h4>
+    <h4 class="h4-style mb-0">Purchase History</h4>
     <a href="{{ route('shop') }}" class="btn btn-primary steve-btn">Continue Shopping</a>
 </div>
 
@@ -32,7 +32,7 @@
 </div>
 
 <div class="table-responsive">
-    <table class="table table--custom table--responsive-lg">
+    <table class="table table--custom table--responsive-lg table-hover">
         <thead>
             <tr>
                 <th>Order Code</th>
@@ -75,20 +75,20 @@
                             <form action="{{ route('user.orders.destroy', $order->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Are you sure you want to cancel this order?');">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="action-btn btn-cancel" title="Cancel Order">
+                                <button type="submit" class="action-btn btn-cancel" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Cancel Order">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <polyline points="3 6 5 6 21 6"></polyline>
                                         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                                     </svg>
                                 </button>
                             </form>
-                            <a href="{{ route('user.orders.show', $order->id) }}" class="action-btn btn-view" title="View Details">
+                            <a href="{{ route('user.orders.show', $order->id) }}" class="action-btn btn-view" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="View Details">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                                     <circle cx="12" cy="12" r="3"></circle>
                                 </svg>
                             </a>
-                            <a href="{{ route('user.orders.invoice', $order->id) }}" target="_blank" class="action-btn btn-invoice" title="Download Invoice">
+                            <a href="{{ route('user.orders.invoice', $order->id) }}" target="_blank" class="action-btn btn-invoice" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Download Invoice">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                                     <polyline points="7 10 12 15 17 10"></polyline>

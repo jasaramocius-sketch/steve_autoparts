@@ -6,22 +6,22 @@
 
 <div class="user-reviews-page">
 <div class="dashboard-topbar">
-    <h4 class="mb-0" style="font-size:1.5rem;font-weight:600;color:#1f0300;">My Reviews</h4>
+    <h4 class="h4-style mb-0">My Reviews</h4>
     <a href="{{ route('shop') }}" class="btn btn-primary steve-btn">Continue Shopping</a>
 </div>
 <div class="view-reviews-filter d-flex align-items-center justify-content-between mb-3 gap-2 flex-wrap">
-    <form method="GET" action="{{ route('user.reviews') }}" class="d-flex gap-1" id="reviewFilterForm">
-        <input type="text" name="search" class="form-control form-control-sm" placeholder="Search..."
-            value="{{ $search ?? '' }}" style="font-size:12px;height:30px;" onchange="this.form.submit()">
-        @if(!empty($search))
-            <a href="{{ route('user.reviews', array_filter(['status' => $statusFilter ?? ''])) }}" class="btn btn-sm btn-outline-secondary" style="padding:6px 10px;font-size:11px;line-height:1.6;">
-                <i class="fas fa-times"></i>
-            </a>
-        @endif
+    <form method="GET" action="{{ route('user.reviews') }}" class="d-flex gap-2 align-items-center" id="reviewFilterForm">
+        @include('admin.partials.search-form', [
+            'route' => route('user.reviews'),
+            'placeholder' => 'Search...',
+            'size' => 'sm',
+            'showClear' => !empty($search),
+            'clearRoute' => route('user.reviews', array_filter(['status' => $statusFilter ?? '']))
+        ])
     </form>
     <form method="GET" action="{{ route('user.reviews') }}" id="statusFilterForm">
         <input type="hidden" name="search" value="{{ $search ?? '' }}">
-        <select name="status" class="form-select form-select-sm" style="font-size:12px;height:30px;" onchange="this.form.submit()">
+        <select name="status" class="form-select" onchange="this.form.submit()">
             <option value="">All</option>
             <option value="pending" {{ ($statusFilter ?? '') === 'pending' ? 'selected' : '' }}>Pending</option>
             <option value="reviewed" {{ ($statusFilter ?? '') === 'reviewed' ? 'selected' : '' }}>Reviewed</option>
@@ -29,7 +29,7 @@
     </form>
 </div>
 <div class="table-responsive">
-    <table class="table table--custom table--responsive-lg">
+    <table class="table table--custom table--responsive-lg table-hover">
         <thead>
             <tr>
                 <th>Product</th>
@@ -78,7 +78,7 @@
                 <td data-label="Action" class="table-action-col">
                     @if($item['status'] === 'pending')
                         <div class="action-buttons" style="justify-content:flex-end;">
-                            <button type="button" class="action-btn btn-invoice review-action-btn" title="Write Review"
+                            <button type="button" class="action-btn btn-invoice review-action-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Write Review"
                                 data-slug="{{ $item['product_slug'] }}"
                                 data-name="{{ $item['product_name'] }}"
                                 data-image="{{ $item['product_image'] ? asset('assets/images/thumbnails/' . $item['product_image']) : asset('assets/images/placeholder.png') }}"
@@ -96,7 +96,7 @@
                         </div>
                     @else
                         <div class="action-buttons" style="justify-content:flex-end;">
-                            <button type="button" class="action-btn btn-view review-view-btn" title="View Review"
+                            <button type="button" class="action-btn btn-view review-view-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="View Review"
                                 data-slug="{{ $item['product_slug'] }}"
                                 data-name="{{ $item['product_name'] }}"
                                 data-image="{{ $item['product_image'] ? asset('assets/images/thumbnails/' . $item['product_image']) : asset('assets/images/placeholder.png') }}"
@@ -109,7 +109,7 @@
                                     <circle cx="12" cy="12" r="3"></circle>
                                 </svg>
                             </button>
-                            <button type="button" class="action-btn btn-invoice review-edit-btn" title="Edit Review"
+                            <button type="button" class="action-btn btn-invoice review-edit-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Edit Review"
                                 data-slug="{{ $item['product_slug'] }}"
                                 data-name="{{ $item['product_name'] }}"
                                 data-image="{{ $item['product_image'] ? asset('assets/images/thumbnails/' . $item['product_image']) : asset('assets/images/placeholder.png') }}"
@@ -122,7 +122,7 @@
                                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                                 </svg>
                             </button>
-                            <button type="button" class="action-btn btn-cancel review-delete-btn" title="Delete Review"
+                            <button type="button" class="action-btn btn-cancel review-delete-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Delete Review"
                                 data-slug="{{ $item['product_slug'] }}"
                                 data-review-id="{{ $item['review_id'] ?? '' }}"
                                 data-name="{{ $item['product_name'] }}">

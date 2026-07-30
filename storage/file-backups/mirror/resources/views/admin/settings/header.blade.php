@@ -247,7 +247,7 @@
                             '<div class="d-flex align-items-center gap-2 flex-wrap">' +
                             '<input type="text" class="form-control form-control-sm child-label" placeholder="Label" value="' + (child.label || '') + '" style="max-width:200px;">' +
                             '<input type="text" class="form-control form-control-sm child-url" placeholder="URL" value="' + (child.url || '') + '" style="max-width:250px;">' +
-                            '<button type="button" class="action-btn btn-cancel ms-auto remove-child" title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
+                            '<button type="button" class="action-btn btn-cancel ms-auto remove-child" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
                             '</div></div></div>';
                     }
 
@@ -262,7 +262,7 @@
                             '<span class="menu-item-toggle" style="cursor:pointer;width:20px;text-align:center;color:#888;transition:transform 0.3s;' + (hasContent ? '' : 'opacity:0.3;pointer-events:none;') + '"><i class="fas fa-chevron-down"></i></span>' +
                             '<input type="text" class="form-control form-control-sm menu-label" placeholder="Label" value="' + (item.label || '') + '" style="max-width:200px;">' +
                             '<input type="text" class="form-control form-control-sm menu-url" placeholder="URL (e.g. /shop)" value="' + (item.url || '') + '" style="max-width:250px;">' +
-                            '<button type="button" class="action-btn btn-cancel ms-auto remove-item" title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>' +
+                            '<button type="button" class="action-btn btn-cancel ms-auto remove-item" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>' +
                             '</div>' +
                             '<div class="children-container ps-4" data-parent="' + index + '" style="' + (hasContent ? '' : 'display:none;') + '">';
 
@@ -275,11 +275,11 @@
                                     html += '<div class="card mb-1 bg-light child-card border-0 shadow-sm" data-child-index="' + ci + '" data-parent="' + index + '">' +
                                         '<div class="card-body py-1 px-2">' +
                                         '<div class="d-flex align-items-center gap-2 mb-1 flex-wrap">' +
-                                        '<select class="form-select form-select-sm column-category-parent" style="max-width:170px;font-size:0.8rem;"></select>' +
-                                        '<span class="column-child-wrap" style="display:none;"><select class="form-select form-select-sm column-category-child" style="max-width:170px;font-size:0.8rem;"></select></span>' +
+                                        '<select class="form-select column-category-parent" style="max-width:170px;font-size:0.8rem;"></select>' +
+                                        '<span class="column-child-wrap" style="display:none;"><select class="form-select column-category-child" style="max-width:170px;font-size:0.8rem;"></select></span>' +
                                         '<input type="text" class="form-control form-control-sm child-label" placeholder="Column Label" value="' + (col.label || '') + '" style="max-width:130px;">' +
                                         '<input type="text" class="form-control form-control-sm child-url" placeholder="URL" value="' + (col.url || '') + '" style="max-width:130px;">' +
-                                        '<button type="button" class="action-btn btn-cancel remove-child-card" title="Remove Column"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
+                                        '<button type="button" class="action-btn btn-cancel remove-child-card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Remove Column"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
                                         '</div>' +
                                         '<div class="subchildren-container ps-3">';
 
@@ -297,11 +297,11 @@
                                 html += '<div class="card mb-1 bg-light child-card border-0 shadow-sm" data-child-index="0" data-parent="' + index + '">' +
                                     '<div class="card-body py-1 px-2">' +
                                     '<div class="d-flex align-items-center gap-2 mb-1 flex-wrap">' +
-                                    '<select class="form-select form-select-sm column-category-parent" style="max-width:170px;font-size:0.8rem;"></select>' +
-                                    '<span class="column-child-wrap" style="display:none;"><select class="form-select form-select-sm column-category-child" style="max-width:170px;font-size:0.8rem;"></select></span>' +
+                                    '<select class="form-select column-category-parent" style="max-width:170px;font-size:0.8rem;"></select>' +
+                                    '<span class="column-child-wrap" style="display:none;"><select class="form-select column-category-child" style="max-width:170px;font-size:0.8rem;"></select></span>' +
                                     '<input type="text" class="form-control form-control-sm child-label" placeholder="Column Label" value="' + (item.label || '') + '" style="max-width:130px;">' +
                                     '<input type="text" class="form-control form-control-sm child-url" placeholder="URL" value="' + (item.url || '') + '" style="max-width:130px;">' +
-                                    '<button type="button" class="action-btn btn-cancel remove-child-card" title="Remove Column"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
+                                    '<button type="button" class="action-btn btn-cancel remove-child-card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Remove Column"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
                                     '</div>' +
                                     '<div class="subchildren-container ps-3">';
                                 for (var fi = 0; fi < children.length; fi++) {
@@ -321,6 +321,7 @@
 
                         if (container) {
                             container.append(html);
+                            container.find('[data-bs-toggle="tooltip"]').tooltip();
                         }
                         return html;
                     }
@@ -407,16 +408,17 @@
                             var html = '<div class="card mb-1 bg-light child-card border-0 shadow-sm" data-child-index="' + count + '" data-parent="' + parent + '">' +
                                 '<div class="card-body py-1 px-2">' +
                                 '<div class="d-flex align-items-center gap-2 mb-1 flex-wrap">' +
-                                '<select class="form-select form-select-sm column-category-parent" style="max-width:170px;font-size:0.8rem;"></select>' +
-                                '<span class="column-child-wrap" style="display:none;"><select class="form-select form-select-sm column-category-child" style="max-width:170px;font-size:0.8rem;"></select></span>' +
+                                '<select class="form-select column-category-parent" style="max-width:170px;font-size:0.8rem;"></select>' +
+                                '<span class="column-child-wrap" style="display:none;"><select class="form-select column-category-child" style="max-width:170px;font-size:0.8rem;"></select></span>' +
                                 '<input type="text" class="form-control form-control-sm child-label" placeholder="Column Label" value="" style="max-width:130px;">' +
                                 '<input type="text" class="form-control form-control-sm child-url" placeholder="URL" value="" style="max-width:130px;">' +
-                                '<button type="button" class="action-btn btn-cancel remove-child-card" title="Remove Column"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
+                                '<button type="button" class="action-btn btn-cancel remove-child-card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Remove Column"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
                                 '</div>' +
                                 '<div class="subchildren-container ps-3"></div>' +
                                 '<button type="button" class="btn btn-outline-primary btn-sm mt-1 add-subchild steve-btn" data-parent="' + parent + '" data-child="' + count + '"><i class="fas fa-plus"></i> Add Sub Item</button>' +
                                 '</div></div>';
                             $container.append(html);
+                            $container.find('[data-bs-toggle="tooltip"]').tooltip();
                             initCategoryDropdowns($container.find('.child-card').last(), { url: '' });
                             if (!$container.is(':visible')) {
                                 $container.slideDown(200);
@@ -444,9 +446,10 @@
                                 '<div class="d-flex align-items-center gap-2 flex-wrap">' +
                                 '<input type="text" class="form-control form-control-sm child-label" placeholder="Label" value="" style="max-width:200px;">' +
                                 '<input type="text" class="form-control form-control-sm child-url" placeholder="URL" value="" style="max-width:250px;">' +
-                                '<button type="button" class="action-btn btn-cancel remove-child" title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
+                                '<button type="button" class="action-btn btn-cancel remove-child" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
                                 '</div></div></div>';
                             $container.append(html);
+                            $container.find('[data-bs-toggle="tooltip"]').tooltip();
                         });
 
                         $(document).on('change', '.column-category-parent', function() {
@@ -474,9 +477,10 @@
                                             '<div class="d-flex align-items-center gap-2 flex-wrap">' +
                                             '<input type="text" class="form-control form-control-sm child-label" placeholder="Label" value="' + sub.name + '" style="max-width:200px;">' +
                                             '<input type="text" class="form-control form-control-sm child-url" placeholder="URL" value="/category/' + sub.slug + '" style="max-width:250px;">' +
-                                            '<button type="button" class="action-btn btn-cancel remove-child" title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
+                                            '<button type="button" class="action-btn btn-cancel remove-child" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
                                             '</div></div></div>';
                                         $subContainer.append(subHtml);
+                                        $subContainer.find('[data-bs-toggle="tooltip"]').tooltip();
                                     }
                                 }
                             } else {

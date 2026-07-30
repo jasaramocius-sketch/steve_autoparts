@@ -14,7 +14,7 @@
         <div class="d-flex justify-content-between align-items-center px-3 pt-3 pb-2">
             <div class="d-flex align-items-center gap-2">
                 <span class="text-muted small">Show</span>
-                <select class="form-select form-select-sm" style="width: auto;" onchange="window.location.href=this.value">
+                <select class="form-select w-auto" onchange="window.location.href=this.value">
                     @foreach([10, 20, 50, 100] as $n)
                         <option value="{{ request()->fullUrlWithQuery(['per_page' => $n]) }}" {{ (int)request('per_page', 20) === $n ? 'selected' : '' }}>{{ $n }}</option>
                     @endforeach
@@ -78,7 +78,7 @@
                         </td>
                         <td class="table-action-col">
                             <div class="action-buttons revision-action-buttons">
-                            <a href="{{ route('admin.revisions.detail', $rev->id) }}" class="btn btn-sm btn-outline-info" title="View Details">
+                            <a href="{{ route('admin.revisions.detail', $rev->id) }}" class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="View Details">
                                 <i class="fas fa-code-branch"></i> Diff
                             </a>
                             </div>

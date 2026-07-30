@@ -76,7 +76,7 @@
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-3">
                 <h5 class="mb-0 fw-bold"><i class="fas fa-list me-2"></i>Recent Orders</h5>
-                <a href="{{ url('/admin/orders') }}" class="btn btn-outline-primary">View All</a>
+                <a href="{{ url('/admin/orders') }}" class="a-tag-hover-color">View All<i class="fas fa-arrow-right ms-1"></i></a>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -141,17 +141,20 @@
             </div>
         </div>
     </div>
-    <div class="col-md-7">
+    <div class="col-md-7 admin-panal-revenue-chart">
         <div class="card border-0 shadow-sm h-100">
-            <div class="card-header bg-white border-bottom py-3">
-                <h5 class="mb-0 fw-bold"><i class="fas fa-chart-line me-2"></i>Monthly Revenue</h5>
+            <div class="card-header bg-white border-bottom py-3 d-flex align-items-center justify-content-between revenue-chart-navbar">
+                <h5 class="mb-0 fw-bold revenue-chart-title"><i class="fas fa-chart-line me-2"></i><span id="revenueChartTitle">Monthly Revenue</span></h5>
+                <div class="btn-group btn-group-sm revenue-chart-buttons" role="group">
+                    <button type="button" class="btn btn-outline-primary active" data-view="monthly">Monthly</button>
+                    <button type="button" class="btn btn-outline-primary" data-view="weekly">Weekly</button>
+                    <button type="button" class="btn btn-outline-primary" data-view="daily">Daily</button>
+                    <button type="button" class="btn btn-outline-primary" data-view="hourly">Hourly</button>
+                    <button type="button" class="btn btn-outline-primary" data-view="5min">5 min</button>
+                </div>
             </div>
             <div class="card-body" style="min-height: 300px;">
-                @if($monthlyRevenue->isEmpty())
-                    <p class="text-muted mb-0 text-center pt-5">No revenue data yet</p>
-                @else
-                    <canvas id="monthlyRevenueChart" style="width: 100%;"></canvas>
-                @endif
+                <canvas id="monthlyRevenueChart" style="width: 100%;"></canvas>
             </div>
         </div>
     </div>
@@ -162,7 +165,6 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     var ordersData = @json($ordersByStatusJson);
-    var revenueData = @json($monthlyRevenueJson);
 
     var statusColors = {
         pending:    { bg: '#ffc107', border: '#ffca2c' },
@@ -249,32 +251,86 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    if (document.getElementById('monthlyRevenueChart') && Object.keys(revenueData).length > 0) {
-        var monthLabels = Object.keys(revenueData).map(function(m) {
-            var parts = m.split('-');
-            var date = new Date(parts[0], parts[1] - 1);
-            return date.toLocaleString('en', { month: 'short' }) + ' ' + parts[0].slice(2);
-        });
-        var revenueValues = Object.values(revenueData).map(function(v) { return parseFloat(v); });
+    var monthlyRevenueData = @json($monthlyRevenueJson);
+    var weeklyRevenueData = @json($weeklyRevenueJson);
+    var dailyRevenueData = @json($dailyRevenueJson);
+    var hourlyRevenueData = @json($hourlyRevenueJson);
+    var fiveMinRevenueData = @json($fiveMinRevenueJson);
+    var revenueChart = null;
 
-        var ctx = document.getElementById('monthlyRevenueChart').getContext('2d');
+    function renderRevenueChart(view) {
+        if (revenueChart) { revenueChart.destroy(); revenueChart = null; }
+
+        var labels, data, title, dataSrc;
+        if (view === 'weekly') {
+            dataSrc = weeklyRevenueData;
+            labels = Object.keys(dataSrc).map(function(d) {
+                var p = d.split('-');
+                return new Date(p[0], p[1] - 1, p[2]).toLocaleString('en', { month: 'short', day: 'numeric' });
+            });
+            data = Object.values(dataSrc).map(function(v) { return parseFloat(v); });
+            title = 'Weekly Revenue';
+        } else if (view === 'daily') {
+            dataSrc = dailyRevenueData;
+            labels = Object.keys(dataSrc).map(function(d) {
+                var p = d.split('-');
+                return new Date(p[0], p[1] - 1, p[2]).toLocaleString('en', { month: 'short', day: 'numeric' });
+            });
+            data = Object.values(dataSrc).map(function(v) { return parseFloat(v); });
+            title = 'Daily Revenue';
+        } else if (view === 'hourly') {
+            dataSrc = hourlyRevenueData;
+            labels = Object.keys(dataSrc).map(function(t) {
+                var p = t.split(' ');
+                return p[1] ? p[1].substring(0, 5) : t;
+            });
+            data = Object.values(dataSrc).map(function(v) { return parseFloat(v); });
+            title = "Hourly Revenue";
+        } else if (view === '5min') {
+            dataSrc = fiveMinRevenueData;
+            labels = Object.keys(dataSrc).map(function(t) {
+                var p = t.split(' ');
+                return p[1] ? p[1].substring(0, 5) : t;
+            });
+            data = Object.values(dataSrc).map(function(v) { return parseFloat(v); });
+            title = "5-Min Revenue";
+        } else {
+            dataSrc = monthlyRevenueData;
+            labels = Object.keys(dataSrc).map(function(m) {
+                var p = m.split('-');
+                return new Date(p[0], p[1] - 1).toLocaleString('en', { month: 'short' }) + ' ' + p[0].slice(2);
+            });
+            data = Object.values(dataSrc).map(function(v) { return parseFloat(v); });
+            title = 'Monthly Revenue';
+        }
+
+        document.getElementById('revenueChartTitle').textContent = title;
+
+        var canvas = document.getElementById('monthlyRevenueChart');
+        if (!canvas) return;
+
+        var ctx = canvas.getContext('2d');
         var gradient = ctx.createLinearGradient(0, 0, 0, 300);
         gradient.addColorStop(0, 'rgba(25, 135, 84, 0.85)');
         gradient.addColorStop(1, 'rgba(25, 135, 84, 0.35)');
 
-        new Chart(ctx, {
-            type: 'bar',
+        revenueChart = new Chart(ctx, {
+            type: 'line',
             data: {
-                labels: monthLabels,
+                labels: labels,
                 datasets: [{
                     label: 'Revenue',
-                    data: revenueValues,
+                    data: data,
+                    fill: true,
+                    tension: 0.4,
                     backgroundColor: gradient,
                     borderColor: '#198754',
-                    borderWidth: 1,
-                    borderRadius: 6,
-                    borderSkipped: false,
-                    maxBarThickness: 50
+                    borderWidth: 3,
+                    pointBackgroundColor: '#198754',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 3,
+                    pointHoverRadius: 6
                 }]
             },
             options: {
@@ -283,7 +339,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 scales: {
                     x: {
                         grid: { display: false },
-                        ticks: { font: { size: 11, weight: '500' }, color: '#6c757d' }
+                        ticks: {
+                            font: { size: 11, weight: '500' },
+                            color: '#6c757d',
+                            maxTicksLimit: (view === 'hourly' || view === '5min') ? 15 : undefined
+                        }
                     },
                     y: {
                         beginAtZero: true,
@@ -316,6 +376,35 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         });
+    }
+
+    if (document.getElementById('monthlyRevenueChart')) {
+        renderRevenueChart('monthly');
+
+        document.querySelectorAll('[data-view]').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('[data-view]').forEach(function(b) { b.classList.remove('active'); });
+                this.classList.add('active');
+                renderRevenueChart(this.dataset.view);
+            });
+        });
+
+        setInterval(function() {
+            var activeBtn = document.querySelector('[data-view].active');
+            if (!activeBtn) return;
+            var view = activeBtn.dataset.view;
+            if (view === 'hourly' || view === '5min') {
+                var range = view;
+                fetch('{{ route("admin.dashboard.today-revenue") }}?range=' + range)
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        if (view === 'hourly') hourlyRevenueData = data;
+                        else fiveMinRevenueData = data;
+                        renderRevenueChart(view);
+                    })
+                    .catch(function() {});
+            }
+        }, 60000);
     }
 });
 </script>

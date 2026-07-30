@@ -14,11 +14,17 @@ class FaqController extends Controller
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
         $perPage = in_array((int)$request->per_page, [10, 20, 50, 100]) ? (int)$request->per_page : 10;
 
-        if ($request->has('trashed')) {
-            $faqs = Faq::onlyTrashed()->orderBy($sortBy, $sortDir)->paginate($perPage);
-        } else {
-            $faqs = Faq::orderBy($sortBy, $sortDir)->paginate($perPage);
+        $query = Faq::query();
+        if ($search = $request->query('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('question', 'like', "%{$search}%")
+                  ->orWhere('answer', 'like', "%{$search}%");
+            });
         }
+        if ($request->has('trashed')) {
+            $query->onlyTrashed();
+        }
+        $faqs = $query->orderBy($sortBy, $sortDir)->paginate($perPage);
         $faqs->appends($request->query())->onEachSide(1);
 
         return view('admin.faqs.index', compact('faqs', 'sortBy', 'sortDir'));

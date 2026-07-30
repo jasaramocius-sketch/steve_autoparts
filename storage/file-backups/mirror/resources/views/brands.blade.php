@@ -28,13 +28,10 @@
     <div class="category-toolbar mb-4">
         <div class="row align-items-center">
             <div class="col-md-4">
-                <form action="{{ route('brands') }}" method="GET">
-                    <input type="text"
-                           class="form-control"
-                           name="search"
-                           placeholder="Search brands..."
-                           value="{{ $search }}">
-                </form>
+                @include('admin.partials.search-form', [
+                    'route' => route('brands'),
+                    'placeholder' => 'Search brands...'
+                ])
             </div>
             <div class="col-md-8">
                 <div class="toolbar-right">
@@ -71,7 +68,7 @@
                 </a>
             </div>
             <div class="category-content">
-                <a href="{{ route('shop', ['brand' => $brand->slug]) }}">
+                <a href="{{ route('shop', ['brand' => $brand->slug]) }}" class="text-dark">
                     <h5>{{ $brand->name }}</h5>
                 </a>
                 <div class="category-stats">

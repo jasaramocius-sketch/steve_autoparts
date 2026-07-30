@@ -55,10 +55,10 @@
                 </div>
             </div>
             <br>
-            <button type="submit" class="template-btn btn-forms steve-btn" style="background-color: var(--primary); border-color: var(--primary); color: #fff; font-weight: 500; border-radius: 4px;">Register Now</button>
-            <p class="text-center login-or">Or</p>
-            <br>
-            <p class="login-redirect">Already have an account? <span><a href="{{ route('login') }}">Sign In</a></span></p>
+            <button type="submit" class="template-btn btn-forms steve-btn button-hover">Register Now</button>
+            <!-- <p class="text-center login-or">Or</p> -->
+            <hr></hr>
+            <p class="login-redirect">Already have an account? <span><a href="{{ route('login') }}" class="a-tag-text-hover">Sign In</a></span></p>
           </form>
         </div>
       </div>

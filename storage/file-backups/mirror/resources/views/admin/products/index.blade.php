@@ -16,12 +16,22 @@
     </div>
 </div>
 
-<ul class="nav nav-tabs mb-3">
+<ul class="nav nav-tabs mb-3 gap-2 d-flex flex-wrap admin-product-index-nav-tabs">
+    @php
+        $activeParams = request()->has('search') ? ['search' => request('search')] : [];
+        $trashParams = array_merge(['trashed' => 1], request()->has('search') ? ['search' => request('search')] : []);
+    @endphp
     <li class="nav-item">
-        <a class="nav-link {{ !request()->has('trashed') ? 'active' : '' }}" href="{{ route('admin.products.index') }}">Active</a>
+        <a class="nav-link {{ !request()->has('trashed') ? 'active' : '' }}" href="{{ route('admin.products.index', $activeParams) }}">Active</a>
     </li>
     <li class="nav-item">
-        <a class="nav-link {{ request()->has('trashed') ? 'active' : '' }}" href="{{ route('admin.products.index', ['trashed' => 1]) }}">Trash ({{ $trashedCount }})</a>
+        <a class="nav-link {{ request()->has('trashed') ? 'active' : '' }}" href="{{ route('admin.products.index', $trashParams) }}">Trash ({{ $trashedCount }})</a>
+    </li>
+    <li class="nav-item search-form ms-lg-auto">
+        @include('admin.partials.search-form', [
+            'route' => route('admin.products.index'),
+            'placeholder' => 'Search products...'
+        ])
     </li>
 </ul>
 
@@ -30,7 +40,7 @@
         <div class="d-flex justify-content-between align-items-center px-3 pt-3 pb-2">
             <div class="d-flex align-items-center gap-2">
                 <span class="text-muted small">Show</span>
-                <select class="form-select form-select-sm" style="width: auto;" onchange="window.location.href=this.value">
+                <select class="form-select w-auto" onchange="window.location.href=this.value">
                     @php $currentPerPage = request('per_page', '10'); @endphp
                     @foreach([10, 20, 50, 100] as $n)
                         <option value="{{ request()->fullUrlWithQuery(['per_page' => $n]) }}" {{ $currentPerPage == $n ? 'selected' : '' }}>{{ $n }}</option>
@@ -120,18 +130,18 @@
                             @if(request()->has('trashed'))
                                 <form action="{{ route('admin.products.restore', $product->id) }}" method="POST" class="d-inline">
                                     @csrf
-                                    <button class="action-btn btn-restore" title="Restore"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button>
+                                    <button class="action-btn btn-restore" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Restore"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button>
                                 </form>
                                 <form action="{{ route('admin.products.force-delete', $product->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Permanently delete {{ $product->name }}?')">
                                     @csrf @method('DELETE')
-                                    <button class="action-btn btn-cancel" title="Delete Permanently"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                                    <button class="action-btn btn-cancel" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Delete Permanently"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
                                 </form>
                             @else
-                                <a href="{{ route('admin.products.details', $product->id) }}" class="action-btn btn-view" title="View Details"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></a>
-                                <a href="{{ route('admin.products.edit', $product->id) }}" class="action-btn btn-edit" title="Edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></a>
+                                <a href="{{ route('admin.products.details', $product->id) }}" class="action-btn btn-view" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="View Details"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></a>
+                                <a href="{{ route('admin.products.edit', $product->id) }}" class="action-btn btn-edit" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></a>
                                 <form action="{{ route('admin.products.destroy', $product->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this product?')">
                                     @csrf @method('DELETE')
-                                    <button class="action-btn btn-cancel" title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                                    <button class="action-btn btn-cancel" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
                                 </form>
                             @endif
                             </div>
@@ -152,5 +162,15 @@
         @endif
     </div>
 </div>
+<!-- <script>
+    $query = $request->has('trashed')
+    ? Product::onlyTrashed()->with('category')
+    : Product::with('category');
 
+if ($search = $request->query('search')) {
+    $query->where('name', 'like', "%{$search}%");
+}
+
+$products = $query->orderBy($sortBy, $sortDir)->paginate($perPage);
+</script> -->
 @endsection

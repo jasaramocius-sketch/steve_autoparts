@@ -42,13 +42,24 @@ class BlogController extends Controller{
     public function category($slug)
     {
         $category = BlogCategory::where('slug', $slug)->firstOrFail();
-        $blogs = Blog::with('category')->where('blog_category_id', $category->id)->where('status', 'published')->latest()->paginate(6)->onEachSide(2);
+        $search = request()->input('search');
+        $sort = in_array(request()->input('sort'), ['latest', 'oldest']) ? request()->input('sort') : 'latest';
+        $blogsQuery = Blog::with('category')->where('blog_category_id', $category->id)->where('status', 'published');
+        if ($search) {
+            $blogsQuery->where('title', 'like', "%{$search}%");
+        }
+        if ($sort === 'oldest') {
+            $blogsQuery->oldest();
+        } else {
+            $blogsQuery->latest();
+        }
+        $blogs = $blogsQuery->paginate(6)->onEachSide(2)->appends(request()->query());
         $recentBlogs = Blog::where('status', 'published')->latest()->take(5)->get();
         $categories = BlogCategory::withCount(['blogs' => fn($q) => $q->where('status', 'published')])->with('children')
             ->whereNull('parent_id')
             ->where('status', 'active')
             ->get();
-        return view('blog.index', compact('blogs', 'recentBlogs', 'categories', 'category'));
+        return view('blog.index', compact('blogs', 'recentBlogs', 'categories', 'category', 'search', 'sort'));
     }
 
 }

@@ -13,7 +13,7 @@
     </div>
 @endif
 <!-- Account Details Panel -->
-<div class="acc-info-wrapper rounded p-4" style="background-color: #fcfbfb; border: 1px solid #eee;">
+<div class="acc-info-wrapper rounded p-4 mb-3" style="background-color: #fcfbfb; border: 1px solid #eee;">
     <h4 style="color: #1f0300; font-weight: 600;" class="mb-3">Account Details</h4>
     <div class="list-wrapper">
     <div class="row w-100">
@@ -34,9 +34,9 @@
     </div>
     </div>
 </div>
-<div class="row">
-    <div class="col-lg-6">
-        <div class="card card-box shadow-sm">
+<div class="d-flex flex-column flex-lg-row gap-3">
+    <div class="flex-fill d-flex">
+        <div class="card card-box shadow-sm w-100">
             <div class="card-header bg-white">
                 <h5 class="mb-0">Profile Settings</h5>
             </div>
@@ -44,14 +44,15 @@
                 <form action="{{ route('admin.profile.update') }}" method="POST">
                     @csrf
 
-                    <div class="mb-3">
-                        <label class="form-label">Name</label>
-                        <input type="text" name="name" class="form-control text-transform-capitalize" value="{{ $user->name }}" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Email Address</label>
-                        <input type="email" name="email" class="form-control text-transform-capitalize" value="{{ $user->email }}" readonly>
+                    <div class="mb-3 d-flex flex-column flex-md-row gap-3">
+                        <div class="w-100">
+                            <label class="form-label">Name</label>
+                            <input type="text" name="name" class="form-control text-transform-capitalize" value="{{ $user->name }}" required>
+                        </div>
+                        <div class="w-100">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" name="email" class="form-control text-transform-capitalize" value="{{ $user->email }}" readonly>
+                        </div>
                     </div>
 
                     <div class="mb-3">
@@ -59,14 +60,15 @@
                         <input type="tel" name="phone" class="form-control text-transform-capitalize" inputmode="numeric" value="{{ $user->phone }}">
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">City</label>
-                        <input type="text" name="city" class="form-control text-transform-capitalize" value="{{ $user->city }}">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Country</label>
-                        <input type="text" name="country" class="form-control text-transform-capitalize" value="{{ $user->country }}">
+                    <div class="mb-3 d-flex flex-column flex-md-row gap-3">
+                        <div class="w-100">
+                            <label class="form-label">City</label>
+                            <input type="text" name="city" class="form-control text-transform-capitalize" value="{{ $user->city }}">
+                        </div>
+                        <div class="w-100">
+                            <label class="form-label">Country</label>
+                            <input type="text" name="country" class="form-control text-transform-capitalize" value="{{ $user->country }}">
+                        </div>
                     </div>
 
                     <div class="mb-3">
@@ -80,8 +82,8 @@
         </div>
     </div>
 
-    <div class="col-lg-6">
-        <div class="card card-box shadow-sm">
+    <div class="flex-fill d-flex">
+        <div class="card card-box shadow-sm w-100">
             <div class="card-header bg-white">
                 <h5 class="mb-0">Change Password</h5>
             </div>

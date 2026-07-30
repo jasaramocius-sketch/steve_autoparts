@@ -79,7 +79,7 @@
         <div class="swiper home-cate-slider">
             <div class="swiper-wrapper">
             @foreach($categories as $category)
-            <div class="swiper-slide px-2">
+            <div class="swiper-slide">
                 <a href="{{ route('category', $category['slug']) }}">
                     <div class="gs-single-cat">
                         <div class="gs-single-cat">
@@ -107,15 +107,20 @@
 <section class="gs-offer-section">
     <div class="container section-with-padding">
         <!-- title box -->
-        <div class="row mb-60 justify-content-center">
-            <div class="col-lg-12">
-                <div class="gs-title-box">
+        <div class="mb-30 gs-offer-section-row-first">
+            <div class="flex" >
+                <div class="gs-title-box flex-column">
                     <h2 class="title wow-replaced">Special Offer</h2>
+                     <p class="des mb-0 wow-replaced" data-wow-delay=".1s">{{ $sections->get('offers')?->description ??  'Discover outstanding deals on high-quality auto parts. Upgraded selection and special savings this month only.' }}</p>
                 </div>
-                <div class="gs-title-box">
-                    <p class="des mb-0 wow-replaced" data-wow-delay=".1s">{{ $sections->get('offers')?->description ??  'Discover outstanding deals on high-quality auto parts. Upgraded selection and special savings this month only.' }}</p>
+                <div class="shop-page-nav flex-column" data-wow-delay=".2s">
+                    <a href="{{ route('shop') }}" class="a-tag-hover-color">
+                        Shop Now
+                        <i class="fas fa-arrow-right ms-1"></i> 
+                    </a>                       
                 </div>
             </div>
+            
         </div>
 
         <!-- main content -->
@@ -186,7 +191,7 @@
         <div class="tab-content" id="myTabContent">
             @foreach($exploreTabs as $i => $tab)
             <div class="tab-pane fade {{ $i === 0 ? 'show active' : '' }}" id="ex-product-{{ $i + 1 }}-pane" role="tabpanel" aria-labelledby="ex-product-{{ $i + 1 }}" tabindex="0">
-                <div class="row" id="products-wrapper">
+                <div class="products-wrapper" id="products-wrapper">
                     @foreach($tab['products'] as $product)
                     <div class="col-md-6 col-lg-4 col-xl-3 product-item-col">
                         <div class="single-product">
@@ -317,7 +322,7 @@
                                     <span class="countdown-title">Sec</span>
                                 </div>
                             </div>
-                            <a href="{{ $deal?->button_url ?? route('shop') }}" class="template-btn steve-btn w-100 wow-replaced" data-wow-delay=".7s">{{ $deal?->button_text ??  'Shop Now' }}</a>
+                            <a href="/stautoparts{{ $deal?->button_url ?? route('shop') }}" class="template-btn steve-btn w-100 wow-replaced" data-wow-delay=".7s">{{ $deal?->button_text ??  'Shop Now' }}</a>
                         </div>
                     </div>
                 </div>

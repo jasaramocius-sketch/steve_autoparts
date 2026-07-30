@@ -225,7 +225,7 @@
                             ? 'items[' + grandparentIndex + '][children][' + parentIndex + '][children]'
                             : 'items[' + parentIndex + '][children]';
                         var childIndex = index;
-                        return '<div class="child-item input-group input-group-sm mb-1" data-index="' + childIndex + '">' +
+                        return '<div class="child-item input-group mb-1" data-index="' + childIndex + '">' +
                             '<input type="text" class="form-control form-control-sm child-label" placeholder="Label" value="' + (child.label || '') + '">' +
                             '<input type="text" class="form-control form-control-sm child-url" placeholder="URL" value="' + (child.url || '') + '">' +
                             '<button type="button" class="action-btn btn-cancel remove-child" title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
@@ -258,8 +258,8 @@
                                     html += '<div class="card mb-1 bg-light child-card border-0 shadow-sm" data-child-index="' + ci + '" data-parent="' + index + '">' +
                                         '<div class="card-body py-1 px-2">' +
                                         '<div class="d-flex align-items-center gap-2 mb-1 flex-wrap">' +
-                                        '<select class="form-select form-select-sm column-category-parent" style="max-width:170px;font-size:0.8rem;"></select>' +
-                                        '<span class="column-child-wrap" style="display:none;"><select class="form-select form-select-sm column-category-child" style="max-width:170px;font-size:0.8rem;"></select></span>' +
+                                        '<select class="form-select column-category-parent" style="max-width:170px;font-size:0.8rem;"></select>' +
+                                        '<span class="column-child-wrap" style="display:none;"><select class="form-select column-category-child" style="max-width:170px;font-size:0.8rem;"></select></span>' +
                                         '<input type="text" class="form-control form-control-sm child-label" placeholder="Column Label" value="' + (col.label || '') + '" style="max-width:130px;">' +
                                         '<input type="text" class="form-control form-control-sm child-url" placeholder="URL" value="' + (col.url || '') + '" style="max-width:130px;">' +
                                         '<button type="button" class="action-btn btn-cancel remove-child-card" title="Remove Column"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
@@ -382,8 +382,8 @@
                                 var html = '<div class="card mb-1 bg-light child-card border-0 shadow-sm" data-child-index="' + count + '" data-parent="' + parent + '">' +
                                     '<div class="card-body py-1 px-2">' +
                                     '<div class="d-flex align-items-center gap-2 mb-1 flex-wrap">' +
-                                    '<select class="form-select form-select-sm column-category-parent" style="max-width:170px;font-size:0.8rem;"></select>' +
-                                    '<span class="column-child-wrap" style="display:none;"><select class="form-select form-select-sm column-category-child" style="max-width:170px;font-size:0.8rem;"></select></span>' +
+                                    '<select class="form-select column-category-parent" style="max-width:170px;font-size:0.8rem;"></select>' +
+                                    '<span class="column-child-wrap" style="display:none;"><select class="form-select column-category-child" style="max-width:170px;font-size:0.8rem;"></select></span>' +
                                     '<input type="text" class="form-control form-control-sm child-label" placeholder="Column Label" value="" style="max-width:130px;">' +
                                     '<input type="text" class="form-control form-control-sm child-url" placeholder="URL" value="" style="max-width:130px;">' +
                                     '<button type="button" class="action-btn btn-cancel remove-child-card" title="Remove Column"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
@@ -394,7 +394,7 @@
                                 $container.append(html);
                                 initCategoryDropdowns($container.find('.child-card').last(), { url: '' });
                             } else {
-                                var html = '<div class="child-item input-group input-group-sm mb-1">' +
+                                var html = '<div class="child-item input-group mb-1">' +
                                     '<input type="text" class="form-control form-control-sm child-label" placeholder="Label">' +
                                     '<input type="text" class="form-control form-control-sm child-url" placeholder="URL">' +
                                     '<button type="button" class="action-btn btn-cancel remove-child" title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
@@ -410,7 +410,7 @@
                         $(document).on('click', '.add-subchild', function() {
                             var $container = $(this).siblings('.subchildren-container');
                             var count = $container.children('.child-item').length;
-                            var html = '<div class="child-item input-group input-group-sm mb-1">' +
+                            var html = '<div class="child-item input-group mb-1">' +
                                 '<input type="text" class="form-control form-control-sm child-label" placeholder="Label">' +
                                 '<input type="text" class="form-control form-control-sm child-url" placeholder="URL">' +
                                 '<button type="button" class="action-btn btn-cancel remove-child" title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
@@ -443,7 +443,7 @@
                                 if ($subContainer.children('.child-item').length === 0 && parent.children.length > 0) {
                                     for (var ch = 0; ch < parent.children.length; ch++) {
                                         var sub = parent.children[ch];
-                                        var subHtml = '<div class="child-item input-group input-group-sm mb-1" data-index="' + ch + '">' +
+                                        var subHtml = '<div class="child-item input-group mb-1" data-index="' + ch + '">' +
                                             '<input type="text" class="form-control form-control-sm child-label" placeholder="Label" value="' + sub.name + '">' +
                                             '<input type="text" class="form-control form-control-sm child-url" placeholder="URL" value="/category/' + sub.slug + '">' +
                                             '<button type="button" class="action-btn btn-cancel remove-child" title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +

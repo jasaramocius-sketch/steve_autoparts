@@ -6,7 +6,8 @@
 @section('content')
 <div class="container-fluid px-0">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="fw-bold mb-0"><i class="fas fa-images me-2"></i>Image Manager</h4>
+        <div></div>
+        <!-- <h4 class="fw-bold mb-0"><i class="fas fa-images me-2"></i>Image Manager</h4> -->
         <button type="button" class="btn btn-primary steve-btn" data-bs-toggle="modal" data-bs-target="#uploadModal">
             <i class="fas fa-upload"></i> Upload Images
         </button>
@@ -16,7 +17,7 @@
     @php $queryParams = array_filter(request()->only(['search', 'sort', 'order'])); @endphp
     <div class="row g-3 mb-4">
         <div class="col-md-3">
-            <a href="{{ route('admin.images.index', $queryParams) }}" class="text-decoration-none">
+            <a href="{{ route('admin.images.index', $queryParams) }}" class="text-decoration-none image-manager-stats-card">
                 <div class="card border-0 shadow-sm p-3 text-center">
                     <h5 class="fw-bold mb-1">{{ $stats['total'] }}</h5>
                     <small class="text-muted">Total Images</small>
@@ -24,7 +25,7 @@
             </a>
         </div>
         <div class="col-md-3">
-            <a href="{{ route('admin.images.index', ['filter' => 'attached'] + $queryParams) }}" class="text-decoration-none">
+            <a href="{{ route('admin.images.index', ['filter' => 'attached'] + $queryParams) }}" class="text-decoration-none image-manager-stats-card">
                 <div class="card border-0 shadow-sm p-3 text-center">
                     <h5 class="fw-bold mb-1">{{ $stats['attached'] }}</h5>
                     <small class="text-muted">Attached</small>
@@ -32,7 +33,7 @@
             </a>
         </div>
         <div class="col-md-3">
-            <a href="{{ route('admin.images.index', ['filter' => 'unused'] + $queryParams) }}" class="text-decoration-none">
+            <a href="{{ route('admin.images.index', ['filter' => 'unused'] + $queryParams) }}" class="text-decoration-none image-manager-stats-card">
                 <div class="card border-0 shadow-sm p-3 text-center" style="border-left:3px solid #dc3545;">
                     <h5 class="fw-bold mb-1 text-danger">{{ $stats['unused'] }}</h5>
                     <small class="text-danger">Unused</small>
@@ -40,7 +41,7 @@
             </a>
         </div>
         <div class="col-md-3">
-            <a href="{{ route('admin.images.index', ['filter' => 'convertible'] + $queryParams) }}" class="text-decoration-none">
+            <a href="{{ route('admin.images.index', ['filter' => 'convertible'] + $queryParams) }}" class="text-decoration-none image-manager-stats-card">
                 <div class="card border-0 shadow-sm p-3 text-center">
                     <h5 class="fw-bold mb-1">{{ $stats['convertible'] }}</h5>
                     <small class="text-muted">Convertible to WebP</small>
@@ -51,13 +52,17 @@
 
     {{-- Filters --}}
     <div class="card border-0 shadow-sm mb-3">
-        <div class="card-body">
-            <form method="GET" class="row g-2 align-items-end">
-                <div class="col-md-4">
+        <div class="card-body d-flex d-sm-flex gap-1 col-sm-12 col-lg-12 flex-wrap align-items-end">
+            <div class="col-lg-4 col-md-12 col-sm-12">
                     <label class="form-label small">Search</label>
-                    <input type="text" name="search" class="form-control" placeholder="Filename, alt text, title..." value="{{ request('search') }}">
+                    @include('admin.partials.search-form', [
+                        'route' => route('admin.images.index'),
+                        'placeholder' => 'Search images...'
+                    ])
                 </div>
-                <div class="col-md-2">
+            <form method="GET" class="row align-items-end col-md-12 g-1 col-lg-8 col-sm-12">
+                
+                <div class="col-lg-3 col-md-3 col-sm-6">
                     <label class="form-label small">Filter</label>
                     <select name="filter" class="form-select" onchange="this.form.submit()">
                         <option value="">All</option>
@@ -66,7 +71,7 @@
                         <option value="convertible" {{ request('filter')=='convertible'?'selected':'' }}>Convertible</option>
                     </select>
                 </div>
-                <div class="col-md-2">
+                <div class="col-lg-3 col-md-3 col-sm-6">
                     <label class="form-label small">Sort</label>
                     <select name="sort" class="form-select">
                         <option value="created_at" {{ request('sort')=='created_at'?'selected':'' }}>Date</option>
@@ -74,15 +79,18 @@
                         <option value="size" {{ request('sort')=='size'?'selected':'' }}>Size</option>
                     </select>
                 </div>
-                <div class="col-md-2">
+                <div class="col-lg-3 col-md-3 col-sm-6">
                     <label class="form-label small">Order</label>
                     <select name="order" class="form-select">
                         <option value="desc" {{ request('order')=='desc'?'selected':'' }}>DESC</option>
                         <option value="asc" {{ request('order')=='asc'?'selected':'' }}>ASC</option>
                     </select>
                 </div>
-                <div class="col-md-2">
+                <div class="col-lg-3 col-md-3 col-sm-6">
                     <button type="submit" class="btn btn-primary w-100 steve-btn"><i class="fas fa-search"></i> Filter</button>
+                    @if(request()->hasAny(['search', 'filter', 'sort', 'order']))
+                        <a href="{{ route('admin.images.index') }}" class="btn btn-outline-secondary w-100 mt-1 steve-btn"><i class="fas fa-times"></i> Clear Filters</a>
+                    @endif
                 </div>
             </form>
         </div>
@@ -118,7 +126,7 @@
                             <label class="position-absolute top-0 start-0 p-2 z-1" style="cursor:pointer;">
                                 <input type="checkbox" name="ids[]" value="{{ $image->id }}" class="form-check-input image-checkbox" onchange="toggleBulk()">
                             </label>
-                            <a href="{{ route('admin.images.edit', $image->id) }}" class="text-decoration-none text-dark">
+                            <a href="{{ route('admin.images.edit', $image->id) }}" class="text-decoration-none text-dark image-edit-link">
                                 <div style="height:140px;overflow:hidden;background:#f8f9fa;display:flex;align-items:center;justify-content:center;">
                                     <img src="{{ $image->thumb_url }}" alt="{{ $image->alt_text ?? $image->original_name }}" style="max-width:100%;max-height:100%;object-fit:contain;" loading="lazy" onerror="this.onerror=null;this.src='{{ asset("assets/images/placeholder.png") }}'">
                                 </div>
@@ -215,6 +223,14 @@ function toggleBulk() {
     const el = document.getElementById('bulk-actions');
     el.style.display = checked > 0 ? 'inline-flex' : 'none';
     document.getElementById('select-all').checked = checked > 0 && checked === document.querySelectorAll('.image-checkbox').length;
+
+    document.querySelectorAll('.image-checkbox').forEach(cb => {
+        const editLink = cb.closest('.card').querySelector('.image-edit-link');
+        if (editLink) {
+            editLink.style.pointerEvents = cb.checked ? 'none' : '';
+            editLink.style.opacity = cb.checked ? '0.5' : '';
+        }
+    });
 }
 
 function bulkAction(url) {

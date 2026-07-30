@@ -6,7 +6,7 @@
 
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 mb-4">
     <div>
-        <h4 class="mb-1">Edit Profile</h4>
+        <h4 class="h4-style mb-1">Edit Profile</h4>
         <p class="text-muted mb-0">Update your name, phone, address and profile photo. Email address is not editable.</p>
     </div>
 </div>

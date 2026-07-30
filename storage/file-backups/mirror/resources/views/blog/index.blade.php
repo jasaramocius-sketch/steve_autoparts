@@ -28,28 +28,25 @@
 
       <!-- Sidebar (first in DOM for mobile stacking) -->
       <div class="col-12 col-lg-4 mt-lg-0">
-        <button class="blog-sidebar-toggle d-lg-none border-0 bg-transparent p-2 steve-btn" type="button" style="border-radius:6px; background:#fff; box-shadow:0 0 0 1px rgba(0,0,0,0.08);">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-          </svg>
-          <span class="ms-2 fw-500">Sidebar</span>
-        </button>
         <div class="blog-sidebar-overlay"></div>
         <div class="gs-blog-sidebar-wrapper">
+          <!-- Close button inside sidebar -->
+          <div class="blog-sidebar-close d-lg-none">
+            <button type="button" class="bg-transparent p-2 steve-btn justify-content-end" aria-label="Close sidebar">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
 
           <!-- Search Widget -->
           <div class="single-blog-widget">
-            <h5 class="widget-title">Search</h5>
-            <form class="search-form" action="{{ route('blog') }}" method="GET">
-              <input class="input-box" type="text" name="search" placeholder="Find anything..." value="{{ $search ?? '' }}">
-              <button type="submit">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M21 21L16.65 16.65M19 11C19 15.4183 15.4183 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </button>
-            </form>
+            @include('admin.partials.search-form', [
+                'route' => route('blog'),
+                'placeholder' => 'Search blogs...',
+                'showClear' => !empty(request('search')) || isset($category)
+            ])
           </div>
 
           <!-- Categories Widget -->
@@ -57,7 +54,7 @@
             <h5 class="widget-title">Categories</h5>
             <ul class="cat-wrapper">
               @foreach($categories as $cat)
-              <a href="{{ route('blog.category', $cat->slug) }}" class="blog-page-cat-list"><i class="fas fa-arrow-right ms-1"></i> {{ $cat->name }} ({{ $cat->blogs_count }})</a>
+              <a href="{{ route('blog.category', $cat->slug) }}" class="blog-page-cat-list {{ isset($category) && $category->id === $cat->id ? 'active' : '' }}"><i class="fas fa-arrow-right ms-1"></i> {{ $cat->name }} ({{ $cat->blogs_count }})</a>
               @endforeach
             </ul>
           </div>
@@ -65,7 +62,7 @@
           <!-- Clear Filters -->
           @if(!empty(request('search')) || isset($category))
           <div class="single-blog-widget">
-            <a href="{{ route('blog') }}" class="btn btn-sm w-100 steve-btn rounded-0 fw-600 btn-primary">
+            <a href="{{ route('blog') }}" class="btn w-100 steve-btn fw-600 btn-primary">
               <i class="fas fa-times me-1"></i> Clear Filters
             </a>
           </div>
@@ -120,7 +117,7 @@
               </svg>
               <span class="date-text">{{ $blog->created_at->format('M d - Y') }}</span>
             </div>
-            <a class="template-btn outlinee-btn" href="{{ route('blog.show', $blog->slug) }}">read more</a>
+            <a class="template-btn steve-btn outlinee-btn" href="{{ route('blog.show', $blog->slug) }}">read more</a>
           </div>
         </div>
         @empty
@@ -140,6 +137,21 @@
 
     </div>
   </div>
+
+  <!-- Floating Sidebar Toggle (Mobile) -->
+  <button class="blog-sidebar-toggle-float d-lg-none" type="button" aria-label="Toggle sidebar">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="4" y1="21" x2="4" y2="14"></line>
+      <line x1="4" y1="10" x2="4" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="12"></line>
+      <line x1="12" y1="8" x2="12" y2="3"></line>
+      <line x1="20" y1="21" x2="20" y2="16"></line>
+      <line x1="20" y1="12" x2="20" y2="3"></line>
+      <line x1="1" y1="14" x2="7" y2="14"></line>
+      <line x1="9" y1="8" x2="15" y2="8"></line>
+      <line x1="17" y1="16" x2="23" y2="16"></line>
+    </svg>
+  </button>
 </div>
 
 @endsection
@@ -149,7 +161,8 @@
 document.addEventListener('DOMContentLoaded', function() {
   var sidebar = document.querySelector('.gs-blog-sidebar-wrapper');
   var overlay = document.querySelector('.blog-sidebar-overlay');
-  var toggle = document.querySelector('.blog-sidebar-toggle');
+  var toggle = document.querySelector('.blog-sidebar-toggle-float');
+  var closeBtn = document.querySelector('.blog-sidebar-close button');
 
   function openSidebar() {
     sidebar.classList.add('active');
@@ -163,6 +176,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   if (toggle) toggle.addEventListener('click', openSidebar);
+  if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
   if (overlay) overlay.addEventListener('click', closeSidebar);
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape' && sidebar && sidebar.classList.contains('active')) closeSidebar();

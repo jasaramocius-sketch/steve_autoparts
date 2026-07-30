@@ -15,7 +15,7 @@
         <div class="d-flex justify-content-between align-items-center px-3 pt-3 pb-2">
             <div class="d-flex align-items-center gap-2">
                 <span class="text-muted small">Show</span>
-                <select class="form-select form-select-sm" style="width: auto;" onchange="window.location.href=this.value">
+                <select class="form-selectge="window.location.href=this.value">
                     @foreach([10, 20, 50, 100] as $n)
                         <option value="{{ request()->fullUrlWithQuery(['per_page' => $n]) }}" {{ (int)request('per_page', 10) === $n ? 'selected' : '' }}>{{ $n }}</option>
                     @endforeach
@@ -60,7 +60,7 @@
                         <td>{{ $order->created_at->format('M d, Y') }}</td>
                         <td class="pe-3 table-action-col">
                             <div class="action-buttons">
-                                <a href="{{ route('admin.orders.show', $order->id) }}" class="action-btn btn-view" title="View Order"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></a>
+                                <a href="{{ route('admin.orders.show', $order->id) }}" class="action-btn btn-view" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="View Order"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></a>
                             </div>
                         </td>
                     </tr>

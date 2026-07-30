@@ -6,7 +6,22 @@
 
 @section('content')
 <style>
-  
+  .category-toolbar .view-btn {
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--primary);
+    background: #fff;
+    color: var(--primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    padding: 9px 18px;
+  }
+  .category-toolbar .view-btn.active {
+    background: var(--primary);
+    color: #fff;
+  }
 </style>
 
 <!-- Banner Hero Section -->
@@ -28,48 +43,31 @@
 <div class="container mt-5">
 
     <!-- Toolbar -->
-    <div class="category-toolbar mb-4">
-        <div class="row align-items-center">
-
+    <div class="category-toolbar mb-4 gap-3 d-grid">
+        <div class="d-flex justify-content-between flex-md-row gap-2 flex-sm-row category-toolbar-top">
             <div class="col-md-4">
-                <form action="{{ route('categories.index') }}" method="GET">
-                    <input type="text"
-                           class="form-control"
-                           name="search"
-                           placeholder="Search category..."
-                           value="{{ request('search') }}">
-                </form>
+                @include('admin.partials.search-form', [
+                    'route' => route('categories.index'),
+                    'placeholder' => 'Search category...'
+                ])
             </div>
-
             <div class="col-md-8">
-                <div class="toolbar-right category-toolbar-right">
-                    <div class="categories-sortby-filter">
-                    <span class="sort-label">Sort by:</span>
-                    <form method="GET">
-                        <input type="hidden" name="search" value="{{ request('search') }}">
-
-                        <select class="form-select sort-select"
-                                name="sort"
-                                onchange="this.form.submit()">
-                            <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Latest</option>
-                            <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Oldest</option>
-                            <option value="name" {{ request('sort') == 'name' ? 'selected' : '' }}>Name A-Z</option>
-                        </select>
-                    </form>
+                <div class="toolbar-right category-toolbar-right d-flex align-items-center justify-content-md-end gap- flex-wrap">
+                    <div class="d-flex align-items-center gap-2">
+                        <h5 class="mb-0 small fw-medium">Sort by</h5>
+                        <form method="GET">
+                            <input type="hidden" name="search" value="{{ request('search') }}">
+                            <select class="form-select" name="sort" onchange="this.form.submit()">
+                                <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Latest</option>
+                                <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Oldest</option>
+                                <option value="name" {{ request('sort') == 'name' ? 'selected' : '' }}>Name A-Z</option>
+                            </select>
+                        </form>
                     </div>
-                    <div class="d-flex align-items-center gap-3 flex-wrap filter-sort-brand-wrapper">
-                    <button type="button" id="gridBtn" class="view-btn active steve-btn">
-                        <i class="fas fa-th-large"></i>
-                    </button>
-
-                    <button type="button" id="listBtn" class="view-btn steve-btn">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    </div>
-
+                    <div class="d-flex align-items-center gap-2">
+                        @include('partials.grid-list-toggle')
                 </div>
             </div>
-
         </div>
     </div>
 
@@ -89,7 +87,7 @@
             </div>
 
             <div class="category-content">
-                <a href="{{ route('category', $category->slug) }}">
+                <a href="{{ route('category', $category->slug) }}" class="text-dark">
                     <h5>{{ $category->name }}</h5>
                 </a>
 
@@ -129,5 +127,110 @@
 </div>
 
 </div>
+
+<script>
+(function() {
+    function applyCategoriesLayout(layout) {
+        var container = document.getElementById('categoryContainer');
+        if (!container) return;
+
+        if (layout === 'list') {
+            document.querySelectorAll('[data-layout="list"]').forEach(function(b) { b.classList.add('active'); });
+            document.querySelectorAll('[data-layout="grid"]').forEach(function(b) { b.classList.remove('active'); });
+            container.classList.add('categories-list-view');
+            var items = container.querySelectorAll(':scope > div');
+            for (var i = 0; i < items.length; i++) {
+                items[i].classList.remove('col-lg-3', 'col-md-6');
+                items[i].classList.add('col-12');
+            }
+            var cards = container.querySelectorAll('.category-card');
+            for (var j = 0; j < cards.length; j++) {
+                cards[j].classList.add('category-card-list');
+            }
+            container.querySelectorAll('.subcategory-list').forEach(function(s) { s.style.display = ''; });
+        } else {
+            document.querySelectorAll('[data-layout="grid"]').forEach(function(b) { b.classList.add('active'); });
+            document.querySelectorAll('[data-layout="list"]').forEach(function(b) { b.classList.remove('active'); });
+            container.classList.remove('categories-list-view');
+            var items = container.querySelectorAll(':scope > div');
+            for (var i = 0; i < items.length; i++) {
+                items[i].classList.remove('col-12');
+                items[i].classList.add('col-lg-3', 'col-md-6');
+            }
+            var cards = container.querySelectorAll('.category-card-list');
+            for (var j = 0; j < cards.length; j++) {
+                cards[j].classList.remove('category-card-list');
+            }
+            container.querySelectorAll('.subcategory-list').forEach(function(s) { s.style.display = 'none'; });
+        }
+    }
+
+    var saved = localStorage.getItem('categories_layout');
+    applyCategoriesLayout(saved || 'grid');
+
+    function forceGridOnMobile() {
+      if (window.innerWidth <= 580) {
+        applyCategoriesLayout('grid');
+      }
+    }
+    forceGridOnMobile();
+    window.addEventListener('resize', forceGridOnMobile);
+
+    document.querySelectorAll('[data-layout="grid"]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            bootstrap.Tooltip.getInstance(this)?.hide();
+            applyCategoriesLayout('grid');
+            localStorage.setItem('categories_layout', 'grid');
+        });
+    });
+    document.querySelectorAll('[data-layout="list"]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            bootstrap.Tooltip.getInstance(this)?.hide();
+            applyCategoriesLayout('list');
+            localStorage.setItem('categories_layout', 'list');
+        });
+    });
+
+    // Disable grid/list tooltips on touch devices
+    document.addEventListener('DOMContentLoaded', function() {
+        if ('ontouchstart' in window) {
+            document.querySelectorAll('[data-layout="grid"], [data-layout="list"]').forEach(function(el) {
+                var tip = bootstrap.Tooltip.getInstance(el);
+                if (tip) tip.disable();
+            });
+        }
+    });
+})();
+</script>
+
+<style>
+#categoryContainer.categories-list-view .category-card {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+}
+#categoryContainer.categories-list-view .category-card .category-image {
+    flex: 0 0 200px;
+}
+#categoryContainer.categories-list-view .category-card .category-content {
+    flex: 1;
+}
+@media (max-width: 607px) {
+    .category-toolbar .view-btn {
+        display: none !important;
+    }}
+@media (max-width: 576px) {
+    #categoryContainer.categories-list-view .category-card {
+        display: block !important;
+    }
+    #categoryContainer.categories-list-view .category-card .category-image {
+        flex: none !important;
+    }
+    #categoryContainer.categories-list-view .category-card .category-content {
+        flex: none !important;
+    }
+}
+</style>
 
 @endsection

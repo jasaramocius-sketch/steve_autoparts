@@ -5,19 +5,19 @@
 @section('dashboard-content')
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h3 class="mb-0">My Wishlist</h3>
+    <h4 class="h4-style mb-0">My Wishlist</h4>
     @if(count($wishlist) > 0)
     <form action="{{ route('wishlist.clear') }}" method="POST">
         @csrf
         @method('DELETE')
-        <button class="btn btn-danger btn-sm steve-btn">
+        <button class="btn btn-danger steve-btn">
             <i class="fas fa-trash"></i> Clear All
         </button>
     </form>
     @endif
 </div>
 
-<div class="row wishlist-page-products">    
+<div class="d-grid wishlist-page-products">    
     @forelse($wishlist as $item)
     <div class="wishlist-page-products-items">
         @php

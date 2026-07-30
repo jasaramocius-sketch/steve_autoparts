@@ -1,7 +1,7 @@
 <link rel="stylesheet" href="{{ asset('assets/front/css/style.css') }}?v={{ filemtime(public_path('assets/front/css/style.css')) }}">
 <div class="admin-navbar admin-dashboard-header">
-    <div class="d-flex align-items-center gap-3">
-        <button class="btn btn-sm btn-outline-secondary d-md-none steve-btn" id="sidebarToggle" title="Toggle sidebar">
+    <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-sm btn-outline-secondary d-md-none steve-btn" id="sidebarToggle" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Toggle sidebar">
             <i class="fas fa-bars"></i>
         </button>
         <a href="{{ url()->previous() }}" class="btn btn-outline-secondary steve-btn btn-sm">
@@ -10,11 +10,11 @@
         <div class="page-title">@yield('page-title', 'Dashboard')</div>
     </div>
     <div class="nav-actions">
-        <a href="{{ route('home') }}" target="_blank" class="btn btn-sm btn-outline-primary d-none d-md-inline-block" title="View Site">
+        <a href="{{ route('home') }}" target="_blank" class="btn btn-sm btn-outline-primary d-none d-md-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="View Site">
             <i class="fas fa-external-link-alt"></i>
         </a>
         <a href="{{ route('admin.clear.cache') }}" class="btn btn-sm btn-outline-danger"
-           onclick="return confirm('Clear all cache?')" title="Clear Cache">
+           onclick="return confirm('Clear all cache?')" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Clear Cache">
             <i class="fas fa-broom"></i>
         </a>
         <div class="dropdown">

@@ -381,7 +381,7 @@
             <div class="d-flex align-items-center gap-3 flex-wrap">
               <div class="d-flex align-items-center gap-2">
                 <h5 class="mb-0" style="font-size: 14px; font-weight: 500;">Sort by</h5>
-                <select class="form-select form-select-sm" style="width:180px; border:1px solid #c7c0bf; border-radius:4px;" id="sort-select">
+                <select class="form-select" style="width:180px; border:1px solid #c7c0bf; border-radius:4px;" id="sort-select">
                   <option value="default" {{ request('sort') == 'default' ? 'selected' : '' }}>Newest</option>
                   <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Oldest</option>
                   <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>Price: Low to High</option>
@@ -401,7 +401,7 @@
                       <input type="hidden" name="{{ $name }}" value="{{ $value }}">
                     @endif
                   @endforeach
-                  <select name="brand" class="form-select form-select-sm" style="width:180px; border:1px solid #c7c0bf; border-radius:4px;">
+                  <select name="brand" class="form-select" style="width:180px; border:1px solid #c7c0bf; border-radius:4px;">
                     <option value="">All Brands</option>
                     @foreach($brands as $brand)
                       <option value="{{ $brand->slug }}" {{ request('brand') == $brand->slug ? 'selected' : '' }}>{{ $brand->name }}</option>

@@ -6,8 +6,8 @@
 
 <section>
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h3 class="mb-1">Followed Sellers</h3>
+        <div>            
+            <h4 class="h4-style mb-0">Followed Sellers</h4>
             <p class="text-muted mb-0">Manage the sellers you follow and view their profile summaries.</p>
         </div>
         <!-- <a href="{{ route('user.wishlist') }}" class="btn btn-outline-secondary">Back to Wishlist</a> -->

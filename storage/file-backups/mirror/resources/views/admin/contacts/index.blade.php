@@ -7,6 +7,13 @@
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="fw-bold mb-0">Questions / Inquiries</h4>
+    <form method="GET" class="d-flex gap-2 align-items-center">
+        <select name="source" class="form-select w-auto" onchange="this.form.submit()">
+            <option value="">All Sources</option>
+            <option value="product" {{ request('source') === 'product' ? 'selected' : '' }}>Questions</option>
+            <option value="contact" {{ request('source') === 'contact' ? 'selected' : '' }}>Inquiries</option>
+        </select>
+    </form>
 </div>
 
 <div class="card border-0 shadow-sm">
@@ -14,7 +21,7 @@
         <div class="d-flex justify-content-between align-items-center px-3 pt-3 pb-2">
             <div class="d-flex align-items-center gap-2">
                 <span class="text-muted small">Show</span>
-                <select class="form-select form-select-sm" style="width: auto;" onchange="window.location.href=this.value">
+                <select class="form-select w-auto" onchange="window.location.href=this.value">
                     @foreach([10, 20, 50, 100] as $n)
                         <option value="{{ request()->fullUrlWithQuery(['per_page' => $n]) }}" {{ (int)request('per_page', 20) === $n ? 'selected' : '' }}>{{ $n }}</option>
                     @endforeach
@@ -32,7 +39,7 @@
                         <th class="ps-3"><a href="{{ sortUrl('id', $sortBy, $sortDir) }}" class="text-decoration-none text-dark"># {!! sortIndicator('id', $sortBy, $sortDir) !!}</a></th>
                         <th><a href="{{ sortUrl('name', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Name {!! sortIndicator('name', $sortBy, $sortDir) !!}</a></th>
                         <th>Email</th>
-                        <th>Product</th>
+                        <th>Page</th>
                         <th><a href="{{ sortUrl('created_at', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Date {!! sortIndicator('created_at', $sortBy, $sortDir) !!}</a></th>
                         <th class="pe-3">Action</th>
                     </tr>
@@ -48,18 +55,22 @@
                         <td><small>{{ $contact->email }}</small></td>
                         <td>
                             @if($contact->product)
-                                <a href="{{ route('product', $contact->product->slug) }}" target="_blank" class="text-decoration-none">{{ Str::limit($contact->product->name, 30) }}</a>
+                                <a href="{{ route('product', $contact->product->slug) }}" target="_blank" class="text-decoration-none primary-a-tag-text-hover">{{ Str::limit($contact->product->name, 30) }}</a>
                             @else
-                                <span class="text-muted">—</span>
+                                <a href="{{ route('contact') }}"
+                                target="_blank"
+                                class="text-decoration-none primary-a-tag-text-hover">
+                                    Contact Page
+                                </a>
                             @endif
                         </td>
                         <td><small>{{ $contact->created_at->format('M d, Y') }}</small></td>
                         <td class="pe-3 table-action-col">
                             <div class="action-buttons">
-                                <a href="{{ route('admin.contacts.show', $contact->id) }}" class="action-btn btn-view" title="View"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></a>
+                                <a href="{{ route('admin.contacts.show', $contact->id) }}" class="action-btn btn-view" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="View"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></a>
                                 <form action="{{ route('admin.contacts.destroy', $contact->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this contact?')">
                                     @csrf @method('DELETE')
-                                    <button class="action-btn btn-cancel" title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                                    <button class="action-btn btn-cancel" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
                                 </form>
                             </div>
                         </td>

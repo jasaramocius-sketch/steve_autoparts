@@ -41,6 +41,63 @@ class AdminController extends Controller
             $monthlyRevenueData->put($key, (float) ($dbRevenue->get($key) ?? 0));
         }
 
+        $weeklyRevenue = Order::selectRaw("YEARWEEK(created_at, 1) as week, SUM(total_amount) as total")
+            ->where('created_at', '>=', now()->subWeeks(12))
+            ->groupBy('week')
+            ->orderBy('week')
+            ->pluck('total', 'week');
+
+        $weeklyRevenueData = collect();
+        for ($i = 11; $i >= 0; $i--) {
+            $start = now()->subWeeks($i)->startOfWeek();
+            $key = $start->format('Y-m-d');
+            $weekKey = (int)$start->format('oW');
+            $weeklyRevenueData->put($key, (float) ($weeklyRevenue->get($weekKey) ?? 0));
+        }
+
+        $dailyRevenue = Order::selectRaw("DATE(created_at) as date, SUM(total_amount) as total")
+            ->where('created_at', '>=', now()->subDays(30))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->pluck('total', 'date');
+
+        $dailyRevenueData = collect();
+        for ($i = 29; $i >= 0; $i--) {
+            $key = now()->subDays($i)->format('Y-m-d');
+            $dailyRevenueData->put($key, (float) ($dailyRevenue->get($key) ?? 0));
+        }
+
+        $hourlyRevenue = Order::selectRaw("DATE_FORMAT(created_at, '%Y-%m-%d %H:00:00') as hour, SUM(total_amount) as total")
+            ->whereDate('created_at', today())
+            ->groupBy('hour')
+            ->orderBy('hour')
+            ->pluck('total', 'hour');
+
+        $hourlyRevenueData = collect();
+        $currentHour = (int)now()->format('H');
+        for ($h = 0; $h <= $currentHour; $h++) {
+            $key = now()->format('Y-m-d') . ' ' . str_pad($h, 2, '0', STR_PAD_LEFT) . ':00:00';
+            $hourlyRevenueData->put($key, (float) ($hourlyRevenue->get($key) ?? 0));
+        }
+
+        $fiveMinRevenue = Order::selectRaw("
+            FROM_UNIXTIME(FLOOR(UNIX_TIMESTAMP(created_at) / 300) * 300) as interval_time,
+            SUM(total_amount) as total
+        ")
+            ->whereDate('created_at', today())
+            ->groupBy('interval_time')
+            ->orderBy('interval_time')
+            ->pluck('total', 'interval_time');
+
+        $fiveMinRevenueData = collect();
+        $current = now()->startOfDay();
+        $now = now();
+        while ($current <= $now) {
+            $key = $current->format('Y-m-d H:i:s');
+            $fiveMinRevenueData->put($key, (float) ($fiveMinRevenue->get($key) ?? 0));
+            $current->addMinutes(5);
+        }
+
         return view('admin.dashboard', [
             'totalOrders' => Order::count(),
             'totalRevenue' => Order::sum('total_amount'),
@@ -52,6 +109,10 @@ class AdminController extends Controller
             'monthlyRevenue' => $monthlyRevenueData,
             'ordersByStatusJson' => $ordersByStatus->pluck('count', 'status'),
             'monthlyRevenueJson' => $monthlyRevenueData,
+            'weeklyRevenueJson' => $weeklyRevenueData,
+            'dailyRevenueJson' => $dailyRevenueData,
+            'hourlyRevenueJson' => $hourlyRevenueData,
+            'fiveMinRevenueJson' => $fiveMinRevenueData,
             'topProducts' => $topProducts,
         ]);
     }
@@ -98,6 +159,48 @@ class AdminController extends Controller
         ]);
 
         return back()->with('success', 'Password changed successfully.');
+    }
+
+    public function todayRevenue(Request $request)
+    {
+        $range = $request->get('range', '5min');
+
+        if ($range === 'hourly') {
+            $hourlyRevenue = Order::selectRaw("DATE_FORMAT(created_at, '%Y-%m-%d %H:00:00') as hour, SUM(total_amount) as total")
+                ->whereDate('created_at', today())
+                ->groupBy('hour')
+                ->orderBy('hour')
+                ->pluck('total', 'hour');
+
+            $data = collect();
+            $currentHour = (int)now()->format('H');
+            for ($h = 0; $h <= $currentHour; $h++) {
+                $key = now()->format('Y-m-d') . ' ' . str_pad($h, 2, '0', STR_PAD_LEFT) . ':00:00';
+                $data->put($key, (float) ($hourlyRevenue->get($key) ?? 0));
+            }
+
+            return response()->json($data);
+        }
+
+        $todayRevenue = Order::selectRaw("
+            FROM_UNIXTIME(FLOOR(UNIX_TIMESTAMP(created_at) / 300) * 300) as interval_time,
+            SUM(total_amount) as total
+        ")
+            ->whereDate('created_at', today())
+            ->groupBy('interval_time')
+            ->orderBy('interval_time')
+            ->pluck('total', 'interval_time');
+
+        $fiveMinIntervals = collect();
+        $current = now()->startOfDay();
+        $now = now();
+        while ($current <= $now) {
+            $key = $current->format('Y-m-d H:i:s');
+            $fiveMinIntervals->put($key, (float) ($todayRevenue->get($key) ?? 0));
+            $current->addMinutes(5);
+        }
+
+        return response()->json($fiveMinIntervals);
     }
 
     public function headerSettings()

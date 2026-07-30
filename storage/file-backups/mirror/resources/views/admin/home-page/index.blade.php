@@ -27,7 +27,7 @@
                         <div class="d-flex justify-content-between align-items-center pb-2">
                             <div class="d-flex align-items-center gap-2">
                                 <span class="text-muted small">Show</span>
-                                <select class="form-select form-select-sm" style="width: auto;" onchange="window.location.href=this.value">
+                                <select class="form-selectge="window.location.href=this.value">
                                     @foreach([10, 20, 50, 100] as $n)
                                         <option value="{{ request()->fullUrlWithQuery(['per_page' => $n]) }}" {{ (int)request('per_page', 10) === $n ? 'selected' : '' }}>{{ $n }}</option>
                                     @endforeach
@@ -64,7 +64,7 @@
                                             <td>{{ $section->order }}</td>
                                             <td class="pe-3 table-action-col">
                                                 <div class="action-buttons">
-                                                    <a href="{{ route('admin.home-page.edit', $section->id) }}" class="action-btn btn-edit" title="Edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></a>
+                                                    <a href="{{ route('admin.home-page.edit', $section->id) }}" class="action-btn btn-edit" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></a>
                                                 </div>
                                             </td>
                                         </tr>

@@ -34,10 +34,16 @@ class ProductController extends Controller
         }
 
         if ($request->has('trashed')) {
-            $products = Product::onlyTrashed()->with('category')->orderBy($sortBy, $sortDir)->paginate($perPage);
+            $query = Product::onlyTrashed()->with('category');
         } else {
-            $products = Product::with('category')->orderBy($sortBy, $sortDir)->paginate($perPage);
+            $query = Product::with('category');
         }
+
+        if ($search = $request->query('search')) {
+            $query->where('name', 'like', "%{$search}%");
+        }
+
+        $products = $query->orderBy($sortBy, $sortDir)->paginate($perPage);
 
         $products->appends($request->query())->onEachSide(1);
         return view('admin.products.index', compact('products', 'sortBy', 'sortDir'));

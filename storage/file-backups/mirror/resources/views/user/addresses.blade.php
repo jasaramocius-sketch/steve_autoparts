@@ -82,6 +82,19 @@
     top: -moz-calc(50% - 2px);
     top: calc(50% - 2px);
 }
+.addreass-add-column:hover .addresses-list__plus:after, 
+.addreass-add-column:hover .addresses-list__plus:before{
+    background-color: var(--primary);
+}
+ .addreass-add-column:hover .addresses-list__plus{
+    color: var(--primary);
+}
+.addreass-add-column:hover span {
+    color: var(--secondary);
+}
+.addresses-list__plus:after {
+    transform: rotate(90deg);
+}
 .addreass-page-column.addreass-add-column {
     display: flex;
     flex-direction: column;
@@ -109,7 +122,7 @@
 </style>
 
 <div class="addreass-page">
-<h3 style="margin:0;">My Addresses</h3>
+<h4 class="h4-style mb-0">My Addresses</h4>
 <div class="addreass-page-contener">
     <a href="javascript:void(0);"
    class="addreass-page-column addreass-add-column"
@@ -142,7 +155,7 @@
             </button>
             <form action="{{ route('user.addresses.destroy', $address->id) }}" method="POST" onsubmit="return confirm('Remove this address?')" class="d-inline">
                 @csrf @method('DELETE')
-                <button class="action-btn btn-cancel" title="Delete">
+                <button class="action-btn btn-cancel" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Delete">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                 </button>
             </form>

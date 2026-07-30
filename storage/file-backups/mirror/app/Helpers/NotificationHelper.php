@@ -17,7 +17,7 @@ class NotificationHelper
         return Notification::create([
             'user_id'  => $order->user_id,
             'title'    => 'Order Placed Successfully',
-            'message'  => "Your order #{$order->order_number} has been placed successfully. Total: $" . number_format($order->total_amount, 2),
+            'message'  => "Your order <a href=\"" . route('user.orders.show', $order->id) . "\" class=\"text-decoration-underline\">#{$order->order_number}</a> has been placed successfully. Total: $" . number_format($order->total_amount, 2),
             'is_read'  => false,
         ]);
     }
@@ -49,7 +49,7 @@ class NotificationHelper
         return Notification::create([
             'user_id'  => $user->id,
             'title'    => 'Welcome to STAutoParts!',
-            'message'  => "Hi {$user->name}, welcome to STAutoParts! Browse our wide range of auto parts and enjoy shopping.",
+            'message'  =>             "Hi " . e($user->name) . ", welcome to STAutoParts! Browse our wide range of auto parts and enjoy shopping.",
             'is_read'  => false,
         ]);
     }

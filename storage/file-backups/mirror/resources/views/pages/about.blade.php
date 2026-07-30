@@ -342,7 +342,7 @@
         <div class="about-container">
             <h2>Tracking Down a Rare Component?</h2>
             <p>If a specialized asset isn't displaying inside our primary shelves, we will locate it immediately via our vast auto procurement network.</p>
-            <a href="/stautoparts/contact/" class="btn-primary">Submit a Parts Request</a>
+            <a href="/stautoparts/contact/" class="btn-primary steve-btn steve-btn-hover">Submit a Parts Request</a>
         </div>
     </section>
     

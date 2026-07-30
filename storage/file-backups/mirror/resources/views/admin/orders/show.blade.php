@@ -6,9 +6,9 @@
 
 @section('content')
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<!-- <div class="d-flex justify-content-between align-items-center mb-3">
     <a href="{{ route('admin.orders.index') }}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left"></i> Back</a>
-</div>
+</div> -->
 
 <div class="row g-3">
     <div class="col-md-8">

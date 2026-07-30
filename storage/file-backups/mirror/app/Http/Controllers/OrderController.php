@@ -14,22 +14,28 @@ class OrderController extends Controller
         $orders = Order::with('user')->latest()->get();
         return view('admin.orders.index', compact('orders'));
     }
-    public function show($id)
+    public function show($idOrNumber)
     {
         // 1. Check if the order exists at a raw database level (ignoring models/scopes)
-        $rawOrder = \DB::table('orders')->where('id', $id)->first();
-        
-        if (!$rawOrder) {
-            dd("Database Error: There is absolutely NO row with id = {$id} in your orders table.");
+        $isNumeric = is_numeric($idOrNumber);
+        $rawQuery = $isNumeric
+            ? \DB::table('orders')->where('id', $idOrNumber)->first()
+            : \DB::table('orders')->where('order_number', $idOrNumber)->first();
+
+        if (!$rawQuery) {
+            dd("Database Error: There is absolutely NO row with id/order_number = {$idOrNumber} in your orders table.");
         }
 
         // 2. If it exists, let's check if it's soft-deleted or hidden by a scope
         try {
-            $order = Order::with(['items.product', 'user'])->findOrFail($id);
+            $orderQuery = Order::with(['items.product', 'user']);
+            $order = $isNumeric
+                ? $orderQuery->findOrFail($idOrNumber)
+                : $orderQuery->where('order_number', $idOrNumber)->firstOrFail();
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             dd([
                 "Message" => "Eloquent cannot find this order. It is likely soft-deleted or restricted by a Model Scope.",
-                "Database Row Data Found" => $rawOrder
+                "Database Row Data Found" => $rawQuery
             ]);
         } catch (\Exception $e) {
             dd("Other Error: " . $e->getMessage());

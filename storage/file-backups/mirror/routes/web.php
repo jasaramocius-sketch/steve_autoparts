@@ -199,6 +199,9 @@ Route::prefix('admin')
         Route::get('/dashboard', [AdminController::class, 'index'])
             ->name('admin.dashboard');
 
+        Route::get('/dashboard/today-revenue', [AdminController::class, 'todayRevenue'])
+            ->name('admin.dashboard.today-revenue');
+
         Route::get('/profile', [AdminController::class, 'profile'])
             ->name('admin.profile');
         Route::post('/profile', [AdminController::class, 'updateProfile'])

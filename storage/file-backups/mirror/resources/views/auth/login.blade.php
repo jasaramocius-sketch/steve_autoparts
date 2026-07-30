@@ -58,14 +58,14 @@
                 </div>
               </div>
               <div class="col d-flex justify-content-end login-forgot">
-                <a href="javascript:void(0)" onclick="toastr.info('Password reset is not enabled for local testing.')">Forgot Password?</a>
+                <a href="javascript:void(0)" onclick="toastr.info('Password reset is not enabled for local testing.')" class="a-tag-text-hover">Forgot Password?</a>
               </div>
             </div>
             
-            <button type="submit" class="template-btn btn-forms steve-btn" style="background-color: var(--primary); border-color: var(--primary); color: #fff; font-weight: 500; border-radius: 4px;">Sign In</button>
-            <p class="text-center login-or">Or</p>
-            <br>
-            <p class="login-redirect">Don't have an account? <span><a href="{{ route('register') }}">Register Now</a></span></p>
+            <button type="submit" class="template-btn btn-forms steve-btn button-hover mt-3">Sign In</button>
+            <!-- <p class="text-center login-or">Or</p> -->
+            <hr></hr>
+            <p class="login-redirect">Don't have an account? <span><a href="{{ route('register') }}" class="a-tag-text-hover">Register Now</a></span></p>
           </form>
         </div>
       </div>

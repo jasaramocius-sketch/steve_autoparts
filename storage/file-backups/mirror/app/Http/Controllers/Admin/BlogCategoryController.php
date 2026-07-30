@@ -15,11 +15,14 @@ class BlogCategoryController extends Controller
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
         $perPage = in_array((int)$request->per_page, [10, 20, 50, 100]) ? (int)$request->per_page : 10;
 
-        if ($request->has('trashed')) {
-            $categories = BlogCategory::onlyTrashed()->withCount('blogs')->with('parent')->orderBy($sortBy, $sortDir)->paginate($perPage);
-        } else {
-            $categories = BlogCategory::withCount('blogs')->with('parent')->orderBy($sortBy, $sortDir)->paginate($perPage);
+        $query = BlogCategory::withCount('blogs')->with('parent');
+        if ($search = $request->query('search')) {
+            $query->where('name', 'like', "%{$search}%");
         }
+        if ($request->has('trashed')) {
+            $query->onlyTrashed();
+        }
+        $categories = $query->orderBy($sortBy, $sortDir)->paginate($perPage);
         $categories->appends($request->query())->onEachSide(1);
 
         return view('admin.blog-categories.index', compact('categories', 'sortBy', 'sortDir'));

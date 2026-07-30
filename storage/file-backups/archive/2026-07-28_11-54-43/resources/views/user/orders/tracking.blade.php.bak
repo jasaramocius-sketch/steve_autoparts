@@ -1,0 +1,114 @@
+@extends('user.layouts.dashboard')
+
+@section('dashboard-content')
+
+<div class="gs-order-track-section">
+    <div class="ud-page-title-box">
+        <h4 style="margin:0;">Order Tracking</h3>
+    </div>
+
+    <p style="margin-top:12px;font-size:18px;color:#4c3533;">Track your order status by entering your order number below.</p>
+
+    <div class="order-track-area">
+        <div class="order-track-title">
+            <h4>Track Your Order</h4>
+        </div>
+
+        <form method="POST" action="{{ route('user.order.tracking') }}">
+            @csrf
+            <div class="form-group">
+                <label for="order_number">Order Number / ID</label>
+                <input type="text" name="order_number" id="order_number" class="form-control" value="{{ old('order_number', request('order_number')) }}" placeholder="Enter your order number or ID">
+                @error('order_number')
+                    <small style="color:#f2415a;margin-top:4px;display:block;">{{ $message }}</small>
+                @enderror
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="template-btn btn-forms steve-btn">Track Order</button>
+            </div>
+        </form>
+    </div>
+
+    @if(request()->isMethod('post') && isset($order))
+        @if($order)
+            @php
+                $shipping = is_array($order->shipping_details)
+                    ? $order->shipping_details
+                    : json_decode($order->shipping_details, true);
+
+                $statusSteps = ['Order Placed', 'On Review', 'On Delivery', 'Delivered'];
+                $statusMap = [
+                    'pending' => 0,
+                    'processing' => 0,
+                    'shipped' => 1,
+                    'delivered' => 3,
+                    'cancelled' => -1,
+                ];
+                $currentStep = $statusMap[$order->status] ?? 0;
+            @endphp
+
+            <div class="order-track-area" style="margin-top:32px;">
+                <h5 style="margin-bottom:24px;">Order #{{ $order->order_number ?? $order->id }} <span style="font-weight:400;color:#796866;">— {{ ucfirst($order->status) }}</span></h5>
+
+                <div class="gs-checkout-wrapper">
+                    <div class="checkout-step-wrapper" style="margin-bottom:0;">
+                        <span class="line"></span>
+                        @php $pct = $currentStep >= 0 ? ($currentStep / (count($statusSteps) - 1)) * 100 : 0; @endphp
+                        <span style="position:absolute;top:30%;z-index:2;width:{{ $pct }}%;border-top:2px solid var(--primary);left:50px;transition:width 0.5s;max-width:calc(100% - 100px);"></span>
+
+                        @foreach($statusSteps as $i => $step)
+                            <div class="single-step {{ $i <= $currentStep ? 'active' : '' }}">
+                                <div class="step-btn">{{ $i + 1 }}</div>
+                                <div class="step-txt" style="{{ $i <= $currentStep ? 'color:var(--primary);' : '' }}">{{ $step }}</div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div style="margin-top:32px;">
+                    <p style="font-size:16px;color:#4c3533;"><strong>Order Date:</strong> {{ optional($order->created_at)->format('d-M-Y') }}</p>
+                    <p style="font-size:16px;color:#4c3533;"><strong>Total Amount:</strong> {{ currency_format($order->total_amount ?? 0) }}</p>
+                    <p style="font-size:16px;color:#4c3533;"><strong>Delivery Type:</strong> {{ $order->delivery_type ?? 'Free Shipping' }}</p>
+                </div>
+
+                <div class="ordered-products" style="margin-top:24px;">
+                    <h5>Ordered Products</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="ordered-tbg">
+                                <tr>
+                                    <th><span class="title">Product</span></th>
+                                    <th><span class="title">Variation</span></th>
+                                    <th><span class="title">Qty</span></th>
+                                    <th><span class="title">Price</span></th>
+                                </tr>
+                            </thead>
+                            <tbody class="tbody-product">
+                                @foreach($order->items as $item)
+                                <tr>
+                                    <td class="td-product-name">
+                                        <ul><li><span>{{ $item->product->name ?? 'Product Unavailable' }}</span></li></ul>
+                                    </td>
+                                    <td>{{ $item->variation ?? '—' }}</td>
+                                    <td>{{ $item->quantity ?? $item->qty ?? 1 }}</td>
+                                    <td><span>{{ currency_format($item->price ?? 0) }}</span></td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        @else
+            <div class="order-track-area" style="margin-top:32px;">
+                <div style="text-align:center;padding:40px;">
+                    <h5 style="color:#f2415a;">Order Not Found</h5>
+                    <p style="color:#796866;margin-top:8px;">No order found with the provided order number. Please check and try again.</p>
+                </div>
+            </div>
+        @endif
+    @endif
+</div>
+
+@endsection

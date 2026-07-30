@@ -31,7 +31,7 @@
                     <div style="font-size:12px;font-weight:600;margin-bottom:4px;">Status</div>
                     <form method="GET" action="{{ route('user.reviews') }}" id="statusFilterForm">
                         <input type="hidden" name="search" value="{{ $search ?? '' }}">
-                        <select name="status" class="form-select form-select-sm" style="font-size:12px;height:30px;" onchange="this.form.submit()">
+                        <select name="status" class="form-select" style="font-size:12px;height:30px;" onchange="this.form.submit()">
                             <option value="">All</option>
                             <option value="pending" {{ ($statusFilter ?? '') === 'pending' ? 'selected' : '' }}>Pending</option>
                             <option value="reviewed" {{ ($statusFilter ?? '') === 'reviewed' ? 'selected' : '' }}>Reviewed</option>

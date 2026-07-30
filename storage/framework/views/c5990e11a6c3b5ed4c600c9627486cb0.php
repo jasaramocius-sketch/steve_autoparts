@@ -1,1 +1,0 @@
-<?php /**PATH /var/www/html/stautoparts/resources/views/admin/partials/footer.blade.php ENDPATH**/ ?>

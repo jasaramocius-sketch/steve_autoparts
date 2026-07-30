@@ -37,7 +37,7 @@
   }
   /* Accordion +/- toggle */
   .cat-toggle-btn .fa-minus { display: none; }
-  .cat-toggle-btn .fa-plus { display: inline; }
+  /* .cat-toggle-btn .fa-plus { display: inline; } */
   .cat-toggle-btn:not(.collapsed) .fa-minus { display: inline; }
   .cat-toggle-btn:not(.collapsed) .fa-plus { display: none; }
 </style>
@@ -106,14 +106,9 @@
       <!-- Sidebar -->
       <div class="col-lg-3">
         <div class="shop-sidebar-wrapper">
-        <div class="btn-wrapper d-flex gap-2 sidebar-grid-list-view-wrapper d-lg-none">
-          <button type="button" class="view-btn active steve-btn" data-layout="grid" title="Grid View">
-            <i class="fas fa-th-large"></i>
-          </button>
-          <button type="button" class="view-btn steve-btn" data-layout="list" title="List View">
-            <i class="fas fa-bars"></i>
-          </button>
-        </div>
+        <!-- <div class="btn-wrapper d-flex gap-2 sidebar-grid-list-view-wrapper d-lg-none">
+            @include('partials.grid-list-toggle')
+        </div> -->
         </div>
         <div class="shop-sidebar-overlay"></div>
         <div class="gs-product-sidebar-wrapper">
@@ -129,7 +124,7 @@
 
           <!-- Categories Widget -->
           <div class="single-product-widget shadow-sm rounded border">
-            <h4 class="widget-title">Categories</h4>
+            <h5 class="widget-title">Categories</h5>
             <div class="product-cat-widget">
               <ul class="list-unstyled mb-0">
                 @if(isset($currentCategory))
@@ -147,7 +142,7 @@
                   <li class="main-list mb-3">
                     <div class="d-flex justify-content-between align-items-center gap-3">
                       @if($topCat->descendant_count > 0 || $isTopActive)
-                        <a href="{{ route('category', ['slug' => $topCat->slug]) }}" class="text-decoration-none flex-grow-1" style="color: {{ $isTopActive ? 'var(--primary)' : '#1f0300' }}; font-weight: {{ $isTopActive ? '600' : '400' }};">
+                        <a href="{{ route('category', ['slug' => $topCat->slug]) }}" class="text-decoration-none flex-grow-1 primary-a-tag-text-hover" style="color: {{ $isTopActive ? 'var(--primary)' : '#1f0300' }}; font-weight: {{ $isTopActive ? '600' : '400' }};">
                           {{ $topCat->name }}
                           <span class="text-muted" style="font-size: 13px; font-weight: 400;">({{ $topCat->descendant_count }})</span>
                         </a>
@@ -175,12 +170,12 @@
                           <li class="mb-2">
                             <div class="d-flex justify-content-between align-items-center gap-3">
                               @if($subCat->descendant_count > 0 || $isSubActive)
-                                <a href="{{ route('subcategory', ['parent' => $topCat->slug, 'child' => $subCat->slug]) }}" class="text-decoration-none flex-grow-1" style="color: {{ $isSubActive && !isset($currentChildcategory) ? 'var(--primary)' : '#1f0300' }}; font-weight: {{ $isSubActive ? '600' : '400' }}; font-size: 15px;">
+                                <a href="{{ route('subcategory', ['parent' => $topCat->slug, 'child' => $subCat->slug]) }}" class="text-decoration-none flex-grow-1 primary-a-tag-text-hover" style="color: {{ $isSubActive ? 'var(--primary)' : '#1f0300' }}; font-weight: {{ $isSubActive ? '600' : '400' }};">
                                   {{ $subCat->name }}
                                   <span class="text-muted" style="font-size: 12px; font-weight: 400;">({{ $subCat->descendant_count }})</span>
                                 </a>
                               @else
-                                <span class="flex-grow-1 cat-no-products" style="font-size: 15px;">
+                                <span class="flex-grow-1 cat-no-products">
                                   {{ $subCat->name }}
                                   <span class="text-muted" style="font-size: 12px; font-weight: 400;">(0)</span>
                                 </span>
@@ -201,12 +196,12 @@
                                   @endphp
                                   <li class="my-1">
                                     @if($childCat->descendant_count > 0 || $isChildActive)
-                                      <a href="{{ route('subcategory', ['parent' => $topCat->slug, 'child' => $subCat->slug, 'subchild' => $childCat->slug]) }}" class="text-decoration-none" style="color: {{ $isChildActive ? 'var(--primary)' : '#1f0300' }}; font-weight: {{ $isChildActive ? '600' : '400' }}; font-size: 14px;">
+                                      <a href="{{ route('subcategory', ['parent' => $topCat->slug, 'child' => $subCat->slug, 'subchild' => $childCat->slug]) }}" class="text-decoration-none a-tag-text-hover" style="color: {{ $isChildActive ? 'var(--primary)' : '#1f0300' }}; font-weight: {{ $isChildActive ? '600' : '400' }};">
                                         {{ $childCat->name }}
                                         <span class="text-muted" style="font-size: 12px; font-weight: 400;">({{ $childCat->descendant_count }})</span>
                                       </a>
                                     @else
-                                      <span class="cat-no-products" style="font-size: 14px;">
+                                      <span class="cat-no-products">
                                         {{ $childCat->name }}
                                         <span class="text-muted" style="font-size: 12px; font-weight: 400;">(0)</span>
                                       </span>
@@ -228,7 +223,7 @@
 
           <!-- Price Filter Widget -->
           <div class="single-product-widget shadow-sm rounded border">
-            <h4 class="widget-title">Price Range</h4>
+            <h5 class="widget-title">Price Range</h5>
             <form id="price-filter-form" action="{{ url()->current() }}" method="GET">
               @foreach(request()->except(['min_price', 'max_price', 'page']) as $name => $value)
                 @if(is_array($value))
@@ -303,7 +298,7 @@
                 <div class="vehicle-filter-form-actions apply-clear-action-btn d-flex flex-row gap-2">
                 <button type="submit" class="btn btn-sm w-100 text-white steve-btn">Apply Filter</button>
                 @if(request()->hasAny(['year', 'make', 'model']))
-                  <a href="{{ url()->current() }}" class="btn btn-outline-secondary btn-sm w-100 mt-2 steve-btn">Clear Filter</a>
+                  <a href="{{ url()->current() }}" class="btn btn-sm w-100 text-white steve-btn">Clear Filter</a>
                 @endif
                 </div>
               
@@ -452,10 +447,10 @@
         <!-- Sort & Nav Header -->
         <div class="product-nav-wrapper shadow-sm rounded border mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
           
-            <div class="d-flex align-items-center gap-3 flex-wrap filter-sort-brand-wrapper">
+            <div class="d-flex align-items-center gap-3 flex-wrap filter-sort-brand-wrapper col-md-8">
               <div class="d-flex align-items-center gap-2 filter-sort-wrapper">
                 <h5 class="mb-0" style="font-size: 14px; font-weight: 500;">Sort by</h5>
-                <select class="form-select form-select-sm" style="width:180px; border:1px solid #c7c0bf; border-radius:4px;" id="sort-select">
+                <select class="form-select" style="width:180px; border:1px solid #c7c0bf; border-radius:4px;" id="sort-select">
                   <option value="default" {{ request('sort') == 'default' ? 'selected' : '' }}>Newest</option>
                   <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Oldest</option>
                   <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>Price: Low to High</option>
@@ -475,7 +470,7 @@
                       <input type="hidden" name="{{ $name }}" value="{{ $value }}">
                     @endif
                   @endforeach
-                  <select name="brand" class="form-select form-select-sm" style="width:180px; border:1px solid #c7c0bf; border-radius:4px;">
+                  <select name="brand" class="form-select" style="width:180px; border:1px solid #c7c0bf; border-radius:4px;">
                     <option value="">All Brands</option>
                     @foreach($brands as $brand)
                       <option value="{{ $brand->slug }}" {{ request('brand') == $brand->slug ? 'selected' : '' }}>{{ $brand->name }}</option>
@@ -484,13 +479,8 @@
                 </form>
               </div>
             </div>
-            <div class="btn-wrapper d-flex gap-2 grid-list-view-wrapper d-none d-lg-flex">
-              <button type="button" class="view-btn active steve-btn" data-layout="grid" title="Grid View">
-                <i class="fas fa-th-large"></i>
-              </button>
-              <button type="button" class="view-btn steve-btn" data-layout="list" title="List View">
-                <i class="fas fa-bars"></i>
-              </button>
+            <div class="btn-wrapper d-flex gap-2 grid-list-view-wrapper d-lg-flex col-md-3 justify-content-sm-end">
+              @include('partials.grid-list-toggle')
             </div>
         </div>
 
@@ -502,7 +492,7 @@
             </span>
             <form method="POST" action="{{ route('shop.clear-vehicle') }}" class="ml-auto">
               @csrf
-              <button type="submit" class="text-danger fw-600 text-decoration-none border-0 bg-transparent p-0" title="Clear vehicle filter" style="font-size: 13px; cursor: pointer;">
+              <button type="submit" class="text-danger fw-600 text-decoration-none border-0 bg-transparent p-0" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Clear vehicle filter" style="font-size: 13px; cursor: pointer;">
                 <i class="las la-times"></i> Clear
               </button>
             </form>
@@ -510,7 +500,7 @@
         @endif
 
         @if(count($products) > 0)
-          <div class="row" id="products-wrapper">
+          <div class="products-wrapper" id="products-wrapper">
             @foreach($products as $product)
               <div class="col-md-6 col-lg-4 col-xl-4 product-item-col">
                 <div class="single-product">
@@ -705,17 +695,37 @@ $(document).ready(function() {
     }
 
     applyLayout(localStorage.getItem('shop_layout') || 'grid');
-    $(document).on('click', '[data-layout="grid"]', function(e) { e.preventDefault(); applyLayout('grid'); });
-    $(document).on('click', '[data-layout="list"]', function(e) { e.preventDefault(); applyLayout('list'); });
+    $(document).on('click', '[data-layout="grid"]', function(e) {
+        e.preventDefault();
+        bootstrap.Tooltip.getInstance(this)?.hide();
+        applyLayout('grid');
+    });
+    $(document).on('click', '[data-layout="list"]', function(e) {
+        e.preventDefault();
+        bootstrap.Tooltip.getInstance(this)?.hide();
+        applyLayout('list');
+    });
 
-    // Force grid view on mobile (≤992px)
+    // Disable grid/list tooltips on touch devices
+    if ('ontouchstart' in window) {
+        document.querySelectorAll('[data-layout="grid"], [data-layout="list"]').forEach(function(el) {
+            var tip = bootstrap.Tooltip.getInstance(el);
+            if (tip) tip.disable();
+        });
+    }
+
+    // Default to grid on phones (≤767px) — only on initial load
     function checkMobileLayout() {
-      if (window.innerWidth <= 992) {
+      if (window.innerWidth <= 580) {
         applyLayout('grid');
       }
     }
     checkMobileLayout();
-    $(window).on('resize', checkMobileLayout);
+    $(window).on('resize', function() {
+      if (window.innerWidth <= 580) {
+        applyLayout('grid');
+      }
+    });
 
     // Accordion: close other main-list categories when one opens
     document.querySelectorAll('.main-list > .collapse').forEach(function(el) {
