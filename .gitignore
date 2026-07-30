@@ -25,4 +25,9 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+# Database dumps
 database/*.sql
+database/*.sql.gz
+
+# Backup folders
+storage/file-backups/
