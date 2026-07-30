@@ -1,0 +1,19 @@
+@extends('layouts.app')
+
+@section('content')
+<section class="gs-dashboard-section py-5">
+    <div class="container">
+        <div class="row">
+
+            @include('user.layouts.sidebar')
+
+            <div class="col-lg-9">
+                <div class="gs-dashboard-user-content-wrapper">
+                    @yield('dashboard-content')
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+@endsection

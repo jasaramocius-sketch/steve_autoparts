@@ -1,0 +1,409 @@
+<?php
+namespace App\Http\Controllers;
+use Illuminate\Http\Request;
+use App\Models\Cart;
+use App\Models\Product;
+
+
+class CartController extends Controller
+{
+    public function index()
+    {
+        $cart = session('cart', []);
+        $total = array_sum(array_map(fn($item) => $item['price'] * $item['qty'], $cart));
+        $cartItems = session()->get('cart', []);
+        return view('cart', compact('cart', 'total','cartItems'));
+    }
+
+    public function add(Request $request)
+    {
+        $cart = session('cart', []);
+
+        $id = $request->product_id;
+        $qty = max((int)$request->input('qty', 1), 1);
+
+        if (isset($cart[$id])) {
+
+            $cart[$id]['qty'] += $qty;
+
+        } else {
+
+            $cart[$id] = [
+                'id' => $id,
+                'name' => $request->product_name,
+                'price' => $request->product_price,
+                'image' => $request->product_image,
+                'qty' => $qty,
+            ];
+        }
+
+        session()->put('cart', $cart);
+
+        // Buy Now
+        if ($request->has('buy_now')) {
+            return redirect()->route('cart')
+                ->with('success', 'Product added to cart!');
+        }
+
+        // AJAX request
+        if ($request->ajax()) {
+            $total = array_sum(array_map(fn($item) => $item['price'] * $item['qty'], $cart));
+            return response()->json([
+                'success' => true,
+                'message' => 'Product added to cart!',
+                'cart_count' => count($cart),
+                'cart_total' => currency_format($total)
+            ]);
+        }
+
+        // Normal request
+        return back()->with('success', 'Product added to cart!');
+    }
+
+    public function remove(Request $request)
+    {
+        $cart = session('cart', []);
+        unset($cart[$request->product_id]);
+        session(['cart' => $cart]);
+
+        if ($request->ajax()) {
+            $total = array_sum(array_map(fn($item) => $item['price'] * $item['qty'], $cart));
+            return response()->json([
+                'success' => true,
+                'message' => 'Product removed from cart!',
+                'cart_count' => count($cart),
+                'cart_total' => currency_format($total)
+            ]);
+        }
+
+        return back()->with('success', 'Product removed from cart!');
+    }
+
+    public function removeSelected(Request $request)
+    {
+        $ids = json_decode($request->product_ids, true) ?? [];
+        $cart = session('cart', []);
+        foreach ($ids as $id) {
+            unset($cart[$id]);
+        }
+        session(['cart' => $cart]);
+        $count = count($ids);
+        return back()->with('success', "$count item(s) removed from cart!");
+    }
+    public function updateQuantity(Request $request, $id)
+{
+    $cart = session()->get('cart', []);
+
+    if (!isset($cart[$id])) {
+
+        return response()->json([
+            'success' => false
+        ]);
+
+    }
+
+    $qty = max((int)$request->quantity,1);
+
+    $cart[$id]['qty']=$qty;
+
+    session()->put('cart',$cart);
+
+    $itemSubtotal=$cart[$id]['price']*$qty;
+
+    $cartTotal=array_sum(array_map(function($item){
+
+        return $item['price']*$item['qty'];
+
+    },$cart));
+
+    return response()->json([
+
+        'success'=>true,
+
+        'qty'=>$qty,
+
+        'itemSubtotal'=>currency_format($itemSubtotal),
+
+        'cartTotal'=>currency_format($cartTotal)
+
+    ]);
+}
+    public function addToCart(Request $request, $id)
+{
+    $product = Product::findOrFail($id);
+
+    $cart = session()->get('cart', []);
+
+    if (isset($cart[$id])) {
+
+        $cart[$id]['qty']++;
+
+    } else {
+
+        $cart[$id] = [
+
+            'id'    => $product->id,
+            'name'  => $product->name,
+            'price' => $product->price,
+            'image' => $product->image,
+            'qty'   => 1,
+
+        ];
+    }
+
+    session()->put('cart', $cart);
+
+    if ($request->ajax()) {
+        $total = array_sum(array_map(fn($item) => $item['price'] * $item['qty'], $cart));
+        return response()->json([
+            'success' => true,
+            'message' => 'Product added to cart!',
+            'cart_count' => count($cart),
+            'cart_total' => currency_format($total)
+        ]);
+    }
+
+    return redirect()->back()->with('success', 'Product added to cart!');
+}
+
+    public function checkout()
+    {
+        $cart = session('cart', []);
+        if (count($cart) === 0) {
+            return redirect()->route('cart')->with('error', 'Your cart is empty.');
+        }
+        $total = array_sum(array_map(fn($item) => $item['price'] * $item['qty'], $cart));
+        $addresses = auth()->user()->addresses()->latest()->get();
+        return view('checkout', compact('cart', 'total', 'addresses'));
+    }
+
+    public function checkoutSubmit(Request $request)
+    {
+        $request->validate([
+            'address_id' => 'required|exists:addresses,id',
+        ]);
+
+        $cart = session('cart', []);
+        if (count($cart) === 0) {
+            return redirect()->route('cart')->with('error', 'Your cart is empty.');
+        }
+
+        $address = \App\Models\Address::findOrFail($request->address_id);
+        if ($address->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        session([
+            'billing_info' => [
+                'name' => $address->full_name,
+                'email' => auth()->user()->email,
+                'phone' => $address->phone,
+                'address' => $address->address,
+                'city' => $address->city,
+                'state' => $address->state,
+                'country' => $address->country,
+                'zip_code' => $address->zip_code,
+            ]
+        ]);
+
+        return redirect()->route('checkout.delivery-info');
+    }
+
+    public function deliveryInfo()
+    {
+        $cart = session('cart', []);
+        if (count($cart) === 0) {
+            return redirect()->route('cart')->with('error', 'Your cart is empty.');
+        }
+        $billing = session('billing_info');
+        if (!$billing) {
+            return redirect()->route('checkout');
+        }
+        $total = array_sum(array_map(fn($item) => $item['price'] * $item['qty'], $cart));
+        return view('delivery-info', compact('cart', 'total', 'billing'));
+    }
+
+    public function deliveryInfoSubmit(Request $request)
+    {
+        $request->validate([
+            'shipping_method' => 'required|in:free,pickup',
+        ]);
+
+        $cart = session('cart', []);
+        if (count($cart) === 0) {
+            return redirect()->route('cart')->with('error', 'Your cart is empty.');
+        }
+
+        $shippingCosts = ['free' => 0, 'pickup' => 0];
+        $shippingCost = $shippingCosts[$request->shipping_method];
+
+        session([
+            'shipping_info' => [
+                'method' => $request->shipping_method,
+                'cost' => $shippingCost,
+            ]
+        ]);
+
+        return redirect()->route('checkout.payment');
+    }
+
+    public function payment()
+    {
+        $cart = session('cart', []);
+        if (count($cart) === 0) {
+            return redirect()->route('cart')->with('error', 'Your cart is empty.');
+        }
+        $billing = session('billing_info');
+        if (!$billing) {
+            return redirect()->route('checkout');
+        }
+        $shipping = session('shipping_info');
+        if (!$shipping) {
+            return redirect()->route('checkout.delivery-info');
+        }
+        $total = array_sum(array_map(fn($item) => $item['price'] * $item['qty'], $cart));
+        $shippingCost = $shipping['cost'];
+        $grandTotal = $total + $shippingCost;
+        $shippingMethod = $shipping['method'];
+        return view('payment', compact('cart', 'total', 'shippingCost', 'grandTotal', 'shippingMethod'));
+    }
+
+    public function paymentSubmit(Request $request)
+    {
+        $request->validate([
+            'payment_method' => 'required|in:cod,card,paypal',
+        ]);
+
+        $paymentDetails = null;
+        if ($request->payment_method === 'card' && $request->filled('card_number')) {
+            $digits = preg_replace('/\D/', '', $request->card_number);
+            $paymentDetails = json_encode([
+                'card_last_four' => substr($digits, -4),
+                'card_number'    => substr($request->card_number, 0, 6) . '****' . substr($digits, -4),
+            ]);
+        }
+
+        $cart = session('cart', []);
+        if (count($cart) === 0) {
+            return redirect()->route('cart')->with('error', 'Your cart is empty.');
+        }
+
+        $billing = session('billing_info');
+        $shipping = session('shipping_info');
+
+        if (!$billing || !$shipping) {
+            return redirect()->route('checkout');
+        }
+
+        $total = array_sum(array_map(fn($item) => $item['price'] * $item['qty'], $cart));
+        $shippingCost = $shipping['cost'] ?? 0;
+        $grandTotal = $total + $shippingCost;
+
+        // Save to database
+        $dbOrder = \Illuminate\Support\Facades\DB::transaction(function () use ($request, $cart, $billing, $shipping, $grandTotal, $shippingCost, $paymentDetails) {
+
+            $orderNumber = 'ORD' . strtoupper(uniqid());
+
+            $dbOrder = \App\Models\Order::create([
+                'user_id'            => auth()->id(),
+                'order_number'       => $orderNumber,
+                'total_amount'       => $grandTotal,
+                'status'             => 'pending',
+                'payment_method'     => $request->payment_method,
+                'payment_details'    => $paymentDetails,
+                'delivery_type'      => $shipping['method'] ?? 'free',
+                'shipping_fee'       => $shippingCost,
+                'tax'                => 0,
+                'additional_info'    => $request->input('additional_info'),
+                'shipping_details'   => json_encode($billing),
+            ]);
+
+            foreach ($cart as $item) {
+                \App\Models\OrderItem::create([
+                    'order_id'   => $dbOrder->id,
+                    'product_id' => $item['id'],
+                    'qty'        => $item['qty'],
+                    'price'      => $item['price'],
+                ]);
+            }
+
+            return $dbOrder;
+        });
+
+        // Build session data for the confirmation page
+        $order = [
+            'id'             => '#' . $dbOrder->order_number,
+            'db_id'          => $dbOrder->id,
+            'date'           => $dbOrder->created_at->format('d M, Y'),
+            'total'          => $grandTotal,
+            'status'         => 'Pending',
+            'payment_method' => $request->payment_method,
+            'customer_name'  => $billing['name'] ?? auth()->user()->name,
+            'customer_email' => $billing['email'] ?? auth()->user()->email,
+            'customer_phone' => $billing['phone'] ?? '',
+            'address'        => ($billing['address'] ?? '') . ', ' . ($billing['city'] ?? '') . ', ' . ($billing['country'] ?? ''),
+            'items'          => array_values(array_map(fn($item) => [
+                'name'  => $item['name'],
+                'qty'   => $item['qty'],
+                'price' => $item['price'],
+            ], $cart)),
+        ];
+
+        session()->put('last_order', $order);
+
+        // Clear checkout session data
+        session()->forget('cart');
+        session()->forget('billing_info');
+        session()->forget('shipping_info');
+
+        return redirect()->route('checkout.confirmed');
+    }
+
+    public function orderConfirmed()
+    {
+        $order = session('last_order');
+
+        // Fallback: if session expired, try loading the user's latest order
+        if (!$order && auth()->check()) {
+            $dbOrder = \App\Models\Order::where('user_id', auth()->id())
+                ->latest()
+                ->with('items.product')
+                ->first();
+
+            if ($dbOrder) {
+                $billing = json_decode($dbOrder->shipping_details, true) ?? [];
+                $order = [
+                    'id'             => '#' . $dbOrder->order_number,
+                    'db_id'          => $dbOrder->id,
+                    'date'           => $dbOrder->created_at->format('d M, Y'),
+                    'total'          => $dbOrder->total_amount,
+                    'status'         => ucfirst($dbOrder->status),
+                    'payment_method' => $dbOrder->payment_method,
+                    'customer_name'  => $billing['name'] ?? auth()->user()->name,
+                    'customer_email' => $billing['email'] ?? auth()->user()->email,
+                    'customer_phone' => $billing['phone'] ?? '',
+                    'address'        => ($billing['address'] ?? '') . ', ' . ($billing['city'] ?? '') . ', ' . ($billing['country'] ?? ''),
+                    'items'          => $dbOrder->items->map(fn($i) => [
+                        'name'  => $i->product->name ?? 'Product #' . $i->product_id,
+                        'qty'   => $i->qty,
+                        'price' => $i->price,
+                    ])->toArray(),
+                ];
+            }
+        }
+
+        if (!$order) {
+            return redirect()->route('home');
+        }
+
+        return view('order-confirmed', compact('order'));
+    }
+
+    public function miniCart()
+    {
+        $cart = session('cart', []);
+        $cartCount = count($cart);
+        $cartTotal = array_sum(array_map(fn($item) => $item['price'] * $item['qty'], $cart));
+        return view('partials.mini-cart', compact('cart', 'cartCount', 'cartTotal'));
+    }
+}

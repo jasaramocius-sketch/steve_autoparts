@@ -1,0 +1,308 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Models\Image;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+
+class ImageController extends Controller
+{
+    public function picker(Request $request)
+    {
+        $query = Image::query();
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('original_name', 'like', "%{$search}%")
+                  ->orWhere('alt_text', 'like', "%{$search}%")
+                  ->orWhere('title', 'like', "%{$search}%");
+            });
+        }
+
+        $query->orderBy('created_at', 'desc');
+
+        $images = $query->paginate(18)->withQueryString();
+
+        return response()->json([
+            'images' => $images->map(function ($image) {
+                return [
+                    'id' => $image->id,
+                    'thumb_url' => $image->thumb_url,
+                    'original_name' => $image->original_name,
+                    'filename' => $image->filename,
+                    'path' => $image->path,
+                    'mime_type' => $image->mime_type,
+                    'size_in_kb' => $image->size_in_kb,
+                ];
+            }),
+            'last_page' => $images->lastPage(),
+            'current_page' => $images->currentPage(),
+            'total' => $images->total(),
+        ]);
+    }
+
+    public function pickerStore(Request $request)
+    {
+        $request->validate([
+            'images' => 'required|array|max:10',
+            'images.*' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:10240',
+        ]);
+
+        $uploaded = [];
+        foreach ($request->file('images') as $file) {
+            $image = Image::storeFromUpload($file, 'images');
+            $uploaded[] = [
+                'id' => $image->id,
+                'thumb_url' => $image->thumb_url,
+                'original_name' => $image->original_name,
+                'filename' => $image->filename,
+                'path' => $image->path,
+                'mime_type' => $image->mime_type,
+                'size_in_kb' => $image->size_in_kb,
+            ];
+        }
+
+        return response()->json(['success' => true, 'images' => $uploaded]);
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'images' => 'required|array',
+            'images.*' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:10240',
+        ]);
+
+        $uploaded = 0;
+        foreach ($request->file('images') as $file) {
+            Image::storeFromUpload($file, 'images');
+            $uploaded++;
+        }
+
+        return back()->with('success', "{$uploaded} image(s) uploaded successfully.");
+    }
+
+    public function index(Request $request)
+    {
+        $query = Image::query();
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('original_name', 'like', "%{$search}%")
+                  ->orWhere('alt_text', 'like', "%{$search}%")
+                  ->orWhere('title', 'like', "%{$search}%");
+            });
+        }
+
+        $filter = $request->filter;
+        if ($filter === 'unused') {
+            $query->whereNull('attachable_type')->whereNull('attachable_id');
+        } elseif ($filter === 'attached') {
+            $query->whereNotNull('attachable_type');
+        } elseif ($filter === 'convertible') {
+            $query->whereIn('mime_type', ['image/jpeg', 'image/pjpeg']);
+        }
+
+        $sort = $request->sort ?? 'created_at';
+        $order = $request->order ?? 'desc';
+        $allowedSorts = ['created_at', 'original_name', 'size', 'width', 'height'];
+        if (!in_array($sort, $allowedSorts)) $sort = 'created_at';
+        $query->orderBy($sort, $order === 'asc' ? 'asc' : 'desc');
+
+        $images = $query->paginate(24)->onEachSide(2)->withQueryString();
+
+        $stats = [
+            'total' => Image::count(),
+            'unused' => Image::whereNull('attachable_type')->whereNull('attachable_id')->count(),
+            'attached' => Image::whereNotNull('attachable_type')->count(),
+            'convertible' => Image::whereIn('mime_type', ['image/jpeg', 'image/pjpeg'])->count(),
+            'total_size' => Image::sum('size'),
+        ];
+
+        return view('admin.images.index', compact('images', 'stats'));
+    }
+
+    public function edit($id)
+    {
+        $image = Image::with('attachable')->findOrFail($id);
+        return view('admin.images.edit', compact('image'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $image = Image::findOrFail($id);
+
+        $request->validate([
+            'alt_text' => 'nullable|string|max:255',
+            'title' => 'nullable|string|max:255',
+            'caption' => 'nullable|string|max:500',
+        ]);
+
+        $image->update($request->only(['alt_text', 'title', 'caption']));
+
+        return redirect()->route('admin.images.edit', $image->id)
+            ->with('success', 'Image details updated successfully.');
+    }
+
+    public function convert($id)
+    {
+        $image = Image::findOrFail($id);
+
+        if (!in_array($image->mime_type, ['image/jpeg', 'image/pjpeg', 'image/jpg'])) {
+            return back()->with('error', 'Only JPEG images can be converted to WebP.');
+        }
+
+        $sourcePath = $image->file_path;
+        if (!file_exists($sourcePath)) {
+            return back()->with('error', 'File not found.');
+        }
+
+        $webpFilename = pathinfo($image->filename, PATHINFO_FILENAME) . '.webp';
+        $destPath = dirname($sourcePath) . '/' . $webpFilename;
+
+        $info = getimagesize($sourcePath);
+        if ($info === false) {
+            return back()->with('error', 'Could not read source image.');
+        }
+
+        $imageResource = imagecreatefromjpeg($sourcePath);
+        if (!$imageResource) {
+            return back()->with('error', 'Could not create image resource.');
+        }
+
+        imagewebp($imageResource, $destPath, 80);
+        imagedestroy($imageResource);
+
+        $webpSize = filesize($destPath);
+        $webpInfo = getimagesize($destPath);
+
+        $publicBase = public_path();
+        $storageBase = storage_path('app/public');
+        $relativePath = match (true) {
+            str_starts_with($destPath, $publicBase)  => substr($destPath, strlen($publicBase) + 1),
+            str_starts_with($destPath, $storageBase) => substr($destPath, strlen($storageBase) + 1),
+            default => pathinfo($image->path, PATHINFO_DIRNAME) . '/' . $webpFilename,
+        };
+        $converted = Image::create([
+            'original_name' => pathinfo($image->original_name, PATHINFO_FILENAME) . '.webp',
+            'filename' => $webpFilename,
+            'path' => $relativePath,
+            'url' => 'storage/' . $relativePath,
+            'mime_type' => 'image/webp',
+            'size' => $webpSize,
+            'width' => $webpInfo[0] ?? null,
+            'height' => $webpInfo[1] ?? null,
+            'alt_text' => $image->alt_text,
+            'title' => $image->title,
+            'caption' => $image->caption,
+            'attachable_type' => $image->attachable_type,
+            'attachable_id' => $image->attachable_id,
+        ]);
+
+        return redirect()->route('admin.images.index')
+            ->with('success', "Converted {$image->original_name} to {$converted->original_name} successfully.");
+    }
+
+    public function bulkConvert(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids)) {
+            return back()->with('error', 'No images selected.');
+        }
+
+        $images = Image::whereIn('id', $ids)
+            ->whereIn('mime_type', ['image/jpeg', 'image/pjpeg'])
+            ->get();
+
+        $converted = 0;
+        $failed = 0;
+
+        foreach ($images as $image) {
+            try {
+                $sourcePath = $image->file_path;
+                if (!file_exists($sourcePath)) { $failed++; continue; }
+
+                $webpFilename = pathinfo($image->filename, PATHINFO_FILENAME) . '.webp';
+                $destPath = dirname($sourcePath) . '/' . $webpFilename;
+
+                $imageResource = imagecreatefromjpeg($sourcePath);
+                if (!$imageResource) { $failed++; continue; }
+
+                imagewebp($imageResource, $destPath, 80);
+                imagedestroy($imageResource);
+
+                $webpSize = filesize($destPath);
+                $dimensions = getimagesize($destPath);
+
+                $publicBase = public_path();
+                $storageBase = storage_path('app/public');
+                $relativePath = match (true) {
+                    str_starts_with($destPath, $publicBase)  => substr($destPath, strlen($publicBase) + 1),
+                    str_starts_with($destPath, $storageBase) => substr($destPath, strlen($storageBase) + 1),
+                    default => pathinfo($image->path, PATHINFO_DIRNAME) . '/' . $webpFilename,
+                };
+                Image::create([
+                    'original_name' => pathinfo($image->original_name, PATHINFO_FILENAME) . '.webp',
+                    'filename' => $webpFilename,
+                    'path' => $relativePath,
+                    'url' => 'storage/' . $relativePath,
+                    'mime_type' => 'image/webp',
+                    'size' => $webpSize,
+                    'width' => $dimensions[0] ?? null,
+                    'height' => $dimensions[1] ?? null,
+                    'alt_text' => $image->alt_text,
+                    'title' => $image->title,
+                    'attachable_type' => $image->attachable_type,
+                    'attachable_id' => $image->attachable_id,
+                ]);
+
+                $converted++;
+            } catch (\Exception $e) {
+                $failed++;
+            }
+        }
+
+        return back()->with('success', "{$converted} images converted to WebP." . ($failed ? " {$failed} failed." : ''));
+    }
+
+    public function bulkDelete(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids)) {
+            return back()->with('error', 'No images selected.');
+        }
+
+        $images = Image::whereIn('id', $ids)->get();
+
+        $deleted = 0;
+        foreach ($images as $image) {
+            $filePath = $image->file_path;
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+            $image->delete();
+            $deleted++;
+        }
+
+        return back()->with('success', "{$deleted} images deleted successfully.");
+    }
+
+    public function bulkMarkUnused(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids)) {
+            return back()->with('error', 'No images selected.');
+        }
+
+        Image::whereIn('id', $ids)->update([
+            'attachable_type' => null,
+            'attachable_id' => null,
+        ]);
+
+        return back()->with('success', count($ids) . ' images marked as unused.');
+    }
+}

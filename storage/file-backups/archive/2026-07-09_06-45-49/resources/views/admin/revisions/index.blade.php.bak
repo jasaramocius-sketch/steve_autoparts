@@ -1,0 +1,122 @@
+@extends('admin.layouts.app')
+@section('page-title', 'Revisions')
+@section('content')
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="fw-bold mb-0">Revisions History</h4>
+</div>
+
+@if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert">{{ session('success') }}<button type="button" class="btn-close steve-btn" data-bs-dismiss="alert"></button></div>
+@endif
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="d-flex justify-content-between align-items-center px-3 pt-3 pb-2">
+            <div class="d-flex align-items-center gap-2">
+                <span class="text-muted small">Show</span>
+                <select class="form-select" style="width: auto;" onchange="window.location.href=this.value">
+                    @foreach([10, 20, 50, 100] as $n)
+                        <option value="{{ request()->fullUrlWithQuery(['per_page' => $n]) }}" {{ (int)request('per_page', 20) === $n ? 'selected' : '' }}>{{ $n }}</option>
+                    @endforeach
+                </select>
+                <span class="text-muted small">per page</span>
+            </div>
+            <div class="text-muted small">
+                Showing {{ $revisions->firstItem() }}-{{ $revisions->lastItem() }} of {{ $revisions->total() }}
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3"><a href="{{ sortUrl('id', $sortBy, $sortDir) }}" class="text-decoration-none text-dark"># {!! sortIndicator('id', $sortBy, $sortDir) !!}</a></th>
+                        <th>User</th>
+                        <th><a href="{{ sortUrl('model_type', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Model {!! sortIndicator('model_type', $sortBy, $sortDir) !!}</a></th>
+                        <th>Record ID</th>
+                        <th><a href="{{ sortUrl('action', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Action {!! sortIndicator('action', $sortBy, $sortDir) !!}</a></th>
+                        <th>Changes</th>
+                        <th class="pe-3"><a href="{{ sortUrl('created_at', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Date {!! sortIndicator('created_at', $sortBy, $sortDir) !!}</a></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($revisions as $rev)
+                    <tr>
+                        <td class="ps-3">{{ $rev->id }}</td>
+                        <td>
+                            @if($rev->user)
+                                {{ $rev->user->name }}
+                                <div class="text-muted small">{{ $rev->user->email }}</div>
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
+                        </td>
+                        <td>
+                            @php
+                                $short = class_basename($rev->model_type);
+                            @endphp
+                            {{ $short }}
+                        </td>
+                        <td>#{{ $rev->model_id }}</td>
+                        <td>
+                            @if($rev->action === 'created')
+                                <span class="badge bg-success">Created</span>
+                            @elseif($rev->action === 'updated')
+                                <span class="badge bg-primary">Updated</span>
+                            @elseif($rev->action === 'deleted')
+                                <span class="badge bg-danger">Deleted</span>
+                            @else
+                                <span class="badge bg-secondary">{{ $rev->action }}</span>
+                            @endif
+                        </td>
+                        <td style="max-width: 350px;">
+                            @if($rev->action === 'created' && $rev->new_values)
+                                <span class="text-muted small">Record created</span>
+                            @elseif($rev->action === 'deleted' && $rev->old_values)
+                                <span class="text-muted small">Record deleted</span>
+                            @elseif($rev->action === 'updated' && $rev->old_values && $rev->new_values)
+                                <div class="small" style="max-height: 120px; overflow-y: auto;">
+                                    @foreach($rev->new_values as $field => $newVal)
+                                        @if(array_key_exists($field, $rev->old_values ?? []))
+                                            @php
+                                                $oldVal = $rev->old_values[$field] ?? '';
+                                                $oldStr = is_scalar($oldVal) ? (string)$oldVal : (is_null($oldVal) ? 'null' : json_encode($oldVal));
+                                                $newStr = is_scalar($newVal) ? (string)$newVal : (is_null($newVal) ? 'null' : json_encode($newVal));
+                                                $maxLen = 80;
+                                                if (mb_strlen($oldStr) > $maxLen) $oldStr = mb_substr($oldStr, 0, $maxLen) . '...';
+                                                if (mb_strlen($newStr) > $maxLen) $newStr = mb_substr($newStr, 0, $maxLen) . '...';
+                                            @endphp
+                                            @if($oldStr !== $newStr)
+                                                <div class="mb-1">
+                                                    <strong class="text-muted">{{ $field }}:</strong><br>
+                                                    <span class="text-danger" title="{{ $rev->old_values[$field] ?? '' }}">{{ $oldStr }}</span>
+                                                    <i class="fas fa-arrow-right mx-1 text-muted" style="font-size: 10px;"></i>
+                                                    <span class="text-success" title="{{ $newVal }}">{{ $newStr }}</span>
+                                                </div>
+                                            @endif
+                                        @endif
+                                    @endforeach
+                                </div>
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
+                        </td>
+                        <td class="pe-3 text-nowrap small text-muted">
+                            {{ $rev->created_at->format('d M Y H:i') }}
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">No revisions found.</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        @if($revisions->hasPages())
+            <div class="d-flex justify-content-center py-3">{{ $revisions->links() }}</div>
+        @endif
+    </div>
+</div>
+
+@endsection

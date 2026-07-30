@@ -1,0 +1,34 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Brand;
+use Illuminate\Http\Request;
+
+class BrandController extends Controller
+{
+    public function brands(Request $request)
+    {
+        $search = $request->get('search', '');
+        $sort = $request->get('sort', 'latest');
+
+        $brands = Brand::where('status', true)
+            ->withCount(['products' => fn($q) => $q->where('status', true)]);
+
+        if ($search !== '') {
+            $brands->where('name', 'like', "%{$search}%");
+        }
+
+        $brands = $brands->get();
+
+        if ($sort === 'name') {
+            $brands = $brands->sortBy('name')->values();
+        } elseif ($sort === 'oldest') {
+            $brands = $brands->sortBy('created_at')->values();
+        } else {
+            $brands = $brands->sortByDesc('created_at')->values();
+        }
+
+        return view('brands', compact('brands', 'search', 'sort'));
+    }
+}

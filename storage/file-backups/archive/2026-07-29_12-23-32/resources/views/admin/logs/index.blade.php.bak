@@ -1,0 +1,33 @@
+@extends('admin.layouts.app')
+{{-- Add your custom page ID and classes right here --}}
+@section('page-id', 'admin-logs-index-page')
+@section('page-class', 'admin-logs-index-page')
+@section('page-title', 'Logs')
+
+@section('content')
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-3">
+        <h5 class="mb-0 fw-bold"><i class="fas fa-file-alt me-2"></i>Site Logs</h5>
+        <form method="GET" action="{{ route('admin.logs.index') }}" class="d-flex align-items-center gap-2">
+            <select name="file" class="form-select" onchange="this.form.submit()">
+                <option value="">Select log file</option>
+                @foreach($files as $file)
+                    <option value="{{ $file }}" {{ $selectedFile === $file ? 'selected' : '' }}>{{ $file }}</option>
+                @endforeach
+            </select>
+        </form>
+    </div>
+    <div class="card-body">
+        @if($selectedFile)
+            <div class="mb-3 text-muted small">Showing: {{ $selectedFile }}</div>
+            @if(empty($contents))
+                <div class="alert alert-info mb-0">No entries found in this log file.</div>
+            @else
+                <pre class="bg-dark text-light p-3 rounded mb-0" style="white-space: pre-wrap; word-break: break-word; max-height: 70vh; overflow:auto;">{{ implode("\n", $contents) }}</pre>
+            @endif
+        @else
+            <div class="alert alert-warning mb-0">No log files found yet.</div>
+        @endif
+    </div>
+</div>
+@endsection

@@ -1,0 +1,177 @@
+@extends('user.layouts.dashboard')
+
+@section('dashboard-content')
+
+<div class="user-reviews-page">
+<div class="dashboard-topbar">
+    <h4 class="mb-0" style="font-size:1.5rem;font-weight:600;color:#1f0300;">My Reviews</h4>
+    <a href="{{ route('shop') }}" class="btn btn-primary">Continue Shopping</a>
+</div>
+
+<div id="reviewPageAlert" class="d-none mt-3"></div>
+
+<div class="table-responsive mt-4">
+    <table class="table table--custom table--responsive-lg">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Review</th>
+                <th>Status / Date</th>
+            </tr>
+        </thead>
+        <tbody>
+        @forelse($items as $item)
+            <tr id="review-row-{{ md5($item['product_slug']) }}">
+                <td>
+                    <div class="d-flex align-items-center gap-2">
+                        @if($item['product_image'])
+                            <img src="{{ asset('assets/images/thumbnails/' . $item['product_image']) }}" alt="" style="width:40px;height:40px;object-fit:cover;border-radius:6px;">
+                        @else
+                            <div style="width:40px;height:40px;background:#f0f0f0;border-radius:6px;display:flex;align-items:center;justify-content:center;">
+                                <i class="fas fa-image text-muted"></i>
+                            </div>
+                        @endif
+                        <div>
+                            <a href="{{ route('product', $item['product_slug']) }}" class="fw-semibold text-dark text-decoration-none" style="font-size:14px;">{{ $item['product_name'] }}</a>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    @if($item['status'] === 'pending')
+                        <div class="review-inline-form" data-slug="{{ $item['product_slug'] }}">
+                            <div class="d-flex align-items-center gap-1 mb-1">
+                                @for($i = 1; $i <= 5; $i++)
+                                    <i class="far fa-star star-pick" data-rating="{{ $i }}" style="font-size:16px;cursor:pointer;color:#ccc;transition:color .2s;"></i>
+                                @endfor
+                                <input type="hidden" class="review-rating-input" value="0">
+                            </div>
+                            <textarea class="form-control form-control-sm review-text-input" rows="2" maxlength="1000" placeholder="Write your review..." style="font-size:13px;"></textarea>
+                            <div class="review-form-alert d-none mt-1" style="font-size:12px;"></div>
+                            <button type="button" class="btn btn-sm btn-primary mt-1 review-submit-btn" style="font-size:12px;padding:3px 12px;">Submit</button>
+                        </div>
+                    @else
+                        <div class="d-flex align-items-center gap-1 mb-1">
+                            @for($i = 1; $i <= 5; $i++)
+                                <i class="fa fa-star{{ $i <= $item['rating'] ? ' text-warning' : '-o text-muted' }}" style="font-size:13px;"></i>
+                            @endfor
+                        </div>
+                        <p class="mb-0" style="max-width:300px;font-size:13px;color:#555;">{{ Str::limit($item['text'], 80) }}</p>
+                    @endif
+                </td>
+                <td>
+                    @if($item['status'] === 'pending')
+                        <span class="badge bg-warning text-dark">Pending</span>
+                    @else
+                        <span class="badge bg-success">Reviewed</span>
+                        <div class="mt-1" style="font-size:13px;">{{ $item['date'] }}</div>
+                    @endif
+                </td>
+            </tr>
+        @empty
+            <tr>
+                <td colspan="3" class="text-center py-5">
+                    <i class="fas fa-star fa-3x text-muted mb-3 d-block"></i>
+                    <p class="text-muted mb-0">No purchased products or reviews found.</p>
+                </td>
+            </tr>
+        @endforelse
+        </tbody>
+    </table>
+</div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.review-inline-form').forEach(function(form) {
+        var slug = form.dataset.slug;
+        var stars = form.querySelectorAll('.star-pick');
+        var ratingInput = form.querySelector('.review-rating-input');
+        var textarea = form.querySelector('.review-text-input');
+        var submitBtn = form.querySelector('.review-submit-btn');
+        var alertEl = form.querySelector('.review-form-alert');
+
+        stars.forEach(function(star) {
+            star.addEventListener('mouseenter', function() {
+                var val = parseInt(star.dataset.rating);
+                stars.forEach(function(s) {
+                    s.className = parseInt(s.dataset.rating) <= val ? 'fas fa-star star-pick' : 'far fa-star star-pick';
+                    s.style.color = parseInt(s.dataset.rating) <= val ? '#fac451' : '#ccc';
+                });
+            });
+            star.addEventListener('click', function() {
+                ratingInput.value = star.dataset.rating;
+            });
+        });
+
+        form.addEventListener('mouseleave', function() {
+            var val = parseInt(ratingInput.value) || 0;
+            stars.forEach(function(s) {
+                s.className = parseInt(s.dataset.rating) <= val ? 'fas fa-star star-pick' : 'far fa-star star-pick';
+                s.style.color = parseInt(s.dataset.rating) <= val ? '#fac451' : '#ccc';
+            });
+        });
+
+        submitBtn.addEventListener('click', function() {
+            var rating = parseInt(ratingInput.value);
+            var text = textarea.value.trim();
+
+            if (!rating || rating < 1 || rating > 5) {
+                alertEl.className = 'review-form-alert text-danger mt-1';
+                alertEl.textContent = 'Please select a rating.';
+                return;
+            }
+            if (!text) {
+                alertEl.className = 'review-form-alert text-danger mt-1';
+                alertEl.textContent = 'Please write your review.';
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+            alertEl.classList.add('d-none');
+
+            fetch('/product/' + slug + '/review', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ rating: rating, text: text })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    var row = form.closest('tr');
+                    var reviewCell = row.querySelector('td:nth-child(2)');
+                    var statusCell = row.querySelector('td:nth-child(3)');
+
+                    var starsHtml = '';
+                    for (var i = 1; i <= 5; i++) {
+                        starsHtml += '<i class="fa fa-star' + (i <= rating ? ' text-warning' : '-o text-muted') + '" style="font-size:13px;"></i>';
+                    }
+                    reviewCell.innerHTML = '<div class="d-flex align-items-center gap-1 mb-1">' + starsHtml + '</div><p class="mb-0" style="max-width:300px;font-size:13px;color:#555;">' + (text.length > 80 ? text.substring(0, 80) + '...' : text) + '</p>';
+                    statusCell.innerHTML = '<span class="badge bg-success">Reviewed</span><div class="mt-1" style="font-size:13px;">' + new Date().toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) + '</div>';
+
+                    var pageAlert = document.getElementById('reviewPageAlert');
+                    pageAlert.className = 'alert alert-success mt-3';
+                    pageAlert.textContent = 'Review submitted successfully!';
+                } else {
+                    alertEl.className = 'review-form-alert text-danger mt-1';
+                    alertEl.textContent = data.message || 'Something went wrong.';
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Submit';
+                }
+            })
+            .catch(function() {
+                alertEl.className = 'review-form-alert text-danger mt-1';
+                alertEl.textContent = 'Something went wrong. Please try again.';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit';
+            });
+        });
+    });
+});
+</script>
+
+@endsection

@@ -1,0 +1,532 @@
+@extends('user.layouts.dashboard')
+
+@section('dashboard-content')
+
+<div class="user-reviews-page">
+<div class="dashboard-topbar">
+    <h4 class="mb-0" style="font-size:1.5rem;font-weight:600;color:#1f0300;">My Reviews</h4>
+    <a href="{{ route('shop') }}" class="btn btn-primary">Continue Shopping</a>
+</div>
+
+<div class="table-responsive mt-4">
+    <table class="table table--custom table--responsive-lg">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Review</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+        @forelse($items as $item)
+            <tr id="review-row-{{ md5($item['product_slug']) }}">
+                <td>
+                    <div class="d-flex align-items-center gap-2">
+                        @if($item['product_image'])
+                            <img src="{{ asset('assets/images/thumbnails/' . $item['product_image']) }}" alt="" style="width:40px;height:40px;object-fit:cover;border-radius:6px;">
+                        @else
+                            <div style="width:40px;height:40px;background:#f0f0f0;border-radius:6px;display:flex;align-items:center;justify-content:center;">
+                                <i class="fas fa-image text-muted"></i>
+                            </div>
+                        @endif
+                        <div>
+                            <a href="{{ route('product', $item['product_slug']) }}" class="fw-semibold text-dark text-decoration-none" style="font-size:14px;">{{ $item['product_name'] }}</a>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    @if($item['status'] === 'pending')
+                        <span class="badge bg-warning text-dark mb-1">Pending</span>
+                    @else
+                        <div class="d-flex align-items-center gap-1">
+                            @for($i = 0; $i < 5; $i++)
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="13" viewBox="0 0 17 16" fill="none">
+                                    <path d="M8.5 0.5L10.4084 6.37336L16.584 6.37336L11.5878 10.0033L13.4962 15.8766L8.5 12.2467L3.50383 15.8766L5.41219 10.0033L0.416019 6.37336L6.59163 6.37336L8.5 0.5Z" fill="{{ $i < $item['rating'] ? '#EEAE0B' : '#E2E8F0' }}" />
+                                </svg>
+                            @endfor
+                        </div>
+                    @endif
+                </td>
+                <td>
+                    @if($item['status'] === 'pending')
+                        <button type="button" class="btn btn-sm btn-outline-primary review-action-btn"
+                            data-slug="{{ $item['product_slug'] }}"
+                            data-name="{{ $item['product_name'] }}"
+                            data-image="{{ $item['product_image'] ? asset('assets/images/thumbnails/' . $item['product_image']) : asset('assets/images/placeholder.png') }}"
+                            data-status="{{ $item['status'] }}"
+                            data-review-id=""
+                            data-rating="{{ $item['rating'] }}"
+                            data-text=""
+                            data-images="[]"
+                            data-date="">
+                            <i class="fas fa-pen"></i>
+                        </button>
+                    @else
+                        <div class="d-flex gap-1">
+                            <button type="button" class="btn btn-sm btn-outline-secondary review-view-btn"
+                                data-slug="{{ $item['product_slug'] }}"
+                                data-name="{{ $item['product_name'] }}"
+                                data-image="{{ $item['product_image'] ? asset('assets/images/thumbnails/' . $item['product_image']) : asset('assets/images/placeholder.png') }}"
+                                data-rating="{{ $item['rating'] }}"
+                                data-text="{{ addslashes($item['text'] ?? '') }}"
+                                data-images="{!! htmlentities(json_encode($item['images'] ?? [])) !!}"
+                                data-date="{{ $item['date'] ?? '' }}"
+                                title="View Review">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary review-edit-btn"
+                                data-slug="{{ $item['product_slug'] }}"
+                                data-name="{{ $item['product_name'] }}"
+                                data-image="{{ $item['product_image'] ? asset('assets/images/thumbnails/' . $item['product_image']) : asset('assets/images/placeholder.png') }}"
+                                data-review-id="{{ $item['review_id'] ?? '' }}"
+                                data-rating="{{ $item['rating'] }}"
+                                data-text="{{ addslashes($item['text'] ?? '') }}"
+                                data-images="{!! htmlentities(json_encode($item['images'] ?? [])) !!}"
+                                title="Edit Review">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger review-delete-btn"
+                                data-slug="{{ $item['product_slug'] }}"
+                                data-review-id="{{ $item['review_id'] ?? '' }}"
+                                data-name="{{ $item['product_name'] }}"
+                                title="Delete Review">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    @endif
+                </td>
+            </tr>
+        @empty
+            <tr>
+                <td colspan="3" class="text-center py-5">
+                    <i class="fas fa-star fa-3x text-muted mb-3 d-block"></i>
+                    <p class="text-muted mb-0">No purchased products or reviews found.</p>
+                </td>
+            </tr>
+        @endforelse
+        </tbody>
+    </table>
+</div>
+</div>
+
+{{-- Review Modal --}}
+<div class="modal fade" id="reviewModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="reviewModalTitle">Write a Review</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="reviewModalAlert" class="alert alert-danger d-none mb-3"></div>
+
+        {{-- Product Info (shared) --}}
+        <div class="mb-3">
+          <h6 class="fw-semibold mb-2">Product</h6>
+          <div class="d-flex align-items-center gap-2">
+            <img id="reviewProductImage" src="" alt="Product" style="width:50px;height:50px;object-fit:cover;border-radius:6px;">
+            <a id="reviewProductLink" href="" class="fw-semibold text-dark text-decoration-none" style="font-size:14px;"></a>
+          </div>
+        </div>
+
+        {{-- VIEW PANEL (read-only) --}}
+        <div id="reviewViewPanel" style="display:none;">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Rating</label>
+            <div id="reviewViewStars" style="font-size:24px;"></div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Comment</label>
+            <p id="reviewViewText" style="color:#4c3533;white-space:pre-wrap;"></p>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Review Images</label>
+            <div id="reviewViewImages" class="d-flex flex-wrap gap-2"></div>
+          </div>
+          <div class="mb-2">
+            <small class="text-muted" id="reviewViewDate"></small>
+          </div>
+        </div>
+
+        {{-- FORM PANEL (editable) --}}
+        <div id="reviewFormPanel">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Rating *</label>
+                <div class="star-picker" id="reviewModalStarPicker">
+                  @for($i = 1; $i <= 5; $i++)
+                    <i class="far fa-star" data-rating="{{ $i }}" style="font-size:24px;cursor:pointer;color:#ccc;transition:color .2s;"></i>
+                  @endfor
+                  <input type="hidden" name="rating" id="reviewModalRating" value="0">
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Comment *</label>
+                <textarea class="form-control" id="reviewModalText" rows="3" maxlength="1000" placeholder="Share your experience with this product..."></textarea>
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Review Images</label>
+                <div class="review-image-upload-wrapper">
+                  <input type="file" id="reviewModalImages" multiple accept="image/jpg,image/jpeg,image/png,image/webp" class="d-none">
+                  <button type="button" class="btn btn-outline-secondary btn-sm" id="reviewBrowseBtn">
+                    <i class="fas fa-cloud-upload-alt"></i> Browse
+                  </button>
+                  <span class="text-muted ms-2" style="font-size:12px;">Max 5 images, 2MB each (JPG, PNG, WebP)</span>
+                </div>
+                <div id="reviewImagePreview" class="d-flex flex-wrap gap-2 mt-2"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="reviewModalSubmitBtn">Submit Review</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.review-action-btn, .review-view-btn, .review-edit-btn, .review-delete-btn { font-size: 12px; padding: 4px 8px; }
+.review-image-upload-wrapper { display: flex; align-items: center; }
+.review-img-thumb { position: relative; width: 60px; height: 60px; border-radius: 6px; overflow: hidden; border: 1px solid #ddd; }
+.review-img-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.review-img-thumb .remove-img { position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.6); color: #fff; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var reviewImages = [];
+    var currentSlug = '';
+    var currentReviewId = '';
+    var reviewModalEl = document.getElementById('reviewModal');
+    var reviewModal = new bootstrap.Modal(reviewModalEl);
+
+    var formPanel = document.getElementById('reviewFormPanel');
+    var submitBtn = document.getElementById('reviewModalSubmitBtn');
+
+    // Write review (pending items)
+    document.querySelectorAll('.review-action-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            currentSlug = btn.dataset.slug;
+            currentReviewId = '';
+
+            document.getElementById('reviewProductImage').src = btn.dataset.image;
+            document.getElementById('reviewProductLink').href = '{{ url("/product") }}/' + btn.dataset.slug;
+            document.getElementById('reviewProductLink').textContent = btn.dataset.name;
+            document.getElementById('reviewModalTitle').textContent = 'Write a Review';
+            document.getElementById('reviewModalAlert').classList.add('d-none');
+
+            document.getElementById('reviewViewPanel').style.display = 'none';
+            formPanel.style.display = '';
+            submitBtn.style.display = '';
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit Review';
+
+            // Reset form
+            document.getElementById('reviewModalRating').value = '0';
+            document.getElementById('reviewModalText').value = '';
+            document.getElementById('reviewImagePreview').innerHTML = '';
+            reviewImages = [];
+            document.getElementById('reviewModalImages').value = '';
+
+            document.getElementById('reviewModalStarPicker').querySelectorAll('i').forEach(function(s) {
+                s.className = 'far fa-star';
+                s.style.color = '#ccc';
+            });
+
+            reviewModal.show();
+        });
+    });
+
+    // View review
+    document.querySelectorAll('.review-view-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.getElementById('reviewProductImage').src = btn.dataset.image;
+            document.getElementById('reviewProductLink').href = '{{ url("/product") }}/' + btn.dataset.slug;
+            document.getElementById('reviewProductLink').textContent = btn.dataset.name;
+            document.getElementById('reviewModalTitle').textContent = 'View Review';
+            document.getElementById('reviewModalAlert').classList.add('d-none');
+
+            formPanel.style.display = 'none';
+            submitBtn.style.display = 'none';
+
+            var rating = parseInt(btn.dataset.rating) || 0;
+            var text = btn.dataset.text || '';
+            var date = btn.dataset.date || '';
+
+            // Stars (SVG like product page)
+            var svgTpl = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="13" viewBox="0 0 17 16" fill="none"><path d="M8.5 0.5L10.4084 6.37336L16.584 6.37336L11.5878 10.0033L13.4962 15.8766L8.5 12.2467L3.50383 15.8766L5.41219 10.0033L0.416019 6.37336L6.59163 6.37336L8.5 0.5Z" fill="FILL_COLOR"></path></svg>';
+            var starsHtml = '';
+            for (var i = 0; i < 5; i++) {
+                starsHtml += svgTpl.replace('FILL_COLOR', i < rating ? '#EEAE0B' : '#E2E8F0');
+            }
+            document.getElementById('reviewViewStars').innerHTML = starsHtml;
+            document.getElementById('reviewViewText').textContent = text;
+            document.getElementById('reviewViewDate').textContent = date ? 'Reviewed on ' + date : '';
+
+            // Images
+            var imgContainer = document.getElementById('reviewViewImages');
+            imgContainer.innerHTML = '';
+            try {
+                var existingImages = JSON.parse(btn.dataset.images || '[]');
+                existingImages.forEach(function(imgPath) {
+                    var a = document.createElement('a');
+                    a.href = '{{ asset("/") }}' + imgPath;
+                    a.target = '_blank';
+                    var img = document.createElement('img');
+                    img.src = '{{ asset("/") }}' + imgPath;
+                    img.alt = 'Review image';
+                    img.style.cssText = 'width:80px;height:80px;object-fit:cover;border-radius:6px;border:1px solid #ddd;';
+                    a.appendChild(img);
+                    imgContainer.appendChild(a);
+                });
+                if (existingImages.length === 0) {
+                    imgContainer.innerHTML = '<span class="text-muted" style="font-size:13px;">No images uploaded.</span>';
+                }
+            } catch(e) {
+                imgContainer.innerHTML = '<span class="text-muted" style="font-size:13px;">No images uploaded.</span>';
+            }
+
+            // Show view panel
+            document.getElementById('reviewViewPanel').style.display = '';
+            reviewModal.show();
+        });
+    });
+
+    // Edit review (reviewed items)
+    document.querySelectorAll('.review-edit-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            currentSlug = btn.dataset.slug;
+            currentReviewId = btn.dataset.reviewId || '';
+
+            document.getElementById('reviewProductImage').src = btn.dataset.image;
+            document.getElementById('reviewProductLink').href = '{{ url("/product") }}/' + btn.dataset.slug;
+            document.getElementById('reviewProductLink').textContent = btn.dataset.name;
+            document.getElementById('reviewModalTitle').textContent = 'Edit Review';
+            document.getElementById('reviewModalAlert').classList.add('d-none');
+
+            document.getElementById('reviewViewPanel').style.display = 'none';
+            formPanel.style.display = '';
+            submitBtn.style.display = '';
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Update Review';
+
+            // Pre-fill form
+            var rating = parseInt(btn.dataset.rating) || 0;
+            document.getElementById('reviewModalRating').value = rating;
+            document.getElementById('reviewModalText').value = btn.dataset.text;
+            document.getElementById('reviewImagePreview').innerHTML = '';
+            reviewImages = [];
+            document.getElementById('reviewModalImages').value = '';
+
+            // Set stars
+            document.getElementById('reviewModalStarPicker').querySelectorAll('i').forEach(function(s) {
+                var val = parseInt(s.dataset.rating);
+                s.className = val <= rating ? 'fas fa-star' : 'far fa-star';
+                s.style.color = val <= rating ? '#fac451' : '#ccc';
+            });
+
+            // Show existing images as removable thumbnails
+            try {
+                var existingImages = JSON.parse(btn.dataset.images || '[]');
+                var container = document.getElementById('reviewImagePreview');
+                existingImages.forEach(function(imgPath) {
+                    var div = document.createElement('div');
+                    div.className = 'review-img-thumb';
+                    div.setAttribute('data-existing-path', imgPath);
+                    var img = document.createElement('img');
+                    img.src = '{{ asset("/") }}' + imgPath;
+                    var removeBtn = document.createElement('button');
+                    removeBtn.className = 'remove-img';
+                    removeBtn.innerHTML = '&times;';
+                    removeBtn.addEventListener('click', function() {
+                        div.remove();
+                    });
+                    div.appendChild(img);
+                    div.appendChild(removeBtn);
+                    container.appendChild(div);
+                });
+            } catch(e) {}
+
+            reviewModal.show();
+        });
+    });
+
+    // Delete review
+    document.querySelectorAll('.review-delete-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            if (!confirm('Are you sure you want to delete this review?')) return;
+
+            var slug = btn.dataset.slug;
+            var reviewId = btn.dataset.reviewId;
+
+            fetch('{{ url("/product") }}/' + slug + '/review/' + reviewId, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    toastr.success('Review deleted successfully!');
+                    location.reload();
+                } else {
+                    toastr.error(data.message || 'Failed to delete review.');
+                }
+            })
+            .catch(function() {
+                toastr.error('Something went wrong.');
+            });
+        });
+    });
+
+    // Star picker
+    var starPicker = document.getElementById('reviewModalStarPicker');
+    var stars = starPicker.querySelectorAll('i');
+    stars.forEach(function(star) {
+        star.addEventListener('mouseenter', function() {
+            var val = parseInt(star.dataset.rating);
+            stars.forEach(function(s) {
+                var v = parseInt(s.dataset.rating);
+                s.className = v <= val ? 'fas fa-star' : 'far fa-star';
+                s.style.color = v <= val ? '#fac451' : '#ccc';
+            });
+        });
+        star.addEventListener('click', function() {
+            document.getElementById('reviewModalRating').value = star.dataset.rating;
+        });
+    });
+    starPicker.addEventListener('mouseleave', function() {
+        var val = parseInt(document.getElementById('reviewModalRating').value) || 0;
+        stars.forEach(function(s) {
+            var v = parseInt(s.dataset.rating);
+            s.className = v <= val ? 'fas fa-star' : 'far fa-star';
+            s.style.color = v <= val ? '#fac451' : '#ccc';
+        });
+    });
+
+    // Browse button
+    document.getElementById('reviewBrowseBtn').addEventListener('click', function() {
+        document.getElementById('reviewModalImages').click();
+    });
+
+    // File input change -> preview
+    document.getElementById('reviewModalImages').addEventListener('change', function(e) {
+        var files = Array.from(e.target.files);
+        files.forEach(function(file) {
+            if (reviewImages.length >= 5) return;
+            if (file.size > 2 * 1024 * 1024) {
+                alert(file.name + ' is larger than 2MB.');
+                return;
+            }
+            if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+                alert(file.name + ' is not a supported image format.');
+                return;
+            }
+            reviewImages.push(file);
+        });
+        renderImagePreviews();
+        e.target.value = '';
+    });
+
+    function renderImagePreviews() {
+        var container = document.getElementById('reviewImagePreview');
+        // Keep existing image thumbnails (from edit mode)
+        var existingThumbs = container.querySelectorAll('[data-existing-path]');
+        container.innerHTML = '';
+        existingThumbs.forEach(function(el) { container.appendChild(el); });
+        // Add new file previews
+        reviewImages.forEach(function(file, index) {
+            var div = document.createElement('div');
+            div.className = 'review-img-thumb';
+            var img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+            var removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-img';
+            removeBtn.innerHTML = '&times;';
+            removeBtn.addEventListener('click', function() {
+                reviewImages.splice(index, 1);
+                renderImagePreviews();
+            });
+            div.appendChild(img);
+            div.appendChild(removeBtn);
+            container.appendChild(div);
+        });
+    }
+
+    // Submit
+    submitBtn.addEventListener('click', function() {
+        var rating = parseInt(document.getElementById('reviewModalRating').value);
+        var text = document.getElementById('reviewModalText').value.trim();
+        var alertEl = document.getElementById('reviewModalAlert');
+
+        if (!rating || rating < 1 || rating > 5) {
+            alertEl.textContent = 'Please select a rating.';
+            alertEl.classList.remove('d-none');
+            return;
+        }
+        if (!text) {
+            alertEl.textContent = 'Please write your review.';
+            alertEl.classList.remove('d-none');
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting...';
+        alertEl.classList.add('d-none');
+
+        var formData = new FormData();
+        formData.append('rating', rating);
+        formData.append('text', text);
+        formData.append('_token', document.querySelector('meta[name="csrf-token"]').content);
+        formData.append('_method', currentReviewId ? 'PUT' : 'POST');
+        reviewImages.forEach(function(file) {
+            formData.append('images[]', file);
+        });
+
+        var url = currentReviewId
+            ? '{{ url("/product") }}/' + currentSlug + '/review/' + currentReviewId
+            : '{{ url("/product") }}/' + currentSlug + '/review';
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: formData
+        })
+        .then(function(r) { return r.json().then(function(body) { return { status: r.status, body: body }; }); })
+        .then(function(res) {
+            if (res.status === 401) {
+                alertEl.innerHTML = 'Please <a href="{{ route("login") }}">login</a> to write a review.';
+                alertEl.classList.remove('d-none');
+                submitBtn.disabled = false;
+                submitBtn.textContent = currentReviewId ? 'Update Review' : 'Submit Review';
+            } else if (res.body.success) {
+                toastr.success('Review submitted successfully!');
+                reviewModal.hide();
+                location.reload();
+            } else {
+                alertEl.textContent = res.body.message || 'Something went wrong.';
+                alertEl.classList.remove('d-none');
+                submitBtn.disabled = false;
+                submitBtn.textContent = currentReviewId ? 'Update Review' : 'Submit Review';
+            }
+        })
+        .catch(function() {
+            alertEl.textContent = 'Something went wrong. Please try again.';
+            alertEl.classList.remove('d-none');
+            submitBtn.disabled = false;
+            submitBtn.textContent = currentReviewId ? 'Update Review' : 'Submit Review';
+        });
+    });
+});
+</script>
+
+@endsection

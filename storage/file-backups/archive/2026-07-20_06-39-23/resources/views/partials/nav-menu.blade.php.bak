@@ -1,0 +1,89 @@
+@php
+    $currentUrl = url()->current();
+    $menu = $menu ?? [];
+    $megaCategories = $megaCategories ?? collect();
+@endphp
+@foreach($menu as $item)
+    @php
+        $label = $item['label'] ?? '';
+        $url = $item['url'] ?? '#';
+        $children = $item['children'] ?? [];
+        $hasChildren = !empty($children);
+        $menuUrl = $url === '#' ? '' : url($url);
+        $isActive = $menuUrl && ($currentUrl === $menuUrl || $currentUrl === $menuUrl . '/');
+        if (!$isActive && $url !== '#') {
+            $path = ltrim(rtrim(parse_url($url, PHP_URL_PATH), '/'), '/');
+            $currentPath = rtrim(parse_url($currentUrl, PHP_URL_PATH), '/');
+            if ($path !== '' && $currentPath !== '/') {
+                $isActive = str_starts_with($currentPath, '/' . $path);
+            }
+        }
+        if (!$isActive && $hasChildren) {
+            foreach ($children as $child) {
+                $childUrl = $child['url'] ?? '';
+                if ($childUrl === '' || $childUrl === '#') continue;
+                $childPath = ltrim(rtrim(parse_url($childUrl, PHP_URL_PATH), '/'), '/');
+                if ($childPath !== '' && $currentPath !== '/' && str_starts_with($currentPath, '/' . $childPath)) {
+                    $isActive = true;
+                    break;
+                }
+                if (!empty($child['children'])) {
+                    foreach ($child['children'] as $subChild) {
+                        $subUrl = $subChild['url'] ?? '';
+                        if ($subUrl === '' || $subUrl === '#') continue;
+                        $subPath = ltrim(rtrim(parse_url($subUrl, PHP_URL_PATH), '/'), '/');
+                        if ($subPath !== '' && $currentPath !== '/' && str_starts_with($currentPath, '/' . $subPath)) {
+                            $isActive = true;
+                            break 2;
+                        }
+                    }
+                }
+            }
+        }
+        $liClass = $hasChildren ? 'has-megamenu' : '';
+        if ($isActive) $liClass .= ' active';
+        $isMegaFormat = $hasChildren && isset($children[0]['children']);
+    @endphp
+
+    <li class="{{ $liClass }}">
+        <div class="menu-item-with-icon">
+        <a href="{{ $url === '#' ? 'javascript:void(0)' : url($url) }}" class="nav-link{{ $isActive ? ' active' : '' }}">{{ $label }}</a>
+        @if($hasChildren)
+            <span class="has-submenu-icon">
+                <i class="fas fa-chevron-down"></i>
+            </span></div>
+            <div class="megamenu cat-megamenu">
+                <div class="row w-100">
+                    @if($isMegaFormat)
+                        @foreach($children as $col)
+                            <div class="col-lg-4">
+                                <div class="single-menu mt-30">
+                                    <h5><a href="{{ url($col['url'] ?? '#') }}">{{ $col['label'] ?? '' }}</a></h5>
+                                    @if(!empty($col['children']))
+                                        <ul>
+                                            @foreach($col['children'] as $child)
+                                                <li><a href="{{ url($child['url'] ?? '#') }}">{{ $child['label'] ?? '' }}</a></li>
+                                            @endforeach
+                                        </ul>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    @else
+                        <div class="col-lg-4">
+                            <div class="single-menu mt-30">
+                                <ul>
+                                    @foreach($children as $child)
+                                        <li><a href="{{ url($child['url'] ?? '#') }}">{{ $child['label'] ?? '' }}</a></li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        @else
+            </div>
+        @endif
+    </li>
+@endforeach

@@ -1,0 +1,188 @@
+@extends('user.layouts.dashboard')
+
+@section('dashboard-content')
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 mb-4">
+    <div>
+        <h4 class="mb-1">My Profile</h4>
+        <p class="text-muted mb-0">Manage your account details and saved shipping addresses.</p>
+    </div>
+    <a href="{{ route('user.profile.edit') }}" class="btn btn-primary">Update Profile</a>
+</div>
+
+@if(session('success'))
+    <div class="alert alert-success">{{ session('success') }}</div>
+@endif
+
+@if(session('error'))
+    <div class="alert alert-danger">{{ session('error') }}</div>
+@endif
+
+<div class="row gy-4">
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                <img src="{{ $profile->avatar ? asset($profile->avatar) : asset('assets/images/avatar-place.png') }}"
+                     class="rounded-circle mb-3"
+                     style="width: 120px; height: 120px; object-fit: cover;">
+                <h5 class="mb-1">{{ $profile->name }}</h5>
+                <p class="text-muted mb-1">{{ $profile->email }}</p>
+                <p class="text-muted mb-0">{{ $profile->phone ?? 'No phone number added' }}</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Basic Info</h5>
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2"><strong>Name:</strong> {{ $profile->name }}</li>
+                    <li class="mb-2"><strong>Email:</strong> {{ $profile->email }}</li>
+                    <li class="mb-2"><strong>Phone:</strong> {{ $profile->phone ?? 'Not set' }}</li>
+                    <li class="mb-2"><strong>Address:</strong> {{ $profile->address ?? 'Not set' }}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">        
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Saved Addresses</h5>
+                <a href="{{ route('user.addresses') }}" class="btn btn-outline-primary btn-sm">Manage Addresses</a>
+            </div>
+            <div class="card-body">
+                @if($addresses->isEmpty())
+                    <div class="text-center py-4">
+                        <p class="text-muted mb-3">No saved addresses yet.</p>
+                        <a href="{{ route('user.addresses') }}" class="btn btn-primary btn-sm">Add Address</a>
+                    </div>
+                @else
+                    <div class="row g-3">
+                        @foreach($addresses as $address)
+                            <div class="col-12">
+                                <div class="card border rounded">
+                                    <div class="card-body">
+                                        <div class="d-flex flex-md-row justify-content-between gap-3 profile-page-saved-addresses">
+                                            <div class="address-details">
+                                                <h6 class="mb-1">{{ $address->full_name }}</h6>
+                                                <p class="mb-1">{{ $address->address }}, {{ $address->city }}, {{ $address->state ? $address->state . ', ' : '' }}{{ $address->country }}</p>
+                                                <p class="mb-1">{{ $address->zip_code }}</p>
+                                                <p class="mb-0 text-muted">{{ $address->phone }}</p>
+                                                @if($address->set_default)
+                                                    <span class="badge bg-success mt-2">Default</span>
+                                                @endif
+                                            </div>
+                                            <div class="address-actions-dropdown custom-address-dropdown">
+                                                <button type="button" class="address-action-toggle custom-address-toggle steve-btn" aria-haspopup="true" aria-expanded="false">&#x22EE;</button>
+                                                <div class="address-action-menu custom-address-menu">
+                                                    <button type="button" class="address-action-item custom-address-item steve-btn" data-bs-toggle="modal" data-bs-target="#editAddressModal{{ $address->id }}">Edit</button>
+                                                    @if(!$address->set_default)
+                                                        <form action="{{ route('checkout.address.default', $address->id) }}" method="POST" class="address-action-item custom-address-form">
+                                                            @csrf
+                                                            <button type="submit" class="address-action-button custom-address-button steve-btn">Set Default</button>
+                                                        </form>
+                                                    @endif
+                                                    <form action="{{ route('user.addresses.destroy', $address->id) }}" method="POST" class="address-action-item custom-address-form" onsubmit="return confirm('Remove this address?')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="address-action-button custom-address-button custom-address-delete steve-btn">Delete</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Edit Address Modal -->
+                                <div class="modal fade" id="editAddressModal{{ $address->id }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                                        <form action="{{ route('user.addresses.update', $address->id) }}" method="POST">
+                                            @csrf
+                                            @method('PUT')
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Edit Address</h5>
+                                                    <button type="button" class="btn-close steve-btn" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="row g-3">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Full Name</label>
+                                                            <input type="text" name="full_name" class="form-control" value="{{ $address->full_name }}" required>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Phone</label>
+                                                            <input type="tel" name="phone" class="form-control" inputmode="numeric" value="{{ $address->phone }}" required>
+                                                        </div>
+                                                        <div class="col-12">
+                                                            <label class="form-label">Address</label>
+                                                            <textarea name="address" class="form-control" rows="2" required>{{ $address->address }}</textarea>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">City</label>
+                                                            <input type="text" name="city" class="form-control" value="{{ $address->city }}" required>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">State</label>
+                                                            <input type="text" name="state" class="form-control" value="{{ $address->state }}">
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Country</label>
+                                                            <input type="text" name="country" class="form-control" value="{{ $address->country }}" required>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Zip Code</label>
+                                                            <input type="text" name="zip_code" class="form-control" value="{{ $address->zip_code }}" required>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary steve-btn modal-cancel-btn" data-bs-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="btn btn-primary steve-btn modal-save-btn">Save Changes</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <div class="text-center mt-4 add-address-btn-container">
+                        <a href="{{ route('user.addresses') }}" class="w-100 d-block p-2 bg-dark add-address-btn">+ Add Address</a>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        function closeAllAddressDropdowns() {
+            document.querySelectorAll('.address-actions-dropdown.open').forEach(function(dropdown) {
+                dropdown.classList.remove('open');
+            });
+        }
+
+        document.querySelectorAll('.address-actions-dropdown').forEach(function(dropdown) {
+            var toggle = dropdown.querySelector('.address-action-toggle');
+            toggle.addEventListener('click', function(event) {
+                event.stopPropagation();
+                var isOpen = dropdown.classList.contains('open');
+                closeAllAddressDropdowns();
+                if (!isOpen) {
+                    dropdown.classList.add('open');
+                }
+            });
+        });
+
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.address-actions-dropdown')) {
+                closeAllAddressDropdowns();
+            }
+        });
+    });
+</script>
+
+@endsection

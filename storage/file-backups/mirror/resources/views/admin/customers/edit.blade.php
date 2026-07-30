@@ -1,0 +1,61 @@
+@extends('admin.layouts.app')
+{{-- Add your custom page ID and classes right here --}}
+@section('page-id', 'admin-customers-edit-page')
+@section('page-class', 'admin-customers-edit-page')
+@section('page-title', 'Edit Customer')
+@section('content')
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">Edit Customer: {{ $customer->name }}</h5>
+    </div>
+    <div class="card-body">
+        <form action="{{ route('admin.customers.update', $customer->id) }}" method="POST" enctype="multipart/form-data">
+            @csrf @method('PUT')
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Name <span class="text-danger">*</span></label>
+                    <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $customer->name) }}" required>
+                    @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Email Address <span class="text-danger">*</span></label>
+                    <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $customer->email) }}" required>
+                    @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Phone</label>
+                    <input type="tel" name="phone" class="form-control" inputmode="numeric" value="{{ old('phone', $customer->phone) }}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select @error('status') is-invalid @enderror">
+                        <option value="active" {{ old('status', $customer->status ?? 'active') === 'active' ? 'selected' : '' }}>Active</option>
+                        <option value="inactive" {{ old('status', $customer->status ?? '') === 'inactive' ? 'selected' : '' }}>Inactive</option>
+                    </select>
+                    @error('status')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">City</label>
+                    <input type="text" name="city" class="form-control" value="{{ old('city', $customer->city) }}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Country</label>
+                    <input type="text" name="country" class="form-control" value="{{ old('country', $customer->country) }}">
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label">Address</label>
+                    <input type="text" name="address" class="form-control" value="{{ old('address', $customer->address) }}">
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button class="btn btn-primary steve-btn"><i class="fas fa-save"></i> Update</button>
+                <a href="{{ route('admin.customers.index') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@endsection
