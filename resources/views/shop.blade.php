@@ -583,7 +583,7 @@
             @if($hasVehicleFilter)
               <span class="filter-chip">
                 <span class="filter-chip-label">Vehicle:</span>
-                <span class="filter-chip-value">{{ $selectedVehicle->year }} {{ $selectedVehicle->make }} {{ $selectedVehicle->model }}</span>
+                <span class="filter-chip-value">{{ $selectedVehicle->year }} {{ $selectedVehicle->make }} {{ $selectedVehicle->model }} ({{ $products->total() }})</span>
                 <form method="POST" action="{{ route('shop.clear-vehicle') }}" class="d-inline">
                   @csrf
                   <button type="submit" class="filter-chip-clear border-0 bg-transparent p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Clear vehicle filter">
