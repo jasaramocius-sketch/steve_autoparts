@@ -13,6 +13,7 @@ Contents
 - Operations & Maintenance — docs/operations.md
 - Contributing — docs/contributing.md
 - FAQ & Troubleshooting — docs/faq.md
+- HTML copy — docs/index.html
 
 Useful links
 

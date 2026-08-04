@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Steve Auto Parts Documentation</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f7f9fc;
+        --panel: #ffffff;
+        --text: #1f2937;
+        --muted: #6b7280;
+        --accent: #0f766e;
+        --border: #dbe3ec;
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+      }
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+      .hero {
+        background: linear-gradient(135deg, #134e4a, #0f766e);
+        color: white;
+        padding: 32px;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+      }
+      .hero h1 { margin: 0 0 8px; font-size: 2rem; }
+      .hero p { margin: 0; color: #ccfbf1; }
+      .nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin: 24px 0;
+      }
+      .nav a {
+        text-decoration: none;
+        color: var(--accent);
+        background: var(--panel);
+        border: 1px solid var(--border);
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-weight: 600;
+      }
+      .section {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 24px;
+        margin-bottom: 18px;
+        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+      }
+      .section h2 { margin-top: 0; color: var(--accent); }
+      .section h3 { margin-bottom: 8px; }
+      code, pre {
+        font-family: Consolas, "Courier New", monospace;
+      }
+      pre {
+        background: #111827;
+        color: #f9fafb;
+        padding: 14px;
+        border-radius: 8px;
+        overflow-x: auto;
+      }
+      ul { padding-left: 20px; }
+      .muted { color: var(--muted); }
+      .grid {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      }
+      .card {
+        background: #f8fafc;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px;
+      }
+      .card h3 { margin-top: 0; }
+      .footer {
+        text-align: center;
+        padding: 24px 0 8px;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="hero">
+        <h1>Steve Auto Parts Documentation</h1>
+        <p>This HTML page is a browser-friendly copy of the repository documentation for developers and end users.</p>
+      </div>
+
+      <div class="nav">
+        <a href="README.md">Markdown docs index</a>
+        <a href="../README.md">Project README</a>
+        <a href="../HOME_PAGE_ADMIN_GUIDE.md">Home Page Admin Guide</a>
+      </div>
+
+      <div class="section">
+        <h2>Overview</h2>
+        <p>This documentation covers getting started, development workflows, deployment steps, architecture, database operations, testing, admin usage, troubleshooting, and contribution guidelines for the Steve Auto Parts site.</p>
+        <div class="grid">
+          <div class="card">
+            <h3>For developers</h3>
+            <ul>
+              <li>Setup local environment</li>
+              <li>Run tests and build assets</li>
+              <li>Understand architecture and routes</li>
+              <li>Deploy safely</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>For end users</h3>
+            <ul>
+              <li>Browse the storefront</li>
+              <li>Use the shopping and checkout flows</li>
+              <li>Manage content from the admin panel</li>
+              <li>Use support and troubleshooting tips</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Getting Started</h2>
+        <p>Requirements:</p>
+        <ul>
+          <li>PHP 8.3+</li>
+          <li>Composer</li>
+          <li>Node.js 18+ and npm</li>
+          <li>Git</li>
+          <li>MySQL/MariaDB or SQLite</li>
+        </ul>
+        <p>Typical local setup:</p>
+        <pre>composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --force
+npm install
+npm run dev</pre>
+      </div>
+
+      <div class="section">
+        <h2>Development Guide</h2>
+        <p>Common developer commands:</p>
+        <pre>composer run dev
+vendor/bin/pint
+composer test</pre>
+        <p>The main folders are:</p>
+        <ul>
+          <li><code>app/</code> — application code</li>
+          <li><code>resources/views/</code> — Blade templates</li>
+          <li><code>resources/js/</code> and <code>resources/css/</code> — frontend assets</li>
+          <li><code>routes/web.php</code> — public and admin routes</li>
+          <li><code>database/</code> — migrations and seeders</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <h2>Deployment Guide</h2>
+        <p>Production deployment checklist:</p>
+        <ul>
+          <li>Install PHP, Composer, Node, and required extensions</li>
+          <li>Configure <code>.env</code> with production values</li>
+          <li>Run migrations and build frontend assets</li>
+          <li>Cache config and routes</li>
+          <li>Configure queue workers and web server</li>
+        </ul>
+        <pre>composer install --no-dev --optimize-autoloader
+npm ci
+npm run build
+php artisan migrate --force
+php artisan config:cache</pre>
+      </div>
+
+      <div class="section">
+        <h2>Architecture Overview</h2>
+        <p>The project is a Laravel 13 application with server-rendered Blade templates and Vite-powered frontend assets. Public routes and admin routes are both defined in <code>routes/web.php</code>.</p>
+        <ul>
+          <li>HTTP layer: controllers and routes</li>
+          <li>Data layer: Eloquent models and migrations</li>
+          <li>Presentation layer: Blade views and Vite assets</li>
+          <li>Admin panel: role-based access for admin and staff users</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <h2>Database</h2>
+        <p>The default setup uses SQLite in <code>.env.example</code>, while production should use MySQL/MariaDB. Schema changes are managed with Laravel migrations and seeders.</p>
+        <pre>php artisan migrate --force
+php artisan db:seed</pre>
+        <p>Useful assets:</p>
+        <ul>
+          <li><code>stautoparts.sql</code> — SQL snapshot</li>
+          <li><code>sample-products-import.csv</code> — sample import file</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <h2>Testing</h2>
+        <p>Run automated tests with PHPUnit:</p>
+        <pre>composer test</pre>
+        <p>Useful variants:</p>
+        <pre>vendor/bin/phpunit
+vendor/bin/phpunit tests/Feature/ExampleTest.php</pre>
+      </div>
+
+      <div class="section">
+        <h2>Operations &amp; Maintenance</h2>
+        <p>Key operational tasks include file uploads, backups, monitoring, maintenance mode, and queue worker health.</p>
+        <ul>
+          <li>Upload images under <code>public/assets/images/</code></li>
+          <li>Review backup utilities in <code>backup/</code> and <code>copy_backup.py</code></li>
+          <li>Monitor logs under <code>storage/logs/</code></li>
+          <li>Use maintenance mode during upgrades</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <h2>Contributing</h2>
+        <p>To contribute:</p>
+        <ol>
+          <li>Create a feature or fix branch</li>
+          <li>Implement the change and run tests</li>
+          <li>Open a pull request with a description and testing details</li>
+        </ol>
+      </div>
+
+      <div class="section">
+        <h2>FAQ &amp; Troubleshooting</h2>
+        <ul>
+          <li>If homepage content is not updating, verify active home page sections and migrations.</li>
+          <li>If images fail to upload, check permissions and allowed file formats.</li>
+          <li>If product import fails, confirm the CSV format and server upload limits.</li>
+          <li>If queues fail, confirm a queue worker is running.</li>
+        </ul>
+      </div>
+
+      <div class="footer">
+        <p>Open the Markdown docs in the <code>docs/</code> folder for the source version, or view this HTML page directly in a browser.</p>
+      </div>
+    </div>
+  </body>
+</html>
