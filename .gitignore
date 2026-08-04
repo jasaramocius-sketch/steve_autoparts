@@ -31,3 +31,4 @@ database/*.sql.gz
 
 # Backup folders
 storage/file-backups/
+

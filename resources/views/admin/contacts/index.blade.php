@@ -5,7 +5,7 @@
 @section('page-title', 'Questions / Inquiries')
 @section('content')
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap flex-md-nowrap">
     <h4 class="fw-bold mb-0">Questions / Inquiries</h4>
     <form method="GET" class="d-flex gap-2 align-items-center">
         <select name="source" class="form-select w-auto" onchange="this.form.submit()">
@@ -18,7 +18,7 @@
 
 <div class="card border-0 shadow-sm">
     <div class="card-body p-0">
-        <div class="d-flex justify-content-between align-items-center px-3 pt-3 pb-2">
+        <div class="d-flex justify-content-between align-items-center px-3 pt-3 pb-2 flex-wrap flex-md-nowrap mb-3 flex-wrap flex-md-nowrap">
             <div class="d-flex align-items-center gap-2">
                 <span class="text-muted small">Show</span>
                 <select class="form-select w-auto" onchange="window.location.href=this.value">

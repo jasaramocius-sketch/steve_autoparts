@@ -19,6 +19,7 @@
                 <div class="card-body text-center">
                     <img src="{{ $image->thumb_url }}" alt="{{ $image->alt_text ?? $image->original_name }}" class="img-fluid rounded" style="max-height:400px;" onerror="this.onerror=null;this.src='{{ asset("assets/images/placeholder.png") }}'">
                     <hr>
+                    <div class="table-responsive">
                     <table class="table table-sm table-borderless text-start small mb-0">
                         <tr><th class="text-muted">Filename</th><td>{{ $image->original_name }}</td></tr>
                         <tr><th class="text-muted">URL</th><td class="text-break"><a href="{{ $image->thumb_url }}" target="_blank"><code>{{ $image->thumb_url }}</code></a></td></tr>
@@ -37,6 +38,7 @@
                             </td>
                         </tr>
                     </table>
+                    </div>
                 </div>
             </div>
 

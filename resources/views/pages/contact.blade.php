@@ -6,10 +6,10 @@
 
 @section('content')
 
-<section class="py-5 bg-light contect-page-main-section">
+<section class="contect-page-main-section">
     <div class="container">
         <div class="text-center mb-5">
-            <h1>Contact</h1>
+            <h1>Contact Us</h1>
             <p class="text-muted">
                 Have questions? We'd love to hear from you.
             </p>
@@ -40,7 +40,7 @@
                         <h4 class="mb-4">Contact Information</h4>
                         <div class="mb-4 d-flex gap-2 ">
                             <div class="">
-                            <i class="fas fa-user-alt me-2 w-fit"></i>
+                            <i class="fas fa-map-marker-alt me-2 w-fit"></i>
                             </div>
                             <div class="">
                             <strong>Address</strong>
@@ -51,7 +51,7 @@
                         </div>
                         <div class="mb-4 d-flex gap-2 ">
                             <div class="">
-                            <i class="fas fa-user-alt me-2 w-fit"></i>
+                            <i class="fas fa-phone-alt me-2 w-fit"></i>
                             </div>
                             <div class="">
                             <strong>Phone</strong></br>

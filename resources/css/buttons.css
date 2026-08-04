@@ -792,6 +792,20 @@
   color: var(--btn-white) !important;
 }
 
+@media (hover: none) {
+  .view-btn:hover {
+    background: var(--btn-white) !important;
+    border-color: var(--btn-primary) !important;
+    color: var(--btn-primary) !important;
+  }
+}
+
+.view-btn.active {
+  background: var(--btn-primary);
+  border-color: var(--btn-primary);
+  color: var(--btn-white);
+}
+
 /* shop inline view-btn override */
 .product-nav-wrapper .btn-wrapper .view-btn {
   width: 42px;
@@ -1239,9 +1253,9 @@ button.add-to-cart,
 
 
 /* --- category-create-page bridge --- */
-.category-create-page .steve-btn {
-  /* preserves existing context overrides */
-}
+/* .category-create-page .steve-btn {
+  preserves existing context overrides
+} */
 
 
 /* --- mobile-view-auth-btns bridge --- */

@@ -149,7 +149,7 @@
                         <li><span>Expires:</span> {{ $packages->first()->expires_at ?? 'N/A' }}</li>
                     @else
                         <li class="text-muted">Package Not Found</li>
-                        <li><a href="#" class="btn btn-sm btn-dark rounded-pill px-4">Upgrade Package</a></li>
+                        <li><a href="#" class="btn btn-sm btn-dark steve-btn px-4">Upgrade Package</a></li>
                     @endif
                 </ul>
             </div>
@@ -167,7 +167,7 @@
                         <li><span>Phone:</span> {{ $address->phone ?? 'N/A' }}</li>
                     @else
                         <li class="text-muted">No default address found</li>
-                        <li><a href="{{ route('user.addresses') }}" class="btn btn-sm btn-dark rounded-pill px-4">Add New Address</a></li>
+                        <li><a href="{{ route('user.addresses') }}" class="btn btn-sm btn-dark steve-btn px-4">Add New Address</a></li>
                     @endif
                 </ul>
             </div>
@@ -178,7 +178,7 @@
 <div class="dashboard-row dashboard-additional-block-3">
     <div class="dashboard-column" style="width: 100%;">
         <div class="acc-info-wrapper">
-            <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                 <h4 class="mb-0">Your Vehicles</h4>
                 <a href="{{ route('user.vehicles') }}" class="text-decoration-none small a-tag-hover-color">View All <i class="fas fa-arrow-right ms-1"></i></a>
             </div>
@@ -209,7 +209,7 @@
 </div>
 
 <div class="dashboard-row dashboard-wishlist-block-2">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <h4 class="mb-0">My Wishlist</h4>
         <a href="{{ route('user.wishlist') }}" class="text-decoration-none small a-tag-hover-color">View All <i class="fas fa-arrow-right ms-1"></i></a>
     </div>

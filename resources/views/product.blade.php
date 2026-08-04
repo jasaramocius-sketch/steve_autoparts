@@ -300,6 +300,11 @@
     align-items: center;
     gap: 5px;
 }
+@media (max-width: 400px) {
+  .details_btn_area {
+    grid-template-columns: 1fr;
+  }
+}
 /* .details_btn_area div{
   width: 49%;
 } */
@@ -842,7 +847,7 @@
                         <small class="text-muted">{{ $review['date'] ?? '' }}</small>
                         @auth
                           @if(($review['user_id'] ?? null) == Auth::id())
-                            <button type="button" class="btn btn-sm btn-outline-danger ms-auto delete-review-btn" data-review-id="{{ $review['id'] ?? '' }}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Delete review" style="padding:2px 8px;font-size:12px;">
+                            <button type="button" class="btn btn-sm btn-outline-danger ms-auto delete-review-btn" data-review-id="{{ $review['id'] ?? '' }}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Delete review" style="padding:6px 12px;font-size:13px;">
                               <i class="fas fa-trash"></i>
                             </button>
                           @endif

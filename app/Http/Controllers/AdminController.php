@@ -237,9 +237,18 @@ class AdminController extends Controller
         $sortBy = in_array($request->sort_by, ['id', 'created_at', 'action', 'model_type']) ? $request->sort_by : 'created_at';
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
         $perPage = in_array((int)$request->per_page, [10, 20, 50, 100]) ? (int)$request->per_page : 20;
+        $dateFrom = $request->query('date_from');
+        $dateTo = $request->query('date_to');
 
-        $revisions = Revision::with('user')
-            ->orderBy($sortBy, $sortDir)
+        $revisions = Revision::with('user');
+        if ($dateFrom) {
+            $revisions->whereDate('created_at', '>=', $dateFrom);
+        }
+        if ($dateTo) {
+            $revisions->whereDate('created_at', '<=', $dateTo);
+        }
+
+        $revisions = $revisions->orderBy($sortBy, $sortDir)
             ->paginate($perPage)
             ->appends($request->query())
             ->onEachSide(1);
@@ -258,9 +267,18 @@ class AdminController extends Controller
         $sortBy = in_array($request->sort_by, ['id', 'created_at', 'event', 'file_path']) ? $request->sort_by : 'created_at';
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
         $perPage = in_array((int)$request->per_page, [10, 20, 50, 100]) ? (int)$request->per_page : 20;
+        $dateFrom = $request->query('date_from');
+        $dateTo = $request->query('date_to');
 
-        $fileRevisions = FileRevision::with('user')
-            ->orderBy($sortBy, $sortDir)
+        $fileRevisions = FileRevision::with('user');
+        if ($dateFrom) {
+            $fileRevisions->whereDate('created_at', '>=', $dateFrom);
+        }
+        if ($dateTo) {
+            $fileRevisions->whereDate('created_at', '<=', $dateTo);
+        }
+
+        $fileRevisions = $fileRevisions->orderBy($sortBy, $sortDir)
             ->paginate($perPage)
             ->appends($request->query())
             ->onEachSide(1);
@@ -317,5 +335,57 @@ class AdminController extends Controller
         }
 
         return redirect()->route('admin.settings.header')->with('success', 'Header settings updated successfully.');
+    }
+
+    public function footerSettings()
+    {
+        $settings = Setting::getAllAsArray();
+        return view('admin.settings.footer', compact('settings'));
+    }
+
+    public function updateFooterSettings(Request $request)
+    {
+        $data = json_decode((string) $request->input('footer_columns', '[]'), true);
+
+        if (!is_array($data)) {
+            return back()->with('error', 'Invalid footer columns data.');
+        }
+
+        $allowedTypes = ['links', 'newsletter', 'contact'];
+        $allowedSpans = [2, 3, 4, 6, 12];
+
+        $columns = [];
+        foreach ($data as $col) {
+            if (!is_array($col)) {
+                continue;
+            }
+
+            $type = in_array($col['type'] ?? '', $allowedTypes) ? $col['type'] : 'links';
+            $span = in_array((int) ($col['span'] ?? 2), $allowedSpans) ? (int) $col['span'] : 2;
+
+            $links = [];
+            foreach (($col['links'] ?? []) as $link) {
+                if (!is_array($link)) {
+                    continue;
+                }
+                $label = trim((string) ($link['label'] ?? ''));
+                $url = trim((string) ($link['url'] ?? ''));
+                if ($label === '' && $url === '') {
+                    continue;
+                }
+                $links[] = ['label' => $label, 'url' => $url];
+            }
+
+            $columns[] = [
+                'type' => $type,
+                'heading' => trim((string) ($col['heading'] ?? '')),
+                'span' => $span,
+                'links' => $links,
+            ];
+        }
+
+        Setting::set('footer_columns', json_encode($columns));
+
+        return redirect()->route('admin.settings.footer')->with('success', 'Footer settings updated successfully.');
     }
 }

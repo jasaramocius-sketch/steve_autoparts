@@ -16,21 +16,12 @@
   $paymentMethod = $paymentLabels[$order['payment_method'] ?? 'cod'] ?? ($order['payment_method'] ?? 'Cash on Delivery');
   $orderCode = ltrim($order['id'] ?? '', '#');
 @endphp
-
-<section class="pt-5 mb-4">
-  <div class="container">
-    <div class="row">
-      <div class="col-xl-8 mx-auto">
-        @include('partials.checkout-steps', ['activeStep' => 5])
-      </div>
-    </div>
-  </div>
-</section>
+@include('partials.checkout-steps', ['activeStep' => 5])
 
 <section class="py-4">
   <div class="container text-left">
     <div class="row">
-      <div class="col-xl-8 mx-auto">
+      <div class="mx-auto">
         <div class="text-center py-4 mb-0">
           <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36" class="mb-3">
             <g transform="translate(-978 -481)">
@@ -169,16 +160,16 @@
                     </tbody>
                   </table>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="text-center mt-4">
+              </div><div class="text-center mt-4">
           <a href="{{ route('home') }}" class="btn btn-primary fs-14 fw-700 rounded-0 px-4">
             Continue Shopping <i class="las la-arrow-right"></i>
           </a>
         </div>
+            </div>
+          </div>
+        </div>
+
+        
       </div>
     </div>
   </div>

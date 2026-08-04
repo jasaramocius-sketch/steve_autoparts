@@ -69,8 +69,8 @@ Route::get('/blog', [BlogController::class, 'index'])->name('blog');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 Route::get('/blog/category/{slug}', [BlogController::class, 'category'])->name('blog.category');
 
-Route::get('/about', [HomeController::class, 'about'])->name('about');
-Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
+Route::get('/about-us', [HomeController::class, 'about'])->name('about');
+Route::get('/contact-us', [HomeController::class, 'contact'])->name('contact');
 Route::get('/page/{slug}', [HomeController::class, 'page'])->name('page.show');
 
 /*
@@ -365,11 +365,17 @@ Route::prefix('admin')
             ->name('admin.home-page.update');
         Route::post('/home-page/reorder', [HomePageController::class, 'reorder'])
             ->name('admin.home-page.reorder');
+        Route::post('/home-page/{id}/toggle-status', [HomePageController::class, 'toggleStatus'])
+            ->name('admin.home-page.toggle-status');
 
         Route::get('/settings/header', [AdminController::class, 'headerSettings'])
             ->name('admin.settings.header');
         Route::post('/settings/header', [AdminController::class, 'updateHeaderSettings'])
             ->name('admin.settings.header.update');
+        Route::get('/settings/footer', [AdminController::class, 'footerSettings'])
+            ->name('admin.settings.footer');
+        Route::post('/settings/footer', [AdminController::class, 'updateFooterSettings'])
+            ->name('admin.settings.footer.update');
         Route::get('/logs', [AdminController::class, 'logs'])
             ->name('admin.logs.index');
         Route::get('/revisions', [AdminController::class, 'revisions'])
@@ -390,6 +396,8 @@ Route::prefix('admin')
             ->name('admin.images.picker');
         Route::post('/images/picker/upload', [ImageController::class, 'pickerStore'])
             ->name('admin.images.picker-store');
+        Route::post('/images/picker/store-url', [ImageController::class, 'pickerStoreFromUrl'])
+            ->name('admin.images.picker-store-url');
         Route::post('/images', [ImageController::class, 'store'])
             ->name('admin.images.store');
         Route::get('/images/{id}/edit', [ImageController::class, 'edit'])
@@ -618,8 +626,8 @@ Route::get('/currency/{currency}', function ($currency) {
 })->name('currency.change');
 
 
-Route::get('/contact', [ContactController::class, 'index'])
+Route::get('/contact-us', [ContactController::class, 'index'])
     ->name('contact');
 
-Route::post('/contact', [ContactController::class, 'store'])
+Route::post('/contact-us', [ContactController::class, 'store'])
     ->name('contact.store');

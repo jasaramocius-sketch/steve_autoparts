@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\Image;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -67,6 +68,87 @@ class ImageController extends Controller
         }
 
         return response()->json(['success' => true, 'images' => $uploaded]);
+    }
+
+    public function pickerStoreFromUrl(Request $request)
+    {
+        $request->validate([
+            'url' => 'required|url|max:2048',
+        ]);
+
+        $url = $request->url;
+
+        if (!preg_match('/^https?:\/\//i', $url)) {
+            return response()->json(['success' => false, 'message' => 'Only http/https image URLs are allowed.'], 422);
+        }
+
+        $context = stream_context_create([
+            'http' => [
+                'timeout' => 20,
+                'ignore_errors' => true,
+                'user_agent' => 'Mozilla/5.0 (compatible; StAutopartsImageDownloader/1.0)',
+            ],
+            'ssl' => ['verify_peer' => false, 'verify_peer_name' => false],
+        ]);
+
+        $contents = @file_get_contents($url, false, $context);
+        if ($contents === false || strlen($contents) === 0) {
+            return response()->json(['success' => false, 'message' => 'Could not download the image from the provided URL.'], 422);
+        }
+
+        if (strlen($contents) > 10 * 1024 * 1024) {
+            return response()->json(['success' => false, 'message' => 'The image is larger than the 10MB limit.'], 422);
+        }
+
+        $info = @getimagesizefromstring($contents);
+        if ($info === false) {
+            return response()->json(['success' => false, 'message' => 'The URL does not point to a valid image.'], 422);
+        }
+
+        $allowedMimes = [
+            'image/jpeg' => 'jpg',
+            'image/png' => 'png',
+            'image/gif' => 'gif',
+            'image/webp' => 'webp',
+            'image/svg+xml' => 'svg',
+        ];
+
+        $mime = $info['mime'];
+        if (!isset($allowedMimes[$mime])) {
+            return response()->json(['success' => false, 'message' => 'Unsupported image type: ' . $mime], 422);
+        }
+        $ext = $allowedMimes[$mime];
+
+        $originalName = basename((string) parse_url($url, PHP_URL_PATH)) ?: ('image.' . $ext);
+        if (!preg_match('/\.' . preg_quote($ext, '/') . '$/i', $originalName)) {
+            $originalName = pathinfo($originalName, PATHINFO_FILENAME) . '.' . $ext;
+        }
+
+        $tmp = tempnam(sys_get_temp_dir(), 'imgdl_');
+        if ($tmp === false) {
+            return response()->json(['success' => false, 'message' => 'Could not create a temporary file.'], 500);
+        }
+
+        try {
+            file_put_contents($tmp, $contents);
+            $uploadedFile = new UploadedFile($tmp, $originalName, $mime, null, true);
+            $image = Image::storeFromUpload($uploadedFile, 'images');
+        } finally {
+            @unlink($tmp);
+        }
+
+        return response()->json([
+            'success' => true,
+            'image' => [
+                'id' => $image->id,
+                'thumb_url' => $image->thumb_url,
+                'original_name' => $image->original_name,
+                'filename' => $image->filename,
+                'path' => $image->path,
+                'mime_type' => $image->mime_type,
+                'size_in_kb' => $image->size_in_kb,
+            ],
+        ]);
     }
 
     public function store(Request $request)

@@ -39,19 +39,19 @@
     </div>
   </div>
 </section>
-
-<div class="container mt-5">
+<section class="product-category py-120 shop-page-product-items" style="background-color: #F9F8F8;">
+<div class="container">
 
     <!-- Toolbar -->
     <div class="category-toolbar mb-4 gap-3 d-grid">
         <div class="d-flex justify-content-between flex-md-row gap-2 flex-sm-row category-toolbar-top">
-            <div class="col-md-4">
+            <div class="w-auto">
                 @include('admin.partials.search-form', [
                     'route' => route('categories.index'),
                     'placeholder' => 'Search category...'
                 ])
             </div>
-            <div class="col-md-8">
+            <div class="w-auto">
                 <div class="toolbar-right category-toolbar-right d-flex align-items-center justify-content-md-end gap- flex-wrap">
                     <div class="d-flex align-items-center gap-2">
                         <h5 class="mb-0 small fw-medium">Sort by</h5>
@@ -64,7 +64,7 @@
                             </select>
                         </form>
                     </div>
-                    <div class="d-flex align-items-center gap-2">
+                    <div class="d-flex align-items-center gap-2" style="padding-left:10px;">
                         @include('partials.grid-list-toggle')
                 </div>
             </div>
@@ -72,11 +72,11 @@
     </div>
 
     <!-- Categories Grid -->
-    <div class="row" id="categoryContainer">
+    <div id="categoryContainer" class="category-container">
 
     @foreach($categories as $category)
 
-    <div class="col-lg-3 col-md-6 mb-4">
+    <div class="category-grid-item">
         <div class="category-card">
 
             <div class="category-image">
@@ -119,6 +119,30 @@
                 @endif
             </div>
 
+            @if(isset($category->preview_products) && $category->preview_products->count() > 0)
+            <div class="category-products">
+                <!-- <h6 class="category-products-title">Products</h6> -->
+                <div class="category-products-list">
+                    @foreach($category->preview_products as $previewProduct)
+                    <a href="{{ route('product', $previewProduct->slug) }}" class="category-product-item">
+                        <span class="category-product-img">
+                            {!! imgTag('assets/images/thumbnails/' . $previewProduct->image, $previewProduct->name) !!}
+                        </span>
+                        <span class="category-product-info">
+                            <span class="category-product-name">{{ $previewProduct->name }}</span>
+                            <span class="category-product-price">
+                                {{ currency_format($previewProduct->price) }}
+                                @if(!empty($previewProduct->old_price) && $previewProduct->old_price > $previewProduct->price)
+                                <del class="category-product-old-price">{{ currency_format($previewProduct->old_price) }}</del>
+                                @endif
+                            </span>
+                        </span>
+                    </a>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
         </div>
     </div>
 
@@ -127,7 +151,7 @@
 </div>
 
 </div>
-
+</section>
 <script>
 (function() {
     function applyCategoriesLayout(layout) {
@@ -138,30 +162,10 @@
             document.querySelectorAll('[data-layout="list"]').forEach(function(b) { b.classList.add('active'); });
             document.querySelectorAll('[data-layout="grid"]').forEach(function(b) { b.classList.remove('active'); });
             container.classList.add('categories-list-view');
-            var items = container.querySelectorAll(':scope > div');
-            for (var i = 0; i < items.length; i++) {
-                items[i].classList.remove('col-lg-3', 'col-md-6');
-                items[i].classList.add('col-12');
-            }
-            var cards = container.querySelectorAll('.category-card');
-            for (var j = 0; j < cards.length; j++) {
-                cards[j].classList.add('category-card-list');
-            }
-            container.querySelectorAll('.subcategory-list').forEach(function(s) { s.style.display = ''; });
         } else {
             document.querySelectorAll('[data-layout="grid"]').forEach(function(b) { b.classList.add('active'); });
             document.querySelectorAll('[data-layout="list"]').forEach(function(b) { b.classList.remove('active'); });
             container.classList.remove('categories-list-view');
-            var items = container.querySelectorAll(':scope > div');
-            for (var i = 0; i < items.length; i++) {
-                items[i].classList.remove('col-12');
-                items[i].classList.add('col-lg-3', 'col-md-6');
-            }
-            var cards = container.querySelectorAll('.category-card-list');
-            for (var j = 0; j < cards.length; j++) {
-                cards[j].classList.remove('category-card-list');
-            }
-            container.querySelectorAll('.subcategory-list').forEach(function(s) { s.style.display = 'none'; });
         }
     }
 
@@ -169,7 +173,7 @@
     applyCategoriesLayout(saved || 'grid');
 
     function forceGridOnMobile() {
-      if (window.innerWidth <= 580) {
+      if (window.innerWidth <= 767) {
         applyCategoriesLayout('grid');
       }
     }
@@ -179,6 +183,7 @@
     document.querySelectorAll('[data-layout="grid"]').forEach(function(btn) {
         btn.addEventListener('click', function() {
             bootstrap.Tooltip.getInstance(this)?.hide();
+            this.blur();
             applyCategoriesLayout('grid');
             localStorage.setItem('categories_layout', 'grid');
         });
@@ -186,14 +191,15 @@
     document.querySelectorAll('[data-layout="list"]').forEach(function(btn) {
         btn.addEventListener('click', function() {
             bootstrap.Tooltip.getInstance(this)?.hide();
+            this.blur();
             applyCategoriesLayout('list');
             localStorage.setItem('categories_layout', 'list');
         });
     });
 
-    // Disable grid/list tooltips on touch devices
+    // Disable grid/list tooltips on devices without hover support
     document.addEventListener('DOMContentLoaded', function() {
-        if ('ontouchstart' in window) {
+        if (window.matchMedia && window.matchMedia('(hover: none)').matches) {
             document.querySelectorAll('[data-layout="grid"], [data-layout="list"]').forEach(function(el) {
                 var tip = bootstrap.Tooltip.getInstance(el);
                 if (tip) tip.disable();
@@ -211,12 +217,47 @@
     gap: 20px;
 }
 #categoryContainer.categories-list-view .category-card .category-image {
-    flex: 0 0 200px;
+    flex: 0 0 24%;
 }
 #categoryContainer.categories-list-view .category-card .category-content {
     flex: 1;
 }
-@media (max-width: 607px) {
+#categoryContainer {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+  overflow-x: hidden;  /* Safety fallback to stop horizontal scroll */
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+@media (max-width: 1199px) {
+  #categoryContainer {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 767px) {
+  #categoryContainer {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 576px) {
+  #categoryContainer {
+    grid-template-columns: 1fr;
+  }
+}
+#categoryContainer.categories-list-view {
+  grid-template-columns: 1fr;
+}
+.category-products .category-product-item:hover .category-product-name{
+    color: var(--primary);
+}
+/* #categoryContainer.row .col-lg-3{
+    padding: 0;
+} */
+@media (max-width: 767px) {
     .category-toolbar .view-btn {
         display: none !important;
     }}

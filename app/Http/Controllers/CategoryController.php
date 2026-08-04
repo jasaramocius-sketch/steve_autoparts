@@ -101,6 +101,11 @@ class CategoryController extends Controller
             $category->total_products_count = Product::whereIn('category_id', $descIds)
                 ->where('status', true)
                 ->count();
+            $category->preview_products = Product::whereIn('category_id', $descIds)
+                ->where('status', true)
+                ->latest()
+                ->take(3)
+                ->get();
             return $category;
         });
 

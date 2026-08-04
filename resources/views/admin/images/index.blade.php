@@ -5,7 +5,7 @@
 @section('page-title', 'Image Manager')
 @section('content')
 <div class="container-fluid px-0">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap flex-md-nowrap">
         <div></div>
         <!-- <h4 class="fw-bold mb-0"><i class="fas fa-images me-2"></i>Image Manager</h4> -->
         <button type="button" class="btn btn-primary steve-btn" data-bs-toggle="modal" data-bs-target="#uploadModal">
@@ -51,7 +51,7 @@
     </div>
 
     {{-- Filters --}}
-    <div class="card border-0 shadow-sm mb-3">
+    <div class="card border-0 shadow-sm mb-3 flex-wrap flex-md-nowrap">
         <div class="card-body d-flex d-sm-flex gap-1 col-sm-12 col-lg-12 flex-wrap align-items-end">
             <div class="col-lg-4 col-md-12 col-sm-12">
                     <label class="form-label small">Search</label>
@@ -161,7 +161,7 @@
     @else
     <div class="card border-0 shadow-sm">
         <div class="card-body text-center py-5 text-muted">
-            <i class="fas fa-image fa-3x mb-3"></i>
+            <i class="fas fa-image fa-3x mb-3 flex-wrap flex-md-nowrap"></i>
             <p>No images found.</p>
         </div>
     </div>
@@ -177,12 +177,23 @@
                     <button type="button" class="btn-close steve-btn" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3">
+                    <div class="mb-3 flex-wrap flex-md-nowrap">
                         <label class="form-label">Select Images <span class="text-danger">*</span></label>
                         <input type="file" name="images[]" class="form-control" multiple accept="image/*" required>
                         <div class="form-text">Allowed: jpeg, png, jpg, gif, svg, webp. Max 10MB per file.</div>
                     </div>
                     <div id="upload-preview" class="row g-2"></div>
+                    <hr>
+                    <div class="mb-2">
+                        <label class="form-label">Or download from a URL</label>
+                        <div class="d-flex gap-2">
+                            <input type="url" id="image-url-input" class="form-control" placeholder="https://example.com/image.jpg" autocomplete="off">
+                            <button type="button" id="image-url-btn" class="btn btn-outline-secondary text-nowrap">
+                                <i class="fas fa-download me-1"></i> Download URL
+                            </button>
+                        </div>
+                        <div id="image-url-error" class="text-danger small mt-1"></div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary steve-btn" data-bs-dismiss="modal">Cancel</button>
@@ -237,6 +248,55 @@ function bulkAction(url) {
     const form = document.getElementById('bulk-form');
     form.action = url;
     form.submit();
+}
+
+const imageUrlBtn = document.getElementById('image-url-btn');
+if (imageUrlBtn) {
+    const imageUrlInput = document.getElementById('image-url-input');
+    const imageUrlError = document.getElementById('image-url-error');
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const storeUrl = '{{ route("admin.images.picker-store-url") }}';
+
+    function downloadFromUrl() {
+        const url = imageUrlInput.value.trim();
+        if (!url) {
+            imageUrlError.textContent = 'Please enter an image URL.';
+            return;
+        }
+        const originalHtml = imageUrlBtn.innerHTML;
+        imageUrlBtn.disabled = true;
+        imageUrlBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Downloading...';
+        imageUrlError.textContent = '';
+
+        const formData = new FormData();
+        formData.append('url', url);
+
+        fetch(storeUrl, {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': csrfToken, 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+            body: formData
+        })
+        .then(r => r.json().then(d => ({ ok: r.ok, data: d })))
+        .then(res => {
+            imageUrlBtn.disabled = false;
+            imageUrlBtn.innerHTML = originalHtml;
+            if (res.ok && res.data.success) {
+                location.reload();
+            } else {
+                imageUrlError.textContent = (res.data && res.data.message) || 'Could not download the image from the provided URL.';
+            }
+        })
+        .catch(() => {
+            imageUrlBtn.disabled = false;
+            imageUrlBtn.innerHTML = originalHtml;
+            imageUrlError.textContent = 'Download failed. Please try again.';
+        });
+    }
+
+    imageUrlBtn.addEventListener('click', downloadFromUrl);
+    imageUrlInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); downloadFromUrl(); }
+    });
 }
 </script>
 @endpush

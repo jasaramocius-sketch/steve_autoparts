@@ -93,7 +93,10 @@ class PageController extends Controller
         $page = Page::findOrFail($id);
         $page->status = !$page->status;
         $page->save();
-        return back()->with('success', 'Page status updated successfully.');
+
+        $status = $page->status ? 'active' : 'inactive';
+
+        return back()->with('success', "Page status was successfully set to {$status}.");
     }
 
     public function destroy($id)

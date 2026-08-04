@@ -208,8 +208,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="steve-btn steve-btn-sm">Save Changes</button>
-                    <button class="steve-btn steve-btn-sm outline-btn" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn steve-btn steve-btn-sm text-white btn-primary">Save Changes</button>
+                    <button class="btn steve-btn steve-btn-sm text-white btn-primary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </form>
@@ -274,8 +274,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="steve-btn steve-btn-sm">Save</button>
-                    <button class="steve-btn steve-btn-sm outline-btn" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn steve-btn steve-btn-sm text-white btn-primary">Save</button>
+                    <button class="btn steve-btn steve-btn-sm text-white btn-primary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </form>

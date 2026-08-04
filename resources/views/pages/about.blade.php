@@ -7,14 +7,7 @@
 <!-- ABOUT PAGE STYLES -->
 <style>
     /* Variables specific to the About content */
-    :root {
-        --primary-red: #e31b23;
-        --dark-slate: #1a1a1a;
-        --light-grey: #f8f9fa;
-        --text-dark: #333333;
-        --text-muted: #666666;
-        --transition-speed: 0.3s ease;
-    }
+    
 
     /* Container for the page content */
     .about-content-wrapper {
@@ -68,7 +61,7 @@
     .story-text h2 {
         font-size: 36px;
         margin-bottom: 20px;
-        color: var(--dark-slate);
+        color: var(--soft-dark);
         position: relative;
     }
 
@@ -77,7 +70,7 @@
         display: block;
         width: 60px;
         height: 4px;
-        background-color: var(--primary-red);
+        background-color: var(--primary);
         margin-top: 10px;
     }
 
@@ -110,7 +103,7 @@
 
     .stat-box h3 {
         font-size: 36px;
-        color: var(--primary-red);
+        color: var(--primary);
         margin-bottom: 5px;
         font-weight: 700;
     }
@@ -133,11 +126,11 @@
         text-align: center;
         font-size: 36px;
         margin-bottom: 50px;
-        color: var(--dark-slate);
+        color: var(--soft-dark);
     }
 
     .values-title span {
-        color: var(--primary-red);
+        color: var(--primary);
     }
 
     .values-grid {
@@ -158,7 +151,7 @@
 
     .value-card:hover {
         transform: translateY(-5px);
-        border-top-color: var(--primary-red);
+        border-top-color: var(--primary);
         box-shadow: 0 15px 35px rgba(0,0,0,0.1);
     }
 
@@ -166,7 +159,7 @@
         width: 70px;
         height: 70px;
         background-color: rgba(227, 27, 35, 0.1);
-        color: var(--primary-red);
+        color: var(--primary);
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -178,7 +171,7 @@
     .value-card h3 {
         font-size: 20px;
         margin-bottom: 15px;
-        color: var(--dark-slate);
+        color: var(--soft-dark);
     }
 
     .value-card p {
@@ -189,7 +182,7 @@
 
     /* Call to Action Section */
     .about-cta {
-        background-color: var(--dark-slate);
+        background-color: var(--soft-dark);
         color: #ffffff;
         text-align: center;
         padding: 60px 0;
@@ -208,9 +201,9 @@
         margin-right: auto;
     }
 
-    .btn-primary {
+    /* .btn-primary {
         display: inline-block;
-        background-color: var(--primary-red);
+        background-color: var(--primary);
         color: #ffffff;
         padding: 12px 30px;
         text-decoration: none;
@@ -220,12 +213,12 @@
         font-size: 14px;
         letter-spacing: 0.5px;
         transition: background-color var(--transition-speed);
-    }
-
+    } */
+/* 
     .btn-primary:hover {
         background-color: #b5151b;
         color: #ffffff;
-    }
+    } */
 
     /* Responsive Design Breakpoints */
     @media (max-width: 992px) {
@@ -239,6 +232,25 @@
         .stats-grid {
             grid-template-columns: 1fr 1fr;
             gap: 20px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .about-hero {
+            padding: 70px 0;
+        }
+        .about-hero h1 {
+            font-size: 38px;
+        }
+        .about-hero p {
+            font-size: 16px;
+        }
+        .values-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .value-card {
+            padding: 30px 20px;
         }
     }
 
@@ -342,7 +354,7 @@
         <div class="about-container">
             <h2>Tracking Down a Rare Component?</h2>
             <p>If a specialized asset isn't displaying inside our primary shelves, we will locate it immediately via our vast auto procurement network.</p>
-            <a href="/stautoparts/contact/" class="btn-primary steve-btn steve-btn-hover">Submit a Parts Request</a>
+            <a href="{{ route('contact') }}" class="btn-primary steve-btn steve-btn-hover">Submit a Parts Request</a>
         </div>
     </section>
     

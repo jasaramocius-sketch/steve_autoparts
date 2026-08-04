@@ -24,8 +24,8 @@
                 <div class="col-md-4">
                     <label class="form-label">Type</label>
                     <select name="type" class="form-control @error('type') is-invalid @enderror">
-                        <option value="fixed" {{ old('type', $coupon->type) === 'fixed' ? 'selected' : '' }}>{{ Fixed ($) }}</option>
-                        <option value="percentage" {{ old('type', $coupon->type) === 'percentage' ? 'selected' : '' }}>{{ Percentage (%) }}</option>
+                        <option value="fixed" {{ old('type', $coupon->type) === 'fixed' ? 'selected' : '' }}>Fixed ($)</option>
+                        <option value="percentage" {{ old('type', $coupon->type) === 'percentage' ? 'selected' : '' }}>Percentage (%)</option>
                     </select>
                     @error('type') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>

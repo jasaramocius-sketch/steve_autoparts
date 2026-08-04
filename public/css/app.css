@@ -106,7 +106,7 @@ a {
   width: 100%
 }
 
-.form-select {
+/* .form-select {
   background-image: none;
   padding-right: 2.25rem;
 }
@@ -128,7 +128,7 @@ a {
   transform: translateY(-60%) rotate(45deg);
   transition: transform 0.2s ease;
   pointer-events: none;
-}
+} */
 
 .form-select-wrapper.focused::after {
   transform: translateY(-40%) rotate(-135deg);
@@ -2208,6 +2208,20 @@ a {
   background: var(--btn-primary-hover) !important;
   border-color: var(--btn-primary-hover) !important;
   color: var(--btn-white) !important;
+}
+
+@media (hover: none) {
+  .view-btn:hover {
+    background: var(--btn-white) !important;
+    border-color: var(--btn-primary) !important;
+    color: var(--btn-primary) !important;
+  }
+}
+
+.view-btn.active {
+  background: var(--btn-primary);
+  border-color: var(--btn-primary);
+  color: var(--btn-white);
 }
 
 /* shop inline view-btn override */

@@ -207,7 +207,7 @@ class DashboardController extends Controller
 
         $userId = Auth::id();
 
-        $wishlist = Wishlist::where('user_id', $userId)->get();
+        $wishlist = Wishlist::where('user_id', $userId)->latest()->paginate(9)->withQueryString();
 
         return view('user.wishlist', compact('wishlist'));
     }

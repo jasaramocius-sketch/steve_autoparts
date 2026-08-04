@@ -5,13 +5,13 @@
 @section('page-title', 'Revisions')
 @section('content')
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <!-- <h4 class="fw-bold mb-0">Revisions History</h4> -->
-</div>
+<!-- <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap flex-md-nowrap">
+    <h4 class="fw-bold mb-0">Revisions History</h4>
+</div> -->
 
 <div class="card border-0 shadow-sm revisions-page-table">
     <div class="card-body p-0">
-        <div class="d-flex justify-content-between align-items-center px-3 pt-3 pb-2">
+        <div class="d-flex justify-content-between align-items-center px-3 pt-3 pb-2 flex-wrap flex-md-nowrap mb-3 flex-wrap flex-md-nowrap">
             <div class="d-flex align-items-center gap-2">
                 <span class="text-muted small">Show</span>
                 <select class="form-select w-auto" onchange="window.location.href=this.value">
@@ -21,6 +21,7 @@
                 </select>
                 <span class="text-muted small">per page</span>
             </div>
+            @include('admin.partials.date-range-filter', ['filterRoute' => 'admin.revisions.index'])
             <div class="text-muted small">
                 Showing {{ $revisions->firstItem() }}-{{ $revisions->lastItem() }} of {{ $revisions->total() }}
             </div>

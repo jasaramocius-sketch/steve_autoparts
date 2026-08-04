@@ -13,19 +13,10 @@
     opacity: 0;
 }
 </style>
+@include('partials.checkout-steps', ['activeStep' => 4])
 
-<section class="pt-5 mb-4">
-  <div class="container">
-    <div class="row">
-      <div class="col-xl-8 mx-auto">
-        @include('partials.checkout-steps', ['activeStep' => 4])
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="container mb-4 py-4">
-  <div class="text-left col-xl-8 mx-auto">
+<section class="container mb-4 py-4 border bg-white">
+  <div class="mx-auto">
     <div class="row">
       <div class="col-lg-8">
         <form action="{{ route('checkout.payment.submit') }}" class="form-default" role="form" method="POST" id="checkout-form">
@@ -114,7 +105,7 @@
           <div class="card-header pt-4 pb-1 border-bottom-0 bg-white payment-page-summary-header">
             <h3 class="fs-16 fw-700 mb-0">Summary</h3>
             <div class="text-right">
-              <span class="badge badge-inline badge-primary fs-12 rounded-0 px-2">
+              <span class="badge badge-inline badge-primary fs-12 rounded px-2">
                 {{ count($cart) }} Items
               </span>
             </div>
@@ -177,15 +168,15 @@
         </div>
       </div>
     </div>
-    <div class="row align-items-center cp-actions-row">
+    <div class="row align-items-center cp-actions-row mt-5">
       <div class="col-6 cp-actions-left">
-        <a href="{{ route('home') }}" class="btn-link fs-14 fw-700 px-0">
-          <i class="las la-arrow-left fs-16"></i>
+        <a href="{{ route('home') }}" class="btn-link fw-700 px-0 a-tag-hover-color">
+          <i class="fas fa-arrow-left fs-16"></i>
           Return to shop
         </a>
       </div>
       <div class="col-6 text-right cp-actions-right">
-        <button type="submit" form="checkout-form" class="btn btn-primary fs-14 fw-700 rounded-0 px-4 steve-btn">Complete Order</button>
+        <button type="submit" form="checkout-form" class="btn btn-primary fw-700 px-4 steve-btn">Complete Order</button>
       </div>
     </div>
   </div>

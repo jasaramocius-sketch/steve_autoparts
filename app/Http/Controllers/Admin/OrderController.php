@@ -15,10 +15,17 @@ class OrderController extends Controller
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
         $perPage = in_array((int)$request->per_page, [10, 20, 50, 100]) ? (int)$request->per_page : 10;
 
-        $orders = Order::with('user')->orderBy($sortBy, $sortDir)->paginate($perPage);
+        $query = Order::with('user');
+
+        $statusFilter = $request->status;
+        if (in_array($statusFilter, ['pending', 'processing', 'shipped', 'delivered', 'cancelled'], true)) {
+            $query->where('status', $statusFilter);
+        }
+
+        $orders = $query->orderBy($sortBy, $sortDir)->paginate($perPage);
         $orders->appends($request->query())->onEachSide(1);
 
-        return view('admin.orders.index', compact('orders', 'sortBy', 'sortDir'));
+        return view('admin.orders.index', compact('orders', 'sortBy', 'sortDir', 'statusFilter'));
     }
 
     public function show($id)

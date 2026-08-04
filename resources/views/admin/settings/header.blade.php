@@ -5,15 +5,15 @@
 @section('page-title', 'Header Settings')
 @section('content')
 <div class="container-fluid admin-settings-header">
-    <div class="row mb-4">
+    <!-- <div class="row mb-4">
         <div class="col-md-12">
-            <!-- <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2>Header Settings</h2>
                 <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
-            </div> -->
+            </div>
 
         </div>
-    </div>
+    </div> -->
 
     <div class="row">
         <div class="col-md-12">

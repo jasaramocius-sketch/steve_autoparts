@@ -278,7 +278,7 @@ class ShopController extends Controller
     {
         $query = $request->get('query', '');
 
-        if (strlen($query) < 2) {
+        if (strlen($query) < 3) {
             return response()->json([]);
         }
 
@@ -292,8 +292,8 @@ class ShopController extends Controller
             return [
                 'name' => $product->name,
                 'slug' => $product->slug,
-                'price' => number_format($product->price, 2),
-                'old_price' => $product->old_price ? number_format($product->old_price, 2) : null,
+                'price' => currency_format($product->price),
+                'old_price' => $product->old_price ? currency_format($product->old_price) : null,
                 'image' => $product->image ? asset('assets/images/thumbnails/' . $product->image) : asset('assets/images/placeholder.png'),
                 'category' => $product->category->name ?? '',
                 'url' => route('product', $product->slug),

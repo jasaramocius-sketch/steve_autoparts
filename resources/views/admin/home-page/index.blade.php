@@ -6,15 +6,15 @@
 
 @section('content')
 <div class="container-fluid">
-    <div class="row mb-4">
+    <!-- <div class="row">
         <div class="col-md-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h4 class="fw-bold mb-0">Home Page Sections</h4>
-                <!-- <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a> -->
+                <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
             </div>
 
         </div>
-    </div>
+    </div> -->
 
     <div class="row">
         <div class="col-md-12">
@@ -24,7 +24,7 @@
                 </div> -->
                 <div class="card-body">
                     @if($sections->count() > 0)
-                        <div class="d-flex justify-content-between align-items-center pb-2">
+                        <div class="d-flex justify-content-between align-items-center pb-2 flex-wrap flex-md-nowrap mb-3">
                             <div class="d-flex align-items-center gap-2">
                                 <span class="text-muted small">Show</span>
                                 <select class="form-select w-auto" onchange="window.location.href=this.value">
@@ -57,9 +57,14 @@
                                             </td>
                                             <td>{{ Str::limit($section->title, 50) }}</td>
                                             <td>
-                                                <span class="badge {{ $section->status ? 'bg-light text-success border border-success-subtle' : 'bg-light text-danger border border-danger-subtle' }}">
-                                                    {{  $section->status ? 'Active' : 'Inactive' }}
-                                                </span>
+                                                <form action="{{ route('admin.home-page.toggle-status', $section->id) }}" method="POST" class="d-inline featured-status-btn">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-sm border-0 p-0 steve-btn">
+                                                        <span class="badge {{ $section->status ? 'bg-success' : 'bg-danger' }}" style="cursor:pointer;">
+                                                            {{ $section->status ? 'Active' : 'Inactive' }}
+                                                        </span>
+                                                    </button>
+                                                </form>
                                             </td>
                                             <td>{{ $section->order }}</td>
                                             <td class="pe-3 table-action-col">
@@ -101,4 +106,6 @@
         font-size: 0.875rem;
     }
 </style>
+
 @endsection
+

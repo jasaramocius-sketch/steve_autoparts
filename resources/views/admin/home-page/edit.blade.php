@@ -6,14 +6,14 @@
 
 @section('content')
 <div class="container-fluid">
-    <div class="row mb-4">
+    <!-- <div class="row mb-4">
         <div class="col-md-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2>Edit {{ ucfirst(str_replace('_', ' ', $section->section_name)) }}</h2>
                 <a href="{{ route('admin.home-page.index') }}" class="btn btn-secondary">Back</a>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <div class="row">
         <div class="col-md-8">
@@ -30,6 +30,24 @@
                                     <li>{{ $error }}</li>
                                 @endforeach
                             </ul>
+                        </div>
+                    @endif
+
+                    @if($section->section_name === 'offers')
+                        <div class="alert alert-info">
+                            <strong>Special Offer section:</strong> The heading is controlled by <strong>Title</strong> (default: "Special Offer") and the intro text below it by <strong>Description</strong>. The offer banners are managed below under <strong>Offer Banners</strong>.
+                        </div>
+                    @endif
+
+                    @if($section->section_name === 'deal_of_day')
+                        <div class="alert alert-info">
+                            <strong>!! Special Offer !! section:</strong> <strong>Title</strong>, <strong>Subtitle</strong> and <strong>Description</strong> now drive the heading, sub-heading and paragraph. <strong>Button Text</strong>, <strong>Button URL</strong> and <strong>Image</strong> work as before, and the countdown end date/time is set below.
+                        </div>
+                    @endif
+
+                    @if($section->section_name === 'latest_post')
+                        <div class="alert alert-info">
+                            <strong>Latest Post section:</strong> <strong>Title</strong> = section heading, <strong>Description</strong> = intro text. The posts themselves come from published blog posts (manage them under the Blog menu); use the posts-count field below to control how many are shown.
                         </div>
                     @endif
 
@@ -81,6 +99,130 @@
                                 <span class="invalid-feedback">{{ $message }}</span>
                             @enderror
                         </div>
+
+                        @if($section->section_name === 'offers')
+                        @php
+                            $extra = $section->extra_data ?? [];
+                            $banners = $extra['banners'] ?? [];
+                            $maxBanners = 3;
+                            $allBannerSlotsFilled = count($banners) >= $maxBanners;
+                        @endphp
+                        <div class="card mb-3 border-warning">
+                            <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Offer Banners</h5>
+                                <button type="button" class="btn btn-sm btn-dark steve-btn {{ $allBannerSlotsFilled ? 'd-none' : '' }}" id="add-banner-btn">
+                                    <i class="fas fa-plus me-1"></i> Add Banner
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-muted small">Banners shown below the "Special Offer" heading on the home page (max {{ $maxBanners }}).</p>
+                                <div id="banners-container">
+                                    @for($i = 0; $i < $maxBanners; $i++)
+                                    @php $banner = $banners[$i] ?? null; @endphp
+                                    <div class="banner-row border rounded p-3 mb-3 bg-light {{ $banner ? '' : 'd-none' }}">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <strong>Banner #{{ $i + 1 }}</strong>
+                                            <button type="button" class="btn btn-sm btn-danger steve-btn remove-banner-btn"><i class="fas fa-times me-1"></i>Remove</button>
+                                        </div>
+                                        <div class="row g-3">
+                                            <div class="col-md-4">
+                                                <label class="form-label mb-1"><strong>Image</strong></label>
+                                                @if($banner && !empty($banner['image']))
+                                                    @php
+                                                        $previewImg = 'assets/images/home/' . $banner['image'];
+                                                        if (!file_exists(public_path($previewImg))) {
+                                                            $previewImg = 'assets/images/categories/' . $banner['image'];
+                                                        }
+                                                    @endphp
+                                                    <div class="mb-1">
+                                                        <img src="{{ asset($previewImg) }}" width="100" style="border-radius:4px;border:1px solid #ddd;" onerror="this.onerror=null;this.src='{{ asset('assets/images/placeholder.png') }}'">
+                                                    </div>
+                                                @endif
+                                                <input type="hidden" name="banners[{{ $i }}][image_from_manager]" id="banners_image_from_manager_{{ $i }}">
+                                                <input type="hidden" name="banners[{{ $i }}][existing_image]" value="{{ $banner['image'] ?? '' }}">
+                                                <div id="impPreview_banner_{{ $i }}" class="d-none mt-1"></div>
+                                                <button type="button" class="btn btn-sm btn-outline-primary mt-1" onclick="impOpen_banner_{{ $i }}()">
+                                                    <i class="fas fa-images me-1"></i> Browse Image Manager
+                                                </button>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <div class="row g-2">
+                                                    <div class="col-md-6">
+                                                        <label class="form-label mb-1"><strong>Title</strong></label>
+                                                        <input type="text" name="banners[{{ $i }}][title]" class="form-control" value="{{ $banner['title'] ?? '' }}">
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label mb-1"><strong>Subtitle</strong></label>
+                                                        <input type="text" name="banners[{{ $i }}][subtitle]" class="form-control" value="{{ $banner['subtitle'] ?? '' }}">
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label mb-1"><strong>Button Text</strong></label>
+                                                        <input type="text" name="banners[{{ $i }}][button_text]" class="form-control" value="{{ $banner['button_text'] ?? '' }}">
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label mb-1"><strong>Button URL</strong></label>
+                                                        <input type="text" name="banners[{{ $i }}][button_url]" class="form-control" value="{{ $banner['button_url'] ?? '' }}" placeholder="/shop">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @endfor
+                                </div>
+                                <p id="banners-full-note" class="text-muted small {{ $allBannerSlotsFilled ? '' : 'd-none' }}">Maximum {{ $maxBanners }} banners reached.</p>
+                            </div>
+                        </div>
+
+                        <script>
+                        document.getElementById('add-banner-btn')?.addEventListener('click', function() {
+                            var hidden = document.querySelectorAll('#banners-container .banner-row.d-none');
+                            if (hidden.length === 0) {
+                                var note = document.getElementById('banners-full-note');
+                                if (note) {
+                                    note.classList.remove('d-none');
+                                    setTimeout(function() { note.classList.add('d-none'); }, 2500);
+                                }
+                                return;
+                            }
+                            hidden[0].classList.remove('d-none');
+                            if (document.querySelectorAll('#banners-container .banner-row').length === document.querySelectorAll('#banners-container .banner-row:not(.d-none)').length) {
+                                document.getElementById('add-banner-btn').classList.add('d-none');
+                                document.getElementById('banners-full-note').classList.remove('d-none');
+                            }
+                        });
+                        document.querySelectorAll('.remove-banner-btn').forEach(function(btn) {
+                            btn.addEventListener('click', function() {
+                                var row = btn.closest('.banner-row');
+                                row.querySelectorAll('input').forEach(function(inp) { inp.value = ''; });
+                                row.classList.add('d-none');
+                                document.getElementById('add-banner-btn').classList.remove('d-none');
+                                document.getElementById('banners-full-note').classList.add('d-none');
+                            });
+                        });
+                        </script>
+                        @endif
+
+                        @if($section->section_name === 'deal_of_day')
+                        @php $extra = $section->extra_data ?? []; @endphp
+                        <div class="form-group mb-3">
+                            <label for="countdown" class="form-label"><strong>Countdown End Date/Time</strong></label>
+                            <input type="datetime-local" name="countdown" id="countdown" class="form-control" value="{{ $extra['countdown'] ?? '' }}">
+                            <small class="text-muted d-block">Sets the date/time shown in the countdown. Leave empty to use the default end date.</small>
+                        </div>
+                        @endif
+
+                        @if($section->section_name === 'latest_post')
+                        @php $extra = $section->extra_data ?? []; @endphp
+                        <div class="form-group mb-3">
+                            <label for="posts_count" class="form-label"><strong>Number of Posts to Show</strong></label>
+                            <select name="posts_count" id="posts_count" class="form-control">
+                                @foreach([2, 3, 4, 6] as $n)
+                                    <option value="{{ $n }}" {{ (int)($extra['posts_count'] ?? 2) === $n ? 'selected' : '' }}>{{ $n }} Posts</option>
+                                @endforeach
+                            </select>
+                            <small class="text-muted d-block">How many latest published blog posts to display on the home page.</small>
+                        </div>
+                        @endif
 
                         @if(in_array($section->section_name, ['top_brands_heading', 'top_brands', 'brands_section']))
                         @php
@@ -267,5 +409,9 @@
 </style>
 
 @include('admin.partials.image-manager-picker', ['pickerId' => 'home_image', 'targetInput' => 'image_from_manager'])
+
+@for($i = 0; $i < 3; $i++)
+@include('admin.partials.image-manager-picker', ['pickerId' => 'banner_' . $i, 'targetInput' => 'banners[' . $i . '][image_from_manager]'])
+@endfor
 
 @endsection
