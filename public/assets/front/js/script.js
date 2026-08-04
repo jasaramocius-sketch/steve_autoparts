@@ -826,32 +826,96 @@ $(document).ready(function () {
 });
 
 document.addEventListener('DOMContentLoaded', function () {
-  const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-  [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
+  function getTooltipTargets() {
+    return document.querySelectorAll('[data-bs-toggle="tooltip"], .action-btn[title], .action-btn[data-bs-title]');
+  }
 
-  // Also init Bootstrap tooltips on action buttons with title (e.g. modal triggers that can't have data-bs-toggle="tooltip")
-  document.querySelectorAll('.action-btn[title]:not([data-bs-toggle="tooltip"])').forEach(function(el) {
-    new bootstrap.Tooltip(el);
+  function initTooltip(el) {
+    if (!el || !(el instanceof HTMLElement)) return;
+    if (!window.bootstrap || typeof window.bootstrap.Tooltip !== 'function') return;
+
+    if (bootstrap.Tooltip.getInstance(el)) return;
+
+    const tooltip = new bootstrap.Tooltip(el, {
+      container: 'body',
+      trigger: 'hover focus'
+    });
+
+    el.addEventListener('mouseleave', function () {
+      tooltip.hide();
+    });
+
+    el.addEventListener('click', function () {
+      tooltip.hide();
+    });
+
+    el.addEventListener('blur', function () {
+      tooltip.hide();
+    });
+  }
+
+  function hideTooltip(el) {
+    if (!el || !(el instanceof HTMLElement)) return;
+    if (!window.bootstrap || typeof window.bootstrap.Tooltip !== 'function') return;
+    const tooltipInstance = bootstrap.Tooltip.getInstance(el);
+    if (tooltipInstance) tooltipInstance.hide();
+  }
+
+  function hideAllVisibleTooltips() {
+    document.querySelectorAll('.tooltip.show').forEach(function (tooltipEl) {
+      tooltipEl.classList.remove('show');
+      tooltipEl.style.display = '';
+    });
+  }
+
+  getTooltipTargets().forEach(function (el) {
+    initTooltip(el);
   });
 
   // FIX: Dismiss tooltip on right-click (contextmenu) before browser menu opens
-  document.addEventListener('contextmenu', function(e) {
-    var trigger = e.target.closest('[data-bs-toggle="tooltip"], .action-btn[title]');
+  document.addEventListener('contextmenu', function (e) {
+    var trigger = e.target.closest('[data-bs-toggle="tooltip"], .action-btn[title], .action-btn[data-bs-title]');
     if (trigger) {
-      var tooltipInstance = bootstrap.Tooltip.getInstance(trigger);
-      if (tooltipInstance) tooltipInstance.hide();
+      hideTooltip(trigger);
     }
   });
 
   // FIX: Dismiss ALL stuck tooltips on Escape key
-  document.addEventListener('keydown', function(e) {
+  document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') {
-      document.querySelectorAll('.tooltip.show').forEach(function(tooltipEl) {
-        tooltipEl.classList.remove('show');
-        tooltipEl.style.display = '';
-      });
+      hideAllVisibleTooltips();
     }
   });
+
+  document.addEventListener('click', function (e) {
+    var trigger = e.target.closest('[data-bs-toggle="tooltip"], .action-btn[title], .action-btn[data-bs-title]');
+    if (trigger) {
+      hideTooltip(trigger);
+    }
+  }, true);
+
+  // Re-init tooltips for inserted elements (e.g. AJAX content)
+  var tooltipObserver = new MutationObserver(function (mutations) {
+    mutations.forEach(function (mutation) {
+      mutation.addedNodes.forEach(function (node) {
+        if (!(node instanceof HTMLElement)) return;
+        if (node.matches && node.matches('[data-bs-toggle="tooltip"], .action-btn[title], .action-btn[data-bs-title]')) {
+          initTooltip(node);
+        }
+        if (node.querySelectorAll) {
+          node.querySelectorAll('[data-bs-toggle="tooltip"], .action-btn[title], .action-btn[data-bs-title]').forEach(function (child) {
+            initTooltip(child);
+          });
+        }
+      });
+    });
+  });
+
+  try {
+    tooltipObserver.observe(document.body, { childList: true, subtree: true });
+  } catch (err) {
+    // Ignore if observer cannot be attached
+  }
 });
 
 // Search Suggestions AJAX
