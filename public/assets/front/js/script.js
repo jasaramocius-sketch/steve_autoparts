@@ -965,3 +965,96 @@ $(document).ready(function () {
   });
 
 });
+
+// ===== Tooltip robustness fixes =====
+// Ensure tooltips are hidden when triggers are removed or when mouse leaves
+(function() {
+  function initTooltips() {
+    const triggers = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    triggers.forEach(function(el) {
+      try {
+        if (!bootstrap.Tooltip.getInstance(el)) {
+          new bootstrap.Tooltip(el, { container: 'body' });
+        }
+      } catch (err) {
+        // bootstrap may not be available in some contexts — ignore
+        return;
+      }
+
+      // Ensure mouseleave always hides tooltip
+      el.addEventListener('mouseleave', function() {
+        const ti = bootstrap.Tooltip.getInstance(el);
+        if (ti) ti.hide();
+      });
+
+      // Hide tooltip on click (useful when element removal happens on click)
+      el.addEventListener('click', function() {
+        const ti = bootstrap.Tooltip.getInstance(el);
+        if (ti) ti.hide();
+      });
+
+      // Also hide on blur for accessibility
+      el.addEventListener('blur', function() {
+        const ti = bootstrap.Tooltip.getInstance(el);
+        if (ti) ti.hide();
+      });
+    });
+  }
+
+  // Hide any visible tooltip elements (safety)
+  function hideVisibleTooltips() {
+    document.querySelectorAll('.tooltip.show').forEach(function(tooltipEl) {
+      tooltipEl.classList.remove('show');
+      tooltipEl.style.display = '';
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    initTooltips();
+
+    // Observe DOM removals to hide tooltips that belonged to removed nodes
+    var observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(m) {
+        if (m.removedNodes && m.removedNodes.length) {
+          m.removedNodes.forEach(function(node) {
+            if (node.nodeType !== 1) return;
+
+            // If removed node itself was a tooltip trigger
+            if (node.matches && node.matches('[data-bs-toggle="tooltip"]')) {
+              const ti = bootstrap.Tooltip.getInstance(node);
+              if (ti) ti.hide();
+            }
+
+            // If it contained triggers inside, hide their tooltips
+            if (node.querySelectorAll) {
+              node.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(inner) {
+                const ti = bootstrap.Tooltip.getInstance(inner);
+                if (ti) ti.hide();
+              });
+            }
+          });
+        }
+      });
+    });
+
+    try {
+      observer.observe(document.body, { childList: true, subtree: true });
+    } catch (err) {
+      // ignore if observe fails
+    }
+
+    // Also ensure any global interactions hide stuck tooltips
+    document.addEventListener('click', function() { hideVisibleTooltips(); }, true);
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') hideVisibleTooltips(); });
+
+    // Re-init tooltips on (re)insertion of tooltip-marked elements (some code may inject them)
+    var insertionObserver = new MutationObserver(function(mutations) {
+      mutations.forEach(function(m) {
+        if (m.addedNodes && m.addedNodes.length) {
+          initTooltips();
+        }
+      });
+    });
+    try { insertionObserver.observe(document.body, { childList: true, subtree: true }); } catch (err) {}
+  });
+})();
