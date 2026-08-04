@@ -41,7 +41,7 @@
         <div id="impSelected_{{ $pickerId }}" class="d-none mb-3"></div>
 
         <!-- Search + Upload -->
-        <div class="d-flex gap-2 mb-3">
+        <div class="d-flex gap-2 mb-2">
           <div class="flex-grow-1">
             <input type="text" class="form-control form-control-sm" id="impSearch_{{ $pickerId }}" placeholder="Search images..." autocomplete="off">
           </div>
@@ -50,6 +50,17 @@
             <input type="file" id="impFileInput_{{ $pickerId }}" class="d-none" multiple accept="image/*">
           </label>
         </div>
+
+        <!-- Provide URL to download -->
+        <div class="d-flex gap-2 mb-1">
+          <div class="flex-grow-1">
+            <input type="url" class="form-control form-control-sm" id="impUrlInput_{{ $pickerId }}" placeholder="Provide an image URL to download (optional)" autocomplete="off">
+          </div>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="impUrlBtn_{{ $pickerId }}">
+            <i class="fas fa-download me-1"></i> Download URL
+          </button>
+        </div>
+        <div id="impUrlError_{{ $pickerId }}" class="text-danger small d-none mb-2"></div>
 
         <!-- Upload Progress -->
         <div id="impUploadProgress_{{ $pickerId }}" class="d-none mb-3">
@@ -96,6 +107,7 @@
     var isMultiple = {{ $multiple ? 'true' : 'false' }};
     var apiUrl = '{{ route("admin.images.picker") }}';
     var uploadUrl = '{{ route("admin.images.picker-store") }}';
+    var urlStoreUrl = '{{ route("admin.images.picker-store-url") }}';
     var csrfTokenEl = document.querySelector('meta[name="csrf-token"]');
     var csrfToken = csrfTokenEl ? csrfTokenEl.getAttribute('content') : '';
 
@@ -110,6 +122,10 @@
         if (!isMultiple) state.chosen = [];
         state.search = '';
         document.getElementById('impSearch_' + pid).value = '';
+        var urlInput = document.getElementById('impUrlInput_' + pid);
+        if (urlInput) urlInput.value = '';
+        var urlError = document.getElementById('impUrlError_' + pid);
+        if (urlError) urlError.classList.add('d-none');
         updateSelectBtn();
         hideSelectedPreview();
         renderChosen();
@@ -117,7 +133,12 @@
     };
 
     window['impConfirm_' + pid] = function() {
-        var input = document.querySelector('input[name="' + targetInputName + '"]');
+        // Use safe name-matching to support names with brackets like banners[0][image_from_manager]
+        var input = null;
+        var allInputs = document.querySelectorAll('input[type="hidden"], input:not([type])');
+        for (var i = 0; i < allInputs.length; i++) {
+            if (allInputs[i].name === targetInputName) { input = allInputs[i]; break; }
+        }
         if (isMultiple) {
             var paths = state.chosen.map(function(img) { return img.path; });
             if (input) input.value = JSON.stringify(paths);
@@ -326,5 +347,68 @@
             alert('Upload failed. Please try again.');
         });
     });
+
+    window['impDownloadUrl_' + pid] = function() {
+        var urlInput = document.getElementById('impUrlInput_' + pid);
+        var errorEl = document.getElementById('impUrlError_' + pid);
+        var url = urlInput ? urlInput.value.trim() : '';
+        if (!url) {
+            errorEl.textContent = 'Please enter an image URL.';
+            errorEl.classList.remove('d-none');
+            return;
+        }
+        var btn = document.getElementById('impUrlBtn_' + pid);
+        var originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Downloading...';
+        errorEl.classList.add('d-none');
+
+        var formData = new FormData();
+        formData.append('url', url);
+
+        fetch(urlStoreUrl, {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': csrfToken, 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+            body: formData
+        })
+        .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+        .then(function(res) {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+            if (res.ok && res.data.success && res.data.image) {
+                var img = res.data.image;
+                if (isMultiple) {
+                    state.chosen.push(img);
+                    renderChosen();
+                } else {
+                    state.selected = img;
+                    showSelectedPreview();
+                }
+                updateSelectBtn();
+                loadImages();
+                if (urlInput) urlInput.value = '';
+            } else {
+                errorEl.textContent = (res.data && res.data.message) || 'Could not download the image from the provided URL.';
+                errorEl.classList.remove('d-none');
+            }
+        })
+        .catch(function() {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+            errorEl.textContent = 'Download failed. Please try again.';
+            errorEl.classList.remove('d-none');
+        });
+    };
+
+    var urlBtn = document.getElementById('impUrlBtn_' + pid);
+    if (urlBtn) {
+        urlBtn.addEventListener('click', function() { window['impDownloadUrl_' + pid](); });
+        var urlInputEl = document.getElementById('impUrlInput_' + pid);
+        if (urlInputEl) {
+            urlInputEl.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') { e.preventDefault(); window['impDownloadUrl_' + pid](); }
+            });
+        }
+    }
 })();
 </script>

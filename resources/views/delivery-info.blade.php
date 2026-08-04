@@ -5,20 +5,12 @@
 @section('title', 'Delivery Info' . ' - ' . config('app.name', 'StAutoparts'))
 @section('content')
 
-<section class="pt-5 mb-4">
-  <div class="container">
-    <div class="row">
-      <div class="col-xl-8 mx-auto">
-        @include('partials.checkout-steps', ['activeStep' => 3])
-      </div>
-    </div>
-  </div>
-</section>
+@include('partials.checkout-steps', ['activeStep' => 3])
 
 <section class="py-4">
   <div class="container">
     <div class="row">
-      <div class="col-xxl-8 col-xl-10 mx-auto">
+      <div class="mx-auto">
         <div class="border bg-white p-4 mb-4">
           <form class="form-default" action="{{ route('checkout.delivery-info.store') }}" role="form" method="POST">
             @csrf
@@ -54,7 +46,7 @@
                     <h6 class="fs-14 fw-700 mt-3">Choose Delivery Type</h6>
                   </div>
                   <div class="col-md-6">
-                    <div class="row gutters-5">
+                    <div class="row gutters-5 justify-content-end">
                       <div class="col-6">
                         <label class="aiz-megabox d-block bg-white mb-0">
                           <input type="radio" name="shipping_method" value="free" checked class="d-none">
@@ -69,15 +61,16 @@
                   </div>
                 </div>
               </div>
-            </div>
-
-            <div class="pt-4 d-flex justify-content-between align-items-center">
-              <a href="{{ route('shop') }}" class="btn-link fs-14 fw-700 px-0">
-                <i class="la la-arrow-left fs-16"></i>
+              <div class="pt-4 d-flex justify-content-between align-items-center">
+              <a href="{{ route('shop') }}" class="btn-link fw-700 px-0 a-tag-hover-color">
+                <i class="fas fa-arrow-left fs-16"></i>
                 Return to shop
               </a>
-              <button type="submit" class="btn btn-primary fs-14 fw-700 rounded-0 px-4 steve-btn">Continue to Payment</button>
+              <button type="submit" class="btn btn-primary fw-700 px-4 steve-btn">Continue to Payment</button>
             </div>
+            </div>
+
+            
           </form>
         </div>
       </div>

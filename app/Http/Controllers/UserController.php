@@ -124,6 +124,7 @@ class UserController extends Controller
             'country' => $request->country,
             'avatar' => $user->avatar,
             'password' => $user->password,
+            'postal_code' => $request->postal_code,
         ]);
 
         return back()->with('success', 'Profile updated successfully.');

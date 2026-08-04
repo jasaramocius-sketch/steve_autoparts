@@ -7,7 +7,7 @@
 
 @php $trashedCount = \App\Models\Product::onlyTrashed()->count(); @endphp
 
-<div class="d-flex justify-content-between align-items-center mb-3 gap-2">
+<div class="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
     <div class=""></div>
     <div class="d-flex gap-2 flex-wrap admin-product-page-important-btn">
         <a href="{{ route('admin.products.import-form') }}" class="btn btn-outline-primary product-import-export-btn steve-btn"><i class="fas fa-upload"></i> Import</a>
@@ -37,7 +37,7 @@
 
 <div class="card border-0 shadow-sm">
     <div class="card-body p-0">
-        <div class="d-flex justify-content-between align-items-center px-3 pt-3 pb-2">
+        <div class="d-flex justify-content-between align-items-center px-3 pt-3 pb-2 flex-wrap flex-md-nowrap mb-3">
             <div class="d-flex align-items-center gap-2">
                 <span class="text-muted small">Show</span>
                 <select class="form-select w-auto" onchange="window.location.href=this.value">

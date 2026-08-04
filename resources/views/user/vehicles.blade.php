@@ -3,14 +3,15 @@
 @section('page-id', 'user-vehicles-page')
 @section('page-class', 'user-vehicles-page')
 @section('dashboard-content')
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
     <h4 class="h4-style mb-0">My Vehicles</h4>
     <button class="btn btn-primary btn-sm steve-btn" data-bs-toggle="modal" data-bs-target="#addVehicleModal">+ Add Vehicle</button>
 </div>
 
+<section>
 @forelse($vehicles as $vehicle)
 <div class="card mb-3">
-    <div class="card-body d-flex justify-content-between align-items-center">
+    <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
         <div>
             <h5 class="mb-1">{{ $vehicle->year }} {{ $vehicle->make }} {{ $vehicle->model }}</h5>
             @if($vehicle->engine)
@@ -79,7 +80,7 @@
     </div>
 </div>
 @endforelse
-
+</section>
 <!-- Add Vehicle Modal -->
 <div class="modal fade" id="addVehicleModal" tabindex="-1">
     <div class="modal-dialog">

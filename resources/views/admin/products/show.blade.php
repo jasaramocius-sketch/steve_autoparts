@@ -117,6 +117,7 @@
                 <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Product Summary</h5>
             </div>
             <div class="card-body">
+                <div class="table-responsive">
                 <table class="table table-sm mb-0">
                     <tr>
                         <th class="text-muted" style="width:45%">Name</th>
@@ -185,6 +186,7 @@
                         <td>{{ number_format($product->rating, 1) }} / 5 ({{ $product->reviews }} reviews)</td>
                     </tr>
                 </table>
+                </div>
             </div>
         </div>
 
@@ -193,6 +195,7 @@
                 <h5 class="mb-0"><i class="fas fa-car me-2"></i>Vehicle Details</h5>
             </div>
             <div class="card-body">
+                <div class="table-responsive">
                 <table class="table table-sm mb-0">
                     <tr>
                         <th class="text-muted" style="width:45%">Year</th>
@@ -207,6 +210,7 @@
                         <td>{{ $product->model ?? '—' }}</td>
                     </tr>
                 </table>
+                </div>
             </div>
         </div>
 
@@ -215,6 +219,7 @@
                 <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Metadata</h5>
             </div>
             <div class="card-body">
+                <div class="table-responsive">
                 <table class="table table-sm mb-0">
                     <tr>
                         <th class="text-muted" style="width:45%">ID</th>
@@ -237,6 +242,7 @@
                         <td>{{ $product->updated_at ? $product->updated_at->format('M d, Y h:i A') : '—' }}</td>
                     </tr>
                 </table>
+                </div>
             </div>
         </div>
 

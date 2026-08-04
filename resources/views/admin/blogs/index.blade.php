@@ -7,12 +7,12 @@
 
 @php $trashedCount = \App\Models\Blog::onlyTrashed()->count(); @endphp
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap flex-md-nowrap">
     <div class=""></div>
     <a href="{{ route('admin.blogs.create') }}" class="btn btn-primary"><i class="fas fa-plus"></i> Add Blog</a>
 </div>
 
-<ul class="nav nav-tabs mb-3">
+<ul class="nav nav-tabs mb-3 flex-wrap flex-md-nowrap">
     <li class="nav-item">
         <a class="nav-link {{ !request()->has('trashed') ? 'active' : '' }}" href="{{ route('admin.blogs.index') }}">Active</a>
     </li>
@@ -29,7 +29,7 @@
 
 <div class="card border-0 shadow-sm">
     <div class="card-body p-0">
-        <div class="d-flex justify-content-between align-items-center px-3 pt-3 pb-2">
+        <div class="d-flex justify-content-between align-items-center px-3 pt-3 pb-2 flex-wrap flex-md-nowrap mb-3 flex-wrap flex-md-nowrap">
             <div class="d-flex align-items-center gap-2">
                 <span class="text-muted small">Show</span>
                 <select class="form-select w-auto" onchange="window.location.href=this.value">

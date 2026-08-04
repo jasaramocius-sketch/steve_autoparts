@@ -32,7 +32,20 @@
                     <li class="mb-2"><strong>Name:</strong> {{ $profile->name }}</li>
                     <li class="mb-2"><strong>Email:</strong> {{ $profile->email }}</li>
                     <li class="mb-2"><strong>Phone:</strong> {{ $profile->phone ?? 'Not set' }}</li>
-                    <li class="mb-2"><strong>Address:</strong> {{ $profile->address ?? 'Not set' }}</li>
+                    @php
+                        $address = implode(', ', array_filter([
+                            $profile->address ?? null,
+                            $profile->city ?? null,
+                            $profile->country ?? null,
+                            $profile->postal_code ?? null,
+                        ]));
+                    @endphp
+
+                    @if($address)
+                        <li class="mb-2">
+                            <strong>Address:</strong> {{ $address }}
+                        </li>
+                    @endif
                 </ul>
             </div>
         </div>

@@ -17,7 +17,7 @@
   </div>
 </section>  
 </div>
-<div class="Faqs-page-container py-5">
+<div class="Faqs-page-container">
   <div class="container-fluid px-4">
     <div class="row justify-content-center Faqs-page-row">
       <div class="col-lg-8 Faqs-page-col" id="faqsAccordion">

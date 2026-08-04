@@ -43,6 +43,9 @@ class SetPageAttributes
             // Share with all views
             View::share('pageId', $pageId);
             View::share('pageClass', $pageClass);
+
+            // Share current CMS page (defaults to null; controllers passing $page override it)
+            View::share('page', null);
         } else {
             // Fallback for routes without names
             View::share('pageId', 'page');

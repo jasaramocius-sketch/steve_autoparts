@@ -72,6 +72,9 @@ $(document).ready(function () {
     $overlay.addClass("active");
     var t = bootstrap.Tooltip.getInstance(this);
     if (t) { t.hide(); t.disable(); }
+    setTimeout(function () {
+      $searchBar.find(".form__control").trigger("focus");
+    }, 50);
   });
 
 
@@ -540,6 +543,7 @@ $(document).ready(function () {
     freeMode: true,
     grabCursor: true,
     swipeToSlide: true,
+    freeModeSticky: true,
     touchThreshold: 5,
     navigation: {
       prevEl: '.featured-prev',
@@ -563,6 +567,7 @@ $(document).ready(function () {
     freeMode: true,
     grabCursor: true,
     swipeToSlide: true,
+    freeModeSticky: true,
     touchThreshold: 5,
     navigation: {
       prevEl: '.best-selling-prev',
@@ -667,21 +672,6 @@ window.addEventListener('pageshow', function (event) {
 });
 
 $(document).ready(function () {
-  // Custom Search Toggle
-  $('#searchIcon').on('click', function (e) {
-    e.stopPropagation();
-    $('#searchBar').toggleClass('active');
-    var t = bootstrap.Tooltip.getInstance(this);
-    if (t) { t.hide(); t.disable(); }
-  });
-  $(document).on('click', function (e) {
-    if (!$(e.target).closest('#searchBar').length && !$(e.target).closest('#searchIcon').length) {
-      $('#searchBar').removeClass('active');
-      var t = bootstrap.Tooltip.getInstance($('#searchIcon')[0]);
-      if (t) t.enable();
-    }
-  });
-
   // Category menu toggle
   $('#category-menu-toggle').on('click', function (e) {
     e.stopPropagation();
@@ -870,18 +860,27 @@ $(document).ready(function () {
   var $searchInput = $('#searchInput');
   var $suggestions = $('#searchSuggestions');
 
+  function escapeHtml(str) {
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   $searchInput.on('keyup', function () {
     var query = $(this).val().trim();
     clearTimeout(searchTimer);
 
-    if (query.length < 2) {
+    if (query.length < 3) {
       $suggestions.removeClass('active').html('');
       return;
     }
 
     searchTimer = setTimeout(function () {
       $.ajax({
-        url: '/stautoparts/api/search/suggestions',
+        url: window.searchSuggestionsUrl || '/stautoparts/api/search/suggestions',
         method: 'GET',
         data: { query: query },
         beforeSend: function () {
@@ -895,13 +894,13 @@ $(document).ready(function () {
 
           var html = '';
           $.each(data, function (i, item) {
-            html += '<a href="' + item.url + '" class="search-suggestion-item">';
-            html += '<img src="' + item.image + '" alt="' + item.name + '">';
+            html += '<a href="' + escapeHtml(item.url) + '" class="search-suggestion-item">';
+            html += '<img src="' + escapeHtml(item.image) + '" alt="' + escapeHtml(item.name) + '">';
             html += '<div class="search-suggestion-info">';
-            html += '<div class="search-suggestion-name">' + item.name + '</div>';
-            html += '<div class="search-suggestion-meta">' + item.category + '</div>';
+            html += '<div class="search-suggestion-name">' + escapeHtml(item.name) + '</div>';
+            html += '<div class="search-suggestion-meta">' + escapeHtml(item.category) + '</div>';
             html += '</div>';
-            html += '<div class="search-suggestion-price">$' + item.price + '</div>';
+            html += '<div class="search-suggestion-price">' + escapeHtml(item.price) + '</div>';
             html += '</a>';
           });
 
@@ -966,4 +965,3 @@ $(document).ready(function () {
   });
 
 });
-

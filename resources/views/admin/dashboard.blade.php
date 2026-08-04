@@ -311,8 +311,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         var ctx = canvas.getContext('2d');
         var gradient = ctx.createLinearGradient(0, 0, 0, 300);
-        gradient.addColorStop(0, 'rgba(25, 135, 84, 0.85)');
-        gradient.addColorStop(1, 'rgba(25, 135, 84, 0.35)');
+        gradient.addColorStop(0, '#2d477662');
+        gradient.addColorStop(1, '#2d4776');
 
         revenueChart = new Chart(ctx, {
             type: 'line',
@@ -324,11 +324,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     fill: true,
                     tension: 0.4,
                     backgroundColor: gradient,
-                    borderColor: '#198754',
-                    borderWidth: 3,
-                    pointBackgroundColor: '#198754',
+                    borderColor: '#e62e04',
+                    borderWidth: 1,
+                    pointBackgroundColor: '#2d4776',
                     pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
+                    pointBorderWidth: 1,
                     pointRadius: 3,
                     pointHoverRadius: 6
                 }]

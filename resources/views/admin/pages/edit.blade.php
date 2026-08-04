@@ -21,6 +21,12 @@
                     @error('title') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
 
+                    <div class="col-md-6">
+                        <label class="form-label">Short Description</label>
+                        <input type="text" name="short_description" class="form-control @error('short_description') is-invalid @enderror" value="{{ old('short_description', $page->short_description) }}">
+                        @error('short_description') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+
                 <div class="col-md-4">
                     <label class="form-label">&nbsp;</label>
                     <div class="form-check mt-2">

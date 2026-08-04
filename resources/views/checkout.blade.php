@@ -5,20 +5,12 @@
 @section('title', 'Checkout' . ' - ' . config('app.name', 'StAutoparts'))
 @section('content')
 
-<section class="pt-5 mb-4">
-  <div class="container">
-    <div class="row">
-      <div class="col-xl-8 mx-auto">
-        @include('partials.checkout-steps', ['activeStep' => 2])
-      </div>
-    </div>
-  </div>
-</section>
+@include('partials.checkout-steps', ['activeStep' => 2])
 
 <section class="mb-4">
   <div class="container">
     <div class="row cols-xs-space cols-sm-space cols-md-space">
-      <div class="col-xxl-8 col-xl-10 mx-auto">
+      <div class="mx-auto">
         <form class="form-default" data-toggle="validator" action="{{ route('checkout.submit') }}" role="form" method="POST">
           @csrf
           <div class="border bg-white p-4 mb-4">
@@ -110,11 +102,11 @@
               </div>
             </div>
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
-              <a href="{{ route('shop') }}" class="fw-600">
-                <i class="las la-arrow-left"></i>
+              <a href="{{ route('shop') }}" class="fw-600 a-tag-hover-color">
+                <i class="fas fa-arrow-left"></i>
                 Return to shop
               </a>
-              <button type="submit" class="btn btn-primary fs-14 fw-700 rounded-0 px-4 steve-btn">Continue to Delivery Info</button>
+              <button type="submit" class="btn btn-primary fs-14 fw-700 px-4 steve-btn">Continue to Delivery Info</button>
           </div>            
           </div>
         </form>

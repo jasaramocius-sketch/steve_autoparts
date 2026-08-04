@@ -139,11 +139,6 @@
     height: 400px !important;
   }
 
-  .category-image a {
-    height: 335px;
-    width: 335px;
-  }
-
   /* .home-cate-slider .swiper-slide{
     width:50%;
 } */
@@ -750,12 +745,12 @@
 }
 
 /* Category color badge */
-.cat-color-badge {
+/* .cat-color-badge {
   width: 16px;
   height: 16px;
   font-size: 10px;
   background: var(--cat-color, #e62e04);
-}
+} */
 
 /* Category sidebar menu */
 .hover-category-menu {
@@ -1092,7 +1087,8 @@
 }
 
 .hov-bg-soft-light:hover {
-  background: #f1f1f1 !important;
+  background: var(--primary) !important;
+  color: #fff !important;
 }
 
 .alpha-7 {
@@ -1319,8 +1315,8 @@
 
 /* ── Aiz plus/minus ── */
 .aiz-plus-minus .btn-icon {
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   padding: 0;
   display: inline-flex;
   align-items: center;
@@ -1333,7 +1329,7 @@
 }
 
 .aiz-plus-minus input {
-  width: 40px;
+  width: 44px;
   background: transparent;
   font-weight: 600;
 }
@@ -1385,8 +1381,8 @@
 
 @media (max-width: 999px) {
   .icon-circle .cart-count {
-    width: 20px !important;
-    height: 20px !important;
+    /* width: 20px !important;
+    height: 20px !important; */
     font-size: 12px;
   }
 }
@@ -1449,11 +1445,11 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 6px 14px;
+  padding: 10px 16px;
   border-radius: 8px;
   background: var(--primary, #1e1e2d);
   color: #fff;
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 600;
   text-decoration: none;
   border: none;
@@ -1477,7 +1473,7 @@
 .mobile-nav-tabs {
   padding: 0;
   /* background: #f8f7f7; */
-  border-bottom: 1px solid #e9ecef;
+  /* border-bottom: 1px solid #e9ecef; */
   padding: 0 20px;
 }
 
@@ -1535,12 +1531,28 @@
 .cat-toggle-btn .fa-minus {
   display: none;
 }
+.cat-toggle-btn {
+  padding: 8px !important;
+  min-width: 36px;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 .cat-toggle-btn i {
-    width: 25px;
-    padding: 10px !important;
+    /* width: 25px; */
+    padding: 4px !important;
+    background-color: var(--primary);
+    color: #fff;
+    border-radius: 4px;
+}
+.cat-toggle-btn i:hover {
+    background-color: var(--hov-primary);
+    color: #fff;
 }
 .d-flex:hover .cat-toggle-btn i {
-  color: var(--primary) !important;
+  color: #fff !important;
+  background-color: var(--hov-primary);
 }
 .cat-toggle-btn .fa-plus {
   display: inline;
@@ -1690,4 +1702,67 @@
   width: 100%;
   opacity: 1;
   visibility: visible;
+}
+
+@media (hover: none) {
+  .view-btn:hover {
+    background: #fff !important;
+    border-color: var(--primary) !important;
+    color: var(--primary) !important;
+  }
+}
+
+.view-btn.active {
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: #fff !important;
+}
+
+@media (hover: none) {
+  .tooltip {
+    display: none !important;
+  }
+}
+
+@media (hover: none) {
+  .gs-latest-post-section .single-post.h2-single-post .post-content {
+    bottom: 0;
+  }
+
+  .gs-latest-post-section .single-post.h2-single-post:hover .post-content {
+    bottom: 0;
+  }
+
+  .gs-latest-post-section .single-post.h2-single-post .post-content .date,
+  .gs-latest-post-section .single-post.h2-single-post .post-content .post-desc,
+  .gs-latest-post-section .single-post.h2-single-post .post-content .read-more {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  .gs-latest-post-section .single-post:hover .post-img img {
+    transform: none;
+  }
+
+  .single-product .add-to-cart {
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  .single-product:hover .product-img,
+  .single-product-list-view:hover .product-img,
+  .single-offer-product:hover .promo-img,
+  .gs-single-recent-product-widget:hover .img-wrapper .thumb {
+    transform: none;
+  }
+
+  .overlayed-img-wrapper .overlay-on-img,
+  .overlayed-img-wrapper .content-on-overlay {
+    opacity: 1;
+  }
+
+  .overlayed-img-wrapper:hover .overlay-on-img,
+  .overlayed-img-wrapper:hover .content-on-overlay {
+    opacity: 1;
+  }
 }

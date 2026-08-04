@@ -7,12 +7,12 @@
 
 @php $trashedCount = \App\Models\Page::onlyTrashed()->count(); @endphp
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap flex-md-nowrap">
     <h4 class="fw-bold mb-0">All Pages</h4>
     <a href="{{ route('admin.pages.create') }}" class="btn btn-primary"><i class="fas fa-plus"></i> Add Page</a>
 </div>
 
-<ul class="nav nav-tabs mb-3">
+<ul class="nav nav-tabs mb-3 flex-wrap flex-md-nowrap">
     <li class="nav-item">
         <a class="nav-link {{ !request()->has('trashed') ? 'active' : '' }}" href="{{ route('admin.pages.index') }}">Active</a>
     </li>
@@ -29,7 +29,7 @@
 
 <div class="card border-0 shadow-sm">
     <div class="card-body p-0">
-        <div class="d-flex justify-content-between align-items-center px-3 pt-3 pb-2">
+        <div class="d-flex justify-content-between align-items-center px-3 pt-3 pb-2 flex-wrap flex-md-nowrap mb-3 flex-wrap flex-md-nowrap">
             <div class="d-flex align-items-center gap-2">
                 <span class="text-muted small">Show</span>
                 <select class="form-select w-auto" onchange="window.location.href=this.value">
@@ -67,7 +67,7 @@
                             @else
                                 <form action="{{ route('admin.pages.toggle-status', $page->id) }}" method="POST" class="d-inline">
                                     @csrf
-                                    <button type="submit" class="badge {{ $page->status ? 'bg-light text-success border border-success-subtle' : 'bg-light text-danger border border-danger-subtle' }} border-0" style="cursor:pointer;" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Click to toggle status">
+                                    <button type="submit" class="badge {{ $page->status ? 'bg-success' : 'bg-danger' }}" style="cursor:pointer;" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Click to toggle status">
                                         {{ $page->status ? 'Active' : 'Inactive' }}
                                     </button>
                                 </form>

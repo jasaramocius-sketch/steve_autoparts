@@ -5,7 +5,7 @@
 @section('dashboard-content')
 
 <section>
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
         <div>            
             <h4 class="h4-style mb-0">Followed Sellers</h4>
             <p class="text-muted mb-0">Manage the sellers you follow and view their profile summaries.</p>

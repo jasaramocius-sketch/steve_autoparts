@@ -49,12 +49,13 @@ class PageController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
+            'short_description' => 'nullable|string|max:255',
             'content' => 'nullable|string',
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:500',
         ]);
 
-        $data = $request->only(['title', 'content', 'meta_title', 'meta_description']);
+        $data = $request->only(['title', 'short_description', 'content', 'meta_title', 'meta_description']);
         $data['slug'] = Str::slug($request->title);
         $data['status'] = $request->boolean('status');
 
@@ -75,12 +76,13 @@ class PageController extends Controller
 
         $request->validate([
             'title' => 'required|string|max:255',
+            'short_description' => 'nullable|string|max:255',
             'content' => 'nullable|string',
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:500',
         ]);
 
-        $data = $request->only(['title', 'content', 'meta_title', 'meta_description']);
+        $data = $request->only(['title', 'short_description', 'content', 'meta_title', 'meta_description']);
         $data['status'] = $request->boolean('status');
 
         $page->update($data);
@@ -93,7 +95,10 @@ class PageController extends Controller
         $page = Page::findOrFail($id);
         $page->status = !$page->status;
         $page->save();
-        return back()->with('success', 'Page status updated successfully.');
+
+        $status = $page->status ? 'active' : 'inactive';
+
+        return back()->with('success', "Page status was successfully set to {$status}.");
     }
 
     public function destroy($id)

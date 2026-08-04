@@ -948,6 +948,17 @@ if ($request->filled('image_from_manager')) {
 **Files created:**
 - `app/Helpers/NotificationHelper.php`
 
+## 75. Swiper Free-Mode First Item Always Fully Visible
+
+**Problem:** On home page, when user drags Swiper slides (free-mode), the first slide could be left partially off-screen (cut at the left edge).
+
+**Solution:** Added `freeModeSticky: true` and `swipeToSlide: true` to free-mode Swipers to force first slide fully visible.
+
+**Files changed:**
+- `resources/views/home.blade.php:635` — `.home-cate-slider` now has `swipeToSlide: true` + `freeModeSticky: true`
+- `public/assets/front/js/script.js:540` — `.featured-products.product-cards-slider` now has `freeModeSticky: true`
+- `public/assets/front/js/script.js:564` — `.best-selling.product-cards-slider` now has `freeModeSticky: true`
+
 **Files changed:**
 - `app/Providers/AppServiceProvider.php` — registered helper via `require_once`
 
@@ -1957,3 +1968,284 @@ echo 1825 > .opencode/skills/.last_sync
 | `resources/css/buttons.css` | Updated | 2026-07-28 13:41:19 |
 
 **Note:** `public/css/app.css` has no File Revision record — watcher was not running when manually appended. To capture, restart file watcher and re-trigger edit.
+
+---
+
+## 48. Grid/List View Tooltips — Bootstrap Tooltip with Touch Disable
+**Issue:** Bootstrap tooltip on grid/list buttons stayed visible on click; native `title` had different design.
+
+**Fix:** Restored `data-bs-toggle="tooltip" data-bs-trigger="hover"` (Bootstrap styling, hover-only trigger) + `bootstrap.Tooltip.getInstance(this)?.hide()` in click handlers. On touch devices (`ontouchstart`), tooltips are completely disabled via `tip.disable()`.
+
+**Files:** `resources/views/shop.blade.php`, `resources/views/categories.blade.php`
+
+---
+
+## 49. Grid/List Toggle — Extracted to Partial
+Created `resources/views/partials/grid-list-toggle.blade.php` (buttons only, no wrapper). Used in shop sidebar, shop header, and categories page.
+
+---
+
+## 50. Force Grid View on Small Screens (≤580px)
+Both shop and categories pages force grid layout when `window.innerWidth <= 580`, regardless of localStorage preference (on load and resize).
+
+---
+
+## 51. Form-Select-Wrapper — Single Outside Click to Close
+**Issue:** Native `<select>` dropdown closes on outside click/blur, but `focused` class stayed until a second outside click (blur doesn't always fire).
+
+**Fix:** Added document `click` handler — if click target is outside `.form-select-wrapper`, remove `.focused` from all wrappers immediately.
+
+**Files:** `resources/views/layouts/app.blade.php`
+
+---
+
+## 52. Nice-Select — Reverted Unnecessary Handlers
+Scroll and document-level Esc handlers added to `nice-select.js` were removed (click-only behavior preferred).
+
+---
+
+## 53. Tooltips — Hidden on Touch/No-Hover Devices Only (CSS Approach)
+**Decision:** Tooltips stay on desktop/laptop (hover-capable devices); hidden on mobile/tablet where there is no hover. Implemented purely via CSS to cover both Bootstrap `.tooltip` and jQuery-UI `.ui-tooltip`.
+
+**Files changed:**
+- `public/assets/front/css/style.css:5730-5736` — added `@media (hover: none) { .tooltip, .ui-tooltip { display: none !important } }`
+- `resources/views/layouts/app.blade.php:354-369` — restored `title` attributes on mobile header auth buttons (Login/Register)
+- Shop + categories grid/list buttons keep `data-bs-trigger="hover"` and `tip.disable()` on `(hover: none)` devices (see #48)
+
+---
+
+## 54. Wishlist Pagination
+**Files changed:**
+- `app/Http/Controllers/DashboardController.php:210` — `wishlist()` now uses `paginate(9)->withQueryString()` instead of `get()`
+- `resources/views/user/wishlist.blade.php` — added `.pagination-wrapper` block with `$wishlist->links()` behind `@if(method_exists($wishlist,'links') && $wishlist->hasPages())`
+
+---
+
+## 55. Footer Settings — Admin Manager (Like Header Settings)
+Storefront footer columns are now configurable from Admin. Columns stored as JSON in the `footer_columns` setting; empty/invalid setting falls back to the original static footer design (verified byte-for-byte).
+
+**Files changed/created:**
+- `routes/web.php:373-376` — `admin.settings.footer` (GET) + `admin.settings.footer.update` (POST)
+- `app/Http/Controllers/AdminController.php:340` `footerSettings()` + `:346` `updateFooterSettings()` — validates/sanitizes column types (`links`, `newsletter`, `contact`), spans (`2,3,4,6,12`), stores JSON via `Setting::set('footer_columns', ...)`
+- `resources/views/admin/settings/footer.blade.php` — **NEW** column editor: add/remove/reorder columns (Sortable), per-column type/heading/span/links
+- `resources/views/admin/partials/sidebar.blade.php` — "Footer Settings" link under Settings
+- `resources/views/partials/footer-columns.blade.php` — **NEW** footer renderer with default fallback
+- `resources/views/layouts/app.blade.php` — footer row now `@include('partials.footer-columns')`
+- `public/assets/front/css/style.css` — `.footer-link-col` 50% width on mobile rule
+
+---
+
+## 56. Categories List-View — Subcategory Names Fix
+**Root cause:** JS toggled class `categories-list-view` on `#categoryContainer` but CSS rules targeted `#categoryContainer.list-view`, so subcategory names never showed in list view.
+
+**Files changed:**
+- `public/assets/front/css/style.css:16244-16274` — replaced `#categoryContainer.list-view` → `#categoryContainer.categories-list-view` (and `:not(.list-view)` → `:not(.categories-list-view)`)
+
+---
+
+## 57. Categories Page — Product Preview in List View (3 Products with Image + Price)
+Category cards in list view now show up to 3 product thumbnails with name + price (strikethrough old price) on the right side.
+
+**Files changed:**
+- `app/Http/Controllers/CategoryController.php:104-108` — `preview_products` = latest 3 active products across all descendant category IDs per category
+- `resources/views/categories.blade.php` — card restructured into 3 divs: `.category-image`, `.category-content`, `.category-products`; preview block uses `imgTag()` + `currency_format()`, links to `route('product', $slug)`
+- `public/assets/front/css/style.css` — `.category-products` flex column (270px, left border) shown only under `#categoryContainer.categories-list-view`, hidden in grid; product item/image/name/price styles
+
+Verified: 14 categories × 3 products = 42 preview items render on `/categories` (HTTP 200); card = 3 top-level divs.
+
+---
+
+## 58. Shop Page — Active Filter Chips with Clear Icons
+When a sort or brand filter is active, a chip row ("Active filters:") appears below the toolbar showing each active filter with an ✕ clear icon.
+
+**Files changed:**
+- `resources/views/shop.blade.php` — added `@php` label maps + chips markup after `.product-nav-wrapper`; chip ✕ uses `request()->fullUrlWithQuery(['sort' => null])` / `['brand' => null]` so clearing one filter preserves all other params; `.filter-chip` styles added to the page `<style>` block
+
+**Behavior (verified):**
+- `?sort=price_asc&brand=bosch&year=2020` → chips "Sort by: Price: Low to High ✕" + "Brand: Bosch ✕"
+- Sort ✕ → `/shop?brand=bosch&year=2020`; Brand ✕ → `/shop?sort=price_asc&year=2020`
+- No chips on plain `/shop`; `sort=default` never shows a chip
+
+---
+
+## 59. Categories Page — Force Grid View Below 767px
+**Update to #50:** Categories page now forces grid view when `window.innerWidth <= 767` (was 580) — on load and resize — even if list view is saved in localStorage. View toggle buttons are hidden below 767px too.
+
+**Files changed:**
+- `resources/views/categories.blade.php:196` — `forceGridOnMobile()` breakpoint 580 → 767
+- `resources/views/categories.blade.php` — `.category-toolbar .view-btn` hidden under `@media (max-width: 767px)`
+
+---
+
+## 139. UI/UX QA Report — Full Fix Pass (source: `UIUX_QA_REPORT.html`)
+
+All Section 2–5 defects from `UIUX_QA_REPORT.html` were applied (04 Aug 2026) without introducing design/function regressions. Verified via `php artisan view:cache` + rendered-page checks (home, shop, product, cart, about-us, login, admin). Remaining items are Low-priority cleanups only: #3 dead badge CSS, #14 wishlist pill styling, #17 select chevron touch, #24 dead `.gs-cart-section` CSS.
+
+### Accessibility
+- **#16 Focus indicators** — `public/assets/front/css/style.css` — `:focus-visible` now restores a visible outline for `.form-select`/`.form-control` (`border-color: var(--primary)`, `outline: 2px solid var(--primary)`, `outline-offset: 1px`, `box-shadow: 0 0 0 3px rgba(230,46,4,.15)`) — the old `border-color:unset; box-shadow:unset` rule had removed all focus indicators.
+- **#5 Anchor scroll offset** — `style.css` — added `html { scroll-padding-top: 120px }` so sticky header no longer covers in-page anchors.
+
+### Tap targets / touch sizing
+- **#6 Auth buttons** — `public/assets/front/css/custom.css` — `.mobile-auth-icon-btn` padding `6px 14px` → `10px 16px`.
+- **#7 Category toggles** — `custom.css` — `.cat-toggle-btn` now `min-width:36px; min-height:36px; padding:8px`, inline-flex centered (was `p-0` ~9-11px tap).
+- **#9 Search controls** — `style.css` — input, category dropdown and search button raised 38px → 44px at ≤767.98px and ≤399.97px.
+- **#11 Newsletter input** — `style.css` — `.news-latter-input` height `auto` → `48px`.
+- **#12 Footer social links** — `style.css` — held at 40×40px ≤991.97px (was 32×32px).
+- **#13 Product Compare/Details** — `style.css` — `.single-product .compare/... .details` padding `4px !important` → `10px 14px !important`.
+- **#15 / #20 `.view-btn`** — `style.css` — grid/list toggle buttons raised 30px/34px → 42px at ≤991.97px.
+- **#21 Review delete button** — `product.blade.php:845` — padding `2px 8px; font-size:12px` → `6px 12px; font-size:13px`.
+- **#22 Buy Now / Add to Cart** — `product.blade.php` — `.details_btn_area` stacks to `1fr` at ≤400px.
+- **#23 Cart qty controls** — `cart.blade.php`, `layouts/app.blade.php`, `custom.css` — `.aiz-plus-minus` buttons 28/30px → 36px, input 32px → 44px (both inline styles and CSS).
+
+### Layout / overflow
+- **#8 Mobile menu height** — `style.css` — `.mobile-menu { height:100vh }` → `100dvh` (dynamic-toolbar safe).
+- **#19 Shop sort/brand selects** — `style.css:4543` — `@media (max-width:399px){ .filter-sort-brand-wrapper select{width:125px} }` (was 180px each in 2-col grid → overflowed 360px phones).
+- **#25 Compare sticky first column** — `style.css` — re-enabled `.compare-table` sticky first column (`position:sticky; left:0`, solid `#f8f9fa` bg, `min-width:180px`, z-index layering th 3 / first th 4) so product names stay visible while the 1200px table scrolls.
+- **#26 About page** — `pages/about.blade.php` — added `@media (max-width:768px)` block (hero padding 70px 0, h1 38px, p 16px, values-grid 2-col gap 20px, value-card padding) for the 577–991px tablet gap.
+- **#18 Home hero** — already rebuilt as a static section with centered content ≤767px (`style.css:11580-11610`).
+
+### Wrap fixes (flex-wrap / table-responsive)
+- **#28 / #29 User dashboard headers** — `user/{vehicles,wishlist,followed-sellers,notifications,dashboard}.blade.php` — added `flex-wrap` (and `gap-2` where needed) to page headers and the vehicles card body → no overflow at 320px.
+- **#31 Admin index toolbars** — `admin/blog-categories/index.blade.php` — toolbar now `flex-wrap flex-md-nowrap mb-3` (matches the other 12 index pages).
+- **#32 Admin page headers** — `admin/products/index.blade.php` + `admin/home-page/index.blade.php` — added `flex-wrap`.
+- **#35 Admin tables** — `admin/products/show.blade.php` (Product Summary, Vehicle Details, Metadata) + `admin/images/edit.blade.php` — wrapped in `.table-responsive`.
+- **#36 Revisions diff tables** — `admin/revisions/detail.blade.php` — all 3 `diff-table` variants wrapped in `.table-responsive`.
+
+### Admin panel stacking & buttons
+- **#33 Sidebar overlay z-index** — `admin/layouts/app.blade.php` — 3-layer stack: sidebar `1001` / overlay `1000` / navbar `999` (was all 999 → navbar painted above dim layer).
+- **#34 Admin action buttons** — `admin/layouts/app.blade.php` — `.admin-content .card-header .btn` raised to `font-size:14px; padding:6px 12px` and the generic rule to `12px/5px 10px` (was `12px/4px 10px` → `11px/3px 8px` on mobile).
+- **#37 Orders & Brands index** — restored the missing opening `<div>` (renders literal `flex-wrap flex-md-nowrap"` text and closed the layout container prematurely) — fixed pre-session, verified.
+
+### JS cleanup
+- **#10 Search bar duplicate handler** — `public/assets/front/js/script.js` — removed the dead `$('#searchIcon')` → `toggleClass('active')` block (`.search-bar.active` had no CSS). Single `.show` open path + tooltip/autofocus behavior intact.
+
+**Remaining (deferred, Low):** #3 dead 16×16 badge rule removal · #14 wishlist pill styling vs `.steve-btn` · #17 select chevron on touch · #24 dead `.gs-cart-section .cart-table` CSS.
+
+---
+
+## 140. File Revisions — QA Fix Pass (04 Aug 2026)
+
+The file watcher (`file:audit` + `file-watcher.mjs`) recorded revisions for all 20 files changed in the UI/UX QA fix pass (#139). `TASKS.md` / `UIUX_QA_REPORT.html` sit outside the watched directories (`app/`, `config/`, `database/`, `resources/`, `routes/`, `public/assets/`) so they are not tracked.
+
+**File revisions recorded (04 Aug 2026):**
+| # | File | Revisions |
+|---|---|---|
+| 1 | `public/assets/front/css/style.css` | 8 (4551–4557, 4590 note: 4551-4557 on 04 Aug) |
+| 2 | `public/assets/front/css/custom.css` | 3 (4558–4559, 4563) |
+| 3 | `public/assets/front/js/script.js` | 1 (4560) |
+| 4 | `resources/views/product.blade.php` | 2 (4561–4562) |
+| 5 | `resources/views/layouts/app.blade.php` | 1 (4564) |
+| 6 | `resources/views/cart.blade.php` | 1 (4565) |
+| 7 | `resources/views/pages/about.blade.php` | 1 (4566) |
+| 8 | `resources/views/user/vehicles.blade.php` | 2 (4567–4568) |
+| 9 | `resources/views/user/wishlist.blade.php` | 1 (4569) |
+| 10 | `resources/views/user/followed-sellers.blade.php` | 1 (4570) |
+| 11 | `resources/views/user/notifications.blade.php` | 1 (4571) |
+| 12 | `resources/views/user/dashboard.blade.php` | 2 (4572–4573) |
+| 13 | `resources/views/admin/blog-categories/index.blade.php` | 1 (4574) |
+| 14 | `resources/views/admin/products/index.blade.php` | 1 (4575) |
+| 15 | `resources/views/admin/home-page/index.blade.php` | 1 (4576) |
+| 16 | `resources/views/admin/layouts/app.blade.php` | 4 (4577–4580) |
+| 17 | `resources/views/admin/products/show.blade.php` | 5 (4581–4586) |
+| 18 | `resources/views/admin/images/edit.blade.php` | 1 (4587) |
+| 19 | `resources/views/admin/revisions/detail.blade.php` | 1 (4588) |
+| 20 | `resources/views/shop.blade.php` | 2 (4589–4590) |
+
+All events are `updated`; each has a backup archive and unified diff available from the admin **File Revisions** page (`/admin/file-revisions`).
+
+---
+
+## 141. Home Page — Dynamic Section Config, Countdown & Banners (04 Aug 2026)
+
+Revisions **4591–4652** (04 Aug 06:16–09:34). Home sections made fully configurable from the admin; hero guarded by status; about/contact slugs renamed.
+
+**Problem:** Home hero rendered even when disabled; "Special Offer" title was hardcoded; offers banner slots and countdown could not be managed; latest-posts count fixed; `/about` / `/contact` slugs did not match the footer links.
+
+**Solution:**
+- `HomeController.php` — latest posts limit read from `latest_post` section extra_data `posts_count` (clamped 1–12); `top_brands` limit/`brand_ids` selection preserved from extra_data.
+- `home.blade.php` — section title from `$sections->get('offers')?->title ?? 'Special Offer'`; fixed `button-text` → `button_text` typo; hero wrapped in `@if($heroSection)` (only renders when status enabled).
+- `Admin/HomePageController.php` — `update()` merges status checkbox, `posts_count`, countdown, and Offer Banners repeater (3 slots, image manager) into section extra_data; `image_from_manager` now copies from both `storage/app/public/...` and `public_path(...)`; new `toggleStatus()` method.
+- `admin/home-page/edit.blade.php` — info alert context for offers / deal_of_day / latest_post sections; Offer Banners repeater with image picker.
+- `admin/home-page/index.blade.php` — status toggle button per section.
+- `routes/web.php` — `admin.home-page.toggle-status`; `/about` → `/about-us`, `/contact` → `/contact-us` (Home + Contact controllers).
+- New hero/banner images added under `public/assets/images/home/`.
+
+## 142. Image Manager — Upload From URL (04 Aug 2026)
+
+Revisions **4599–4612** (04 Aug 06:29–06:35).
+
+**Problem:** Image manager picker only supported file upload; no way to import a remote image by URL.
+
+**Solution:** `ImageController::pickerStoreFromUrl()` + `admin.images.picker-store-url` route; `admin/images/image-manager-picker.blade.php` and `admin/images/index.blade.php` got a URL-input mode alongside the upload mode.
+
+## 143. Static Pages — Terms Redesign & Route-Attribute Lookup Experiments (04 Aug 2026)
+
+Revisions **4628–4649** (04 Aug 07:41–09:10).
+
+**Problem:** Terms page was a placeholder; an attempt to auto-lookup page attributes by route name caused issues.
+
+**Solution:**
+- `pages/terms.blade.php` — full redesign (custom layout/CSS), replacing the "Coming Soon" placeholder.
+- `routes/web.php` — terms/return/privacy routes wired to the redesigned view.
+- Experiment (later reverted): `Page.php` `pageID` fillable/casts + `SetPageAttributes.php` route-name page lookup (rev 4631–4635) removed at rev 4637–4639 — the middleware keeps only the pure route-name-derived `pageId`/`pageClass` sharing (no DB lookup).
+
+## 144. Checkout Flow — Layout Restructure (04 Aug 2026)
+
+Revisions **4663–4716** (04 Aug 10:06–12:18).
+
+**Problem:** Checkout steps header and step pages had no consistent section/container wrapper; layout and spacing inconsistent with the rest of the storefront.
+
+**Solution:**
+- `partials/checkout-steps.blade.php` — wrapped in `<section id="cart-summary"><div class="container">`, consistent step icons/labels with done/active/upcoming states.
+- `checkout.blade.php` — restructured (address cards, postal code shown on the selected address).
+- `cart.blade.php` — matching container restructure.
+- `delivery-info.blade.php` — restructured; inhouse products list added to the delivery summary.
+- `payment.blade.php` — restructured.
+- `order-confirmed.blade.php` — restructured with a confirmation check icon header.
+- `pages/show.blade.php` — whitespace-only touch (rev 4678).
+
+## 145. CSS Variable Rename + Shop Vehicle Filter Chips (04 Aug 2026)
+
+Revisions **4724–4756** (04 Aug 12:36–13:34).
+
+**Problem:** Layout reused a green color only known as `--forest-green` while the site's green is `--green`; shop page had no visual indicator that a vehicle-filter chip was active.
+
+**Solution:**
+- `layouts/app.blade.php` + `style.css` — CSS variable renamed `--forest-green` → `--green` (border-bottom / header borders); `--green: #85b567` added to `style.css` root.
+- `shop.blade.php` — active vehicle filter chip handling via `$hasVehicleFilter` (vehicle filter active when a category chip is selected), so chip states render correctly in both the sidebar and mobile views.
+
+## 146. Payment Page — Section Wrapper + Terms Agreement Checkbox (04 Aug 2026)
+
+Revisions **4740–4746** (04 Aug 13:06–13:13).
+
+**Problem:** Payment page had no section wrapper and no required agreement to the store policies.
+
+**Solution:** `payment.blade.php` — page wrapped in section/container layout; added required `agree_checkbox` with links to `/terms`, `/return-policy`, `/privacy-policy`.
+
+## 147. User Vehicles — Section Wrapper + Edit Modal Restructure (04 Aug 2026)
+
+Revisions **4757–4759, 4793–4796** (04 Aug 13:15–14:31).
+
+**Problem:** Vehicles list card and edit modal were not wrapped in the dashboard section element, breaking the sidebar layout rhythm.
+
+**Solution:** `user/vehicles.blade.php` — vehicle list wrapped in `<section>`, edit modal restructured (per-vehicle `#editVehicleModal{{ $vehicle->id }}` with cleaner form layout).
+
+## 148. User Profile — Zip Code (postal_code) Support (04 Aug–05 Aug 2026)
+
+Revisions **4760–4767, 4780–4783, 4797–4807** (04 Aug 13:33–05 Aug 05:10).
+
+**Problem:** Users could not save their ZIP/postal code; the profile address summary ignored it and address layout crammed city/country on one column.
+
+**Solution:**
+- `user/profile.blade.php` — address display now `implode(array_filter([$profile->address, $profile->city, $profile->country, $profile->postal_code]))` (rev 4760).
+- `user/profile-edit.blade.php` — new "Zip Code" field (`name="postal_code"`), city/country switched to `col-md-4` columns, Cancel button uses `steve-btn` styling.
+- `UserController::updateProfile()` — `postal_code` added to validated/saved data.
+- `style.css` (rev 4784–4790) — form `:focus-visible` outline/box-shadow set back to `unset` (reversal of the #139 focus ring) and `thead`/`tfoot` first-row `border-top` added.
+
+## 149. Product Card — Compare / Quick View Tooltips (05 Aug 2026)
+
+Revisions **4808–4809** (05 Aug 05:15).
+
+**Problem:** The compare and quick-view (eye) icon buttons in the product card had no tooltips, so their purpose was unclear.
+
+**Solution:** `partials/product-card.blade.php` — compare link gets `data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Compare"` and the eye link gets `title="Quick View"` (auto-initialized by the existing Bootstrap tooltip init in `public/assets/front/js/script.js`).

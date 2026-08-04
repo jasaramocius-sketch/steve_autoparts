@@ -31,3 +31,8 @@ database/*.sql.gz
 
 # Backup folders
 storage/file-backups/
+
+.aider*
+*.sql
+*.sql.bak
+storage/file-backups/

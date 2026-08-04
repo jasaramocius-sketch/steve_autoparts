@@ -5,20 +5,11 @@
 @section('title', 'Cart' . ' - ' . config('app.name', 'StAutoparts'))
 @section('content')
 
-<section class="pt-5 mb-4" id="cart-summary">
-  <div class="container">
-    <div class="row">
-      <div class="col-xl-8 mx-auto">
-
-        @include('partials.checkout-steps', ['activeStep' => 1])
-</div>
-    </div>
-  </div>
-</section>
+@include('partials.checkout-steps', ['activeStep' => 1])
 <section class="mb-4">
   <div class="container">
     <div class="row cols-xs-space cols-sm-space cols-md-space">
-      <div class="col-xxl-8 col-xl-10 mx-auto">
+      <div class="mx-auto">
         @if(count($cart) > 0)
         <div class="border bg-white p-3 p-lg-4">
           <div class="mb-4">
@@ -84,12 +75,12 @@
           </div>
 
           <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
-              <a href="{{ route('shop') }}" class="fw-600">
-                <i class="las la-arrow-left"></i>
+              <a href="{{ route('shop') }}" class="fw-600 a-tag-hover-color">
+                <i class="fas fa-arrow-left"></i>
                 Return to shop
               </a>
-              <a href="{{ route('checkout') }}" class="btn btn-primary fs-14 fw-700 rounded-0 px-4">
-                Continue to Shipping
+              <a href="{{ route('checkout') }}" class="btn btn-primary steve-btn">
+                Continue to checkout
               </a>
           </div>
         </div>
@@ -98,6 +89,7 @@
           <div class="text-center p-3">
             <i class="las la-frown la-3x opacity-60 mb-3"></i>
             <h3 class="h4 fw-700">Your Cart is empty</h3>
+            <a href="{{ route('shop') }}" class="btn btn-primary steve-btn">Continue Shopping</a>
           </div>
         </div>
         @endif
@@ -122,12 +114,12 @@
     margin-bottom: 0;
   }
   .cart-summary-item-group .cart-summary-item .qty-input {
-    width: 32px;
+    width: 36px;
     font-size: 14px !important;
   }
   .cart-summary-item-group .cart-summary-item .btn-circle {
-    width: 30px;
-    height: 30px;
+    width: 36px;
+    height: 36px;
   }
   .cart-summary-item-group .cart-summary-item .btn-circle i {
     font-size: 12px;

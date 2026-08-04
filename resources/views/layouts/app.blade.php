@@ -33,7 +33,7 @@
       border-bottom-color: #ededf2 !important;
     }
     .done .border-bottom-6px {
-      border-bottom-color: rgba(var(--forest-green), var(--bs-text-opacity))  !important;
+      border-bottom-color: var(--green)  !important;
     }
     .active .border-bottom-6px {
       border-bottom-color: #e62e04 !important;
@@ -128,8 +128,8 @@
       color: #fff;
     }
     .aiz-plus-minus .btn-icon {
-      width: 28px;
-      height: 28px;
+      width: 36px;
+      height: 36px;
       padding: 0;
       display: inline-flex;
       align-items: center;
@@ -137,7 +137,7 @@
       border-radius: 50%;
     }
     .aiz-plus-minus input {
-      width: 40px;
+      width: 44px;
       background: transparent;
       font-weight: 600;
     }
@@ -177,7 +177,7 @@
     @yield('style')
     @stack('page-builder-css')
 </head>
-<body id="@yield('page-id', 'default-page-id')" class="@yield('page-class', 'default-body-class')">
+@include('partials.page-attributes')
 
     <!-- header area -->
     <header class="header-section position-relative z-3 header-stikcy">
@@ -188,7 +188,7 @@
             $currentCurrency = session('currency', 'USD');
             $megaCategories = \App\Models\Category::has('children')->with(['children' => function ($q) { $q->orderBy('name'); }])->orderBy('name')->take(5)->get();
         @endphp
-        <div class="info-bar d-nonee d-md-blockk">
+        <div class="info-bar d-none d-md-block">
             <div class="container custom-containerr">
                 <div class="info-row d-flex">
                     <div class="info-left">
@@ -338,7 +338,7 @@
             <a href="{{ route('home') }}">
                 {!! imgTag('assets/images/' . (\App\Models\Setting::get('mobile_logo') ?? 'BwSkuSZ7ZYGWPc4Zk3CfeFzcn49dHpx3143n4WKS.png'), 'logo') !!}
             </a>
-            <svg class="close" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <svg class="close" xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none">
                 <path d="M18 6L6 18M6 6L18 18" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
         </div>
@@ -353,19 +353,19 @@
                     <span class="fw-700 fs-14">{{ Auth::user()->name }}</span>
                 </div>
                 <div class="mt-2 d-flex flex-wrap gap-2">
-                    <a href="{{ route('user.dashboard') }}" class="mobile-auth-icon-btn" title="Dashboard"><i class="fas fa-gauge"></i> Dashboard</a>
+                    <a href="{{ route('user.dashboard') }}" class="mobile-auth-icon-btn steve-btn" title="Dashboard"><i class="fas fa-gauge"></i> Dashboard</a>
                     @if(!in_array(Auth::user()->role, ['admin', 'master_admin', 'staff']))
-                        <a href="{{ route('user.orders') }}" class="mobile-auth-icon-btn" title="Orders"><i class="fas fa-box"></i> Orders</a>
+                        <a href="{{ route('user.orders') }}" class="mobile-auth-icon-btn steve-btn" title="Orders"><i class="fas fa-box"></i> Orders</a>
                     @endif
                     <form method="POST" action="{{ route('logout') }}" class="d-inline">
                         @csrf
-                        <button type="submit" class="mobile-auth-icon-btn" title="Logout"><i class="fas fa-right-from-bracket"></i> Logout</button>
+                        <button type="submit" class="mobile-auth-icon-btn steve-btn" title="Logout"><i class="fas fa-right-from-bracket"></i> Logout</button>
                     </form>
                 </div>
             @else
                 <div class="d-flex gap-2">
-                    <a href="{{ route('login') }}" class="mobile-auth-icon-btn" title="Login"><i class="fas fa-right-to-bracket"></i> Sign In</a>
-                    <a href="{{ route('register') }}" class="mobile-auth-icon-btn" title="Register"><i class="fas fa-user-plus"></i> Sign Up</a>
+                    <a href="{{ route('login') }}" class="mobile-auth-icon-btn steve-btn" title="Login"><i class="fas fa-right-to-bracket"></i> Sign In</a>
+                    <a href="{{ route('register') }}" class="mobile-auth-icon-btn steve-btn" title="Register"><i class="fas fa-user-plus"></i> Sign Up</a>
                 </div>
             @endif
         </div>
@@ -634,7 +634,7 @@
                 <div class="col">
                     <form class="search-form" action="{{ route('shop') }}" method="GET">
                         <div class="input-group input__group">
-                            <input type="text" class="form-control form__control" name="search" placeholder="I am shopping for..." value="{{ request('search') }}">
+                            <input type="text" id="searchInput" class="form-control form__control" name="search" placeholder="I am shopping for..." value="{{ request('search') }}" autocomplete="off">
                             <div class="input-group-append">
                                 <span class="search-separator"></span>
                                 <button class="dropdown-toggle btn btn-secondary search-category-dropdown steve-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -652,6 +652,7 @@
                                     <i class="fas fa-search"></i>
                                 </button>
                             </div>
+                            <div id="searchSuggestions" class="search-suggestions"></div>
                         </div>
                     </form>
                 </div>
@@ -687,92 +688,7 @@
         </div> -->
         <div class="container">
             <div class="row footer-row gy-3">
-                <div class="col-lg-4 col-md-6 col-12 left-info">
-                    <a class="header-logo-wrapper" href="{{ route('home') }}">
-                        {!! imgTag('assets/images/' . (\App\Models\Setting::get('footer_logo') ?? '1730281141Whitepng.png'), 'logo', 'logo mb-3') !!}
-                    </a>
-                    <a class="wow-replaced d-block mb-2 text-white" data-wow-delay=".1s" href="tel:{{ \App\Models\Setting::get('header_phone', '+1 (234) 567-8901') }}">
-                        <i class="fas fa-phone-alt me-2"></i> {{ \App\Models\Setting::get('header_phone', '00 000 000 000') }}
-                    </a>
-                    <a class="wow-replaced d-block mb-2 text-white" data-wow-delay=".2s" href="mailto:{{ \App\Models\Setting::get('header_email', 'help@steveautoparts.com') }}">
-                        <i class="fas fa-envelope me-2"></i> {{ \App\Models\Setting::get('header_email', 'help@steveautoparts.com') }}
-                    </a>
-                    <a class="wow-replaced d-block text-white" data-wow-delay=".3s" href="/stautoparts/contact/">
-                        <i class="fas fa-map-marker-alt me-2"></i> {{ \App\Models\Setting::get('header_address', '3584 Hickory Heights Drive , USA') }}
-                    </a>
-                    <!-- <div class="social-links mt-3">
-                        <a href="#"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                    </div> -->
-                </div>
-                <div class="col-lg-2 col-md-6 col-12 quick-links-col">
-                    <h6 class="text-white mb-3">Quick Links</h6>
-                    <ul class="list-unstyled">
-                        <li class="mb-2"><a href="{{ route('home') }}" class="text-secondary">Home</a></li>
-                        <li class="mb-2"><a href="{{ route('shop') }}" class="text-secondary">Shop</a></li>
-                        <li class="mb-2"><a href="{{ route('categories.index') }}" class="text-secondary">Categories</a></li>
-                        <li class="mb-2"><a href="{{ route('brands') }}" class="text-secondary">Brands</a></li>
-                        <li class="mb-2"><a href="{{ route('about') }}" class="text-secondary">About Us</a></li>
-                        <li class="mb-2"><a href="{{ route('contact') }}" class="text-secondary">Contact</a></li>
-                    </ul>
-                </div>
-                <div class="col-lg-2 col-md-6 col-12 customer-service-col">
-                        <h6 class="text-white mb-3">Customer Service</h6>
-                        <ul class="list-unstyled">
-                            <li class="mb-2">
-                                <a href="{{ route('terms.conditions') }}" class="text-secondary">
-                                    Terms & Conditions
-                                </a>
-                            </li>
-
-                            <li class="mb-2">
-                                <a href="{{ route('privacy.policy') }}" class="text-secondary">
-                                    Privacy Policy
-                                </a>
-                            </li>
-
-                            <li class="mb-2">
-                                <a href="{{ route('return.policy') }}" class="text-secondary">
-                                    Return Policy
-                                </a>
-                            </li>
-
-                            <li class="mb-2">
-                                <a href="{{ route('support.policy') }}" class="text-secondary">
-                                    Support Policy
-                                </a>
-                            </li>
-                        </ul>
-                </div>
-                <div class="col-lg-4 col-md-6 col-12">
-                    <h6 class="text-white mb-3">Subscribe to our newsletter</h6>
-                    <div class="newslatter-area mb-3">
-                        <div class="newslatter-form">
-                            <form action="javascript:void(0);">
-                                @csrf
-                                <input class="news-latter-input" type="email" placeholder="Your Email" name="email" required>
-                                <button class="newsletter-btn steve-btn steve-btn-hover" type="submit">Subscribe</button>
-                            </form>
-                        </div>
-                        <div class="social-links mt-3 d-flex">
-                            <a href="#"><i class="fab fa-facebook-f"></i></a>
-                            <a href="#"><i class="fab fa-twitter"></i></a>
-                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                        </div>
-                    </div>
-
-                    
-                    <!-- <div class="recent-posts">
-                        <a href="#" class="recent-post d-flex text-white gap-2 mb-2">
-                            {!! imgTag('assets/images/blogs/1730868152organized-automotive-workshop-interior-minjpg.jpg', 'post', '', 'style="width: 50px; height: 50px; object-fit: cover;"') !!}
-                            <div>
-                                <h6 class="mb-0" style="font-size: 13px;">Top 10 Essential Auto Parts...</h6>
-                                <small class="text-secondary">Jan 02 - 2019</small>
-                            </div>
-                        </a>
-                    </div> -->
-                </div>
+                @include('partials.footer-columns')
             </div>
         </div>
         <div class="gs-footer-bottom">
@@ -804,6 +720,7 @@
     <!-- Session Flash Notifications (must remain inline for Blade PHP) -->
     <script>
     var PLACEHOLDER_IMG = '{{ asset("assets/images/placeholder.png") }}';
+    window.searchSuggestionsUrl = "{{ route('search.suggestions') }}";
     </script>
 <script>
     @if(session('success'))
@@ -879,6 +796,12 @@
 </script>
 
 <script>
+var closeFormSelects = function() {
+    document.querySelectorAll('.form-select-wrapper.focused').forEach(function(w) {
+        w.classList.remove('focused');
+    });
+};
+
 document.querySelectorAll('.form-select').forEach(function(el) {
     var wrapper = document.createElement('span');
     wrapper.className = 'form-select-wrapper';
@@ -895,22 +818,30 @@ document.querySelectorAll('.form-select').forEach(function(el) {
         wrapper.classList.remove('focused');
     });
     el.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            wrapper.classList.remove('focused');
-        } else if (e.key === ' ' || e.key === 'Enter') {
+        if (e.key === ' ' || e.key === 'Enter') {
             wrapper.classList.toggle('focused');
         }
     });
 });
 
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeFormSelects();
+}, true);
+document.addEventListener('keyup', function(e) {
+    if (e.key === 'Escape') closeFormSelects();
+}, true);
+
+document.addEventListener('scroll', function() {
+    closeFormSelects();
+}, true);
+
 // Close on outside click — single click outside removes focused class
 document.addEventListener('click', function(e) {
     if (!e.target.closest('.form-select-wrapper')) {
-        document.querySelectorAll('.form-select-wrapper.focused').forEach(function(w) {
-            w.classList.remove('focused');
-        });
+        closeFormSelects();
     }
 });
+
 </script>
     @yield('scripts')
     @stack('page-builder-js')

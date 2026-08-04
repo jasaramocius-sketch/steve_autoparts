@@ -61,15 +61,20 @@
                                 <div class="text-danger">{{ $message }}</div>
                             @enderror
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label class="form-label">City</label>
                             <input type="text" name="city" class="form-control"
                                    value="{{ old('city', $profile->city) }}">
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label class="form-label">Country</label>
                             <input type="text" name="country" class="form-control"
                                    value="{{ old('country', $profile->country) }}">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Zip Code</label>
+                            <input type="text" name="postal_code" class="form-control"
+                                   value="{{ old('postal_code', $profile->postal_code) }}">
                         </div>
                         <div class="col-md-12 mb-3">
                             <label class="form-label">Address</label>
@@ -102,7 +107,7 @@
                     </div>
 
                     <button type="submit" class="btn btn-primary steve-btn">Save Changes</button>
-                    <a href="{{ route('user.profile') }}" class="btn btn-secondary ms-2">Cancel</a>
+                    <a href="{{ route('user.profile') }}" class="btn btn-secondary ms-2 steve-btn">Cancel</a>
                 </form>
             </div>
         </div>

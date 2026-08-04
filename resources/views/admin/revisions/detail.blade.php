@@ -79,6 +79,7 @@
     </div>
     <div class="card-body p-0">
         @if($rev->action === 'created' && $rev->new_values)
+            <div class="table-responsive">
             <table class="diff-table">
                 <thead><tr><th style="width:150px">Field</th><th>Value (New)</th></tr></thead>
                 <tbody>
@@ -91,7 +92,9 @@
                     @endforeach
                 </tbody>
             </table>
+            </div>
         @elseif($rev->action === 'deleted' && $rev->old_values)
+            <div class="table-responsive">
             <table class="diff-table">
                 <thead><tr><th style="width:150px">Field</th><th>Value (Old)</th></tr></thead>
                 <tbody>
@@ -104,7 +107,9 @@
                     @endforeach
                 </tbody>
             </table>
+            </div>
         @elseif($rev->action === 'updated' && $rev->old_values && $rev->new_values)
+            <div class="table-responsive">
             <table class="diff-table">
                 <thead><tr><th style="width:150px">Field</th><th>Old Value</th><th>New Value</th></tr></thead>
                 <tbody>
@@ -137,6 +142,7 @@
                     @endif
                 </tbody>
             </table>
+            </div>
         @else
             <div class="empty-diff">No change data available for this revision.</div>
         @endif

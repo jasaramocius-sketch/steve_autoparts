@@ -13,7 +13,7 @@
 
     <style>
         body { background:#f4f6f9; font-family:'Inter',sans-serif; }
-        .admin-sidebar { width:260px; height:100vh; position:fixed; background:#1e1e2d; color:#fff; z-index:1000; display:flex; flex-direction:column; transition:transform .25s; }
+        .admin-sidebar { width:260px; height:100vh; position:fixed; background:#1e1e2d; color:#fff; z-index:1001; display:flex; flex-direction:column; transition:transform .25s; }
         .admin-sidebar .brand { padding:18px 20px; border-bottom:1px solid rgba(255,255,255,.08); font-size:18px; font-weight:700; letter-spacing:.5px; white-space:nowrap; display:flex; align-items:center; justify-content:space-between; }
         .admin-sidebar .brand a { flex:1; font-size:1rem;}
         .sidebar-close-btn { display:none; background:none; border:none; color:rgba(255,255,255,.6); font-size:18px; cursor:pointer; padding:4px 8px; border-radius:6px; transition:all .15s; }
@@ -46,7 +46,7 @@
             position: fixed;
             inset: 0;
             background: rgba(0,0,0,.5);
-            z-index: 999;
+            z-index: 1000;
         }
         body.sidebar-open .admin-sidebar-overlay {
             display: block;
@@ -68,7 +68,7 @@
             .admin-content .table th,
             .admin-content .table td { padding:0.5rem 0.4rem; white-space:nowrap; }
             .admin-content .card-header h5 { font-size:1rem; }
-            .admin-content .card-header .btn { font-size:12px; padding:4px 10px; }
+            .admin-content .card-header .btn { font-size:14px; padding:6px 12px; }
             .sidebar-close-btn { display:inline-flex; }
             .admin-product-page-important-btn a {padding: 6px 12px;font-size: 14px;line-height: 1;}
         }
@@ -88,7 +88,7 @@
             .admin-content .card-body .fa-2x { font-size:1.2em; }
             .admin-content .card-body .rounded-3 { padding:8px !important; }
             .admin-content .card-header h5 { font-size:14px; }
-            .admin-content .card-header .btn { font-size:11px; padding:3px 8px; }
+            .admin-content .card-header .btn { font-size:12px; padding:5px 10px; }
             .admin-content .table { font-size:12px; }
             .admin-content .table th,
             .admin-content .table td { padding:0.4rem 0.3rem; }
@@ -108,7 +108,7 @@
     @stack('page-builder-css')
 </head>
 
-<body>
+@include('partials.page-attributes')
 
 @include('admin.partials.sidebar')
 <div class="admin-sidebar-overlay"></div>
@@ -233,6 +233,12 @@ document.addEventListener('error', function(e) {
 }, true);
 </script>
 <script>
+var closeFormSelects = function() {
+    document.querySelectorAll('.form-select-wrapper.focused').forEach(function(w) {
+        w.classList.remove('focused');
+    });
+};
+
 document.querySelectorAll('.form-select').forEach(function(el) {
     var wrapper = document.createElement('span');
     wrapper.className = 'form-select-wrapper';
@@ -249,12 +255,27 @@ document.querySelectorAll('.form-select').forEach(function(el) {
         wrapper.classList.remove('focused');
     });
     el.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            wrapper.classList.remove('focused');
-        } else if (e.key === ' ' || e.key === 'Enter') {
+        if (e.key === ' ' || e.key === 'Enter') {
             wrapper.classList.toggle('focused');
         }
     });
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeFormSelects();
+}, true);
+document.addEventListener('keyup', function(e) {
+    if (e.key === 'Escape') closeFormSelects();
+}, true);
+
+document.addEventListener('scroll', function() {
+    closeFormSelects();
+}, true);
+
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.form-select-wrapper')) {
+        closeFormSelects();
+    }
 });
 </script>
 @stack('page-builder-js')

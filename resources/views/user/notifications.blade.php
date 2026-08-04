@@ -3,7 +3,7 @@
 @section('page-id', 'user-notifications-page')
 @section('page-class', 'user-notifications-page')
 @section('dashboard-content')
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
     <h4 class="h4-style mb-0">Notifications
         @if($unreadCount > 0)
         <span class="badge bg-danger ms-2">{{ $unreadCount }}</span>

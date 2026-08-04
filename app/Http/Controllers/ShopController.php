@@ -152,11 +152,27 @@ class ShopController extends Controller
         }
 
         $productsQuery = Product::where('status', true);
+
+        // When the garage vehicle filter is auto-applied, count matching products.
+        // Only apply the vehicle filter when at least one product matches. On zero
+        // match, fall back to showing all products but keep the vehicle alert bar
+        // (with the 0 count) so the user knows no parts fit their vehicle.
+        $vehicleMatchCount = null;
+        if ($selectedVehicle) {
+            $vehicleQuery = (clone $productsQuery);
+            $this->filterProducts($request, $vehicleQuery);
+            $vehicleMatchCount = $vehicleQuery->count();
+
+            if ($vehicleMatchCount === 0) {
+                $request->merge(['year' => '', 'make' => '', 'model' => '']);
+            }
+        }
+
         $this->filterProducts($request, $productsQuery);
         $products = $productsQuery->paginate(24)->onEachSide(1)->withQueryString();
 
         return view('shop', array_merge(
-            compact('products', 'selectedVehicle'),
+            compact('products', 'selectedVehicle', 'vehicleMatchCount'),
             $this->getSharedData()
         ));
     }
@@ -278,7 +294,7 @@ class ShopController extends Controller
     {
         $query = $request->get('query', '');
 
-        if (strlen($query) < 2) {
+        if (strlen($query) < 3) {
             return response()->json([]);
         }
 
@@ -292,8 +308,8 @@ class ShopController extends Controller
             return [
                 'name' => $product->name,
                 'slug' => $product->slug,
-                'price' => number_format($product->price, 2),
-                'old_price' => $product->old_price ? number_format($product->old_price, 2) : null,
+                'price' => currency_format($product->price),
+                'old_price' => $product->old_price ? currency_format($product->old_price) : null,
                 'image' => $product->image ? asset('assets/images/thumbnails/' . $product->image) : asset('assets/images/placeholder.png'),
                 'category' => $product->category->name ?? '',
                 'url' => route('product', $product->slug),

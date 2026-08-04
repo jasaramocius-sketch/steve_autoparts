@@ -28,6 +28,10 @@
     border-radius: 8px; 
     padding: 9px 18px;
   }
+  .filter-select option:hover {
+    background-color: var(--primary) !important;
+    color: #fff;
+  }
   .product-nav-wrapper .btn-wrapper .view-btn.active {
     background: var(--primary);
     color: #fff;
@@ -40,6 +44,46 @@
   /* .cat-toggle-btn .fa-plus { display: inline; } */
   .cat-toggle-btn:not(.collapsed) .fa-minus { display: inline; }
   .cat-toggle-btn:not(.collapsed) .fa-plus { display: none; }
+  /* Active filter chips */
+  .active-filter-chips-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #6b7280;
+  }
+  .filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 4px 8px 4px 12px;
+    background: #fff7ed;
+    border: 1px solid var(--primary);
+    border-radius: 20px;
+    font-size: 13px;
+  }
+  .filter-chip-label {
+    color: #6b7280;
+    font-weight: 500;
+  }
+  .filter-chip-value {
+    color: var(--primary);
+    font-weight: 600;
+  }
+  .filter-chip-clear {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    color: #fff;
+    background: var(--primary);
+    font-size: 13px;
+    text-decoration: none;
+  }
+  .filter-chip-clear:hover {
+    background: #c53030;
+    color: #fff;
+  }
 </style>
 
 <!-- Banner Hero Section -->
@@ -447,10 +491,10 @@
         <!-- Sort & Nav Header -->
         <div class="product-nav-wrapper shadow-sm rounded border mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
           
-            <div class="d-flex align-items-center gap-3 flex-wrap filter-sort-brand-wrapper col-md-8">
+            <div class="d-flex align-items-center gap-3 flex-wrap filter-sort-brand-wrapper w-auto">
               <div class="d-flex align-items-center gap-2 filter-sort-wrapper">
                 <h5 class="mb-0" style="font-size: 14px; font-weight: 500;">Sort by</h5>
-                <select class="form-select" style="width:180px; border:1px solid #c7c0bf; border-radius:4px;" id="sort-select">
+                <select class="form-select" style="/*width:180px;*/ border:1px solid #c7c0bf; border-radius:4px;" id="sort-select">
                   <option value="default" {{ request('sort') == 'default' ? 'selected' : '' }}>Newest</option>
                   <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Oldest</option>
                   <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>Price: Low to High</option>
@@ -470,7 +514,7 @@
                       <input type="hidden" name="{{ $name }}" value="{{ $value }}">
                     @endif
                   @endforeach
-                  <select name="brand" class="form-select" style="width:180px; border:1px solid #c7c0bf; border-radius:4px;">
+                  <select name="brand" class="form-select" style="/*width:180px;*/ border:1px solid #c7c0bf; border-radius:4px;">
                     <option value="">All Brands</option>
                     @foreach($brands as $brand)
                       <option value="{{ $brand->slug }}" {{ request('brand') == $brand->slug ? 'selected' : '' }}>{{ $brand->name }}</option>
@@ -479,23 +523,117 @@
                 </form>
               </div>
             </div>
-            <div class="btn-wrapper d-flex gap-2 grid-list-view-wrapper d-lg-flex col-md-3 justify-content-sm-end">
+            <div class="btn-wrapper d-flex gap-2 grid-list-view-wrapper d-lg-flex w-auto justify-content-sm-end">
               @include('partials.grid-list-toggle')
             </div>
         </div>
 
-        @if(isset($selectedVehicle) && $selectedVehicle && !isset($currentCategory))
-          <div class="alert alert-dismissible d-flex align-items-center mb-3 py-2 px-3" style="background: linear-gradient(135deg, #e8f5e9, #f1f8e9); border: 1px solid #a5d6a7; border-radius: 8px; font-size: 14px;">
-            <i class="las la-car mr-2" style="font-size: 20px; color: #2e7d32;"></i>
-            <span class="text-dark">
-              Showing parts for <strong>{{ $selectedVehicle->year }} {{ $selectedVehicle->make }} {{ $selectedVehicle->model }}</strong>
-            </span>
-            <form method="POST" action="{{ route('shop.clear-vehicle') }}" class="ml-auto">
-              @csrf
-              <button type="submit" class="text-danger fw-600 text-decoration-none border-0 bg-transparent p-0" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Clear vehicle filter" style="font-size: 13px; cursor: pointer;">
-                <i class="las la-times"></i> Clear
-              </button>
-            </form>
+        @php
+          $sortLabels = ['default' => 'Newest', 'oldest' => 'Oldest', 'price_asc' => 'Price: Low to High', 'price_desc' => 'Price: High to Low', 'rating' => 'Top Rated'];
+          $sortVal = request('sort');
+          $hasSortFilter = !empty($sortVal) && $sortVal !== 'default';
+          $activeSortLabel = $hasSortFilter ? ($sortLabels[$sortVal] ?? $sortVal) : null;
+          $brandVal = request('brand');
+          $hasBrandFilter = !empty($brandVal);
+          $activeBrand = $hasBrandFilter
+              ? ($brands->firstWhere('slug', $brandVal)?->name ?? $brands->firstWhere('id', $brandVal)?->name ?? $brandVal)
+              : null;
+          $hasSearchFilter = request()->filled('search');
+          $hasPriceParams = request()->filled('min_price') || request()->filled('max_price');
+          $minPriceVal = (float) request('min_price', 0);
+          $maxPriceVal = (float) request('max_price', 0);
+          $hasPriceFilter = $hasPriceParams && ($minPriceVal > 0 || $maxPriceVal < 1000);
+          $hasVehicleChips = !isset($selectedVehicle) || !$selectedVehicle;
+          $hasVehicleFilterChip = isset($selectedVehicle) && $selectedVehicle;
+          $hasYearFilter = $hasVehicleChips && request()->filled('year');
+          $hasMakeFilter = $hasVehicleChips && request()->filled('make');
+          $hasModelFilter = $hasVehicleChips && request()->filled('model');
+        @endphp
+
+        @if($hasSortFilter || $hasBrandFilter || $hasSearchFilter || $hasPriceFilter || $hasYearFilter || $hasMakeFilter || $hasModelFilter || $hasVehicleFilterChip)
+          <div class="active-filter-chips d-flex align-items-center flex-wrap gap-2 mb-3">
+            <span class="active-filter-chips-label">Active filters:</span>
+            @if($hasSearchFilter)
+              <span class="filter-chip">
+                <span class="filter-chip-label">Search:</span>
+                <span class="filter-chip-value">{{ request('search') }}</span>
+                <a href="{{ request()->fullUrlWithQuery(['search' => null, 'page' => null]) }}" class="filter-chip-clear" data-bs-toggle="tooltip" data-bs-placement="top" title="Remove search filter">
+                  <i class="las la-times"></i>
+                </a>
+              </span>
+            @endif
+            @if($hasSortFilter)
+              <span class="filter-chip">
+                <span class="filter-chip-label">Sort by:</span>
+                <span class="filter-chip-value">{{ $activeSortLabel }}</span>
+                <a href="{{ request()->fullUrlWithQuery(['sort' => null, 'page' => null]) }}" class="filter-chip-clear" data-bs-toggle="tooltip" data-bs-placement="top" title="Remove sort filter">
+                  <i class="las la-times"></i>
+                </a>
+              </span>
+            @endif
+            @if($hasBrandFilter)
+              <span class="filter-chip">
+                <span class="filter-chip-label">Brand:</span>
+                <span class="filter-chip-value">{{ $activeBrand }}</span>
+                <a href="{{ request()->fullUrlWithQuery(['brand' => null, 'page' => null]) }}" class="filter-chip-clear" data-bs-toggle="tooltip" data-bs-placement="top" title="Remove brand filter">
+                  <i class="las la-times"></i>
+                </a>
+              </span>
+            @endif
+            @if($hasPriceFilter)
+              <span class="filter-chip">
+                <span class="filter-chip-label">Price:</span>
+                <span class="filter-chip-value">${{ number_format($minPriceVal, 0) }} - ${{ number_format($maxPriceVal, 0) }}</span>
+                <a href="{{ request()->fullUrlWithQuery(['min_price' => null, 'max_price' => null, 'page' => null]) }}" class="filter-chip-clear" data-bs-toggle="tooltip" data-bs-placement="top" title="Remove price filter">
+                  <i class="las la-times"></i>
+                </a>
+              </span>
+            @endif
+            @if($hasYearFilter)
+              <span class="filter-chip">
+                <span class="filter-chip-label">Year:</span>
+                <span class="filter-chip-value">{{ request('year') }}</span>
+                <a href="{{ request()->fullUrlWithQuery(['year' => null, 'page' => null]) }}" class="filter-chip-clear" data-bs-toggle="tooltip" data-bs-placement="top" title="Remove year filter">
+                  <i class="las la-times"></i>
+                </a>
+              </span>
+            @endif
+            @if($hasMakeFilter)
+              <span class="filter-chip">
+                <span class="filter-chip-label">Make:</span>
+                <span class="filter-chip-value">{{ request('make') }}</span>
+                <a href="{{ request()->fullUrlWithQuery(['make' => null, 'page' => null]) }}" class="filter-chip-clear" data-bs-toggle="tooltip" data-bs-placement="top" title="Remove make filter">
+                  <i class="las la-times"></i>
+                </a>
+              </span>
+            @endif
+            @if($hasModelFilter)
+              <span class="filter-chip">
+                <span class="filter-chip-label">Model:</span>
+                <span class="filter-chip-value">{{ request('model') }}</span>
+                <a href="{{ request()->fullUrlWithQuery(['model' => null, 'page' => null]) }}" class="filter-chip-clear" data-bs-toggle="tooltip" data-bs-placement="top" title="Remove model filter">
+                  <i class="las la-times"></i>
+                </a>
+              </span>
+            @endif
+            @if($hasVehicleFilterChip)
+              @php
+                $vehicleMatchCount = $vehicleMatchCount ?? null;
+              @endphp
+              <span class="filter-chip">
+                <span class="filter-chip-label">Vehicle:</span>
+                <span class="filter-chip-value">{{ $selectedVehicle->year }} {{ $selectedVehicle->make }} {{ $selectedVehicle->model }}</span>
+                @if($vehicleMatchCount !== null)
+                  <span class="filter-chip-value" style="color:#6b7280; font-weight:600;">{{ $vehicleMatchCount }} part{{ $vehicleMatchCount === 1 ? '' : 's' }}</span>
+                @endif
+                <form method="POST" action="{{ route('shop.clear-vehicle') }}" class="d-inline">
+                  @csrf
+                  <button type="submit" class="filter-chip-clear" style="border:0; padding:0; cursor:pointer;" data-bs-toggle="tooltip" data-bs-placement="top" title="Remove vehicle filter">
+                    <i class="las la-times"></i>
+                  </button>
+                </form>
+              </span>
+            @endif
           </div>
         @endif
 
@@ -698,16 +836,18 @@ $(document).ready(function() {
     $(document).on('click', '[data-layout="grid"]', function(e) {
         e.preventDefault();
         bootstrap.Tooltip.getInstance(this)?.hide();
+        this.blur();
         applyLayout('grid');
     });
     $(document).on('click', '[data-layout="list"]', function(e) {
         e.preventDefault();
         bootstrap.Tooltip.getInstance(this)?.hide();
+        this.blur();
         applyLayout('list');
     });
 
-    // Disable grid/list tooltips on touch devices
-    if ('ontouchstart' in window) {
+    // Disable grid/list tooltips on devices without hover support
+    if (window.matchMedia && window.matchMedia('(hover: none)').matches) {
         document.querySelectorAll('[data-layout="grid"], [data-layout="list"]').forEach(function(el) {
             var tip = bootstrap.Tooltip.getInstance(el);
             if (tip) tip.disable();

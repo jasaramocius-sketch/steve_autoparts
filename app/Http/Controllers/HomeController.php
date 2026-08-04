@@ -103,14 +103,26 @@ class HomeController extends Controller
         }
 
         $heroSection = $sections->get('hero');
-        $bannerSections = $sections->filter(fn($s) => str_starts_with($s->section_name, 'banner_'));
+
+        $offersSection = $sections->get('offers');
+        $bannerData = $offersSection?->extra_data['banners'] ?? [];
+        if (!empty($bannerData)) {
+            $banners = collect($bannerData)->map(fn($b) => (object) $b);
+        } else {
+            $banners = $sections->filter(fn($s) => str_starts_with($s->section_name, 'banner_'))->values();
+        }
 
         $bestSelling = Product::where('status', true)->where('added_by', 'admin')->where('product_type', 'best_selling')->latest()->take(8)->get();
         if ($bestSelling->isEmpty()) {
             $bestSelling = Product::where('status', true)->where('added_by', 'admin')->inRandomOrder()->take(8)->get();
         }
 
-        $latestPosts = Blog::where('status', 'published')->latest()->take(2)->get();
+        $latestPostSection = $sections->get('latest_post');
+        $latestPostLimit = (int) ($latestPostSection?->extra_data['posts_count'] ?? 2);
+        if ($latestPostLimit < 1 || $latestPostLimit > 12) {
+            $latestPostLimit = 2;
+        }
+        $latestPosts = Blog::where('status', 'published')->latest()->take($latestPostLimit)->get();
 
         $brandsSection = $sections->get('top_brands_heading');
         $brandsExtra = $brandsSection?->extra_data ?? [];
@@ -134,7 +146,7 @@ class HomeController extends Controller
 
         $brands = $brandsQuery->get();
 
-        return view('home', compact('categories', 'featuredProducts', 'exploreTabs', 'heroSection', 'bannerSections', 'bestSelling', 'sections', 'latestPosts', 'brands'));
+        return view('home', compact('categories', 'featuredProducts', 'exploreTabs', 'heroSection', 'banners', 'bestSelling', 'sections', 'latestPosts', 'brands'));
     }
 
     private function buildExploreTabs($section): array

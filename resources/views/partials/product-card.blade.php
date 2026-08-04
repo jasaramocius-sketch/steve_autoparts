@@ -35,7 +35,7 @@
         {!! imgTag('assets/images/thumbnails/' . $product['image'], $product['name'], 'product-img') !!}
         </a>      
         <div class="add-to-cart">
-            <a class="compare_product" href="javascript:;" data-href="{{ route('compare.add', ['product_id' => $product['id']]) }}">
+            <a class="compare_product" href="javascript:;" data-href="{{ route('compare.add', ['product_id' => $product['id']]) }}" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Compare">
                 <div class="compare">
                     <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                         <path d="M18.1777 8C23.2737 8 23.2737 16 18.1777 16C13.0827 16 11.0447 8 5.43875 8C0.85375 8 0.85375 16 5.43875 16C11.0447 16 13.0828 8 18.1788 8H18.1777Z" stroke="#030712" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
@@ -50,7 +50,7 @@
                 <input type="hidden" name="product_image" value="{{ asset($product['image']) }}">
                 <button type="submit" class="add-cart border-0 steve-btn">Add to Cart</button>
             </form>
-            <a href="{{ route('product', $product['slug']) }}">
+            <a href="{{ route('product', $product['slug']) }}" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Quick View">
                 <div class="details">
                     <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                         <path d="M2.42012 12.7132C2.28394 12.4975 2.21584 12.3897 2.17772 12.2234C2.14909 12.0985 2.14909 11.9015 2.17772 11.7766C2.21584 11.6103 2.28394 11.5025 2.42012 11.2868C3.54553 9.50484 6.8954 5 12.0004 5C17.1054 5 20.4553 9.50484 21.5807 11.2868C21.7169 11.5025 21.785 11.6103 21.8231 11.7766C21.8517 11.9015 21.8517 12.0985 21.8231 12.2234C21.785 12.3897 21.7169 12.4975 21.5807 12.7132C20.4553 14.4952 17.1054 19 12.0004 19C6.8954 19 3.54553 14.4952 2.42012 12.7132Z" stroke="#030712" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />

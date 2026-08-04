@@ -4,7 +4,7 @@
 @section('page-class', 'user-wishlist-page')
 @section('dashboard-content')
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
     <h4 class="h4-style mb-0">My Wishlist</h4>
     @if(count($wishlist) > 0)
     <form action="{{ route('wishlist.clear') }}" method="POST">
@@ -40,5 +40,11 @@
             </div>
         </div>
     @endforelse
+</div>
+@if(method_exists($wishlist, 'links') && $wishlist->hasPages())
+    <div class="pagination-wrapper mt-4 col-12">
+        {{ $wishlist->links() }}
+    </div>
+@endif
 
 @endsection

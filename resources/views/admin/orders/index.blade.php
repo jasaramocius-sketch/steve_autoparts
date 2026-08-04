@@ -6,21 +6,32 @@
 
 @section('content')
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+ <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="fw-bold mb-0">All Orders</h4>
 </div>
 
 <div class="card border-0 shadow-sm">
     <div class="card-body p-0">
-        <div class="d-flex justify-content-between align-items-center px-3 pt-3 pb-2">
-            <div class="d-flex align-items-center gap-2">
-                <span class="text-muted small">Show</span>
-                <select class="form-select w-auto" onchange="window.location.href=this.value">
-                    @foreach([10, 20, 50, 100] as $n)
-                        <option value="{{ request()->fullUrlWithQuery(['per_page' => $n]) }}" {{ (int)request('per_page', 10) === $n ? 'selected' : '' }}>{{ $n }}</option>
-                    @endforeach
-                </select>
-                <span class="text-muted small">per page</span>
+        <div class="d-flex justify-content-between align-items-center px-3 pt-3 pb-2 flex-wrap flex-md-nowrap mb-3">
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="text-muted small">Show</span>
+                    <select class="form-select w-auto" onchange="window.location.href=this.value">
+                        @foreach([10, 20, 50, 100] as $n)
+                            <option value="{{ request()->fullUrlWithQuery(['per_page' => $n]) }}" {{ (int)request('per_page', 10) === $n ? 'selected' : '' }}>{{ $n }}</option>
+                        @endforeach
+                    </select>
+                    <span class="text-muted small">per page</span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="text-muted small">Status</span>
+                    <select class="form-select w-auto" onchange="window.location.href=this.value">
+                        <option value="{{ request()->fullUrlWithQuery(['status' => null, 'page' => null]) }}" {{ !request('status') ? 'selected' : '' }}>All Statuses</option>
+                        @foreach(['pending', 'processing', 'shipped', 'delivered', 'cancelled'] as $st)
+                            <option value="{{ request()->fullUrlWithQuery(['status' => $st, 'page' => null]) }}" {{ request('status') === $st ? 'selected' : '' }}>{{ ucfirst($st) }}</option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
             <div class="text-muted small">
                 Showing {{ $orders->firstItem() }}-{{ $orders->lastItem() }} of {{ $orders->total() }}

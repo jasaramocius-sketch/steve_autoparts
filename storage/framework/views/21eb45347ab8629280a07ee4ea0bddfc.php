@@ -1,0 +1,25 @@
+<?php $__env->startSection('page-id', 'user-support-policy-page'); ?>
+<?php $__env->startSection('page-class', 'user-support-policy-page'); ?>
+<?php $__env->startSection('title', 'Support Policy'); ?>
+<?php $__env->startSection('content'); ?>
+
+<div class="container py-5">
+    <h1 class="fw-bold mb-4">Support Policy</h1>
+    <p class="text-muted">Last updated: July 2026</p>
+
+    <h5 class="mt-4">1. Support Hours</h5>
+    <p>Our support team is available Monday through Friday, 9:00 AM to 6:00 PM (EST). We strive to respond to all inquiries within 24 business hours.</p>
+
+    <h5 class="mt-4">2. How to Get Support</h5>
+    <p>You can reach us via our <a href="<?php echo e(route('contact')); ?>">contact form</a> or by email. For order-related inquiries, please include your order number.</p>
+
+    <h5 class="mt-4">3. Scope of Support</h5>
+    <p>We provide support for order inquiries, product questions, and technical issues related to our website. Support is available in English.</p>
+
+    <h5 class="mt-4">4. Escalation</h5>
+    <p>If your issue is not resolved to your satisfaction, you may request escalation to a senior support representative.</p>
+</div>
+
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/html/stautoparts/resources/views/pages/support-policy.blade.php ENDPATH**/ ?>

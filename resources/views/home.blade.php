@@ -6,57 +6,39 @@
 @section('content')
 
 <!-- hero section start -->
+@if($heroSection)
 <section class="hero-slider-wrapper">
-    @if($heroSection && $heroSection->status)
-        <div class="gs-hero-section" style="background-image: url('{{ $heroSection->image ? asset('assets/images/home/' . $heroSection->image) : asset('assets/images/sliders/1730872837Hero03-minpng.png') }}'); background-size: cover; background-position: center; min-height: 520px; display: flex; align-items: center;">
-            <div class="container">
-                <div class="row align-items-center">
-                    <div class="col-12 col-md-6 col-lg-6">
-                        <div class="hero-content">
-                            @if($heroSection->subtitle)
-                                <h6 class="subtitle wow-replaced" style="color:var(--hov-primary)">{{ $heroSection->subtitle }}</h6>
-                            @endif
-                            @if($heroSection->title)
-                                <h1 class="title wow-replaced" data-wow-delay=".1s" style="color:#090909; font-weight: 800;">{{ $heroSection->title }}</h1>
-                            @endif
-                            @if($heroSection->description)
-                                <p class="des wow-replaced" data-wow-delay=".2s" style="color:#000000">
-                                    {{ $heroSection->description }}
-                                </p>
-                            @endif
-                            @if($heroSection->button_text && $heroSection->button_url)
-                                <a class="template-btn hero-shop-now-btn steve-btn wow-replaced" data-wow-delay=".3s" href="{{ $heroSection->button_url }}">
-                                    {{ $heroSection->button_text }}
-                                </a>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @else
-        <div class="gs-hero-section" style="background-image: url('{{ asset('assets/images/sliders/1730872837Hero03-minpng.png') }}'); background-size: cover; background-position: center; min-height: 520px; display: flex; align-items: center;">
-            <div class="container">
-                <div class="row align-items-center">
-                    <div class="col-12 col-md-6 col-lg-6">
-                        <div class="hero-content">
-                            <h6 class="subtitle wow-replaced" style="color:var(--hov-primary)">Dive In and Explore</h6>
-                            <h1 class="title wow-replaced" data-wow-delay=".1s" style="color:#090909; font-weight: 800;">Start Shopping Now!</h1>
+    <div class="gs-hero-section" style="background-image: url('{{ $heroSection->image ? asset('assets/images/home/' . $heroSection->image) : asset('assets/images/sliders/1730872837Hero03-minpng.png') }}'); background-size: cover; background-position: center; min-height: 520px; display: flex; align-items: center;">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-12 col-md-6 col-lg-6">
+                    <div class="hero-content">
+                        @if($heroSection->subtitle)
+                            <h6 class="subtitle wow-replaced" style="color:var(--hov-primary)">{{ $heroSection->subtitle }}</h6>
+                        @endif
+                        @if($heroSection->title)
+                            <h1 class="title wow-replaced" data-wow-delay=".1s" style="color:#090909; font-weight: 800;">{{ $heroSection->title }}</h1>
+                        @endif
+                        @if($heroSection->description)
                             <p class="des wow-replaced" data-wow-delay=".2s" style="color:#000000">
-                                Explore our curated collections and find the perfect item that speaks to your style and needs. With just a click, begin your journey.
+                                {{ $heroSection->description }}
                             </p>
-                            <a class="template-btn hero-shop-now-btn steve-btn wow-replaced" data-wow-delay=".3s" href="{{ route('shop') }}" style="background-color: var(--hov-primary);">
-                                Shop Now
+                        @endif
+                        @if($heroSection->button_text && $heroSection->button_url)
+                            <a class="template-btn hero-shop-now-btn steve-btn wow-replaced" data-wow-delay=".3s" href="{{ $heroSection->button_url }}">
+                                {{ $heroSection->button_text }}
                             </a>
-                        </div>
+                        @endif
                     </div>
                 </div>
             </div>
         </div>
-    @endif
+    </div>
 </section>
+@endif
 <!-- hero section end -->
 
+@if($sections->has('categories_heading'))
 <!-- categories section start -->
 <div class="gs-cate-section">
     <div class="container wow-replaced section-with-padding">
@@ -102,7 +84,9 @@
     </div>
 </div>
 <!-- categories section end -->
+@endif
 
+@if($sections->has('offers'))
 <!-- product offer section start -->
 <section class="gs-offer-section">
     <div class="container section-with-padding">
@@ -110,12 +94,12 @@
         <div class="mb-30 gs-offer-section-row-first">
             <div class="flex" >
                 <div class="gs-title-box flex-column">
-                    <h2 class="title wow-replaced">Special Offer</h2>
+                    <h2 class="title wow-replaced">{{ $sections->get('offers')?->title ?? 'Special Offer' }}</h2>
                      <p class="des mb-0 wow-replaced" data-wow-delay=".1s">{{ $sections->get('offers')?->description ??  'Discover outstanding deals on high-quality auto parts. Upgraded selection and special savings this month only.' }}</p>
                 </div>
                 <div class="shop-page-nav flex-column" data-wow-delay=".2s">
                     <a href="{{ route('shop') }}" class="a-tag-hover-color">
-                        Shop Now
+                        {{ $sections->get('offers')?->button_text ??  'Shop Now' }}
                         <i class="fas fa-arrow-right ms-1"></i> 
                     </a>                       
                 </div>
@@ -125,15 +109,21 @@
 
         <!-- main content -->
         <div class="row g-4">
-            @forelse($bannerSections as $banner)
+            @forelse($banners as $banner)
                 @php
-                    $bannerCount = $bannerSections->count();
+                    $bannerCount = $banners->count();
                     $colClass = $bannerCount == 1 ? 'col-lg-12' : ($bannerCount == 2 ? 'col-lg-6' : 'col-lg-4');
                 @endphp
                 <div class="{{ $colClass }} wow-replaced" data-wow-delay=".2s">
                     <a href="{{ $banner->button_url ?? route('shop') }}" class="">
                         @if($banner->image)
-                            {!! imgTag('assets/images/categories/' . $banner->image, 'offer banner', 'w-100 h-100 object-fit-cover') !!}
+                            @php
+                                $bannerImg = 'assets/images/home/' . $banner->image;
+                                if (!file_exists(public_path($bannerImg))) {
+                                    $bannerImg = 'assets/images/categories/' . $banner->image;
+                                }
+                            @endphp
+                            {!! imgTag($bannerImg, 'offer banner', 'w-100 h-100 object-fit-cover') !!}
                         @else
                             <div class="bg-light p-5 text-center" style="min-height: 300px; display: flex; align-items: center; justify-content: center; border-radius: 4px;">
                                 <div>
@@ -166,7 +156,9 @@
     </div>
 </section>
 <!-- product offer section end -->
+@endif
 <!-- <div id="unirate-converter"></div> -->
+@if($sections->has('explore_products'))
 <!-- explore product section start -->
 <section class="gs-explore-product-section bg-light-white">
     <div class="container section-with-padding">
@@ -291,7 +283,9 @@
         </div>
     </div>
 </section>
+@endif
 
+@if($sections->has('deal_of_day'))
 <!-- Deal of the Day -->
 <section class="gs-deal-of-day gs-deal-of-day-home2">
     <div class="container section-with-padding">
@@ -300,9 +294,9 @@
                 <div class="deal-of-day-wrapper">
                     <div class="deal-of-day-content">
                         @php $deal = $sections->get('deal_of_day'); @endphp
-                        <h2 class="title wow-replaced">!! Special Offer !!</h2>
-                        <h6 class="sub-title wow-replaced" data-wow-delay=".1s">CLICK SHOP NOW FOR ALL DEAL OF THE PRODUCT</h6>
-                        <p class="deal-description wow-replaced" data-wow-delay=".2s">Donec condimentum Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam at risus nec urna facilisis tincidunt.</p>
+                        <h2 class="title wow-replaced">{{ $deal?->title ?? '!! Special Offer !!' }}</h2>
+                        <h6 class="sub-title wow-replaced" data-wow-delay=".1s">{{ $deal?->subtitle ?? 'CLICK SHOP NOW FOR ALL DEAL OF THE PRODUCT' }}</h6>
+                        <p class="deal-description wow-replaced" data-wow-delay=".2s">{{ $deal?->description ?? 'Donec condimentum Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam at risus nec urna facilisis tincidunt.' }}</p>
                         <div class="countdown-wrapper flex-wrap " id="countdown">
                             <div class="countdown-item-wrapper d-flex">
                                 <div class="countdown-item wow-replaced" data-wow-delay=".3s">
@@ -322,7 +316,11 @@
                                     <span class="countdown-title">Sec</span>
                                 </div>
                             </div>
-                            <a href="/stautoparts{{ $deal?->button_url ?? route('shop') }}" class="template-btn steve-btn w-100 wow-replaced" data-wow-delay=".7s">{{ $deal?->button_text ??  'Shop Now' }}</a>
+                            @php
+                                $dealUrl = $deal?->button_url ?: route('shop');
+                                if (!str_starts_with($dealUrl, 'http')) { $dealUrl = url($dealUrl); }
+                            @endphp
+                            <a href="{{ $dealUrl }}" class="template-btn steve-btn w-100 wow-replaced" data-wow-delay=".7s">{{ $deal?->button_text ??  'Shop Now' }}</a>
                         </div>
                     </div>
                 </div>
@@ -336,10 +334,12 @@
             </div>
         </div>
     </div>
-    <input type="hidden" id="countdown-date" value="2026-12-31T23:59:59">
+    <input type="hidden" id="countdown-date" value="{{ $deal?->extra_data['countdown'] ?? '2026-12-31T23:59:59' }}">
 </section>
 <!-- Deal of the Day Completed -->
+@endif
 
+@if($sections->has('featured_products_heading'))
 <!-- Featured Products Section Started -->
 <section class="gs-explore-product-section bg-white">
     <div class="container section-with-padding">
@@ -371,6 +371,7 @@
     </div>
 </section>
 <!-- Featured Product Section Completed -->
+@endif
 
 <!-- Service Section -->
 <section class="gs-service-section px-4 bg-light-white">
@@ -425,6 +426,7 @@
 </section>
 <!-- Service Section Completed -->
 
+@if($sections->has('best_selling'))
 <!-- Best Selling Section -->
 <section class="gs-explore-product-section">
     <div class="container section-with-padding">
@@ -455,7 +457,9 @@
     </div>
 </section>
 <!-- Best Selling Section Completed -->
+@endif
 
+@if($sections->has('latest_post'))
 <!-- Latest Post Section -->
 <section class="gs-latest-post-section bg-light-white py-120 mt-0 mb-0">
     <div class="container section-with-padding">
@@ -492,7 +496,9 @@
     </div>
 </section>
 <!-- Latest Post Section Completed -->
+@endif
 
+@if($sections->has('top_brands_heading'))
 <!-- Top Brands Section -->
 <section class="gs-brands-section">
     <div class="container section-with-padding">
@@ -524,7 +530,9 @@
     </div>
 </section>
 <!-- Top Brands Section Completed -->
+@endif
 
+@if($sections->has('partners_heading'))
 <!-- Partner Section -->
 <section class="gs-partner-section">
     <div class="container section-with-padding">
@@ -625,6 +633,7 @@
     </div>
 </section>
 <!-- Partner Section Completed -->
+@endif
 
 @endsection
 
@@ -637,6 +646,8 @@
                 spaceBetween: 20,
                 freeMode: true,
                 grabCursor: true,
+                swipeToSlide: true,
+                freeModeSticky: true,
                 navigation: {
                     prevEl: '.cate-prev',
                     nextEl: '.cate-next',

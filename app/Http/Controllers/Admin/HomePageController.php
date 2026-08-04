@@ -44,12 +44,17 @@ class HomePageController extends Controller
             'tabs.*.product_ids.*' => 'integer|exists:products,id',
         ]);
 
+        $validated['status'] = $request->has('status') ? 1 : 0;
+
         if ($request->hasFile('image')) {
             $validated['image'] = saveImageWithWebp($request->file('image'), 'assets/images/home');
         } elseif ($request->filled('image_from_manager')) {
-            $sourcePath = storage_path('app/public/' . $request->image_from_manager);
-            if (file_exists($sourcePath)) {
-                $filename = time() . '_' . uniqid() . '.' . pathinfo($request->image_from_manager, PATHINFO_EXTENSION);
+            $imgPath = $request->image_from_manager;
+            $sourcePath = file_exists(storage_path('app/public/' . $imgPath))
+                ? storage_path('app/public/' . $imgPath)
+                : (file_exists(public_path($imgPath)) ? public_path($imgPath) : null);
+            if ($sourcePath) {
+                $filename = time() . '_' . uniqid() . '.' . pathinfo($imgPath, PATHINFO_EXTENSION);
                 $destDir = public_path('assets/images/home');
                 if (!is_dir($destDir)) mkdir($destDir, 0755, true);
                 copy($sourcePath, $destDir . '/' . $filename);
@@ -74,7 +79,72 @@ class HomePageController extends Controller
             $existing['brand_ids'] = array_values(array_filter(array_map('intval', (array) $request->input('brand_ids', []))));
         }
 
-        if ($request->filled('brands_limit') || $request->has('brand_ids')) {
+        if ($request->filled('posts_count')) {
+            $existing['posts_count'] = (int) $request->posts_count;
+        }
+
+        if ($request->filled('countdown')) {
+            $existing['countdown'] = $request->countdown;
+        }
+
+        if ($section->section_name === 'offers' && $request->has('banners')) {
+            $savedBanners = [];
+            foreach ((array) $request->input('banners') as $row) {
+                if (!is_array($row)) {
+                    continue;
+                }
+
+                $imageFromManager = $row['image_from_manager'] ?? null;
+                $existingImage = $row['existing_image'] ?? null;
+                $newImage = null;
+
+                if ($imageFromManager) {
+                    // Check both storage/app/public and public_path (for images stored in either location)
+                    $sourcePath = null;
+                    if (file_exists(storage_path('app/public/' . $imageFromManager))) {
+                        $sourcePath = storage_path('app/public/' . $imageFromManager);
+                    } elseif (file_exists(public_path($imageFromManager))) {
+                        $sourcePath = public_path($imageFromManager);
+                    }
+
+                    if ($sourcePath) {
+                        $filename = time() . '_' . uniqid() . '.' . pathinfo($imageFromManager, PATHINFO_EXTENSION);
+                        $destDir = public_path('assets/images/home');
+                        if (!is_dir($destDir)) {
+                            mkdir($destDir, 0755, true);
+                        }
+                        copy($sourcePath, $destDir . '/' . $filename);
+                        $newImage = $filename;
+                    }
+                }
+
+                if (!$newImage && $existingImage) {
+                    $newImage = $existingImage;
+                }
+
+                $savedBanners[] = [
+                    'image' => $newImage,
+                    'title' => $row['title'] ?? '',
+                    'subtitle' => $row['subtitle'] ?? '',
+                    'button_text' => $row['button_text'] ?? '',
+                    'button_url' => $row['button_url'] ?? '',
+                ];
+            }
+
+            $savedBanners = array_values(array_filter($savedBanners, function ($b) {
+                return $b['image'] || $b['title'] || $b['subtitle'] || $b['button_text'] || $b['button_url'];
+            }));
+
+            $existing['banners'] = $savedBanners;
+        }
+
+        $extraChanged = $request->filled('brands_limit')
+            || $request->has('brand_ids')
+            || $request->filled('posts_count')
+            || $request->filled('countdown')
+            || ($section->section_name === 'offers' && $request->has('banners'));
+
+        if ($extraChanged) {
             $validated['extra_data'] = $existing;
         }
 
@@ -82,6 +152,15 @@ class HomePageController extends Controller
 
         return redirect()->route('admin.home-page.index')
             ->with('success', 'Section updated successfully!');
+    }
+
+    public function toggleStatus($id)
+    {
+        $section = HomePageSection::findOrFail($id);
+        $section->status = !$section->status;
+        $section->save();
+
+        return back()->with('success', 'Section status updated successfully.');
     }
 
     public function reorder(Request $request)
