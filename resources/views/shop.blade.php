@@ -543,13 +543,14 @@
           $minPriceVal = (float) request('min_price', 0);
           $maxPriceVal = (float) request('max_price', 0);
           $hasPriceFilter = $hasPriceParams && ($minPriceVal > 0 || $maxPriceVal < 1000);
-          $hasVehicleChips = !isset($selectedVehicle) || !$selectedVehicle;
+          $hasVehicleFilter = isset($selectedVehicle) && $selectedVehicle && !isset($currentCategory);
+          $hasVehicleChips = !$hasVehicleFilter;
           $hasYearFilter = $hasVehicleChips && request()->filled('year');
           $hasMakeFilter = $hasVehicleChips && request()->filled('make');
           $hasModelFilter = $hasVehicleChips && request()->filled('model');
         @endphp
 
-        @if($hasSortFilter || $hasBrandFilter || $hasSearchFilter || $hasPriceFilter || $hasYearFilter || $hasMakeFilter || $hasModelFilter)
+        @if($hasSortFilter || $hasBrandFilter || $hasSearchFilter || $hasPriceFilter || $hasVehicleFilter || $hasYearFilter || $hasMakeFilter || $hasModelFilter)
           <div class="active-filter-chips d-flex align-items-center flex-wrap gap-2 mb-3">
             <span class="active-filter-chips-label">Active filters:</span>
             @if($hasSearchFilter)
@@ -577,6 +578,18 @@
                 <a href="{{ request()->fullUrlWithQuery(['brand' => null, 'page' => null]) }}" class="filter-chip-clear" data-bs-toggle="tooltip" data-bs-placement="top" title="Remove brand filter">
                   <i class="las la-times"></i>
                 </a>
+              </span>
+            @endif
+            @if($hasVehicleFilter)
+              <span class="filter-chip">
+                <span class="filter-chip-label">Vehicle:</span>
+                <span class="filter-chip-value">{{ $selectedVehicle->year }} {{ $selectedVehicle->make }} {{ $selectedVehicle->model }}</span>
+                <form method="POST" action="{{ route('shop.clear-vehicle') }}" class="d-inline">
+                  @csrf
+                  <button type="submit" class="filter-chip-clear border-0 bg-transparent p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Clear vehicle filter">
+                    <i class="las la-times"></i>
+                  </button>
+                </form>
               </span>
             @endif
             @if($hasPriceFilter)
