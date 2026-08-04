@@ -14,6 +14,7 @@ Contents
 - Contributing — docs/contributing.md
 - FAQ & Troubleshooting — docs/faq.md
 - HTML copy — docs/index.html
+- Machine-readable spec — docs/machine-readable.html
 
 Useful links
 
