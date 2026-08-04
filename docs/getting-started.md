@@ -40,7 +40,7 @@ Quick setup (recommended)
    php artisan migrate --force
    php artisan db:seed
 
-   The repository also contains stautoparts.sql for an importable snapshot.
+The repository also contains stautoparts.sql for an importable snapshot.
 
 6. Install JS dependencies and build assets:
 

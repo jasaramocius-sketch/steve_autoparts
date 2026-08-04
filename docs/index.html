@@ -1,254 +1,530 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Steve Auto Parts Documentation</title>
-    <style>
-      :root {
-        color-scheme: light;
-        --bg: #f7f9fc;
-        --panel: #ffffff;
-        --text: #1f2937;
-        --muted: #6b7280;
-        --accent: #0f766e;
-        --border: #dbe3ec;
-      }
-
-      * { box-sizing: border-box; }
-      body {
-        margin: 0;
-        font-family: Arial, Helvetica, sans-serif;
-        background: var(--bg);
-        color: var(--text);
-        line-height: 1.6;
-      }
-      .container {
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 24px;
-      }
-      .hero {
-        background: linear-gradient(135deg, #134e4a, #0f766e);
-        color: white;
-        padding: 32px;
-        border-radius: 16px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-      }
-      .hero h1 { margin: 0 0 8px; font-size: 2rem; }
-      .hero p { margin: 0; color: #ccfbf1; }
-      .nav {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-        margin: 24px 0;
-      }
-      .nav a {
-        text-decoration: none;
-        color: var(--accent);
-        background: var(--panel);
-        border: 1px solid var(--border);
-        padding: 8px 12px;
-        border-radius: 999px;
-        font-weight: 600;
-      }
-      .section {
-        background: var(--panel);
-        border: 1px solid var(--border);
-        border-radius: 14px;
-        padding: 24px;
-        margin-bottom: 18px;
-        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
-      }
-      .section h2 { margin-top: 0; color: var(--accent); }
-      .section h3 { margin-bottom: 8px; }
-      code, pre {
-        font-family: Consolas, "Courier New", monospace;
-      }
-      pre {
-        background: #111827;
-        color: #f9fafb;
-        padding: 14px;
-        border-radius: 8px;
-        overflow-x: auto;
-      }
-      ul { padding-left: 20px; }
-      .muted { color: var(--muted); }
-      .grid {
-        display: grid;
-        gap: 16px;
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      }
-      .card {
-        background: #f8fafc;
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 16px;
-      }
-      .card h3 { margin-top: 0; }
-      .footer {
-        text-align: center;
-        padding: 24px 0 8px;
-        color: var(--muted);
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <div class="hero">
-        <h1>Steve Auto Parts Documentation</h1>
-        <p>This HTML page is a browser-friendly copy of the repository documentation for developers and end users.</p>
-      </div>
-
-      <div class="nav">
-        <a href="README.md">Markdown docs index</a>
-        <a href="../README.md">Project README</a>
-        <a href="../HOME_PAGE_ADMIN_GUIDE.md">Home Page Admin Guide</a>
-      </div>
-
-      <div class="section">
-        <h2>Overview</h2>
-        <p>This documentation covers getting started, development workflows, deployment steps, architecture, database operations, testing, admin usage, troubleshooting, and contribution guidelines for the Steve Auto Parts site.</p>
-        <div class="grid">
-          <div class="card">
-            <h3>For developers</h3>
-            <ul>
-              <li>Setup local environment</li>
-              <li>Run tests and build assets</li>
-              <li>Understand architecture and routes</li>
-              <li>Deploy safely</li>
-            </ul>
-          </div>
-          <div class="card">
-            <h3>For end users</h3>
-            <ul>
-              <li>Browse the storefront</li>
-              <li>Use the shopping and checkout flows</li>
-              <li>Manage content from the admin panel</li>
-              <li>Use support and troubleshooting tips</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="section">
-        <h2>Getting Started</h2>
-        <p>Requirements:</p>
-        <ul>
-          <li>PHP 8.3+</li>
-          <li>Composer</li>
-          <li>Node.js 18+ and npm</li>
-          <li>Git</li>
-          <li>MySQL/MariaDB or SQLite</li>
-        </ul>
-        <p>Typical local setup:</p>
-        <pre>composer install
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Steve Auto Parts Documentation</title>
+<style>
+body { margin:0; font-family:Inter,system-ui, sans-serif; background:#f3f4f6; color:#111827; }
+.container { max-width:1040px; margin:0 auto; padding:32px; }
+header { background:#0f766e; color:#f8fafc; padding:32px 32px 24px; border-radius: 0 0 18px 18px; box-shadow:0 20px 60px rgba(15,23,42,.12); }
+header h1 { margin:0 0 12px; font-size:2.4rem; }
+header p { margin:0; color: #d1fae5; font-size:1.04rem; }
+nav { display:flex; flex-wrap:wrap; gap:10px; margin:24px 0; }
+a.tag { text-decoration:none; background:#ffffff; color:#0f766e; border:1px solid #d1d5db; padding:10px 16px; border-radius:999px; font-size:.95rem; }
+.section { background:#ffffff; border:1px solid #e5e7eb; border-radius:20px; padding:28px; margin-bottom:24px; box-shadow: 0 10px 30px rgba(15,23,42,.06); }
+.section h2, .section h3, .section h4 { color:#0f766e; margin-top:1.4rem; }
+.section p, .section li { color:#334155; }
+.section ul { padding-left: 1.4rem; }
+pre { background:#0f172a; color:#f8fafc; padding:18px; border-radius:14px; overflow-x:auto; }
+code { background:#e2e8f0; color:#0f172a; padding:2px 6px; border-radius:6px; font-size:.95rem; }
+footer { text-align:center; color:#64748b; margin:36px 0 12px; }
+@media (max-width: 720px) { .container {padding:20px;} header {padding:24px 20px 20px;} }
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<h1>Steve Auto Parts Documentation</h1>
+<p>Complete documentation for developers and end users in one browser-friendly HTML page.</p>
+</header>
+<nav><a class="tag" href="#steve-auto-parts-documentation">Steve Auto Parts — Documentation</a>
+<a class="tag" href="#getting-started">Getting Started</a>
+<a class="tag" href="#development-guide">Development Guide</a>
+<a class="tag" href="#deployment-guide">Deployment Guide</a>
+<a class="tag" href="#architecture-overview">Architecture Overview</a>
+<a class="tag" href="#database">Database</a>
+<a class="tag" href="#testing">Testing</a>
+<a class="tag" href="#operations-maintenance">Operations &amp; Maintenance</a>
+<a class="tag" href="#contributing">Contributing</a>
+<a class="tag" href="#faq-troubleshooting">FAQ &amp; Troubleshooting</a></nav>
+<div class="section"><h2 id="steve-auto-parts-documentation">Steve Auto Parts — Documentation</h2><p>Welcome to the documentation for the Steve Auto Parts web application. This docs/ collection targets both developers (setup, architecture, contributing) and end users (how to use the site, admin features, FAQ).</p>
+<p>Contents</p>
+<ul>
+<li>Getting Started — docs/getting-started.md</li>
+<li>Development — docs/development.md</li>
+<li>Deployment — docs/deployment.md</li>
+<li>Architecture — docs/architecture.md</li>
+<li>Database — docs/database.md</li>
+<li>Testing — docs/testing.md</li>
+<li>Operations &amp; Maintenance — docs/operations.md</li>
+<li>Contributing — docs/contributing.md</li>
+<li>FAQ &amp; Troubleshooting — docs/faq.md</li>
+<li>HTML copy — docs/index.html</li>
+</ul>
+<p>Useful links</p>
+<ul>
+<li>Project README: ../README.md</li>
+<li>Home Page Admin Guide: ../HOME_PAGE_ADMIN_GUIDE.md</li>
+</ul>
+<p>---</p>
+<p>If you want these docs published (GitHub Pages or similar), let me know and a minimal config (MkDocs or simple static site) can be added.</p></div>
+<div class="section"><h2 id="getting-started">Getting Started</h2><p>This guide helps you get the project running locally.</p>
+<p>Requirements</p>
+<ul>
+<li>PHP 8.3+</li>
+<li>Composer</li>
+<li>Node.js 18+ and npm</li>
+<li>MySQL / MariaDB or SQLite (project defaults to sqlite in .env.example)</li>
+<li>Git</li>
+</ul>
+<p>Quick setup (recommended)</p>
+<p>1. Clone the repository and switch to the project directory:</p>
+<pre><code>
+git clone &lt;repo-url&gt; steve_autoparts
+cd steve_autoparts
+</code></pre>
+<p>2. Install PHP dependencies:</p>
+<pre><code>
+composer install
+</code></pre>
+<p>3. Copy environment file and generate app key:</p>
+<pre><code>
 cp .env.example .env
 php artisan key:generate
+</code></pre>
+<p>4. Configure database in .env (MySQL example):</p>
+<pre><code>
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=stautoparts
+DB_USERNAME=root
+DB_PASSWORD=secret
+</code></pre>
+<p>5. Create the database (if using MySQL) and run migrations &amp; seeders:</p>
+<pre><code>
 php artisan migrate --force
+php artisan db:seed
+</code></pre>
+<p>The repository also contains stautoparts.sql for an importable snapshot.</p>
+<p>6. Install JS dependencies and build assets:</p>
+<pre><code>
 npm install
-npm run dev</pre>
-      </div>
-
-      <div class="section">
-        <h2>Development Guide</h2>
-        <p>Common developer commands:</p>
-        <pre>composer run dev
+npm run dev   # for development (hot reload)
+npm run build # for production
+</code></pre>
+<p>7. Start the application for local dev:</p>
+<pre><code>
+php artisan serve --port=8000
+</code></pre>
+<p>Admin access</p>
+<ul>
+<li>Create an admin user via tinker or a seeder.</li>
+<li>See HOME_PAGE_ADMIN_GUIDE.md for admin homepage management.</li>
+</ul>
+<p>Notes</p>
+<ul>
+<li>The repo includes useful scripts in composer.json: <code>composer run setup</code> can automate several of the above steps but review the script before running on production.</li>
+<li>.env.example shows recommended values. Keep secrets out of source control.</li>
+</ul></div>
+<div class="section"><h2 id="development-guide">Development Guide</h2><p>This section covers common developer workflows: running locally, code style, and tools.</p>
+<p>Local development</p>
+<ul>
+<li>Start PHP server, queue listener and vite (concurrent):</li>
+</ul>
+<pre><code>
+composer run dev
+</code></pre>
+<pre><code>
+This uses the `dev` script in composer.json and runs:
+</code></pre>
+<ul>
+<li>php artisan serve</li>
+<li>php artisan queue:listen</li>
+<li>artisan pail (logs)</li>
+<li>npm run dev (vite)</li>
+</ul>
+<ul>
+<li>If you prefer manual start:</li>
+</ul>
+<pre><code>
+php artisan serve
+npm run dev
+php artisan queue:listen --tries=1 --timeout=0
+</code></pre>
+<p>Code structure overview</p>
+<ul>
+<li>app/ — Laravel application code (Models, Controllers, Jobs, etc.)</li>
+<li>resources/views — Blade templates</li>
+<li>resources/js &amp; resources/css — frontend assets</li>
+<li>public/ — public webroot and built assets</li>
+<li>routes/web.php — HTTP routes (both public and admin)</li>
+<li>database/migrations — migrations</li>
+<li>database/seeders — seeders</li>
+</ul>
+<p>Common tasks</p>
+<ul>
+<li>Create a migration:</li>
+</ul>
+<pre><code>
+php artisan make:migration create_example_table
+</code></pre>
+<ul>
+<li>Create a controller:</li>
+</ul>
+<pre><code>
+php artisan make:controller ExampleController
+</code></pre>
+<ul>
+<li>Create a model + migration + factory:</li>
+</ul>
+<pre><code>
+php artisan make:model Example -mfs
+</code></pre>
+<p>Testing</p>
+<ul>
+<li>Run the test suite:</li>
+</ul>
+<pre><code>
+composer test
+</code></pre>
+<ul>
+<li>PHPUnit config: phpunit.xml</li>
+</ul>
+<p>Linting &amp; code style</p>
+<ul>
+<li>PHP Pint is included. Run:</li>
+</ul>
+<pre><code>
 vendor/bin/pint
-composer test</pre>
-        <p>The main folders are:</p>
-        <ul>
-          <li><code>app/</code> — application code</li>
-          <li><code>resources/views/</code> — Blade templates</li>
-          <li><code>resources/js/</code> and <code>resources/css/</code> — frontend assets</li>
-          <li><code>routes/web.php</code> — public and admin routes</li>
-          <li><code>database/</code> — migrations and seeders</li>
-        </ul>
-      </div>
-
-      <div class="section">
-        <h2>Deployment Guide</h2>
-        <p>Production deployment checklist:</p>
-        <ul>
-          <li>Install PHP, Composer, Node, and required extensions</li>
-          <li>Configure <code>.env</code> with production values</li>
-          <li>Run migrations and build frontend assets</li>
-          <li>Cache config and routes</li>
-          <li>Configure queue workers and web server</li>
-        </ul>
-        <pre>composer install --no-dev --optimize-autoloader
+</code></pre>
+<ul>
+<li>Follow PSR-12 and Laravel conventions.</li>
+</ul>
+<p>Frontend</p>
+<ul>
+<li>Vite + Tailwind is configured in package.json. Run:</li>
+</ul>
+<pre><code>
+npm run dev    # development with HMR
+npm run build  # build for production
+</code></pre>
+<p>Notes on repository-specific tooling</p>
+<ul>
+<li>file-watcher.* scripts and file-watcher.service are included to help with automatic backups or syncs. Review those scripts before enabling in production.</li>
+<li>copy_backup.py and backup/ directory contain backup utilities — used by operations.</li>
+</ul></div>
+<div class="section"><h2 id="deployment-guide">Deployment Guide</h2><p>This section gives a checklist for deploying to production.</p>
+<p>Prerequisites</p>
+<ul>
+<li>Server with PHP 8.3+, Composer, Node, and required PHP extensions (gd, mbstring, pdo, etc.)</li>
+<li>Web server (nginx or Apache)</li>
+<li>Database (MySQL/MariaDB recommended)</li>
+<li>Supervisor for queue workers</li>
+</ul>
+<p>Build steps (example)</p>
+<p>1. Pull code on server (or CI/CD pipeline):</p>
+<pre><code>
+git checkout main
+git pull origin main
+</code></pre>
+<p>2. Install PHP deps:</p>
+<pre><code>
+composer install --no-dev --optimize-autoloader
+</code></pre>
+<p>3. Build frontend assets:</p>
+<pre><code>
 npm ci
 npm run build
+</code></pre>
+<p>4. Environment configuration:</p>
+<ul>
+<li>Copy .env and configure environment variables.</li>
+<li>Set APP_ENV=production, APP_DEBUG=false</li>
+<li>Ensure APP_KEY is set.</li>
+</ul>
+<p>5. Database migrations &amp; seeders:</p>
+<pre><code>
 php artisan migrate --force
-php artisan config:cache</pre>
-      </div>
-
-      <div class="section">
-        <h2>Architecture Overview</h2>
-        <p>The project is a Laravel 13 application with server-rendered Blade templates and Vite-powered frontend assets. Public routes and admin routes are both defined in <code>routes/web.php</code>.</p>
-        <ul>
-          <li>HTTP layer: controllers and routes</li>
-          <li>Data layer: Eloquent models and migrations</li>
-          <li>Presentation layer: Blade views and Vite assets</li>
-          <li>Admin panel: role-based access for admin and staff users</li>
-        </ul>
-      </div>
-
-      <div class="section">
-        <h2>Database</h2>
-        <p>The default setup uses SQLite in <code>.env.example</code>, while production should use MySQL/MariaDB. Schema changes are managed with Laravel migrations and seeders.</p>
-        <pre>php artisan migrate --force
-php artisan db:seed</pre>
-        <p>Useful assets:</p>
-        <ul>
-          <li><code>stautoparts.sql</code> — SQL snapshot</li>
-          <li><code>sample-products-import.csv</code> — sample import file</li>
-        </ul>
-      </div>
-
-      <div class="section">
-        <h2>Testing</h2>
-        <p>Run automated tests with PHPUnit:</p>
-        <pre>composer test</pre>
-        <p>Useful variants:</p>
-        <pre>vendor/bin/phpunit
-vendor/bin/phpunit tests/Feature/ExampleTest.php</pre>
-      </div>
-
-      <div class="section">
-        <h2>Operations &amp; Maintenance</h2>
-        <p>Key operational tasks include file uploads, backups, monitoring, maintenance mode, and queue worker health.</p>
-        <ul>
-          <li>Upload images under <code>public/assets/images/</code></li>
-          <li>Review backup utilities in <code>backup/</code> and <code>copy_backup.py</code></li>
-          <li>Monitor logs under <code>storage/logs/</code></li>
-          <li>Use maintenance mode during upgrades</li>
-        </ul>
-      </div>
-
-      <div class="section">
-        <h2>Contributing</h2>
-        <p>To contribute:</p>
-        <ol>
-          <li>Create a feature or fix branch</li>
-          <li>Implement the change and run tests</li>
-          <li>Open a pull request with a description and testing details</li>
-        </ol>
-      </div>
-
-      <div class="section">
-        <h2>FAQ &amp; Troubleshooting</h2>
-        <ul>
-          <li>If homepage content is not updating, verify active home page sections and migrations.</li>
-          <li>If images fail to upload, check permissions and allowed file formats.</li>
-          <li>If product import fails, confirm the CSV format and server upload limits.</li>
-          <li>If queues fail, confirm a queue worker is running.</li>
-        </ul>
-      </div>
-
-      <div class="footer">
-        <p>Open the Markdown docs in the <code>docs/</code> folder for the source version, or view this HTML page directly in a browser.</p>
-      </div>
-    </div>
-  </body>
-</html>
+php artisan db:seed --force
+</code></pre>
+<p>6. Cache optimizations:</p>
+<pre><code>
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+</code></pre>
+<p>7. Permissions:</p>
+<ul>
+<li>Ensure storage/ and bootstrap/cache/ are writable by web user.</li>
+<li>Typical: chown -R www-data:www-data storage bootstrap/cache</li>
+</ul>
+<p>8. Supervisor (queues):</p>
+<ul>
+<li>Create a supervisor config to run <code>php artisan queue:work --sleep=3 --tries=3</code>.</li>
+<li>Reload supervisor after adding config.</li>
+</ul>
+<p>9. Web server config</p>
+<ul>
+<li>Nginx example: point document root to /path/to/project/public and configure fastcgi for PHP-FPM.</li>
+<li>See <code>mylaravel.conf</code> in repo for an example Apache/Nginx config.</li>
+</ul>
+<p>Zero-downtime tips</p>
+<ul>
+<li>Run migrations in a safe way; avoid dropping columns inline.</li>
+<li>Use maintenance mode for breaking changes:</li>
+</ul>
+<pre><code>
+php artisan down
+</code></pre>
+<h2 id="run-migration-and-deploy-steps">run migration and deploy steps</h2>
+<pre><code>
+php artisan up
+</code></pre>
+<p>Backups</p>
+<ul>
+<li>Use database dumps and archive public/assets and storage when performing upgrades.</li>
+<li>The repository contains backup utilities (copy_backup.py and backup/) — review before use.</li>
+</ul>
+<p>CI/CD</p>
+<ul>
+<li>Prefer building assets inside CI and deploying artifacts.</li>
+<li>Add health checks for the application and queue worker status.</li>
+</ul></div>
+<div class="section"><h2 id="architecture-overview">Architecture Overview</h2><p>This project is a Laravel 13 application with server-rendered Blade views and modern frontend tooling (Vite + Tailwind).</p>
+<p>High-level components</p>
+<ul>
+<li>HTTP layer: routes/web.php defines routes for public site and admin panel.</li>
+<li>Controllers: app/Http/Controllers hold request logic.</li>
+<li>Models &amp; Eloquent: app/Models, database relationships mapped via Eloquent ORM.</li>
+<li>Views: resources/views — Blade templating for pages, admin UI.</li>
+<li>Assets: resources/js, resources/css, built by Vite into public/build.</li>
+<li>Jobs &amp; Queues: Laravel queue system used for background tasks (emails, heavy processing).</li>
+</ul>
+<p>Key folders</p>
+<ul>
+<li>app/ — application PHP code</li>
+<li>bootstrap/ — framework bootstrap files</li>
+<li>config/ — app configuration</li>
+<li>database/ — migrations, seeders, factories</li>
+<li>public/ — web root and public assets</li>
+<li>resources/ — views and raw frontend assets</li>
+<li>routes/ — web.php for routes</li>
+<li>storage/ — logs, cache, and file uploads</li>
+<li>vendor/ — composer dependencies</li>
+</ul>
+<p>Admin panel</p>
+<ul>
+<li>Routes are grouped under /admin with role middleware for access control (master_admin, admin, staff).</li>
+<li>Admin controllers live under App\Http\Controllers\Admin</li>
+<li>A home page content manager (HomePageController) drives the front page via the home_page_sections table — see HOME_PAGE_ADMIN_GUIDE.md for details.</li>
+</ul>
+<p>Third-party packages of note</p>
+<ul>
+<li>barryvdh/laravel-dompdf — PDF generation</li>
+<li>stevestore/laravel-page-builder — page builder integration (local path repository configured)</li>
+</ul>
+<p>Routing patterns</p>
+<ul>
+<li>Public routes include home, shop, product, blog, contact, cart and checkout flows.</li>
+<li>Admin routes include resource-like routes for products, brands, blogs, pages, coupons, images, and settings.</li>
+</ul>
+<p>Data flow example</p>
+<ul>
+<li>Product creation (admin) -&gt; stored in products table -&gt; visible in shop listing and product pages.</li>
+<li>Home page admin sections -&gt; stored in home_page_sections -&gt; rendered by HomeController on index()</li>
+</ul>
+<p>Extensibility</p>
+<ul>
+<li>PSR-4 autoloading: App namespace mapped to app/</li>
+<li>Use Laravel events &amp; jobs to offload heavy tasks</li>
+<li>Use service providers for registering app-level services</li>
+</ul></div>
+<div class="section"><h2 id="database">Database</h2><p>This section describes the database layout, migrations, and how to import/export data.</p>
+<p>Default connection</p>
+<ul>
+<li>.env.example defaults to sqlite for quick local setup. For production use MySQL/MariaDB.</li>
+</ul>
+<p>Schema &amp; Migrations</p>
+<ul>
+<li>All schema changes are managed with Laravel migrations located in database/migrations.</li>
+<li>To run migrations:</li>
+</ul>
+<pre><code>
+php artisan migrate --force
+</code></pre>
+<p>Seeders</p>
+<ul>
+<li>Default seeders are in database/seeders. Run:</li>
+</ul>
+<pre><code>
+php artisan db:seed
+</code></pre>
+<ul>
+<li>A HomePageSectionSeeder seeds the homepage sections used by the admin home-page manager.</li>
+</ul>
+<p>Export / Import</p>
+<ul>
+<li>The repository includes a SQL snapshot: stautoparts.sql</li>
+<li>There is also sample-products-import.csv used by the admin product import feature.</li>
+</ul>
+<p>Example import (MySQL):</p>
+<pre><code>
+mysql -u root -p stautoparts &lt; stautoparts.sql
+</code></pre>
+<p>Product import</p>
+<ul>
+<li>Admin panel provides a Products &gt; Import feature. There is a sample CSV at <code>sample-products-import.csv</code>.</li>
+<li>Use the admin import form at /admin/products/import to upload.</li>
+</ul>
+<p>Backups</p>
+<ul>
+<li>Regular backups of database and /public/assets and /storage should be part of operations.</li>
+<li>There is a backup/ directory and copy_backup.py script included for reference — review before use.</li>
+</ul>
+<p>Database tips</p>
+<ul>
+<li>When changing columns used by production code, prefer adding new columns and backfilling rather than destructive changes.</li>
+<li>Use transactions in migrations where appropriate.</li>
+</ul></div>
+<div class="section"><h2 id="testing">Testing</h2><p>This repository uses PHPUnit for automated testing and includes Laravel test scaffolding.</p>
+<p>Run tests</p>
+<ul>
+<li>Run full test suite:</li>
+</ul>
+<pre><code>
+composer test
+</code></pre>
+<ul>
+<li>You can also run PHPUnit directly:</li>
+</ul>
+<pre><code>
+vendor/bin/phpunit
+</code></pre>
+<p>Test configuration</p>
+<ul>
+<li>phpunit.xml at the project root controls test settings.</li>
+</ul>
+<p>Writing tests</p>
+<ul>
+<li>Feature tests: tests/Feature</li>
+<li>Unit tests: tests/Unit</li>
+<li>Use factories under database/factories for test data generation.</li>
+</ul>
+<p>Common commands</p>
+<ul>
+<li>Run a single test file:</li>
+</ul>
+<pre><code>
+vendor/bin/phpunit tests/Feature/ExampleTest.php
+</code></pre>
+<ul>
+<li>Run tests with coverage (requires Xdebug or PCOV):</li>
+</ul>
+<pre><code>
+vendor/bin/phpunit --coverage-html coverage
+</code></pre>
+<p>CI</p>
+<ul>
+<li>Ensure tests run in CI (GitHub Actions or other). Add composer install and test steps to pipelines.</li>
+</ul></div>
+<div class="section"><h2 id="operations-maintenance">Operations &amp; Maintenance</h2><p>This section covers routine operational tasks: backups, watchers, and file uploads.</p>
+<p>File uploads</p>
+<ul>
+<li>Uploaded images are stored under <code>public/assets/images/</code> (see HOME_PAGE_ADMIN_GUIDE.md for the <code>home/</code> subfolder).</li>
+<li>Ensure correct file permissions for uploads (www-data or web user). Typical permissions: 755 for directories and 644 for files.</li>
+</ul>
+<p>Backups</p>
+<ul>
+<li>The repository contains a <code>backup/</code> directory and <code>copy_backup.py</code> utility. Review and adapt to your environment.</li>
+<li>Recommended backup routine:</li>
+<li>Daily DB dump</li>
+<li>Daily snapshot of <code>storage/</code> and <code>public/assets</code></li>
+<li>Rotate backups (keep last 30 days)</li>
+</ul>
+<p>File watcher</p>
+<ul>
+<li>There are scripts and a systemd service to support a file-watcher (file-watcher.sh, file-watcher.service, file-watcher.mjs).</li>
+<li>Use with caution; review scripts before enabling.</li>
+</ul>
+<p>Monitoring</p>
+<ul>
+<li>Monitor logs under storage/logs/ for errors</li>
+<li>Monitor queue worker health (Supervisor or systemd)</li>
+<li>Add uptime/health checks that hit a lightweight health endpoint or the home page</li>
+</ul>
+<p>Maintenance mode</p>
+<ul>
+<li>Use Laravel maintenance mode during upgrades:</li>
+</ul>
+<pre><code>
+php artisan down
+php artisan up
+</code></pre>
+<ul>
+<li>For scheduled tasks, use Laravel scheduler via cron (see docs) or systemd timers.</li>
+</ul>
+<p>Security</p>
+<ul>
+<li>Keep dependencies up to date (composer update, npm update) and review changelogs.</li>
+<li>Never commit .env with secrets.</li>
+<li>Use HTTPS in production and secure cookies.</li>
+</ul>
+<p>Useful utilities in repo</p>
+<ul>
+<li>file-watcher.* — utilities for watching files (read before use)</li>
+<li>copy_backup.py — simple backup helper</li>
+<li>mylaravel.conf — example webserver configuration</li>
+</ul></div>
+<div class="section"><h2 id="contributing">Contributing</h2><p>Thanks for contributing! This project follows standard GitHub workflows.</p>
+<p>How to contribute</p>
+<p>1. Fork the repository and create a feature branch from main:</p>
+<pre><code>
+git checkout -b feature/your-change
+</code></pre>
+<p>2. Make changes and run tests locally:</p>
+<pre><code>
+composer install
+npm install
+composer test
+</code></pre>
+<p>3. Keep commits focused and include helpful messages.</p>
+<p>4. Push and open a pull request. Describe the change, testing steps, and any migrations or environment changes.</p>
+<p>Branching and PRs</p>
+<ul>
+<li>Use descriptive branch names: feature/, fix/, docs/</li>
+<li>Target branch: main (or as project policy requires)</li>
+<li>Run tests and ensure linting/pint passes before requesting review.</li>
+</ul>
+<p>Coding standards</p>
+<ul>
+<li>Follow PSR-12 for PHP</li>
+<li>Use Laravel conventions for controllers, services and models</li>
+<li>Run Pint where appropriate: vendor/bin/pint</li>
+</ul>
+<p>Database changes</p>
+<ul>
+<li>Add migrations for schema changes and include seeders if necessary.</li>
+<li>Describe migration steps in the PR description if manual steps are required.</li>
+</ul>
+<p>Adding documentation</p>
+<ul>
+<li>Add docs to docs/ and keep README updated for high-level project changes.</li>
+</ul>
+<p>Contact and support</p>
+<ul>
+<li>Use Issues for bugs and feature requests.</li>
+<li>Use Pull Requests for code changes.</li>
+</ul></div>
+<div class="section"><h2 id="faq-troubleshooting">FAQ &amp; Troubleshooting</h2><p>Q: Homepage shows default content, not admin content.</p>
+<p>A: Ensure home_page_sections table has active records and that migrations/seeders ran. Check HomeController and that <code>is_active</code> is true.</p>
+<p>Q: Images not uploading or showing.</p>
+<p>A: Verify <code>public/assets/images/</code> exists, correct permissions (www-data), and allowable file sizes/formats (&lt;=5MB, jpg/png/gif/webp).</p>
+<p>Q: Product import fails.</p>
+<p>A: Use the sample CSV <code>sample-products-import.csv</code> as a template. Check for required headers and encoding (UTF-8). Review server PHP limits (upload_max_filesize, post_max_size).</p>
+<p>Q: Queues failing or not processing.</p>
+<p>A: Ensure supervisor or a queue worker is running. Check <code>php artisan queue:work</code> and monitor storage/logs/ for exceptions.</p>
+<p>Q: How to reset local DB quickly?</p>
+<p>A: Run <code>php artisan migrate:fresh --seed</code> (WARNING: destroys data). Use only on local/dev environments.</p>
+<p>Q: How to create an admin user?</p>
+<p>A: Use a seeder or Laravel Tinker:</p>
+<pre><code>
+php artisan tinker
+\App\Models\User::create([&#x27;name&#x27;=&gt;&#x27;Admin&#x27;,&#x27;email&#x27;=&gt;&#x27;admin@example.com&#x27;,&#x27;password&#x27;=&gt;bcrypt(&#x27;secret&#x27;),&#x27;role&#x27;=&gt;&#x27;master_admin&#x27;]);
+</code></pre>
+<p>Q: Where to find the admin homepage manager guide?</p>
+<p>A: See HOME_PAGE_ADMIN_GUIDE.md at the repo root (detailed instructions and schema).</p>
+<p>If you encounter other issues, open an Issue with reproduction steps and environment details.</p></div>
+<footer>Generated documentation HTML from docs/*.md files.</footer>
+</div></body></html>
