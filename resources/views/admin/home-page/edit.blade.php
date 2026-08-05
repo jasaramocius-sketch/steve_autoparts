@@ -203,12 +203,62 @@
                         @endif
 
                         @if($section->section_name === 'deal_of_day')
-                        @php $extra = $section->extra_data ?? []; @endphp
+                        @php $extra = $section->extra_data ?? []; $dealBgImage = $extra['deal_bg_image'] ?? null; @endphp
+
                         <div class="form-group mb-3">
                             <label for="countdown" class="form-label"><strong>Countdown End Date/Time</strong></label>
                             <input type="datetime-local" name="countdown" id="countdown" class="form-control" value="{{ $extra['countdown'] ?? '' }}">
                             <small class="text-muted d-block">Sets the date/time shown in the countdown. Leave empty to use the default end date.</small>
                         </div>
+
+                        <div class="form-group mb-3">
+                            <label for="deal_image" class="form-label"><strong>Content Image</strong></label>
+                            <small class="text-muted d-block mb-2">This image appears as the section content overlay (above the countdown and button).</small>
+                            <div class="mb-2">
+                                @if($section->image)
+                                    <div class="mb-2 home-image-current">
+                                        <img src="{{ asset('assets/images/home/' . $section->image) }}" alt="Current image"
+                                             style="max-width: 300px; height: auto; border-radius: 4px; border: 1px solid #ddd;">
+                                    </div>
+                                @endif
+                            </div>
+                            <input type="hidden" name="deal_of_day_image_from_manager" id="deal_of_day_image_from_manager">
+                            <input type="hidden" name="remove_deal_of_day_image" id="remove_deal_of_day_image" value="0">
+                            <div id="impPreview_deal_of_day_image" class="d-none mt-2"></div>
+                            <div class="d-flex gap-2 mt-1">
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="document.getElementById('remove_deal_of_day_image').value='0'; impOpen_deal_of_day_image()">
+                                    <i class="fas fa-images me-1"></i> Browse Image Manager
+                                </button>
+                                <button type="button" id="clear_btn_deal_of_day_image" data-preview="impPreview_deal_of_day_image" data-current=".home-image-current" class="btn btn-sm btn-outline-danger {{ $section->image ? '' : 'd-none' }}" onclick="clearPickerImage('deal_of_day_image_from_manager','impPreview_deal_of_day_image','.home-image-current','remove_deal_of_day_image')">
+                                    <i class="fas fa-times me-1"></i> Clear Image
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="deal_bg_image" class="form-label"><strong>Background Image</strong></label>
+                            <small class="text-muted d-block mb-2">This image sets the entire section background (cover + center). If not set, the content image will be used as background.</small>
+                            <div class="mb-2">
+                                @if($dealBgImage)
+                                    <div class="mb-2 home-image-current">
+                                        <img src="{{ asset('assets/images/home/' . $dealBgImage) }}" alt="Current background image"
+                                             style="max-width: 300px; height: auto; border-radius: 4px; border: 1px solid #ddd;">
+                                    </div>
+                                @endif
+                            </div>
+                            <input type="hidden" name="deal_of_day_bg_image_from_manager" id="deal_of_day_bg_image_from_manager">
+                            <input type="hidden" name="deal_of_day_bg_image_existing" value="{{ $dealBgImage ?? '' }}">
+                            <div id="impPreview_deal_of_day_bg_image" class="d-none mt-2"></div>
+                            <div class="d-flex gap-2 mt-1">
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="document.getElementById('deal_of_day_bg_image_existing').value=''; impOpen_deal_of_day_bg_image()">
+                                    <i class="fas fa-images me-1"></i> Browse Image Manager
+                                </button>
+                                <button type="button" id="clear_btn_deal_of_day_bg_image" data-preview="impPreview_deal_of_day_bg_image" data-current=".home-image-current" class="btn btn-sm btn-outline-danger {{ $dealBgImage ? '' : 'd-none' }}" onclick="clearPickerImage('deal_of_day_bg_image_from_manager','impPreview_deal_of_day_bg_image','.home-image-current')">
+                                    <i class="fas fa-times me-1"></i> Clear Image
+                                </button>
+                            </div>
+                        </div>
+
                         @endif
 
                         @if($section->section_name === 'latest_post')
@@ -413,5 +463,49 @@
 @for($i = 0; $i < 3; $i++)
 @include('admin.partials.image-manager-picker', ['pickerId' => 'banner_' . $i, 'targetInput' => 'banners[' . $i . '][image_from_manager]'])
 @endfor
+
+@include('admin.partials.image-manager-picker', ['pickerId' => 'deal_of_day_image', 'targetInput' => 'deal_of_day_image_from_manager'])
+@include('admin.partials.image-manager-picker', ['pickerId' => 'deal_of_day_bg_image', 'targetInput' => 'deal_of_day_bg_image_from_manager'])
+
+<script>
+function clearPickerImage(targetInputName, previewId, currentSelector, removeInputId) {
+    try {
+        // clear hidden input by name
+        var allInputs = document.querySelectorAll('input[type="hidden"], input:not([type])');
+        for (var i = 0; i < allInputs.length; i++) {
+            if (allInputs[i].name === targetInputName) {
+                allInputs[i].value = '';
+                break;
+            }
+        }
+
+        // set remove flag if provided
+        if (removeInputId) {
+            var rem = document.getElementById(removeInputId);
+            if (rem) rem.value = '1';
+        }
+
+        // hide preview
+        var preview = document.getElementById(previewId);
+        if (preview) {
+            preview.innerHTML = '';
+            preview.classList.add('d-none');
+        }
+
+        // hide current image container if present
+        if (currentSelector) {
+            var cur = document.querySelector(currentSelector);
+            if (cur) cur.classList.add('d-none');
+        }
+
+        // hide clear button if exists
+        var sanitized = targetInputName.replace(/[^a-z0-9_]/gi, '_');
+        var btn = document.getElementById('clear_btn_' + sanitized) || document.getElementById('clear_btn_' + (targetInputName));
+        if (btn) btn.classList.add('d-none');
+    } catch (err) {
+        console.error('clearPickerImage error', err);
+    }
+}
+</script>
 
 @endsection
