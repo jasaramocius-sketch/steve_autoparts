@@ -215,7 +215,7 @@ class DashboardController extends Controller
         $followedSellers = [];
 
         if ($userId) {
-            $followedSellers = \App\Models\FollowedSeller::with('seller')
+            $followedSellers = \App\Models\FollowedSeller::with(['seller.products' => fn($q) => $q->where('status', true)->orderBy('id')])
                 ->where('user_id', $userId)
                 ->orderBy('created_at', 'desc')
                 ->get();
@@ -283,19 +283,67 @@ class DashboardController extends Controller
             ->where('id', $id)
             ->firstOrFail();
 
+        $sellerModel = $followedSeller->seller;
+        $productTotal = $sellerModel
+            ? $sellerModel->products()->where('status', true)->count()
+            : $followedSeller->products;
+        $products = $sellerModel
+            ? $sellerModel->products()->where('status', true)->orderBy('id')->limit(8)->get(['id', 'name', 'slug', 'price', 'image'])
+            : collect();
+
         $seller = [
             'seller_name' => $followedSeller->seller_name,
             'location' => $followedSeller->location,
             'description' => $followedSeller->description,
-            'products' => $followedSeller->products,
-            'rating' => $followedSeller->rating,
-            'followers' => $followedSeller->followers,
-            'seller_image' => ($followedSeller->seller && $followedSeller->seller->image)
-                ? storedImageUrl($followedSeller->seller->image, 'assets/images')
+            'products' => $productTotal,
+            'rating' => $sellerModel ? (round($sellerModel->products()->where('status', true)->avg('rating') ?? 0, 1)) : $followedSeller->rating,
+            'followers' => $sellerModel ? $sellerModel->followers_count : $followedSeller->followers,
+            'seller_image' => ($sellerModel && $sellerModel->image)
+                ? storedImageUrl($sellerModel->image, 'assets/images')
                 : null,
+            'product_list' => $products->map(fn($p) => [
+                'id' => $p->id,
+                'name' => $p->name,
+                'slug' => $p->slug,
+                'price' => currency_format($p->price),
+                'image' => storedImageUrl($p->image, 'assets/images/thumbnails'),
+            ])->values(),
         ];
 
         return response()->json(['success' => true, 'seller' => $seller]);
+    }
+
+    public function getSellerProducts($id)
+    {
+        $followedSeller = \App\Models\FollowedSeller::with('seller')
+            ->where('user_id', Auth::id())
+            ->where('id', $id)
+            ->firstOrFail();
+
+        $sellerModel = $followedSeller->seller;
+        $offset = (int) request('offset', 0);
+        $limit = 8;
+
+        $query = $sellerModel
+            ? $sellerModel->products()->where('status', true)
+            : null;
+
+        $total = $query ? $query->count() : 0;
+        $products = $query
+            ? $query->orderBy('id')->skip($offset)->take($limit)->get(['id', 'name', 'slug', 'price', 'image'])
+            : collect();
+
+        return response()->json([
+            'success' => true,
+            'product_list' => $products->map(fn($p) => [
+                'id' => $p->id,
+                'name' => $p->name,
+                'slug' => $p->slug,
+                'price' => currency_format($p->price),
+                'image' => storedImageUrl($p->image, 'assets/images/thumbnails'),
+            ])->values(),
+            'has_more' => ($offset + $products->count()) < $total,
+        ]);
     }
 
     public function vehicles()

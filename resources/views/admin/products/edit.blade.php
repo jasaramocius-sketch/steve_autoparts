@@ -79,6 +79,16 @@
                             </select>
                         </div>
 
+                        <div class="col-md-3">
+                            <label class="form-label">Seller</label>
+                            <select name="seller_id" class="form-select">
+                                <option value="">None</option>
+                                @foreach($sellers as $s)
+                                    <option value="{{ $s->id }}" {{ (old('seller_id', $product->seller_id) == $s->id) ? 'selected' : '' }}>{{ $s->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
                         <div class="col-md-2">
                             <label class="form-label">Stock</label>
                             <input type="number" name="stock" class="form-control" value="{{ old('stock', $product->stock) }}" min="0">

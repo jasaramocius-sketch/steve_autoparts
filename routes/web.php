@@ -596,6 +596,7 @@ Route::middleware(['auth', 'nocache'])->prefix('user')->name('user.')->group(fun
     Route::post('/followed-seller', [DashboardController::class,'storeFollowedSeller'])->name('followed-sellers.store');
     Route::delete('/followed-seller/{id}', [DashboardController::class,'destroyFollowedSeller'])->name('followed-sellers.destroy');
     Route::get('/api/seller/{id}', [DashboardController::class,'getSellerDetails'])->name('api.seller.details');
+    Route::get('/api/seller/{id}/products', [DashboardController::class,'getSellerProducts'])->name('api.seller.products');
     Route::get('/addresses', [DashboardController::class,'addresses'])->name('addresses');
     Route::post('/addresses', [DashboardController::class,'storeAddress'])->name('addresses.store');
     Route::put('/addresses/{id}', [DashboardController::class,'updateAddress'])->name('addresses.update');

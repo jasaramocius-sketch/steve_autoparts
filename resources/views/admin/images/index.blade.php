@@ -167,7 +167,7 @@
     @endif
 </div>
 <div class="modal fade" id="uploadModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <form method="POST" action="{{ route('admin.images.store') }}" enctype="multipart/form-data">
                 @csrf

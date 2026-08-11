@@ -47,6 +47,16 @@ if (!function_exists('normalizeImagePath')) {
             return $value;
         }
 
+        $value = preg_replace('#^/+#', '', $value);
+
+        if (str_starts_with($value, 'storage/')) {
+            $value = substr($value, strlen('storage/'));
+        }
+
+        if (str_starts_with($value, 'public/')) {
+            $value = substr($value, strlen('public/'));
+        }
+
         if (str_contains($value, '/')) {
             return $value;
         }

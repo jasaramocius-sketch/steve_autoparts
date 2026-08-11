@@ -22,6 +22,7 @@ class Product extends Model
         'badge',
         'category_id',
         'brand_id',
+        'seller_id',
         'year',
         'make',
         'model',
@@ -83,6 +84,11 @@ class Product extends Model
     public function brand()
     {
         return $this->belongsTo(Brand::class);
+    }
+
+    public function seller()
+    {
+        return $this->belongsTo(Seller::class);
     }
 
     public function galleryImages()

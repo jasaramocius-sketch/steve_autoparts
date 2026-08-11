@@ -635,7 +635,7 @@
                 @endif
                 @foreach($galleryImages as $gi)
                   <div class="swiper-slide details_slider_thumb_item">
-                    {!! imgTag('storage/' . $gi->path, $product['name'], 'img-fluid w-100') !!}
+                    <img src="{{ storedImageUrl($gi->path) }}" alt="{{ $product['name'] }}" class="img-fluid w-100">
                   </div>
                 @endforeach
                 </div>
@@ -649,7 +649,7 @@
                 @endif
                 @foreach($galleryImages as $gi)
                   <div class="swiper-slide details_slider_nav_item">
-                    {!! imgTag('storage/' . $gi->path, $product['name'], 'img-fluid w-100') !!}
+                    <img src="{{ storedImageUrl($gi->path) }}" alt="{{ $product['name'] }}" class="img-fluid w-100">
                   </div>
                 @endforeach
                 </div>
@@ -988,7 +988,7 @@
 
 <!-- Contact Seller Modal -->
 <div class="modal fade" id="contactSellerModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div id="contactSellerAlert" class="d-none" style="margin:0; border-radius:0;"></div>
       <form action="{{ route('contact.seller') }}" method="POST" id="contactSellerForm">

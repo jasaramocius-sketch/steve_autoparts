@@ -150,6 +150,14 @@ if (!function_exists('imgTag')) {
         $alt = $alt ?? '';
         $src = trim($src);
 
+        if (str_starts_with($src, '/storage/')) {
+            $src = substr($src, 1);
+        }
+
+        if (str_starts_with($src, 'storage/storage/')) {
+            $src = substr($src, strlen('storage/'));
+        }
+
         if (empty($src)) {
             $src = 'assets/images/placeholder.png';
         }

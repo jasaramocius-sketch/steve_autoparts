@@ -258,6 +258,18 @@
 - `resources/views/user/orders/invoice.blade.php` — created: PDF-ready invoice template with header, billing address, line items table, totals, footer
 - `routes/web.php` — fixed user invoice route: changed path from `user/orders/invoice/{id}` to `/orders/invoice/{id}` (within user group), renamed admin route to `admin.user.orders.invoice` to avoid conflict
 
+## 25. Product Gallery and Admin Product Edit Fixes
+**Date:** 2026-08-11
+
+**Files changed:**
+- `app/Http/Controllers/ProductController.php` — added `seller_id` support on create/update, moved gallery manager attachment logic into `attachGalleryImagesFromManager()`, and ensured `gallery_images_from_manager` is processed for both store and update
+- `app/Models/Product.php` — added `seller_id` to `$fillable` and `seller()` relation
+- `app/Models/Image.php` — improved `normalizePath()` to strip leading slashes and `public/`/`storage/` prefixes
+- `app/helpers.php` — improved `normalizeImagePath()` to normalize hidden manager paths consistently
+- `resources/views/admin/partials/image-manager-picker.blade.php` — made the modal centered/scrollable, preserved existing selected image paths in multi-select mode, and restored focus after modal close
+- `resources/views/admin/products/edit.blade.php` — added seller dropdown support in the edit product form
+- `resources/views/product/show.blade.php` — changed gallery display to use `storedImageUrl($gi->path)` so stored gallery paths render correctly
+
 ## 25. Bulk Product Import System
 
 **Files changed/created:**

@@ -32,7 +32,7 @@
 
             <li><a class="nav-link {{ request()->routeIs('user.dashboard') ? 'active' : '' }}" href="{{ route('user.dashboard') }}"><i class="fas fa-th-large me-2"></i>Dashboard</a></li>
 
-            <li><a class="nav-link {{ request()->routeIs('user.orders') ? 'active' : '' }}" href="{{ route('user.orders') }}"><i class="fas fa-shopping-bag me-2"></i>Orders</a></li>
+            <li><a class="nav-link {{ request()->routeIs('user.orders', 'user.orders.show', 'user.orders.invoice') ? 'active' : '' }}" href="{{ route('user.orders') }}"><i class="fas fa-shopping-bag me-2"></i>Orders</a></li>
 
             <li><a class="nav-link {{ request()->routeIs('user.reviews') ? 'active' : '' }}" href="{{ route('user.reviews') }}"><i class="fas fa-star me-2"></i>My Reviews</a></li>
 

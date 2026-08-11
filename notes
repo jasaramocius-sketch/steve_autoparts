@@ -37,3 +37,5 @@ Point No. 7nth bhi check kr skte ho
    .mobile-submenu .has-children .mobile-menu-item-row:hover a, .mobile-submenu .has-children .mobile-menu-item-row:hover span i {
     color: red;
 }
+
+Order Details open time dashboard sidebar Order highlight set

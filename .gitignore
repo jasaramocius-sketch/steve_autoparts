@@ -42,3 +42,4 @@ storage/file-backups/
 *.sql
 *.sql.bak
 storage/file-backups/
+notes

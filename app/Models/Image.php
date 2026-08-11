@@ -114,10 +114,15 @@ class Image extends Model
             return null;
         }
 
-        $path = ltrim(trim($path), '/');
+        $path = trim((string) $path);
+        $path = preg_replace('#^/+#', '', $path);
 
         if (str_starts_with($path, 'storage/')) {
             $path = substr($path, strlen('storage/'));
+        }
+
+        if (str_starts_with($path, 'public/')) {
+            $path = substr($path, strlen('public/'));
         }
 
         return $path === '' ? null : $path;

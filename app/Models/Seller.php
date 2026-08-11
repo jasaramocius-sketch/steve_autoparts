@@ -31,6 +31,11 @@ class Seller extends Model
         return $this->hasMany(FollowedSeller::class, 'seller_id');
     }
 
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
+
     public function getFollowersCountAttribute()
     {
         return $this->followedBy()->count();

@@ -207,7 +207,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 left: 20px; right: 20px; top: 50%;
                 height: 1px;
                 transform: translateY(-50%);
-                background: rgba(255,255,255,.12);
+                background: var(--primary);
                 opacity: 1;
                 transition: opacity .2s ease;
             }
@@ -217,7 +217,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 left: 20px; right: 20px; top: 50%;
                 height: 1px;
                 transform: translateY(-50%);
-                background: rgba(255,255,255,.12);
+                background: var(--primary);
                 opacity: 0;
                 transition: opacity .2s ease;
             }

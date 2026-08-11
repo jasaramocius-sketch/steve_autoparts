@@ -122,27 +122,24 @@
                                 </div>
 
                                 <!-- Edit Address Modal -->
-                                <div class="modal fade" id="editAddressModal{{ $address->id }}" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                                <div class="modal fade" id="editAddressModal{{ $address->id }}" tabindex="-1">
+                                    <div class="modal-dialog modal-dialog-centered">
                                         <form action="{{ route('user.addresses.update', $address->id) }}" method="POST">
-                                            @csrf
-                                            @method('PUT')
+                                            @csrf @method('PUT')
                                             <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title">Edit Address</h5>
-                                                    <button type="button" class="btn-close steve-btn" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                </div>
+                                                <div class="modal-header"><h5 class="modal-title">Edit Address</h5><button class="btn-close steve-btn" data-bs-dismiss="modal"></button></div>
                                                 <div class="modal-body">
                                                     @include('partials.address-fields', [
                                                         'prefix' => 'edit_' . $address->id,
                                                         'value' => $address,
                                                         'withFullName' => true,
                                                         'withPhone' => true,
+                                                        'withDefault' => true,
                                                     ])
                                                 </div>
                                                 <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary steve-btn modal-cancel-btn" data-bs-dismiss="modal">Cancel</button>
-                                                    <button type="submit" class="btn btn-primary steve-btn modal-save-btn">Save Changes</button>
+                                                    <button class="btn steve-btn steve-btn-sm text-white btn-primary">Save Changes</button>
+                                                    <button class="btn steve-btn steve-btn-sm text-white btn-primary" data-bs-dismiss="modal">Cancel</button>
                                                 </div>
                                             </div>
                                         </form>

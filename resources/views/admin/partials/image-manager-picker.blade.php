@@ -30,7 +30,7 @@
 
 <!-- Image Manager Picker Modal -->
 <div class="modal fade" id="impModal_{{ $pickerId }}" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header py-2">
         <h6 class="modal-title"><i class="fas fa-images me-2"></i>Image Manager</h6>
@@ -113,9 +113,28 @@
 
     var state = { page: 1, search: '', selected: null, chosen: [], data: null };
     var timer = null;
+    var opener = null;
 
     window['impOpen_' + pid] = function() {
-        var modal = new bootstrap.Modal(document.getElementById('impModal_' + pid));
+        opener = document.activeElement;
+        var modalEl = document.getElementById('impModal_' + pid);
+        var modal = new bootstrap.Modal(modalEl);
+
+        if (modalEl) {
+            modalEl.addEventListener('hide.bs.modal', function() {
+                if (modalEl.contains(document.activeElement)) {
+                    document.activeElement.blur();
+                }
+            }, { once: true });
+
+            modalEl.addEventListener('hidden.bs.modal', function() {
+                if (opener && opener.focus) {
+                    opener.focus();
+                }
+                opener = null;
+            }, { once: true });
+        }
+
         modal.show();
         state.page = 1;
         state.selected = null;
@@ -140,8 +159,23 @@
             if (allInputs[i].name === targetInputName) { input = allInputs[i]; break; }
         }
         if (isMultiple) {
-            var paths = state.chosen.map(function(img) { return img.path; });
-            if (input) input.value = JSON.stringify(paths);
+            var currentPaths = state.chosen.map(function(img) { return img.path; });
+            var mergedPaths = currentPaths.slice();
+            if (input && input.value) {
+                try {
+                    var existing = JSON.parse(input.value);
+                    if (Array.isArray(existing)) {
+                        existing.forEach(function(path) {
+                            if (path && mergedPaths.indexOf(path) === -1) {
+                                mergedPaths.push(path);
+                            }
+                        });
+                    }
+                } catch (e) {
+                    // ignore invalid JSON and replace with current selection
+                }
+            }
+            if (input) input.value = JSON.stringify(mergedPaths);
             var preview = document.getElementById('impPreview_' + pid);
             if (preview) {
                 var html = '<div class="d-flex flex-wrap gap-2">';
@@ -163,7 +197,11 @@
         }
         var fileInput = document.querySelector('#impFileInput_' + pid);
         if (fileInput) fileInput.value = '';
-        bootstrap.Modal.getInstance(document.getElementById('impModal_' + pid)).hide();
+        var modalEl = document.getElementById('impModal_' + pid);
+        var modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) {
+            modal.hide();
+        }
     };
 
     function loadImages() {

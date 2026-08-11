@@ -41,8 +41,8 @@
 
 <!-- Edit Vehicle Modal -->
 <div class="modal fade" id="editVehicleModal{{ $vehicle->id }}" tabindex="-1">
-    <div class="modal-dialog">
-        <form action="{{ route('user.vehicles.update', $vehicle->id) }}" method="POST">
+    <div class="modal-dialog modal-dialog-centered">
+        <form action="{{ route('user.vehicles.update', $vehicle->id) }}" method="POST" class="w-100">
             @csrf @method('PUT')
             <div class="modal-content">
                 <div class="modal-header"><h5 class="modal-title">Edit Vehicle</h5><button class="btn-close steve-btn" data-bs-dismiss="modal"></button></div>
@@ -82,7 +82,7 @@
 </section>
 <!-- Add Vehicle Modal -->
 <div class="modal fade" id="addVehicleModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <form action="{{ route('user.vehicles.store') }}" method="POST">
             @csrf
             <div class="modal-content">

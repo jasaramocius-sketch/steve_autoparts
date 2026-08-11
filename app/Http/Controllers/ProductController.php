@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Brand;
+use App\Models\Seller;
 use App\Models\Image;
 use App\Models\Wishlist;
 use Illuminate\Http\Request;
@@ -95,7 +96,8 @@ class ProductController extends Controller
     {
         $categories = Category::orderBy('name')->get();
         $brands = Brand::where('status', true)->orderBy('name')->get();
-        return view('admin.products.create', compact('categories', 'brands'));
+        $sellers = Seller::orderBy('name')->get();
+        return view('admin.products.create', compact('categories', 'brands', 'sellers'));
     }
 
     public function store(Request $request)
@@ -107,6 +109,7 @@ class ProductController extends Controller
             'stock' => 'nullable|integer|min:0',
             'category_id' => 'nullable|exists:categories,id',
             'brand_id' => 'nullable|exists:brands,id',
+            'seller_id' => 'nullable|exists:sellers,id',
             'year' => 'nullable|integer|min:1900|max:2026',
             'make' => 'nullable|string|max:100',
             'model' => 'nullable|string|max:100',
@@ -119,7 +122,7 @@ class ProductController extends Controller
             'image' => 'nullable|image|mimes:jpg,jpeg,png,gif,webp|max:2048',
         ]);
 
-        $data = $request->only(['name', 'description', 'price', 'old_price', 'category_id', 'brand_id', 'year', 'make', 'model', 'badge', 'product_type', 'stock', 'status', 'tab_label_1', 'tab_label_2', 'tab_label_3', 'policy_text']);
+        $data = $request->only(['name', 'description', 'price', 'old_price', 'category_id', 'brand_id', 'seller_id', 'year', 'make', 'model', 'badge', 'product_type', 'stock', 'status', 'tab_label_1', 'tab_label_2', 'tab_label_3', 'policy_text']);
         $data['featured'] = $request->boolean('featured');
         $data['added_by'] = 'admin';
         $data['features'] = $request->filled('features') ? array_filter(explode("\n", str_replace("\r", "", $request->features))) : null;
@@ -138,17 +141,7 @@ class ProductController extends Controller
             Image::markUsed($request->image_from_manager);
         }
 
-        if ($request->filled('gallery_images_from_manager')) {
-            $paths = json_decode($request->gallery_images_from_manager, true);
-            if (is_array($paths)) {
-                foreach ($paths as $imgPath) {
-                    try {
-                        Image::attachPath($imgPath, $product);
-                    } catch (\Throwable $e) {
-                    }
-                }
-            }
-        }
+        $this->attachGalleryImagesFromManager($product, $request->gallery_images_from_manager);
 
         if ($request->hasFile('gallery_images')) {
             foreach ($request->file('gallery_images') as $file) {
@@ -187,7 +180,8 @@ class ProductController extends Controller
         $product = Product::findOrFail($id);
         $categories = Category::orderBy('name')->get();
         $brands = Brand::where('status', true)->orderBy('name')->get();
-        return view('admin.products.edit', compact('product', 'categories', 'brands'));
+        $sellers = Seller::orderBy('name')->get();
+        return view('admin.products.edit', compact('product', 'categories', 'brands', 'sellers'));
     }
 
     public function update(Request $request, $id)
@@ -201,6 +195,7 @@ class ProductController extends Controller
             'stock' => 'nullable|integer|min:0',
             'category_id' => 'nullable|exists:categories,id',
             'brand_id' => 'nullable|exists:brands,id',
+            'seller_id' => 'nullable|exists:sellers,id',
             'year' => 'nullable|integer|min:1900|max:2026',
             'make' => 'nullable|string|max:100',
             'model' => 'nullable|string|max:100',
@@ -213,7 +208,7 @@ class ProductController extends Controller
             'image' => 'nullable|image|mimes:jpg,jpeg,png,gif,webp|max:2048',
         ]);
 
-        $data = $request->only(['name', 'description', 'price', 'old_price', 'category_id', 'brand_id', 'year', 'make', 'model', 'badge', 'product_type', 'stock', 'status', 'tab_label_1', 'tab_label_2', 'tab_label_3', 'policy_text']);
+        $data = $request->only(['name', 'description', 'price', 'old_price', 'category_id', 'brand_id', 'seller_id', 'year', 'make', 'model', 'badge', 'product_type', 'stock', 'status', 'tab_label_1', 'tab_label_2', 'tab_label_3', 'policy_text']);
         $data['featured'] = $request->boolean('featured');
         $data['features'] = $request->filled('features') ? array_filter(explode("\n", str_replace("\r", "", $request->features))) : null;
         $data['reviews_data'] = $request->filled('reviews_data') ? json_decode($request->reviews_data, true) : null;
@@ -248,19 +243,42 @@ class ProductController extends Controller
             }
         }
 
-        if ($request->filled('gallery_images_from_manager')) {
-            $paths = json_decode($request->gallery_images_from_manager, true);
-            if (is_array($paths)) {
-                foreach ($paths as $imgPath) {
-                    try {
-                        Image::attachPath($imgPath, $product);
-                    } catch (\Throwable $e) {
-                    }
-                }
-            }
-        }
+        $this->attachGalleryImagesFromManager($product, $request->gallery_images_from_manager);
 
         return redirect()->route('admin.products.index')->with('success', 'Product updated successfully!');
+    }
+
+    private function attachGalleryImagesFromManager(Product $product, ?string $galleryImagesFromManager): void
+    {
+        if (!$galleryImagesFromManager) {
+            return;
+        }
+
+        $paths = json_decode($galleryImagesFromManager, true);
+        if (!is_array($paths)) {
+            $paths = [$galleryImagesFromManager];
+        }
+
+        foreach ($paths as $imgPath) {
+            if (!$imgPath) {
+                continue;
+            }
+
+            $imgPath = Image::normalizePath($imgPath);
+            if (!$imgPath) {
+                continue;
+            }
+
+            try {
+                Image::attachPath($imgPath, $product);
+            } catch (\Throwable $e) {
+                \Log::warning('Unable to attach gallery image to product', [
+                    'product_id' => $product->id,
+                    'path' => $imgPath,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
     }
 
     public function destroy($id)

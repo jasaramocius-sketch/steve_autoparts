@@ -33,17 +33,24 @@
                             </div>
                         </div>
 
-                        <p class="text-secondary" style="line-height:1.6;">{{ $seller->description }}</p>
+                        <div class="text-secondary" style="line-height:1.6;">{!! $seller->description !!}</div>
+
+                        @php
+                            $sellerProducts = $seller->seller ? $seller->seller->products : collect();
+                            $productCount = $sellerProducts->isNotEmpty() ? $sellerProducts->count() : $seller->products;
+                            $ratingCount = $sellerProducts->isNotEmpty() ? round($sellerProducts->avg('rating'), 1) : $seller->rating;
+                            $followerCount = $seller->seller ? $seller->seller->followers_count : $seller->followers;
+                        @endphp
 
                         <div class="d-flex flex-wrap gap-3 mt-4">
                             <div class="badge bg-light text-dark p-2 rounded">
-                                <strong>{{ $seller->products }}</strong> Products
+                                <strong>{{ $productCount }}</strong> Products
                             </div>
                             <div class="badge bg-light text-dark p-2 rounded">
-                                <strong>{{ number_format($seller->rating, 1) }}</strong> Rating
+                                <strong>{{ number_format($ratingCount, 1) }}</strong> Rating
                             </div>
                             <div class="badge bg-light text-dark p-2 rounded">
-                                <strong>{{ number_format($seller->followers) }}</strong> Followers
+                                <strong>{{ number_format($followerCount) }}</strong> Followers
                             </div>
                         </div>
 
@@ -144,6 +151,8 @@
     .seller-option { border-radius: 8px; }
     .seller-option.active { border-color: var(--primary); background: rgba(230, 122, 56, 0.06); }
     .seller-option:has(input:checked) { border-color: var(--primary); background: rgba(230, 122, 56, 0.06); }
+    .seller-product-thumb { width: 100%; aspect-ratio: 1/1; border-radius: 8px; overflow: hidden; background: #f8f9fa; }
+    .seller-product-thumb img { object-fit: cover; }
 </style>
 
 <script>
@@ -297,10 +306,83 @@ document.addEventListener('DOMContentLoaded', function() {
                         ${s.description ? `
                             <div class="mt-4 p-3 bg-light rounded">
                                 <h6 class="fw-600 mb-2">About</h6>
-                                <p class="mb-0 text-secondary" style="line-height:1.6;">${s.description}</p>
+                                <div class="mb-0 text-secondary" style="line-height:1.6;">${s.description}</div>
+                            </div>
+                        ` : ''}
+                        ${s.product_list && s.product_list.length ? `
+                            <div class="mt-4">
+                                <h6 class="fw-600 mb-2">Products</h6>
+                                <div class="d-flex align-items-center flex-column modal-body p-0">
+                                <div class="row g-2" id="sellerProductsGrid">
+                                    ${s.product_list.map(function(p) {
+                                        const productUrl = '{{ url("/product") }}' + '/' + p.slug;
+                                        return `
+                                        <div class="col-3">
+                                            <a href="${productUrl}" class="text-decoration-none d-block text-center seller-product-item" title="${p.name}">
+                                                <span class="seller-product-thumb d-block mx-auto mb-1">
+                                                    <img src="${p.image}" alt="${p.name}" class="w-100 h-100" onerror="this.onerror=null;this.src='{{ asset('assets/images/placeholder.png') }}';">
+                                                </span>
+                                                <span class="d-block text-truncate fs-12 text-dark">${p.name}</span>
+                                                <span class="d-block fs-12 fw-600" style="color:var(--primary);">${p.price}</span>
+                                            </a>
+                                        </div>`;
+                                    }).join('')}
+                                </div>
+                                ${s.products > s.product_list.length ? `
+                                    <button type="button" class="btn btn-sm btn-primary mt-3 seller-load-more steve-btn" data-seller-id="${sellerId}" data-offset="${s.product_list.length}">
+                                        Load More Products
+                                    </button>
+                                ` : ''}
+                                </div>
                             </div>
                         ` : ''}
                     `;
+
+                    const loadMoreBtn = bodyEl.querySelector('.seller-load-more');
+                    if (loadMoreBtn) {
+                        loadMoreBtn.addEventListener('click', function() {
+                            const btn = this;
+                            const offset = parseInt(btn.dataset.offset, 10) || 0;
+                            btn.disabled = true;
+                            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Loading...';
+
+                            fetch('{{ route("user.api.seller.products", ":id") }}'.replace(':id', sellerId) + '?offset=' + offset, {
+                                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                            })
+                            .then(r => r.json())
+                            .then(data => {
+                                if (data.success && data.product_list.length) {
+                                    const grid = bodyEl.querySelector('#sellerProductsGrid');
+                                    data.product_list.forEach(function(p) {
+                                        const productUrl = '{{ url("/product") }}' + '/' + p.slug;
+                                        grid.insertAdjacentHTML('beforeend', `
+                                            <div class="col-3">
+                                                <a href="${productUrl}" class="text-decoration-none d-block text-center seller-product-item" title="${p.name}">
+                                                    <span class="seller-product-thumb d-block mx-auto mb-1">
+                                                        <img src="${p.image}" alt="${p.name}" class="w-100 h-100" onerror="this.onerror=null;this.src='{{ asset('assets/images/placeholder.png') }}';">
+                                                    </span>
+                                                    <span class="d-block text-truncate fs-12 text-dark">${p.name}</span>
+                                                    <span class="d-block fs-12 fw-600" style="color:var(--primary);">${p.price}</span>
+                                                </a>
+                                            </div>`);
+                                    });
+                                    btn.dataset.offset = offset + data.product_list.length;
+                                    if (data.has_more) {
+                                        btn.disabled = false;
+                                        btn.innerHTML = 'Load More Products';
+                                    } else {
+                                        btn.remove();
+                                    }
+                                } else {
+                                    btn.remove();
+                                }
+                            })
+                            .catch(() => {
+                                btn.disabled = false;
+                                btn.innerHTML = 'Load More Products';
+                            });
+                        });
+                    }
                 } else {
                     bodyEl.innerHTML = `<div class="text-center py-4 text-danger">Failed to load seller details.</div>`;
                 }
