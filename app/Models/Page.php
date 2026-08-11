@@ -16,7 +16,9 @@ class Page extends Model
         'title',
         'slug',
         'short_description',
+        'image',
         'content',
+        'show_title',
         'meta_title',
         'meta_description',
         'status',
@@ -24,6 +26,7 @@ class Page extends Model
     ];
 
     protected $casts = [
-        'status' => 'boolean',
+        'status'     => 'boolean',
+        'show_title' => 'boolean',
     ];
 }

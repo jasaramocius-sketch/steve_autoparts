@@ -1,7 +1,6 @@
 @extends('admin.layouts.app')
 {{-- Add your custom page ID and classes right here --}}
-@section('page-id', 'admin-customers-edit-page')
-@section('page-class', 'admin-customers-edit-page')
+@include('partials.page-attributes', ['pageId' => 'admin-customers-edit-page', 'pageClass' => 'admin-customers-edit-page'])
 @section('page-title', 'Edit Customer')
 @section('content')
 
@@ -36,17 +35,16 @@
                     </select>
                     @error('status')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
-                <div class="col-md-6">
-                    <label class="form-label">City</label>
-                    <input type="text" name="city" class="form-control" value="{{ old('city', $customer->city) }}">
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Country</label>
-                    <input type="text" name="country" class="form-control" value="{{ old('country', $customer->country) }}">
-                </div>
-                <div class="col-md-12">
-                    <label class="form-label">Address</label>
-                    <input type="text" name="address" class="form-control" value="{{ old('address', $customer->address) }}">
+                <div class="col-12">
+                    @include('partials.address-fields', [
+                        'prefix' => 'customer_form',
+                        'value' => $customer,
+                        'withPhone' => false,
+                        'withFullName' => false,
+                        'withDefault' => false,
+                        'zipName' => 'postal_code',
+                        'required' => [],
+                    ])
                 </div>
             </div>
 

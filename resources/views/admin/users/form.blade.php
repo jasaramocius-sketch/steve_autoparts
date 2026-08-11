@@ -61,17 +61,16 @@
                     <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" placeholder="{{ isset($user) ? 'Leave blank to keep current' : 'Min 6 characters' }}" {{ !isset($user) ? 'required' : '' }}>
                     @error('password')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
-                <div class="col-md-6">
-                    <label class="form-label">City</label>
-                    <input type="text" name="city" class="form-control" value="{{ old('city', $user->city ?? '') }}">
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Country</label>
-                    <input type="text" name="country" class="form-control" value="{{ old('country', $user->country ?? '') }}">
-                </div>
-                <div class="col-md-12">
-                    <label class="form-label">Address</label>
-                    <input type="text" name="address" class="form-control" value="{{ old('address', $user->address ?? '') }}">
+                <div class="col-12">
+                    @include('partials.address-fields', [
+                        'prefix' => 'user_form',
+                        'value' => $user ?? null,
+                        'withPhone' => false,
+                        'withFullName' => false,
+                        'withDefault' => false,
+                        'zipName' => 'postal_code',
+                        'required' => [],
+                    ])
                 </div>
             </div>
 

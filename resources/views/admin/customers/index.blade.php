@@ -1,7 +1,6 @@
 @extends('admin.layouts.app')
 {{-- Add your custom page ID and classes right here --}}
-@section('page-id', 'admin-customers-index-page')
-@section('page-class', 'admin-customers-index-page')
+@include('partials.page-attributes', ['pageId' => 'admin-customers-index-page', 'pageClass' => 'admin-customers-index-page'])
 @section('page-title', 'All Customers')
 @section('content')
 
@@ -37,6 +36,7 @@
                         <th>Phone</th>
                         <th><a href="{{ sortUrl('status', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Status {!! sortIndicator('status', $sortBy, $sortDir) !!}</a></th>
                         <th><a href="{{ sortUrl('city', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">City {!! sortIndicator('city', $sortBy, $sortDir) !!}</a></th>
+                        <th>Followed Sellers</th>
                         <th><a href="{{ sortUrl('created_at', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Joined {!! sortIndicator('created_at', $sortBy, $sortDir) !!}</a></th>
                         <th class="pe-3">Action</th>
                     </tr>
@@ -59,6 +59,24 @@
                             </form>
                         </td>
                         <td>{{ $c->city ?? '—' }}</td>
+                        <td>
+                            @if($c->followedSellers && $c->followedSellers->count())
+                                <div class="d-flex flex-wrap gap-1" style="max-width:220px;">
+                                    @foreach($c->followedSellers->take(3) as $fs)
+                                        @if($fs->seller)
+                                            <span class="badge bg-light text-dark border">{{ $fs->seller->name }}</span>
+                                        @elseif($fs->seller_name)
+                                            <span class="badge bg-light text-dark border">{{ $fs->seller_name }}</span>
+                                        @endif
+                                    @endforeach
+                                    @if($c->followedSellers->count() > 3)
+                                        <span class="badge bg-secondary">+{{ $c->followedSellers->count() - 3 }}</span>
+                                    @endif
+                                </div>
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
+                        </td>
                         <td>{{ $c->created_at->format('d M Y') }}</td>
                         <td class="pe-3 table-action-col">
                             <div class="action-buttons">
@@ -72,7 +90,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="text-center py-4 text-muted">No results found.</td>
+                        <td colspan="9" class="text-center py-4 text-muted">No results found.</td>
                     </tr>
                     @endforelse
                 </tbody>

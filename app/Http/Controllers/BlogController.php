@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Blog;
+use App\Models\Page;
 use App\Models\Category;
 use App\Models\BlogCategory;
 
@@ -23,8 +24,9 @@ class BlogController extends Controller{
             ->whereNull('parent_id')
             ->where('status', 'active')
             ->get();
+        $page = Page::where('slug', 'blog')->where('status', true)->first();
 
-        return view('blog.index', compact('blogs', 'recentBlogs', 'categories', 'search'));
+        return view('blog.index', compact('blogs', 'recentBlogs', 'categories', 'search', 'page'));
     }
     public function show($slug)
     {
@@ -59,7 +61,8 @@ class BlogController extends Controller{
             ->whereNull('parent_id')
             ->where('status', 'active')
             ->get();
-        return view('blog.index', compact('blogs', 'recentBlogs', 'categories', 'category', 'search', 'sort'));
+        $page = Page::where('slug', 'blog')->where('status', true)->first();
+        return view('blog.index', compact('blogs', 'recentBlogs', 'categories', 'category', 'search', 'sort', 'page'));
     }
 
 }

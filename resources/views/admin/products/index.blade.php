@@ -1,7 +1,6 @@
 @extends('admin.layouts.app')
 {{-- Add your custom page ID and classes right here --}}
-@section('page-id', 'admin-products-index-page')
-@section('page-class', 'admin-products-index-page')
+@include('partials.page-attributes', ['pageId' => 'admin-products-index-page', 'pageClass' => 'admin-products-index-page'])
 @section('page-title', 'All Products')
 @section('content')
 
@@ -16,7 +15,7 @@
     </div>
 </div>
 
-<ul class="nav nav-tabs mb-3 gap-2 d-flex flex-wrap admin-product-index-nav-tabs">
+<ul class="nav nav-tabs gap-2 d-flex flex-wrap admin-product-index-nav-tabs">
     @php
         $activeParams = request()->has('search') ? ['search' => request('search')] : [];
         $trashParams = array_merge(['trashed' => 1], request()->has('search') ? ['search' => request('search')] : []);
@@ -88,7 +87,7 @@
                     <tr>
                         <td class="ps-3">{{ $product->id }}</td>
                         <td>
-                            <img src="{{ asset('assets/images/thumbnails/' . ($product->image ?? 'default.png')) }}" width="50" height="50" style="object-fit:cover; border-radius:4px;">
+                            <img src="{{ storedImageUrl($product->image, 'assets/images/thumbnails') }}" width="50" height="50" style="object-fit:cover; border-radius:4px;">
                         </td>
                         <td>{{ $product->name }}</td>
                         <td>{{ $product->category->name ??  'N/A' }}</td>

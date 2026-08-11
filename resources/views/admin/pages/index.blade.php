@@ -1,7 +1,6 @@
 @extends('admin.layouts.app')
 {{-- Add your custom page ID and classes right here --}}
-@section('page-id', 'admin-pages-index-page')
-@section('page-class', 'admin-pages-index-page')
+@include('partials.page-attributes', ['pageId' => 'admin-pages-index-page', 'pageClass' => 'admin-pages-index-page'])
 @section('page-title', 'Pages')
 @section('content')
 
@@ -12,7 +11,7 @@
     <a href="{{ route('admin.pages.create') }}" class="btn btn-primary"><i class="fas fa-plus"></i> Add Page</a>
 </div>
 
-<ul class="nav nav-tabs mb-3 flex-wrap flex-md-nowrap">
+<ul class="nav nav-tabs flex-wrap flex-md-nowrap">
     <li class="nav-item">
         <a class="nav-link {{ !request()->has('trashed') ? 'active' : '' }}" href="{{ route('admin.pages.index') }}">Active</a>
     </li>
@@ -48,6 +47,7 @@
                 <thead class="table-light">
                     <tr>
                         <th class="ps-3"><a href="{{ sortUrl('id', $sortBy, $sortDir) }}" class="text-decoration-none text-dark"># {!! sortIndicator('id', $sortBy, $sortDir) !!}</a></th>
+                        <th>Image</th>
                         <th><a href="{{ sortUrl('title', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Title {!! sortIndicator('title', $sortBy, $sortDir) !!}</a></th>
                         <th><a href="{{ sortUrl('slug', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Slug {!! sortIndicator('slug', $sortBy, $sortDir) !!}</a></th>
                         <th><a href="{{ sortUrl('status', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Status {!! sortIndicator('status', $sortBy, $sortDir) !!}</a></th>
@@ -59,6 +59,13 @@
                     @forelse($pages as $page)
                     <tr>
                         <td class="ps-3">{{ $page->id }}</td>
+                        <td>
+                            @if($page->image)
+                                <img src="{{ storedImageUrl($page->image, 'assets/images/pages') }}" width="50" height="50" style="object-fit:cover; border-radius:4px;">
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
+                        </td>
                         <td>{{ $page->title }}</td>
                         <td><code>/{{ $page->slug }}</code></td>
                         <td>
@@ -97,7 +104,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="text-center py-4 text-muted">{{ request()->has('trashed') ? 'Trash is empty.' : 'No results found.' }}</td>
+                        <td colspan="7" class="text-center py-4 text-muted">{{ request()->has('trashed') ? 'Trash is empty.' : 'No results found.' }}</td>
                     </tr>
                     @endforelse
                 </tbody>

@@ -29,6 +29,6 @@ class BrandController extends Controller
 
         $brands = $brandsQuery->paginate(12)->appends($request->only(['search', 'sort']));
 
-        return view('brands', compact('brands', 'search', 'sort'));
+        return view('brands.index', compact('brands', 'search', 'sort'));
     }
 }

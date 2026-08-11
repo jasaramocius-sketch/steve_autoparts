@@ -34,4 +34,18 @@ class Revision extends Model
     {
         return $this->morphTo();
     }
+
+    public function relatedTitle(): ?string
+    {
+        if (! $this->model_type || ! $this->model_id || ! class_exists($this->model_type)) {
+            return null;
+        }
+
+        try {
+            $record = $this->model_type::withoutGlobalScopes()->find($this->model_id);
+            return $record ? ($record->title ?? $record->name ?? null) : null;
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
 }

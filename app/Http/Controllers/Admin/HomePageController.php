@@ -46,20 +46,17 @@ class HomePageController extends Controller
 
         $validated['status'] = $request->has('status') ? 1 : 0;
 
+        $pickedPaths = [];
+
         if ($request->hasFile('image')) {
-            $validated['image'] = saveImageWithWebp($request->file('image'), 'assets/images/home');
+            $validated['image'] = saveImageWithWebp($request->file('image'));
         } elseif ($request->filled('image_from_manager')) {
-            $imgPath = $request->image_from_manager;
-            $sourcePath = file_exists(storage_path('app/public/' . $imgPath))
-                ? storage_path('app/public/' . $imgPath)
-                : (file_exists(public_path($imgPath)) ? public_path($imgPath) : null);
-            if ($sourcePath) {
-                $filename = time() . '_' . uniqid() . '.' . pathinfo($imgPath, PATHINFO_EXTENSION);
-                $destDir = public_path('assets/images/home');
-                if (!is_dir($destDir)) mkdir($destDir, 0755, true);
-                copy($sourcePath, $destDir . '/' . $filename);
-                $validated['image'] = $filename;
-            }
+            $validated['image'] = 'storage/' . ltrim($request->image_from_manager, '/');
+            $pickedPaths[] = $request->image_from_manager;
+        }
+
+        if ($request->has('remove_section_image') && $request->boolean('remove_section_image') && !isset($validated['image'])) {
+            $validated['image'] = null;
         }
 
         if ($request->has('tabs')) {
@@ -83,8 +80,27 @@ class HomePageController extends Controller
             $existing['posts_count'] = (int) $request->posts_count;
         }
 
+        if ($request->has('post_ids')) {
+            $ids = array_values(array_filter(array_map('intval', (array) $request->input('post_ids', []))));
+            if ($request->filled('posts_count')) {
+                $ids = array_slice($ids, 0, (int) $request->posts_count);
+            }
+            $existing['post_ids'] = $ids;
+        }
+
         if ($request->filled('countdown')) {
             $existing['countdown'] = $request->countdown;
+        }
+
+        if ($section->section_name === 'deal_of_day') {
+            if ($request->filled('deal_bg_image_from_manager')) {
+                $existing['deal_image'] = 'storage/' . ltrim($request->deal_bg_image_from_manager, '/');
+                $pickedPaths[] = $request->deal_bg_image_from_manager;
+            }
+
+            if ($request->has('remove_deal_bg_image') && $request->boolean('remove_deal_bg_image') && !$request->filled('deal_bg_image_from_manager')) {
+                $existing['deal_image'] = null;
+            }
         }
 
         if ($section->section_name === 'offers' && $request->has('banners')) {
@@ -99,23 +115,8 @@ class HomePageController extends Controller
                 $newImage = null;
 
                 if ($imageFromManager) {
-                    // Check both storage/app/public and public_path (for images stored in either location)
-                    $sourcePath = null;
-                    if (file_exists(storage_path('app/public/' . $imageFromManager))) {
-                        $sourcePath = storage_path('app/public/' . $imageFromManager);
-                    } elseif (file_exists(public_path($imageFromManager))) {
-                        $sourcePath = public_path($imageFromManager);
-                    }
-
-                    if ($sourcePath) {
-                        $filename = time() . '_' . uniqid() . '.' . pathinfo($imageFromManager, PATHINFO_EXTENSION);
-                        $destDir = public_path('assets/images/home');
-                        if (!is_dir($destDir)) {
-                            mkdir($destDir, 0755, true);
-                        }
-                        copy($sourcePath, $destDir . '/' . $filename);
-                        $newImage = $filename;
-                    }
+                    $newImage = 'storage/' . ltrim($imageFromManager, '/');
+                    $pickedPaths[] = $imageFromManager;
                 }
 
                 if (!$newImage && $existingImage) {
@@ -141,14 +142,20 @@ class HomePageController extends Controller
         $extraChanged = $request->filled('brands_limit')
             || $request->has('brand_ids')
             || $request->filled('posts_count')
+            || $request->has('post_ids')
             || $request->filled('countdown')
-            || ($section->section_name === 'offers' && $request->has('banners'));
+            || ($section->section_name === 'offers' && $request->has('banners'))
+            || ($section->section_name === 'deal_of_day' && ($request->filled('deal_bg_image_from_manager') || $request->has('remove_deal_bg_image')));
 
         if ($extraChanged) {
             $validated['extra_data'] = $existing;
         }
 
         $section->update($validated);
+
+        foreach ($pickedPaths as $pickedPath) {
+            \App\Models\Image::markUsed($pickedPath, $section);
+        }
 
         return redirect()->route('admin.home-page.index')
             ->with('success', 'Section updated successfully!');

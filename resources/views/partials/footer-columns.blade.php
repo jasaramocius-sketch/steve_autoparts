@@ -47,7 +47,7 @@
     <div class="{{ $footerColClass }}">
         @if($footerType === 'contact')
             <a class="header-logo-wrapper" href="{{ route('home') }}">
-                {!! imgTag('assets/images/' . (\App\Models\Setting::get('footer_logo') ?? '1730281141Whitepng.png'), 'logo', 'logo mb-3') !!}
+                <img src="{{ storedImageUrl(\App\Models\Setting::get('footer_logo') ?? '1730281141Whitepng.png', 'assets/images') }}" alt="logo" class="logo mb-3">
             </a>
             <a class="wow-replaced d-block mb-2 text-white" data-wow-delay=".1s" href="tel:{{ \App\Models\Setting::get('header_phone', '+1 (234) 567-8901') }}">
                 <i class="fas fa-phone-alt me-2"></i> {{ \App\Models\Setting::get('header_phone', '00 000 000 000') }}
@@ -60,7 +60,7 @@
             </a>
         @elseif($footerType === 'newsletter')
             @if($footerHeading)
-                <h6 class="text-white mb-3">{{ $footerHeading }}</h6>
+                <h3 class="text-white mb-3 footer-col-title">{{ $footerHeading }}</h3>
             @endif
             <div class="newslatter-area mb-3">
                 <div class="newslatter-form">
@@ -78,7 +78,7 @@
             </div>
         @else
             @if($footerHeading)
-                <h6 class="text-white mb-3">{{ $footerHeading }}</h6>
+                <h3 class="text-white mb-3 footer-col-title">{{ $footerHeading }}</h3>
             @endif
             @if(!empty($footerLinks))
                 <ul class="list-unstyled">

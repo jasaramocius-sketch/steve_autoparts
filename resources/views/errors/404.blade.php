@@ -1,7 +1,6 @@
 @extends('layouts.app')
 {{-- Add your custom page ID and classes right here --}}
-@section('page-id', 'not-found-page')
-@section('page-class', 'not-found-page')
+@include('partials.page-attributes', ['pageId' => 'not-found-page', 'pageClass' => 'not-found-page'])
 @section('title', '404 - Page Not Found - ' . config('app.name', 'StAutoparts'))
 @section('content')
 

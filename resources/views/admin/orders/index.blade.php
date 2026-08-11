@@ -1,7 +1,6 @@
 @extends('admin.layouts.app')
 {{-- Add your custom page ID and classes right here --}}
-@section('page-id', 'admin-orders-index-page')
-@section('page-class', 'admin-orders-index-page')
+@include('partials.page-attributes', ['pageId' => 'admin-orders-index-page', 'pageClass' => 'admin-orders-index-page'])
 @section('page-title', 'Orders')
 
 @section('content')

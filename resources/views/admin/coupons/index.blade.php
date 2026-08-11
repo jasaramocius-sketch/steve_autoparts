@@ -1,7 +1,6 @@
 @extends('admin.layouts.app')
 {{-- Add your custom page ID and classes right here --}}
-@section('page-id', 'admin-coupons-index-page')
-@section('page-class', 'admin-coupons-index-page')
+@include('partials.page-attributes', ['pageId' => 'admin-coupons-index-page', 'pageClass' => 'admin-coupons-index-page'])
 @section('page-title', 'Coupons')
 @section('content')
 

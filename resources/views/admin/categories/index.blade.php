@@ -1,7 +1,6 @@
 @extends('admin.layouts.app')
 {{-- Add your custom page ID and classes right here --}}
-@section('page-id', 'admin-categories-index-page')
-@section('page-class', 'admin-categories-index-page')
+@include('partials.page-attributes', ['pageId' => 'admin-categories-index-page', 'pageClass' => 'admin-categories-index-page'])
 @section('page-title', 'All Categories')
 @push('page-builder-css')
 <style>
@@ -35,7 +34,7 @@
     </div>
 </div>
 
-<ul class="nav nav-tabs mb-3">
+<ul class="nav nav-tabs">
     <li class="nav-item">
         <a class="nav-link {{ !request()->has('trashed') ? 'active' : '' }}" href="{{ route('admin.categories.index') }}">Active</a>
     </li>

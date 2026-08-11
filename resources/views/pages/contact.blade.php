@@ -1,19 +1,26 @@
 @extends('layouts.app')
 {{-- Add your custom page ID and classes right here --}}
-@section('page-id', 'user-contact-page')
-@section('page-class', 'user-contact-page')
-@section('title', 'Contact' . ' - ' . config('app.name', 'StAutoparts'))
+@include('partials.page-attributes', ['pageId' => 'user-contact-page', 'pageClass' => 'user-contact-page'])
+@section('title', $page->meta_title ?? (($page->title ?? 'Contact') . ' - ' . config('app.name', 'StAutoparts')))
+@section('meta_title', $page->meta_title ?? null)
+@section('meta_description', $page->meta_description ?? null)
 
 @section('content')
 
 <section class="contect-page-main-section">
     <div class="container">
-        <div class="text-center mb-5">
-            <h1>Contact Us</h1>
-            <p class="text-muted">
-                Have questions? We'd love to hear from you.
-            </p>
-        </div>
+        @if (!empty($page->content))
+            <div class="page-content cms-contact-intro">
+                {!! $page->content !!}
+            </div>
+        @else
+            <div class="text-center mb-5">
+                <h1>Contact Us</h1>
+                <p class="text-muted">
+                    Have questions? We'd love to hear from you.
+                </p>
+            </div>
+        @endif
         <div class="row g-4 contact-form-row">
             <!-- Contact Form -->
             <div class="col-lg-6 contact-form-col">

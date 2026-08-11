@@ -1,8 +1,9 @@
 @extends('layouts.app')
 {{-- Add your custom page ID and classes right here --}}
-@section('page-id', 'user-terms-conditions-page')
-@section('page-class', 'user-terms-conditions-page')
-@section('title', 'Terms & Conditions' . ' - ' . config('app.name', 'StAutoparts'))
+@include('partials.page-attributes', ['pageId' => 'user-terms-conditions-page', 'pageClass' => 'user-terms-conditions-page'])
+@section('title', $page->meta_title ?? ('Terms @section('title', $page->meta_title ?? ('Terms & Conditions' . ' - ' . config('app.name', 'StAutoparts'))) Conditions' . ' - ' . config('app.name', 'StAutoparts')))
+@section('meta_title', $page->meta_title ?? 'Terms & Conditions | ' . config('app.name', 'StAutoparts'))
+@section('meta_description', $page->meta_description ?? null)
 @section('content')
 
   <style>

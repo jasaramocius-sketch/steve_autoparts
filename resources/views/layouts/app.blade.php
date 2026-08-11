@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', config('app.name', 'Steve Auto Parts'))</title>
+    @hasSection('meta_title')
+    <meta name="title" content="@yield('meta_title')">
+    @endif
+    @hasSection('meta_description')
+    <meta name="description" content="@yield('meta_description')">
+    @endif
     <meta name="robots" content="noindex, nofollow">
     
     <!-- Essential css files -->
@@ -20,7 +26,7 @@
     <link rel="stylesheet" href="{{ asset('assets/front/css/animate.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/front/css/toastr.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/front/css/dynamic-font.css') }}">
-    <link rel="icon" href="{{ asset('assets/images/' . (\App\Models\Setting::get('header_favicon') ?? '1730880696Fabpng.png')) }}">
+    <link rel="icon" href="{{ storedImageUrl(\App\Models\Setting::get('header_favicon') ?? '1730880696Fabpng.png', 'assets/images') }}">
     <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-bs5.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://unirateapi.com/lander/static/css/unirate-widgets.css">
 
@@ -177,7 +183,7 @@
     @yield('style')
     @stack('page-builder-css')
 </head>
-@include('partials.page-attributes')
+<body id="@yield('page-id', 'default-page-id')" class="@yield('page-class', 'default-body-class')">
 
     <!-- header area -->
     <header class="header-section position-relative z-3 header-stikcy">
@@ -254,9 +260,21 @@
                                     <path d="M1 0.5V20.5" stroke="white" stroke-opacity="0.8"></path>
                                 </svg>
                             </li>
-                            <li class="d-none d-md-flex gap-2 align-items-center">
-                                <a href="{{ Auth::check() ? route('user.dashboard') : route('login') }}" class="a-tag-hover-color">{{ Auth::check() ? 'My Account' : 'Login' }}</a>
+                            @auth
+                            <li class="d-none d-md-flex gap-2 align-items-center dropdown">
+                                <a href="{{ route('user.dashboard') }}" class="a-tag-hover-color dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    My Account
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{{ route('user.dashboard') }}">Dashboard</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('logout') }}">Logout</a></li>
+                                </ul>
                             </li>
+                            @else
+                            <li class="d-none d-md-flex align-items-center" style="list-style:none;">
+                                <a href="{{ route('login') }}" class="a-tag-hover-color">Login</a>
+                            </li>
+                            @endauth
                             <li class="d-none d-md-inline-block">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="2" height="21" viewBox="0 0 2 21" fill="none">
                                     <path d="M1 0.5V20.5" stroke="white" stroke-opacity="0.8"></path>
@@ -285,7 +303,7 @@
                             </svg>
                         </button>
                         <a class="header-logo-wrapper" href="{{ route('home') }}">
-                            <img src="{{ asset('assets/images/' . (\App\Models\Setting::get('header_logo') ?? 'BwSkuSZ7ZYGWPc4Zk3CfeFzcn49dHpx3143n4WKS.png')) }}" alt="logo" class="logo" onerror="this.onerror=null;this.src='{{ asset('assets/images/placeholder.png') }}'">
+                            <img src="{{ storedImageUrl(\App\Models\Setting::get('header_logo') ?? 'BwSkuSZ7ZYGWPc4Zk3CfeFzcn49dHpx3143n4WKS.png', 'assets/images') }}" alt="logo" class="logo" onerror="this.onerror=null;this.src='{{ asset('assets/images/placeholder.png') }}'">
                         </a>
                     </div>
                     <div class="nav-center">
@@ -336,7 +354,7 @@
     <div class="mobile-menu">
         <div class="mobile-menu-top">
             <a href="{{ route('home') }}">
-                {!! imgTag('assets/images/' . (\App\Models\Setting::get('mobile_logo') ?? 'BwSkuSZ7ZYGWPc4Zk3CfeFzcn49dHpx3143n4WKS.png'), 'logo') !!}
+                <img src="{{ storedImageUrl(\App\Models\Setting::get('mobile_logo') ?? '1730281141Whitepng.png', 'assets/images') }}" alt="logo" class="logo">
             </a>
             <svg class="close" xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none">
                 <path d="M18 6L6 18M6 6L18 18" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
@@ -346,7 +364,7 @@
             @if(Auth::check())
                 <div class="d-flex align-items-center gap-2">
                     @if(Auth::user()->avatar)
-                        <img src="{{ asset(Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">
+                        <img src="{{ storedImageUrl(Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">
                     @else
                         <div style="width:36px;height:36px;border-radius:50%;background:#1e1e2d;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;flex-shrink:0;">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</div>
                     @endif
@@ -687,7 +705,7 @@
             </div>
         </div> -->
         <div class="container">
-            <div class="row footer-row gy-3">
+            <div class="row footer-row">
                 @include('partials.footer-columns')
             </div>
         </div>

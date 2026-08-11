@@ -42,9 +42,7 @@ class ReviewController extends Controller
         $imagePaths = [];
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
-                $filename = 'review_' . time() . '_' . Str::random(8) . '.' . $image->getClientOriginalExtension();
-                $image->move(public_path('assets/images/reviews'), $filename);
-                $imagePaths[] = 'assets/images/reviews/' . $filename;
+                $imagePaths[] = saveImageWithWebp($image);
             }
         }
 
@@ -129,9 +127,7 @@ class ReviewController extends Controller
                 if ($request->hasFile('images')) {
                     $imagePaths = $r['images'] ?? [];
                     foreach ($request->file('images') as $image) {
-                        $filename = 'review_' . time() . '_' . Str::random(8) . '.' . $image->getClientOriginalExtension();
-                        $image->move(public_path('assets/images/reviews'), $filename);
-                        $imagePaths[] = 'assets/images/reviews/' . $filename;
+                        $imagePaths[] = saveImageWithWebp($image);
                     }
                     $r['images'] = $imagePaths;
                 }

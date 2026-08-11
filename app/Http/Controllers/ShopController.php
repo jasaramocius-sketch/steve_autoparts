@@ -171,9 +171,10 @@ class ShopController extends Controller
         $this->filterProducts($request, $productsQuery);
         $products = $productsQuery->paginate(24)->onEachSide(1)->withQueryString();
 
-        return view('shop', array_merge(
+        return view('shop.index', array_merge(
             compact('products', 'selectedVehicle', 'vehicleMatchCount'),
-            $this->getSharedData()
+            $this->getSharedData(),
+            ['page' => \App\Models\Page::where('slug', 'shop')->where('status', true)->first()]
         ));
     }
 
@@ -190,7 +191,7 @@ class ShopController extends Controller
         $products = $productsQuery->paginate(24)->onEachSide(1)->withQueryString();
         $pageTitle = 'Classified Products';
 
-        return view('shop', array_merge(
+        return view('shop.index', array_merge(
             compact('products', 'pageTitle'),
             $this->getSharedData()
         ));
@@ -230,7 +231,7 @@ class ShopController extends Controller
         $this->filterProducts($request, $productsQuery);
         $products = $productsQuery->paginate(24)->onEachSide(1)->withQueryString();
 
-        return view('shop', array_merge(
+        return view('shop.index', array_merge(
             compact('products', 'currentCategory'),
             array_filter(compact('currentSubcategory', 'currentChildcategory')),
             $this->getSharedData()
@@ -258,7 +259,7 @@ class ShopController extends Controller
         $this->filterProducts($request, $productsQuery);
         $products = $productsQuery->paginate(24)->onEachSide(1)->withQueryString();
 
-        return view('shop', array_merge(
+        return view('shop.index', array_merge(
             compact('products', 'currentCategory', 'currentSubcategory', 'currentChildcategory'),
             $this->getSharedData()
         ));
@@ -287,7 +288,7 @@ class ShopController extends Controller
             }
         }
 
-        return view('product', compact('product', 'userVehicle', 'vehicleFit'));
+        return view('product.show', compact('product', 'userVehicle', 'vehicleFit'));
     }
 
     public function suggestions(Request $request)
@@ -310,7 +311,7 @@ class ShopController extends Controller
                 'slug' => $product->slug,
                 'price' => currency_format($product->price),
                 'old_price' => $product->old_price ? currency_format($product->old_price) : null,
-                'image' => $product->image ? asset('assets/images/thumbnails/' . $product->image) : asset('assets/images/placeholder.png'),
+                'image' => storedImageUrl($product->image, 'assets/images/thumbnails'),
                 'category' => $product->category->name ?? '',
                 'url' => route('product', $product->slug),
             ];

@@ -17,7 +17,9 @@ class UserController extends Controller
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
         $perPage = in_array((int)$request->per_page, [10, 20, 50, 100]) ? (int)$request->per_page : 10;
 
-        $customers = User::where('role', 'customer')->orderBy($sortBy, $sortDir)->paginate($perPage);
+        $customers = User::where('role', 'customer')
+            ->with('followedSellers.seller')
+            ->orderBy($sortBy, $sortDir)->paginate($perPage);
         $customers->appends($request->query())->onEachSide(1);
 
         return view('admin.customers.index', compact('customers', 'sortBy', 'sortDir'));
@@ -78,7 +80,7 @@ class UserController extends Controller
         $user = Auth::user();
 
         $rules = [
-            'name' => 'required|string|max:255',
+            'full_name' => 'required|string|max:255',
             'email' => [
                 'required',
                 'email',
@@ -88,6 +90,7 @@ class UserController extends Controller
             'phone' => 'required|string|max:255|regex:/^[0-9+\-\s()]+$/',
             'address' => 'required|string|max:255',
             'city' => 'required|string|max:255',
+            'state' => 'nullable|string|max:255',
             'country' => 'required|string|max:255',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ];
@@ -100,11 +103,10 @@ class UserController extends Controller
         $request->validate($rules);
 
         if ($request->hasFile('avatar')) {
-            $avatarName = $this->handleImageUpload($request->file('avatar'), 'uploads/users');
             if ($user->avatar) {
-                $this->deleteImage(basename($user->avatar), 'uploads/users');
+                deleteImageFiles($user->avatar);
             }
-            $user->avatar = 'uploads/users/' . $avatarName;
+            $user->avatar = saveImageWithWebp($request->file('avatar'));
         }
 
         if ($request->filled('current_password') || $request->filled('new_password')) {
@@ -116,11 +118,12 @@ class UserController extends Controller
         }
 
         $user->update([
-            'name' => $request->name,
+            'name' => $request->full_name,
             'email' => $request->email,
             'phone' => $request->phone,
             'address' => $request->address,
             'city' => $request->city,
+            'state' => $request->state,
             'country' => $request->country,
             'avatar' => $user->avatar,
             'password' => $user->password,
@@ -185,7 +188,9 @@ class UserController extends Controller
             'phone' => 'nullable|string|max:255|regex:/^[0-9+\-\s()]*$/',
             'address' => 'nullable|string|max:255',
             'city' => 'nullable|string|max:255',
+            'state' => 'nullable|string|max:255',
             'country' => 'nullable|string|max:255',
+            'postal_code' => 'nullable|string|max:20',
             'status' => 'nullable|in:active,inactive',
         ]);
 
@@ -196,7 +201,9 @@ class UserController extends Controller
             'phone' => $request->phone,
             'address' => $request->address,
             'city' => $request->city,
+            'state' => $request->state,
             'country' => $request->country,
+            'postal_code' => $request->postal_code,
             'role' => 'customer',
             'status' => $request->status ?? 'active',
         ]);
@@ -218,11 +225,13 @@ class UserController extends Controller
             'phone' => 'nullable|string|max:255|regex:/^[0-9+\-\s()]*$/',
             'address' => 'nullable|string|max:255',
             'city' => 'nullable|string|max:255',
+            'state' => 'nullable|string|max:255',
             'country' => 'nullable|string|max:255',
+            'postal_code' => 'nullable|string|max:20',
             'status' => 'nullable|in:active,inactive',
         ]);
 
-        $data = $request->only(['name', 'email', 'phone', 'address', 'city', 'country', 'status']);
+        $data = $request->only(['name', 'email', 'phone', 'address', 'city', 'state', 'country', 'postal_code', 'status']);
         if (!isset($data['status'])) {
             $data['status'] = 'active';
         }

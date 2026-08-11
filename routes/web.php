@@ -271,6 +271,23 @@ Route::prefix('admin')
         Route::post('/brands/{id}/toggle-status', [BrandController::class, 'toggleStatus'])
             ->name('admin.brands.toggle-status');
 
+        Route::get('/sellers', [\App\Http\Controllers\Admin\SellerController::class, 'index'])
+            ->name('admin.sellers.index');
+        Route::get('/sellers/create', [\App\Http\Controllers\Admin\SellerController::class, 'create'])
+            ->name('admin.sellers.create');
+        Route::post('/sellers', [\App\Http\Controllers\Admin\SellerController::class, 'store'])
+            ->name('admin.sellers.store');
+        Route::get('/sellers/{id}/edit', [\App\Http\Controllers\Admin\SellerController::class, 'edit'])
+            ->name('admin.sellers.edit');
+        Route::put('/sellers/{id}', [\App\Http\Controllers\Admin\SellerController::class, 'update'])
+            ->name('admin.sellers.update');
+        Route::delete('/sellers/{id}', [\App\Http\Controllers\Admin\SellerController::class, 'destroy'])
+            ->name('admin.sellers.destroy');
+        Route::post('/sellers/{id}/toggle-status', [\App\Http\Controllers\Admin\SellerController::class, 'toggleStatus'])
+            ->name('admin.sellers.toggle-status');
+        Route::get('/sellers/{id}/followers', [\App\Http\Controllers\Admin\SellerController::class, 'followers'])
+            ->name('admin.sellers.followers');
+
         Route::get('/blogs', [AdminBlogController::class, 'index'])
             ->name('admin.blogs.index');
         Route::get('/blogs/create', [AdminBlogController::class, 'create'])
@@ -576,6 +593,9 @@ Route::middleware(['auth', 'nocache'])->prefix('user')->name('user.')->group(fun
     Route::delete('/vehicles/{id}', [DashboardController::class,'destroyVehicle'])->name('vehicles.destroy');
     Route::post('/vehicles/select/{id}', [DashboardController::class,'selectVehicle'])->name('vehicles.select');
     Route::get('/followed-seller', [DashboardController::class,'followedSellers'])->name('followed-sellers');
+    Route::post('/followed-seller', [DashboardController::class,'storeFollowedSeller'])->name('followed-sellers.store');
+    Route::delete('/followed-seller/{id}', [DashboardController::class,'destroyFollowedSeller'])->name('followed-sellers.destroy');
+    Route::get('/api/seller/{id}', [DashboardController::class,'getSellerDetails'])->name('api.seller.details');
     Route::get('/addresses', [DashboardController::class,'addresses'])->name('addresses');
     Route::post('/addresses', [DashboardController::class,'storeAddress'])->name('addresses.store');
     Route::put('/addresses/{id}', [DashboardController::class,'updateAddress'])->name('addresses.update');

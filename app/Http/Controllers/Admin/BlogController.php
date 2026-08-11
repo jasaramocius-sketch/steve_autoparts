@@ -72,20 +72,13 @@ class BlogController extends Controller
         $data['slug'] = $slug;
 
         if ($request->filled('image_from_manager')) {
-            $sourcePath = storage_path('app/public/' . $request->image_from_manager);
-            if (file_exists($sourcePath)) {
-                $filename = time() . '_' . uniqid() . '.' . pathinfo($request->image_from_manager, PATHINFO_EXTENSION);
-                $destDir = public_path('assets/images/blogs');
-                if (!is_dir($destDir)) mkdir($destDir, 0775, true);
-                copy($sourcePath, $destDir . '/' . $filename);
-                $data['image'] = $filename;
-            }
+            $data['image'] = 'storage/' . ltrim($request->image_from_manager, '/');
         } elseif ($request->hasFile('image')) {
-            $data['image'] = saveImageWithWebp($request->file('image'), 'assets/images/blogs');
+            $data['image'] = saveImageWithWebp($request->file('image'));
         } elseif ($request->filled('image_url')) {
             try {
                 $url = $request->input('image_url');
-                $filename = saveImageFromUrlWithWebp($url, 'assets/images/blogs');
+                $filename = saveImageFromUrlWithWebp($url);
                 if ($filename === null) {
                     return back()->withInput()->withErrors(['image_url' => 'Could not download image from the provided URL.']);
                 }
@@ -95,7 +88,11 @@ class BlogController extends Controller
             }
         }
 
-        Blog::create($data);
+        $blog = Blog::create($data);
+
+        if ($request->filled('image_from_manager')) {
+            \App\Models\Image::markUsed($request->image_from_manager, $blog);
+        }
 
         return redirect()->route('admin.blogs.index')->with('success', 'Blog created successfully.');
     }
@@ -126,20 +123,13 @@ class BlogController extends Controller
         $data = $request->only(['title', 'details', 'status', 'blog_category_id']);
 
         if ($request->filled('image_from_manager')) {
-            $sourcePath = storage_path('app/public/' . $request->image_from_manager);
-            if (file_exists($sourcePath)) {
-                $filename = time() . '_' . uniqid() . '.' . pathinfo($request->image_from_manager, PATHINFO_EXTENSION);
-                $destDir = public_path('assets/images/blogs');
-                if (!is_dir($destDir)) mkdir($destDir, 0775, true);
-                copy($sourcePath, $destDir . '/' . $filename);
-                $data['image'] = $filename;
-            }
+            $data['image'] = 'storage/' . ltrim($request->image_from_manager, '/');
         } elseif ($request->hasFile('image')) {
-            $data['image'] = saveImageWithWebp($request->file('image'), 'assets/images/blogs');
+            $data['image'] = saveImageWithWebp($request->file('image'));
         } elseif ($request->filled('image_url')) {
             try {
                 $url = $request->input('image_url');
-                $filename = saveImageFromUrlWithWebp($url, 'assets/images/blogs');
+                $filename = saveImageFromUrlWithWebp($url);
                 if ($filename === null) {
                     return back()->withInput()->withErrors(['image_url' => 'Could not download image from the provided URL.']);
                 }
@@ -150,6 +140,10 @@ class BlogController extends Controller
         }
 
         $blog->update($data);
+
+        if ($request->filled('image_from_manager')) {
+            \App\Models\Image::markUsed($request->image_from_manager, $blog);
+        }
 
         return redirect()->route('admin.blogs.index')->with('success', 'Blog updated successfully.');
     }

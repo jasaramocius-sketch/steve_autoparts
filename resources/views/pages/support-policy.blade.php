@@ -1,8 +1,9 @@
 @extends('layouts.app')
 {{-- Add your custom page ID and classes right here --}}
-@section('page-id', 'user-support-policy-page')
-@section('page-class', 'user-support-policy-page')
-@section('title', 'Support Policy')
+@include('partials.page-attributes', ['pageId' => 'user-support-policy-page', 'pageClass' => 'user-support-policy-page'])
+@section('title', $page->meta_title ?? ('Support Policy' . ' - ' . config('app.name', 'StAutoparts')))
+@section('meta_title', $page->meta_title ?? 'Support Policy | ' . config('app.name', 'StAutoparts'))
+@section('meta_description', $page->meta_description ?? null)
 @section('content')
 
 <div class="container py-5">

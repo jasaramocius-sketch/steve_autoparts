@@ -1,7 +1,6 @@
 @extends('admin.layouts.app')
 {{-- Add your custom page ID and classes right here --}}
-@section('page-id', 'admin-pages-edit-page')
-@section('page-class', 'admin-pages-edit-page')
+@include('partials.page-attributes', ['pageId' => 'admin-pages-edit-page', 'pageClass' => 'admin-pages-edit-page'])
 @section('page-title', 'Edit Page')
 @section('content')
 
@@ -35,6 +34,16 @@
                     </div>
                 </div>
 
+                <div class="col-md-4">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="form-check mt-2">
+                        <input type="checkbox" name="show_title" value="1" class="form-check-input" id="show_title" {{ $page->show_title ? 'checked' : '' }}>
+                        <label class="form-check-label" for="show_title">Show Page Title</label>
+                    </div>
+                </div>
+
+                @include('admin.pages._banner_image')
+
                 <div class="col-md-6">
                     <label class="form-label">Meta Title</label>
                     <input type="text" name="meta_title" class="form-control @error('meta_title') is-invalid @enderror" value="{{ old('meta_title', $page->meta_title) }}">
@@ -43,7 +52,7 @@
 
                 <div class="col-md-6">
                     <label class="form-label">Meta Description</label>
-                    <textarea name="meta_description" class="form-control texteditor @error('meta_description') is-invalid @enderror" rows="2">{{ old('meta_description', $page->meta_description) }}</textarea>
+                    <textarea name="meta_description" class="form-control @error('meta_description') is-invalid @enderror" rows="2">{{ old('meta_description', $page->meta_description) }}</textarea>
                     @error('meta_description') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
 

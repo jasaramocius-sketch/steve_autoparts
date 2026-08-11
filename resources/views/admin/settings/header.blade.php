@@ -1,7 +1,6 @@
 @extends('admin.layouts.app')
 {{-- Add your custom page ID and classes right here --}}
-@section('page-id', 'admin-settings-header-page')
-@section('page-class', 'admin-settings-header-page')
+@include('partials.page-attributes', ['pageId' => 'admin-settings-header-page', 'pageClass' => 'admin-settings-header-page'])
 @section('page-title', 'Header Settings')
 @section('content')
 <div class="container-fluid admin-settings-header">
@@ -30,7 +29,7 @@
                                 <div class="form-group mb-3">
                                     <label class="form-label"><strong>Header Logo</strong></label>
                                     <div class="mb-2">
-                                        <img src="{{ asset('assets/images/' . ($settings['header_logo'] ?? 'BwSkuSZ7ZYGWPc4Zk3CfeFzcn49dHpx3143n4WKS.png')) }}"
+                                    <img src="{{ storedImageUrl($settings['header_logo'] ?? 'BwSkuSZ7ZYGWPc4Zk3CfeFzcn49dHpx3143n4WKS.png', 'assets/images') }}"
                                              alt="Header Logo" style="max-height:60px;border-radius:4px;border:1px solid #ddd;">
                                     </div>
                                     <input type="hidden" name="image_from_manager_header_logo" id="image_from_manager_header_logo">
@@ -44,7 +43,7 @@
                                 <div class="form-group mb-3">
                                     <label class="form-label"><strong>Favicon</strong></label>
                                     <div class="mb-2">
-                                        <img src="{{ asset('assets/images/' . ($settings['header_favicon'] ?? '1730880696Fabpng.png')) }}"
+                                        <img src="{{ storedImageUrl($settings['header_favicon'] ?? '1730880696Fabpng.png', 'assets/images') }}"
                                              alt="Favicon" style="max-height:40px;border-radius:4px;border:1px solid #ddd;">
                                     </div>
                                     <input type="hidden" name="image_from_manager_header_favicon" id="image_from_manager_header_favicon">
@@ -61,7 +60,7 @@
                                 <div class="form-group mb-3">
                                     <label class="form-label"><strong>Mobile Menu Logo</strong></label>
                                     <div class="mb-2">
-                                        <img src="{{ asset('assets/images/' . ($settings['mobile_logo'] ?? '1730281141Whitepng.png')) }}"
+                                        <img src="{{ storedImageUrl($settings['mobile_logo'] ?? '1730281141Whitepng.png', 'assets/images') }}"
                                              alt="Mobile Logo" style="max-height:50px;border-radius:4px;border:1px solid #ddd;">
                                     </div>
                                     <input type="hidden" name="image_from_manager_mobile_logo" id="image_from_manager_mobile_logo">
@@ -75,7 +74,7 @@
                                 <div class="form-group mb-3">
                                     <label class="form-label"><strong>Footer Logo</strong></label>
                                     <div class="mb-2">
-                                        <img src="{{ asset('assets/images/' . ($settings['footer_logo'] ?? '1730281141Whitepng.png')) }}"
+                                        <img src="{{ storedImageUrl($settings['footer_logo'] ?? '1730281141Whitepng.png', 'assets/images') }}"
                                              alt="Footer Logo" style="max-height:50px;border-radius:4px;border:1px solid #ddd;">
                                     </div>
                                     <input type="hidden" name="image_from_manager_footer_logo" id="image_from_manager_footer_logo">
@@ -83,6 +82,32 @@
                                     <button type="button" class="btn btn-sm btn-outline-primary" onclick="impOpen_footer_logo()">
                                         <i class="fas fa-images me-1"></i> Browse Image Manager
                                     </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="form-label"><strong>Admin Header Background Image</strong></label>
+                                    <small class="text-muted d-block mb-2">Background image of the admin top bar (the container that holds the page title).</small>
+                                    @if (!empty($settings['admin_header_bg']))
+                                        <div class="mb-2 admin-header-bg-current">
+                                            <img src="{{ asset('assets/images/' . $settings['admin_header_bg']) }}" alt="Admin Header Background"
+                                                 style="max-width:300px;max-height:80px;border-radius:4px;border:1px solid #ddd;object-fit:cover;">
+                                        </div>
+                                    @endif
+                                    <input type="hidden" name="image_from_manager_admin_header_bg" id="image_from_manager_admin_header_bg">
+                                    <input type="hidden" name="remove_admin_header_bg" id="remove_admin_header_bg" value="0">
+                                    <div id="impPreview_admin_header_bg" class="d-none mt-2"></div>
+                                    <div class="d-flex gap-2 mt-1">
+                                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="document.getElementById('remove_admin_header_bg').value='0'; impOpen_admin_header_bg()">
+                                            <i class="fas fa-images me-1"></i> Browse Image Manager
+                                        </button>
+                                        <button type="button" id="clear_btn_admin_header_bg" data-preview="impPreview_admin_header_bg" data-current=".admin-header-bg-current" class="btn btn-sm btn-outline-danger {{ !empty($settings['admin_header_bg']) ? '' : 'd-none' }}" onclick="clearPickerImage('image_from_manager_admin_header_bg','impPreview_admin_header_bg','.admin-header-bg-current','remove_admin_header_bg')">
+                                            <i class="fas fa-times me-1"></i> Clear Image
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -521,5 +546,55 @@
 @include('admin.partials.image-manager-picker', ['pickerId' => 'header_favicon', 'targetInput' => 'image_from_manager_header_favicon'])
 @include('admin.partials.image-manager-picker', ['pickerId' => 'mobile_logo', 'targetInput' => 'image_from_manager_mobile_logo'])
 @include('admin.partials.image-manager-picker', ['pickerId' => 'footer_logo', 'targetInput' => 'image_from_manager_footer_logo'])
+@include('admin.partials.image-manager-picker', ['pickerId' => 'admin_header_bg', 'targetInput' => 'image_from_manager_admin_header_bg'])
+
+<script>
+function clearPickerImage(hiddenId, previewId, currentImgSel, removeFlagId) {
+    var hidden = document.getElementById(hiddenId);
+    if (hidden) hidden.value = '';
+    var preview = document.getElementById(previewId);
+    if (preview) {
+        preview.innerHTML = '';
+        preview.classList.add('d-none');
+    }
+    if (currentImgSel) {
+        document.querySelectorAll(currentImgSel).forEach(function(el) {
+            el.classList.add('d-none');
+        });
+    }
+    if (removeFlagId) {
+        var flag = document.getElementById(removeFlagId);
+        if (flag) flag.value = '1';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    var obsConfig = { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] };
+    document.querySelectorAll('[data-preview]').forEach(function(btn) {
+        var previewId  = btn.getAttribute('data-preview');
+        var currentSel = btn.getAttribute('data-current');
+        var preview    = document.getElementById(previewId);
+        if (!preview) return;
+
+        var update = function() {
+            var hasPickedImage = preview.querySelector('img') !== null;
+            var hasExistingImage = false;
+            if (currentSel) {
+                document.querySelectorAll(currentSel).forEach(function(el) {
+                    if (!el.classList.contains('d-none')) hasExistingImage = true;
+                });
+            }
+            btn.classList.toggle('d-none', !hasPickedImage && !hasExistingImage);
+        };
+
+        new MutationObserver(update).observe(preview, obsConfig);
+        if (currentSel) {
+            document.querySelectorAll(currentSel).forEach(function(el) {
+                new MutationObserver(update).observe(el, obsConfig);
+            });
+        }
+    });
+});
+</script>
 
 @endsection

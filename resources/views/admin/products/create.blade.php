@@ -1,7 +1,6 @@
 @extends('admin.layouts.app')
 {{-- Add your custom page ID and classes right here --}}
-@section('page-id', 'admin-products-create-page')
-@section('page-class', 'admin-products-create-page')
+@include('partials.page-attributes', ['pageId' => 'admin-products-create-page', 'pageClass' => 'admin-products-create-page'])
 @section('page-title', 'Add Product')
 @section('content')
 
@@ -181,20 +180,21 @@
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Primary Image</label>
                             <div class="card p-3 border-dashed">
-                                <!-- <input type="file" name="image" class="form-control mb-2 @error('image') is-invalid @enderror">
-                                @error('image') <div class="invalid-feedback">{{ $message }}</div> @enderror -->
-                                <input type="hidden" name="image_from_manager" id="image_from_manager_product_image">
-                                <div id="impPreview_product_image" class="d-none my-2"></div>
-                                <button type="button" class="btn btn-sm btn-outline-primary mt-1" onclick="impOpen_product_image()">
-                                    <i class="fas fa-folder-open me-1"></i> Browse Image Manager
-                                </button>
-                            </div>
-                        </div>
+                                <input type="file" name="image" class="form-control mb-2 @error('image') is-invalid @enderror" accept="image/*">
+                                @error('image') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    @php $selectedImageFromManager = old('image_from_manager'); @endphp
+                                    <input type="hidden" name="image_from_manager" id="image_from_manager_product_image" value="{{ $selectedImageFromManager }}">
+                                    <div id="impPreview_product_image" class="{{ $selectedImageFromManager ? '' : 'd-none' }} my-2">
+                                        @if($selectedImageFromManager)
+                                            <img src="{{ asset('storage/' . $selectedImageFromManager) }}" width="80" style="border-radius:4px;">
+                                            <small class="text-muted d-block">Selected from image manager</small>
+                                        @endif
+                                    </div>
 
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Gallery Images</label>
                             <div class="card p-3 border-dashed">
-                                <!-- <input type="file" name="gallery_images[]" class="form-control mb-2" multiple accept="image/*"> -->
+                                <input type="file" name="gallery_images[]" class="form-control mb-2" multiple accept="image/*">
                                 <input type="hidden" name="gallery_images_from_manager" id="gallery_images_from_manager">
                                 <div id="impPreview_gallery_images" class="d-none my-2"></div>
                                 <button type="button" class="btn btn-sm btn-outline-primary mt-1" onclick="impOpen_gallery_images()">

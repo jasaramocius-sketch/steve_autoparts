@@ -1,7 +1,6 @@
 @extends('admin.layouts.app')
 {{-- Add your custom page ID and classes right here --}}
-@section('page-id', 'admin-products-edit-page')
-@section('page-class', 'admin-products-edit-page')
+@include('partials.page-attributes', ['pageId' => 'admin-products-edit-page', 'pageClass' => 'admin-products-edit-page'])
 @section('page-title', 'Edit Product')
 @section('content')
 
@@ -186,19 +185,24 @@
                             <div class="card p-3 border-dashed h-100">
                                 @if($product->image)
                                     <div class="mb-3 d-flex align-items-center bg-light p-2 rounded">
-                                        <img src="{{ asset('assets/images/thumbnails/' . $product->image) }}" width="60" height="60" style="object-fit:cover; border-radius:4px; border:1px solid #ddd;">
+                                        <img src="{{ storedImageUrl($product->image, 'assets/images/thumbnails') }}" width="60" height="60" style="object-fit:cover; border-radius:4px; border:1px solid #ddd;">
                                         <div class="ms-3">
                                             <small class="text-muted d-block fw-bold">Current Primary Image</small>
-                                            <small class="text-muted">Upload a new one below to replace.</small>
+                                            <small class="text-muted">Upload a new one below or choose from image manager to replace.</small>
                                         </div>
                                     </div>
                                 @endif
                                 
-                                <!-- <input type="file" name="image" class="form-control mb-2 @error('image') is-invalid @enderror">
-                                @error('image') <div class="invalid-feedback">{{ $message }}</div> @enderror -->
-                                
-                                <input type="hidden" name="image_from_manager" id="image_from_manager_product_image">
-                                <div id="impPreview_product_image" class="d-none my-2"></div>
+                                <input type="file" name="image" class="form-control mb-2 @error('image') is-invalid @enderror" accept="image/*">
+                                @error('image') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                @php $selectedImageFromManager = old('image_from_manager'); @endphp
+                                <input type="hidden" name="image_from_manager" id="image_from_manager_product_image" value="{{ $selectedImageFromManager }}">
+                                <div id="impPreview_product_image" class="{{ $selectedImageFromManager ? '' : 'd-none' }} my-2">
+                                    @if($selectedImageFromManager)
+                                        <img src="{{ asset('storage/' . $selectedImageFromManager) }}" width="80" style="border-radius:4px;">
+                                        <small class="text-muted d-block">Selected from image manager</small>
+                                    @endif
+                                </div>
                                 <div>
                                     <button type="button" class="btn btn-sm btn-outline-primary mt-1" onclick="impOpen_product_image()">
                                         <i class="fas fa-folder-open me-1"></i> Browse Image Manager
@@ -228,7 +232,7 @@
                                     </div>
                                 @endif
 
-                                <!-- <input type="file" name="gallery_images[]" class="form-control mb-2" multiple accept="image/*"> -->
+                                <input type="file" name="gallery_images[]" class="form-control mb-2" multiple accept="image/*">
                                 <input type="hidden" name="gallery_images_from_manager" id="gallery_images_from_manager">
                                 <div id="impPreview_gallery_images" class="d-none my-2"></div>
                                 

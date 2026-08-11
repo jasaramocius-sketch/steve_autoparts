@@ -39,11 +39,12 @@ if (!function_exists('convertToWebp')) {
 }
 
 if (!function_exists('saveImageWithWebp')) {
-    function saveImageWithWebp($file, string $dir): string
+    function saveImageWithWebp($file, string $dir = 'uploads'): string
     {
-        $destination = public_path($dir);
+        $subdir = 'uploads/' . now()->format('Y/m');
+        $destination = storage_path('app/public/' . $subdir);
 
-        // Directory create karo agar nahi hai
+        // Directory auto-create karo agar nahi hai
         if (!is_dir($destination)) {
             mkdir($destination, 0775, true);
         }
@@ -62,7 +63,7 @@ if (!function_exists('saveImageWithWebp')) {
 
         convertToWebp($fullPath, $webpPath);
 
-        return $filename;
+        return 'storage/' . $subdir . '/' . $filename;
     }
 }
 
@@ -91,9 +92,10 @@ if (!function_exists('saveImageFromUrlWithWebp')) {
         }
 
         $filename = time() . '_' . uniqid() . '.' . $extension;
-        $dirPath = public_path($dir);
+        $subdir = 'uploads/' . now()->format('Y/m');
+        $dirPath = storage_path('app/public/' . $subdir);
         if (!file_exists($dirPath)) {
-            mkdir($dirPath, 0755, true);
+            mkdir($dirPath, 0775, true);
         }
         file_put_contents($dirPath . '/' . $filename, $response->body());
 
@@ -102,23 +104,26 @@ if (!function_exists('saveImageFromUrlWithWebp')) {
 
         convertToWebp($fullPath, $webpPath);
 
-        return $filename;
+        return 'storage/' . $subdir . '/' . $filename;
     }
 }
 
 if (!function_exists('deleteImageFiles')) {
-    function deleteImageFiles(?string $filename, string $dir): void
+    function deleteImageFiles(?string $filename, string $dir = 'uploads'): void
     {
         if (!$filename) return;
 
-        $fullPath = public_path($dir . '/' . $filename);
-        if (file_exists($fullPath)) {
-            @unlink($fullPath);
-        }
+        $path = normalizeImagePath($filename, $dir);
 
-        $webpPath = dirname($fullPath) . '/' . pathinfo($fullPath, PATHINFO_FILENAME) . '.webp';
-        if (file_exists($webpPath)) {
-            @unlink($webpPath);
+        foreach ([public_path($path), storage_path('app/public/' . $path)] as $fullPath) {
+            if (file_exists($fullPath)) {
+                @unlink($fullPath);
+            }
+
+            $webpPath = dirname($fullPath) . '/' . pathinfo($fullPath, PATHINFO_FILENAME) . '.webp';
+            if (file_exists($webpPath)) {
+                @unlink($webpPath);
+            }
         }
     }
 }
@@ -143,9 +148,16 @@ if (!function_exists('imgTag')) {
     function imgTag(string $src, ?string $alt = '', string $class = '', string $extra = ''): string
     {
         $alt = $alt ?? '';
+        $src = trim($src);
 
-        if (empty($src) || !file_exists(public_path($src))) {
+        if (empty($src)) {
             $src = 'assets/images/placeholder.png';
+        }
+
+        $checkPath = str_starts_with($src, 'uploads/') ? 'storage/' . $src : $src;
+        if (!file_exists(public_path($checkPath))) {
+            $src = 'assets/images/placeholder.png';
+            $checkPath = $src;
         }
 
         $placeholder = asset('assets/images/placeholder.png');
@@ -153,10 +165,27 @@ if (!function_exists('imgTag')) {
         $classAttr = $class ? " class=\"{$class}\"" : '';
         $extraAttr = $extra ? " {$extra}" : '';
 
-        $html = '<img src="' . asset($src) . '" alt="' . e($alt) . '"' . $classAttr . ' onerror="' . $onerror . '"' . $extraAttr . '>';
+        $imgSrc = $src;
+        $webpSource = null;
 
-        if (webpExists($src)) {
-            $html = '<picture><source srcset="' . webpSrc($src) . '" type="image/webp">' . $html . '</picture>';
+        if (preg_match('/\.webp$/i', $src)) {
+            $original = webpOriginal($src);
+            if ($original !== null) {
+                $imgSrc = $original;
+                $webpSource = $src;
+            }
+        } elseif (webpExists($src)) {
+            $webpSource = webpSrc($src);
+        }
+
+        // Convert uploads paths to storage/ for asset()
+        $assetSrc = str_starts_with($imgSrc, 'uploads/') ? 'storage/' . $imgSrc : $imgSrc;
+        $assetWebp = $webpSource ? (str_starts_with($webpSource, 'uploads/') ? 'storage/' . $webpSource : $webpSource) : null;
+
+        $html = '<img src="' . asset($assetSrc) . '" alt="' . e($alt) . '"' . $classAttr . ' onerror="' . $onerror . '"' . $extraAttr . '>';
+
+        if ($assetWebp) {
+            $html = '<picture><source srcset="' . asset($assetWebp) . '" type="image/webp">' . $html . '</picture>';
         }
 
         return $html;

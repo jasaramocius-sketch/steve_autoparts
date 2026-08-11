@@ -55,6 +55,26 @@ class Product extends Model
         'featured' => false,
     ];
 
+    public function getReviewsDataAttribute($value)
+    {
+        if (is_array($value)) return $value;
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            return is_array($decoded) ? $decoded : [];
+        }
+        return [];
+    }
+
+    public function getFeaturesAttribute($value)
+    {
+        if (is_array($value)) return $value;
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            return is_array($decoded) ? $decoded : [];
+        }
+        return [];
+    }
+
     public function category()
     {
         return $this->belongsTo(Category::class, 'category_id', 'id');

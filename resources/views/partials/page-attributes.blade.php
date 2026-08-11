@@ -1,10 +1,8 @@
-{{-- Renders the <body> tag merging the current CMS page attributes with the view's page-id/page-class sections. --}}
+{{-- Registers the page-id/page-class sections, merging the current CMS page attributes ($page) with the static values passed from each view. Include in every view: @include('partials.page-attributes', ['pageId' => 'my-page', 'pageClass' => 'my-page']) --}}
 @php
     $pageModel = $page ?? null;
-    $pageId = optional($pageModel)->id;
-    $pageIdPrefix = $pageId !== null ? 'page-' . $pageId : '';
-    $pageClassPrefix = optional($pageModel)->title ? ' page-' . Str::slug($pageModel->title) : '';
-    $viewPageId = trim($__env->yieldContent('page-id', 'default-page-id'));
-    $viewPageClass = trim($__env->yieldContent('page-class', 'default-body-class'));
+    $pageIdValue = trim(($pageModel ? 'page-' . $pageModel->id : '') . ' ' . trim($pageId ?? ''));
+    $pageClassValue = trim(($pageModel ? ' page-' . Str::slug($pageModel->title) : '') . ' ' . trim($pageClass ?? ''));
 @endphp
-<body id="{{ trim($pageIdPrefix . ' ' . $viewPageId) }}" class="{{ trim($pageClassPrefix . ' ' . $viewPageClass) }}">
+@section('page-id', $pageIdValue !== '' ? $pageIdValue : 'default-page-id')
+@section('page-class', $pageClassValue !== '' ? $pageClassValue : 'default-body-class')

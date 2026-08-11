@@ -1,7 +1,6 @@
 @extends('admin.layouts.app')
 {{-- Add your custom page ID and classes right here --}}
-@section('page-id', 'admin-blog-categories-index-page')
-@section('page-class', 'admin-blog-categories-index-page')
+@include('partials.page-attributes', ['pageId' => 'admin-blog-categories-index-page', 'pageClass' => 'admin-blog-categories-index-page'])
 @section('page-title', 'Blog Categories')
 @section('content')
 
@@ -13,7 +12,7 @@
     <a href="{{ route('admin.blog-categories.create') }}" class="btn btn-primary"><i class="fas fa-plus"></i> Add Blog Category</a>
 </div>
 
-<ul class="nav nav-tabs mb-3">
+<ul class="nav nav-tabs">
     <li class="nav-item">
         <a class="nav-link {{ !request()->has('trashed') ? 'active' : '' }}" href="{{ route('admin.blog-categories.index') }}">Active</a>
     </li>

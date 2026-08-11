@@ -23,7 +23,8 @@ class ContactController extends Controller
     }
     public function index()
     {
-        return view('pages.contact');
+        $page = \App\Models\Page::where('slug', 'contact')->where('status', true)->first();
+        return view('pages.contact', compact('page'));
     }
 
     public function store(Request $request)

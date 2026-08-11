@@ -4,7 +4,7 @@
         <ul class="list-group list-group-flush">
             @foreach($cart as $item)
                 <li class="list-group-item d-flex align-items-center gap-3 px-3 py-3 cart-icon-dropdown-items">
-                    {!! imgTag('assets/images/thumbnails/'.basename($item['image']), $item['name'], 'cart-icon-dropdown-item-img', 'style="width:50px;height:50px;object-fit:cover;"') !!}
+                    {!! imgTag(storedPath($item['image'], 'assets/images/thumbnails'), $item['name'], 'cart-icon-dropdown-item-img', 'style="width:50px;height:50px;object-fit:cover;"') !!}
                     <div class="flex-grow-1 min-w-0 cart-icon-dropdown-item-details">
                         <a href="{{ route('cart') }}" class="text-dark fw-600 fs-14 text-truncate d-block">{{ $item['name'] }}</a>
                         <div class="fs-13 text-secondary">

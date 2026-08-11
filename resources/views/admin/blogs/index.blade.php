@@ -1,7 +1,6 @@
 @extends('admin.layouts.app')
 {{-- Add your custom page ID and classes right here --}}
-@section('page-id', 'admin-blogs-index-page')
-@section('page-class', 'admin-blogs-index-page')
+@include('partials.page-attributes', ['pageId' => 'admin-blogs-index-page', 'pageClass' => 'admin-blogs-index-page'])
 @section('page-title', 'All Blogs')
 @section('content')
 
@@ -12,7 +11,7 @@
     <a href="{{ route('admin.blogs.create') }}" class="btn btn-primary"><i class="fas fa-plus"></i> Add Blog</a>
 </div>
 
-<ul class="nav nav-tabs mb-3 flex-wrap flex-md-nowrap">
+<ul class="nav nav-tabs flex-wrap flex-md-nowrap">
     <li class="nav-item">
         <a class="nav-link {{ !request()->has('trashed') ? 'active' : '' }}" href="{{ route('admin.blogs.index') }}">Active</a>
     </li>

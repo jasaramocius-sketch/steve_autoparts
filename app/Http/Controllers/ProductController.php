@@ -88,7 +88,7 @@ class ProductController extends Controller
 
         $hasPurchased = \App\Http\Controllers\ReviewController::hasPurchased(auth()->id(), $product->id);
 
-        return view('product', compact('product', 'related', 'inWishlist', 'wishedProductIds', 'hasPurchased'));
+        return view('product.show', compact('product', 'related', 'inWishlist', 'wishedProductIds', 'hasPurchased'));
     }
 
     public function create()
@@ -127,32 +127,24 @@ class ProductController extends Controller
         $data['slug'] = Str::slug($request->name) . '-' . time();
 
         if ($request->filled('image_from_manager')) {
-            $sourcePath = storage_path('app/public/' . $request->image_from_manager);
-            if (file_exists($sourcePath)) {
-                $filename = time() . '_' . uniqid() . '.' . pathinfo($request->image_from_manager, PATHINFO_EXTENSION);
-                $destDir = public_path('assets/images/thumbnails');
-                if (!is_dir($destDir)) mkdir($destDir, 0775, true);
-                copy($sourcePath, $destDir . '/' . $filename);
-                $data['image'] = $filename;
-            }
+            $data['image'] = 'storage/' . ltrim($request->image_from_manager, '/');
         } elseif ($request->hasFile('image')) {
-            $data['image'] = saveImageWithWebp($request->file('image'), 'assets/images/thumbnails');
+            $data['image'] = saveImageWithWebp($request->file('image'));
         }
 
         $product = Product::create($data);
 
+        if ($request->filled('image_from_manager')) {
+            Image::markUsed($request->image_from_manager);
+        }
+
         if ($request->filled('gallery_images_from_manager')) {
             $paths = json_decode($request->gallery_images_from_manager, true);
             if (is_array($paths)) {
-                $destDir = public_path('products/gallery');
-                if (!is_dir($destDir)) mkdir($destDir, 0775, true);
                 foreach ($paths as $imgPath) {
-                    $source = storage_path('app/public/' . $imgPath);
-                    if (file_exists($source)) {
-                        $filename = time() . '_' . uniqid() . '.' . pathinfo($imgPath, PATHINFO_EXTENSION);
-                        copy($source, $destDir . '/' . $filename);
-                        $file = new \Illuminate\Http\UploadedFile($destDir . '/' . $filename, basename($filename));
-                        Image::storeFromUpload($file, 'products/gallery', $product);
+                    try {
+                        Image::attachPath($imgPath, $product);
+                    } catch (\Throwable $e) {
                     }
                 }
             }
@@ -227,19 +219,16 @@ class ProductController extends Controller
         $data['reviews_data'] = $request->filled('reviews_data') ? json_decode($request->reviews_data, true) : null;
 
         if ($request->filled('image_from_manager')) {
-            $sourcePath = storage_path('app/public/' . $request->image_from_manager);
-            if (file_exists($sourcePath)) {
-                $filename = time() . '_' . uniqid() . '.' . pathinfo($request->image_from_manager, PATHINFO_EXTENSION);
-                $destDir = public_path('assets/images/thumbnails');
-                if (!is_dir($destDir)) mkdir($destDir, 0775, true);
-                copy($sourcePath, $destDir . '/' . $filename);
-                $data['image'] = $filename;
-            }
+            $data['image'] = 'storage/' . ltrim($request->image_from_manager, '/');
         } elseif ($request->hasFile('image')) {
-            $data['image'] = saveImageWithWebp($request->file('image'), 'assets/images/thumbnails');
+            $data['image'] = saveImageWithWebp($request->file('image'));
         }
 
         $product->update($data);
+
+        if ($request->filled('image_from_manager')) {
+            Image::markUsed($request->image_from_manager);
+        }
 
         if ($request->has('delete_gallery_ids')) {
             $images = Image::whereIn('id', $request->delete_gallery_ids)
@@ -262,15 +251,10 @@ class ProductController extends Controller
         if ($request->filled('gallery_images_from_manager')) {
             $paths = json_decode($request->gallery_images_from_manager, true);
             if (is_array($paths)) {
-                $destDir = public_path('products/gallery');
-                if (!is_dir($destDir)) mkdir($destDir, 0775, true);
                 foreach ($paths as $imgPath) {
-                    $source = storage_path('app/public/' . $imgPath);
-                    if (file_exists($source)) {
-                        $filename = time() . '_' . uniqid() . '.' . pathinfo($imgPath, PATHINFO_EXTENSION);
-                        copy($source, $destDir . '/' . $filename);
-                        $file = new \Illuminate\Http\UploadedFile($destDir . '/' . $filename, basename($filename));
-                        Image::storeFromUpload($file, 'products/gallery', $product);
+                    try {
+                        Image::attachPath($imgPath, $product);
+                    } catch (\Throwable $e) {
                     }
                 }
             }
@@ -459,7 +443,7 @@ class ProductController extends Controller
             }
 
             if (!empty($data['image']) && filter_var($data['image'], FILTER_VALIDATE_URL)) {
-                $saved = saveImageFromUrlWithWebp($data['image'], 'assets/images/thumbnails');
+                $saved = saveImageFromUrlWithWebp($data['image']);
                 if ($saved) {
                     $insertData['image'] = $saved;
                 } else {
@@ -480,7 +464,8 @@ class ProductController extends Controller
 
                 if (!empty($data['gallery_images'])) {
                     $galleryUrls = array_filter(array_map('trim', explode('|', $data['gallery_images'])));
-                    $destDir = public_path('products/gallery');
+                    $subdir = 'uploads/' . now()->format('Y/m');
+                    $destDir = storage_path('app/public/' . $subdir);
                     if (!is_dir($destDir)) mkdir($destDir, 0775, true);
                     foreach ($galleryUrls as $imgUrl) {
                         if (!filter_var($imgUrl, FILTER_VALIDATE_URL)) continue;
@@ -494,8 +479,19 @@ class ProductController extends Controller
                         elseif (str_contains($contentType, 'gif')) $ext = 'gif';
                         $filename = time() . '_' . uniqid() . '.' . $ext;
                         file_put_contents($destDir . '/' . $filename, $response->body());
-                        $file = new \Illuminate\Http\UploadedFile($destDir . '/' . $filename, $filename);
-                        Image::storeFromUpload($file, 'products/gallery', $product);
+                        Image::create([
+                            'original_name' => $filename,
+                            'filename' => $filename,
+                            'path' => $subdir . '/' . $filename,
+                            'url' => 'storage/' . $subdir . '/' . $filename,
+                            'mime_type' => $contentType,
+                            'size' => filesize($destDir . '/' . $filename),
+                            'width' => null,
+                            'height' => null,
+                            'is_unused' => false,
+                            'attachable_type' => Product::class,
+                            'attachable_id' => $product->id,
+                        ]);
                         $galleryImported++;
                     }
                 }
@@ -581,7 +577,7 @@ class ProductController extends Controller
                     $p->product_type ?? 'none',
                     $p->status ? '1' : '0',
                     $p->featured ? '1' : '0',
-                    $p->image ? url('assets/images/thumbnails/' . $p->image) : '',
+                    $p->image ? url(storedPath($p->image, 'assets/images/thumbnails')) : '',
                     $p->brand->name ?? '',
                     $p->year ?? '',
                     $p->make ?? '',

@@ -1,7 +1,6 @@
 @extends('layouts.app')
 {{-- Add your custom page ID and classes right here --}}
-@section('page-id', 'auth-login-page')
-@section('page-class', 'auth-login-page')
+@include('partials.page-attributes', ['pageId' => 'auth-login-page', 'pageClass' => 'auth-login-page'])
 @section('page-title', 'Login - StAutoparts')
 @section('content')
 

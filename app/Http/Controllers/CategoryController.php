@@ -117,7 +117,7 @@ class CategoryController extends Controller
             $categories = $categories->sortByDesc('created_at')->values();
         }
 
-        return view('categories', compact('categories'));
+        return view('categories.index', compact('categories'));
     }
     // Create Form
     public function create()
@@ -143,20 +143,13 @@ class CategoryController extends Controller
         $category->status = $request->boolean('status', true);
 
         if ($request->filled('image_from_manager')) {
-            $sourcePath = storage_path('app/public/' . $request->image_from_manager);
-            if (file_exists($sourcePath)) {
-                $filename = time() . '_' . uniqid() . '.' . pathinfo($request->image_from_manager, PATHINFO_EXTENSION);
-                $destDir = public_path('assets/images/categories');
-                if (!is_dir($destDir)) mkdir($destDir, 0775, true);
-                copy($sourcePath, $destDir . '/' . $filename);
-                $category->image = $filename;
-            }
+            $category->image = 'storage/' . ltrim($request->image_from_manager, '/');
         } elseif ($request->hasFile('image')) {
-            $category->image = saveImageWithWebp($request->file('image'), 'assets/images/categories');
+            $category->image = saveImageWithWebp($request->file('image'));
         } elseif ($request->filled('image_url')) {
             try {
                 $url = $request->input('image_url');
-                $filename = saveImageFromUrlWithWebp($url, 'assets/images/categories');
+                $filename = saveImageFromUrlWithWebp($url);
                 if ($filename === null) {
                     return back()->withInput()->withErrors(['image_url' => 'Could not download image from the provided URL.']);
                 }
@@ -167,6 +160,10 @@ class CategoryController extends Controller
         }
 
         $category->save();
+
+        if ($request->filled('image_from_manager')) {
+            \App\Models\Image::markUsed($request->image_from_manager, $category);
+        }
 
         return redirect()->route('admin.categories.index')
             ->with('success', 'Category created successfully.');
@@ -197,20 +194,13 @@ class CategoryController extends Controller
         $category->status = $request->boolean('status', true);
 
         if ($request->filled('image_from_manager')) {
-            $sourcePath = storage_path('app/public/' . $request->image_from_manager);
-            if (file_exists($sourcePath)) {
-                $filename = time() . '_' . uniqid() . '.' . pathinfo($request->image_from_manager, PATHINFO_EXTENSION);
-                $destDir = public_path('assets/images/categories');
-                if (!is_dir($destDir)) mkdir($destDir, 0775, true);
-                copy($sourcePath, $destDir . '/' . $filename);
-                $category->image = $filename;
-            }
+            $category->image = 'storage/' . ltrim($request->image_from_manager, '/');
         } elseif ($request->hasFile('image')) {
-            $category->image = saveImageWithWebp($request->file('image'), 'assets/images/categories');
+            $category->image = saveImageWithWebp($request->file('image'));
         } elseif ($request->filled('image_url')) {
             try {
                 $url = $request->input('image_url');
-                $filename = saveImageFromUrlWithWebp($url, 'assets/images/categories');
+                $filename = saveImageFromUrlWithWebp($url);
                 if ($filename === null) {
                     return back()->withInput()->withErrors(['image_url' => 'Could not download image from the provided URL.']);
                 }
@@ -221,6 +211,10 @@ class CategoryController extends Controller
         }
         
         $category->save();
+
+        if ($request->filled('image_from_manager')) {
+            \App\Models\Image::markUsed($request->image_from_manager, $category);
+        }
 
         return redirect()->route('admin.categories.index')
             ->with('success', 'Category updated successfully');

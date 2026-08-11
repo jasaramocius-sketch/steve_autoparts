@@ -1,7 +1,8 @@
 @extends('layouts.app'){{-- Add your custom page ID and classes right here --}}
-@section('page-id', 'user-faq-page')
-@section('page-class', 'user-faq-page')
-@section('title', 'FAQ' . ' - ' . config('app.name', 'StAutoparts'))
+@include('partials.page-attributes', ['pageId' => 'user-faq-page', 'pageClass' => 'user-faq-page'])
+@section('title', $page->meta_title ?? ('FAQ' . ' - ' . config('app.name', 'StAutoparts')))
+@section('meta_title', $page->meta_title ?? ('FAQ | ' . config('app.name', 'StAutoparts')))
+@section('meta_description', $page->meta_description ?? 'Frequently asked questions about ST Auto Parts — orders, shipping, returns and support.')
 @section('content')
 <div class="Faq-hero">    
 <!-- Banner Hero Section -->

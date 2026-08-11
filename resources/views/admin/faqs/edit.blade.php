@@ -1,7 +1,6 @@
 @extends('admin.layouts.app')
 {{-- Add your custom page ID and classes right here --}}
-@section('page-id', 'admin-faqs-edit-page')
-@section('page-class', 'admin-faqs-edit-page')
+@include('partials.page-attributes', ['pageId' => 'admin-faqs-edit-page', 'pageClass' => 'admin-faqs-edit-page'])
 @section('page-title', 'Edit FAQ')
 @section('content')
 

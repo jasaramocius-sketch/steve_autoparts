@@ -75,7 +75,7 @@ class Category extends Model
     {
         $storedImage = trim((string) $this->image);
         if ($storedImage !== '') {
-            $candidate = 'assets/images/categories/' . $storedImage;
+            $candidate = storedPath($storedImage, 'assets/images/categories');
             if (file_exists(public_path($candidate))) {
                 return $candidate;
             }

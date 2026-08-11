@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;   
+use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\TracksIsDeleted;
 
 class FollowedSeller extends Model
@@ -12,6 +12,7 @@ class FollowedSeller extends Model
 
     protected $fillable = [
         'user_id',
+        'seller_id',
         'seller_name',
         'location',
         'products',
@@ -30,5 +31,10 @@ class FollowedSeller extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function seller()
+    {
+        return $this->belongsTo(Seller::class, 'seller_id');
     }
 }

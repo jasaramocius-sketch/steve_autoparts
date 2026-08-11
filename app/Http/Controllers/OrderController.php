@@ -9,10 +9,27 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class OrderController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $orders = Order::with('user')->latest()->get();
-        return view('admin.orders.index', compact('orders'));
+        $query = Order::with('user');
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortDir = $request->get('sort_dir', 'desc');
+
+        $orders = $query
+            ->orderBy($sortBy, $sortDir)
+            ->paginate($request->get('per_page', 10))
+            ->withQueryString();
+
+        return view('admin.orders.index', compact(
+            'orders',
+            'sortBy',
+            'sortDir'
+        ));
     }
     public function show($idOrNumber)
     {
@@ -42,7 +59,21 @@ class OrderController extends Controller
         }
 
         // 3. If it passes everything, let's see if it successfully loads the view
-        return view('orders.show', compact('order'));
+        $userId = auth()->id();
+        $reviewedSlugs = [];
+        foreach ($order->items as $item) {
+            if (!$item->product || empty($item->product->reviews_data)) {
+                continue;
+            }
+            foreach ($item->product->reviews_data as $review) {
+                if (($review['user_id'] ?? null) == $userId && !($review['deleted'] ?? false)) {
+                    $reviewedSlugs[$item->product->id] = true;
+                    break;
+                }
+            }
+        }
+
+        return view('user.orders.show', compact('order', 'reviewedSlugs'));
     }
     public function destroy($id)
     {

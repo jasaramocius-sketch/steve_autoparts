@@ -9,6 +9,26 @@ use Illuminate\Support\Str;
 
 class PageController extends Controller
 {
+    /**
+     * Summernote submits <p><br></p> / <br> when the editor is left empty.
+     * Treat content with no meaningful text as empty (null).
+     */
+    protected static function normalizeContent(?string $html): ?string
+    {
+        $html = trim((string) $html);
+        if ($html === '') {
+            return null;
+        }
+
+        $text = trim(html_entity_decode(strip_tags($html)));
+        if ($text === '') {
+            $hasMedia = (bool) preg_match('/<img\b|<iframe\b|<video\b|<table\b|<a\b|class\s*=|style\s*=/i', $html);
+            return $hasMedia ? $html : null;
+        }
+
+        return $html;
+    }
+
     public function index(Request $request)
     {
         $sortBy = in_array($request->sort_by, ['id', 'title', 'slug', 'status', 'updated_at', 'created_at']) ? $request->sort_by : 'created_at';
@@ -57,9 +77,17 @@ class PageController extends Controller
 
         $data = $request->only(['title', 'short_description', 'content', 'meta_title', 'meta_description']);
         $data['slug'] = Str::slug($request->title);
+        $data['short_description'] = $request->input('short_description') ?: null;
+        $data['content'] = static::normalizeContent($request->input('content'));
+        $data['image'] = $request->filled('image_from_manager') ? 'storage/' . ltrim($request->input('image_from_manager'), '/') : null;
         $data['status'] = $request->boolean('status');
+        $data['show_title'] = $request->boolean('show_title');
 
-        Page::create($data);
+        $page = Page::create($data);
+
+        if ($request->filled('image_from_manager')) {
+            \App\Models\Image::markUsed($request->input('image_from_manager'), $page);
+        }
 
         return redirect()->route('admin.pages.index')->with('success', 'Page created successfully.');
     }
@@ -83,9 +111,21 @@ class PageController extends Controller
         ]);
 
         $data = $request->only(['title', 'short_description', 'content', 'meta_title', 'meta_description']);
+        $data['short_description'] = $request->input('short_description') ?: null;
+        $data['content'] = static::normalizeContent($request->input('content'));
+        if ($request->boolean('remove_section_image')) {
+            $data['image'] = null;
+        } elseif ($request->filled('image_from_manager')) {
+            $data['image'] = 'storage/' . ltrim($request->input('image_from_manager'), '/');
+        }
         $data['status'] = $request->boolean('status');
+        $data['show_title'] = $request->boolean('show_title');
 
         $page->update($data);
+
+        if ($request->filled('image_from_manager')) {
+            \App\Models\Image::markUsed($request->input('image_from_manager'), $page);
+        }
 
         return redirect()->route('admin.pages.index')->with('success', 'Page updated successfully.');
     }

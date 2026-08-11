@@ -1,7 +1,6 @@
 @extends('user.layouts.dashboard')
 {{-- Add your custom page ID and classes right here --}}
-@section('page-id', 'user-addresses-page')
-@section('page-class', 'user-addresses-page')
+@include('partials.page-attributes', ['pageId' => 'user-addresses-page', 'pageClass' => 'user-addresses-page'])
 @section('dashboard-content')
 
 <style>
@@ -170,42 +169,13 @@
             <div class="modal-content">
                 <div class="modal-header"><h5 class="modal-title">Edit Address</h5><button class="btn-close steve-btn" data-bs-dismiss="modal"></button></div>
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Full Name</label>
-                        <input type="text" name="full_name" class="form-control" value="{{ $address->full_name }}" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Phone</label>
-                        <input type="tel" name="phone" class="form-control" inputmode="numeric" value="{{ $address->phone }}" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Address</label>
-                        <textarea name="address" class="form-control texteditor" rows="2" required>{{ $address->address }}</textarea>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col">
-                            <label class="form-label">City</label>
-                            <input type="text" name="city" class="form-control" value="{{ $address->city }}" required>
-                        </div>
-                        <div class="col">
-                            <label class="form-label">State</label>
-                            <input type="text" name="state" class="form-control" value="{{ $address->state }}">
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col">
-                            <label class="form-label">Country</label>
-                            <input type="text" name="country" class="form-control" value="{{ $address->country }}" required>
-                        </div>
-                        <div class="col">
-                            <label class="form-label">Zip Code</label>
-                            <input type="text" name="zip_code" class="form-control" inputmode="numeric" value="{{ $address->zip_code }}" required>
-                        </div>
-                    </div>
-                    <div class="mb-3 form-check">
-                        <input type="checkbox" name="set_default" id="edit_set_default_{{ $address->id }}" class="form-check-input" value="1" {{ $address->set_default ? 'checked' : '' }}>
-                        <label class="form-check-label" for="edit_set_default_{{ $address->id }}">Set as default address</label>
-                    </div>
+                    @include('partials.address-fields', [
+                        'prefix' => 'edit_' . $address->id,
+                        'value' => $address,
+                        'withFullName' => true,
+                        'withPhone' => true,
+                        'withDefault' => true,
+                    ])
                 </div>
                 <div class="modal-footer">
                     <button class="btn steve-btn steve-btn-sm text-white btn-primary">Save Changes</button>
@@ -236,42 +206,12 @@
             <div class="modal-content">
                 <div class="modal-header"><h5 class="modal-title">Add Address</h5><button class="btn-close steve-btn" data-bs-dismiss="modal"></button></div>
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Full Name</label>
-                        <input type="text" name="full_name" class="form-control" placeholder="John Doe" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Phone</label>
-                        <input type="tel" name="phone" class="form-control" inputmode="numeric" placeholder="+1 234 567 890" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Address</label>
-                        <textarea name="address" class="form-control texteditor" rows="2" placeholder="123 Main St" required></textarea>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col">
-                            <label class="form-label">City</label>
-                            <input type="text" name="city" class="form-control" placeholder="New York" required>
-                        </div>
-                        <div class="col">
-                            <label class="form-label">State</label>
-                            <input type="text" name="state" class="form-control" placeholder="NY">
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col">
-                            <label class="form-label">Country</label>
-                            <input type="text" name="country" class="form-control" placeholder="USA" required>
-                        </div>
-                        <div class="col">
-                            <label class="form-label">Zip Code</label>
-                            <input type="text" name="zip_code" class="form-control" inputmode="numeric" placeholder="10001" required>
-                        </div>
-                    </div>
-                    <div class="mb-3 form-check">
-                        <input type="checkbox" name="set_default" id="add_set_default" class="form-check-input" value="1">
-                        <label class="form-check-label" for="add_set_default">Set as default address</label>
-                    </div>
+                    @include('partials.address-fields', [
+                        'prefix' => 'add',
+                        'withFullName' => true,
+                        'withPhone' => true,
+                        'withDefault' => true,
+                    ])
                 </div>
                 <div class="modal-footer">
                     <button class="btn steve-btn steve-btn-sm text-white btn-primary">Save</button>

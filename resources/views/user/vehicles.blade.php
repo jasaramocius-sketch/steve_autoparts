@@ -1,7 +1,6 @@
 @extends('user.layouts.dashboard')
 {{-- Add your custom page ID and classes right here --}}
-@section('page-id', 'user-vehicles-page')
-@section('page-class', 'user-vehicles-page')
+@include('partials.page-attributes', ['pageId' => 'user-vehicles-page', 'pageClass' => 'user-vehicles-page'])
 @section('dashboard-content')
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
     <h4 class="h4-style mb-0">My Vehicles</h4>

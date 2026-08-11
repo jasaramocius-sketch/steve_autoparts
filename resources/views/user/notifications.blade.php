@@ -1,7 +1,6 @@
 @extends('user.layouts.dashboard')
 {{-- Add your custom page ID and classes right here --}}
-@section('page-id', 'user-notifications-page')
-@section('page-class', 'user-notifications-page')
+@include('partials.page-attributes', ['pageId' => 'user-notifications-page', 'pageClass' => 'user-notifications-page'])
 @section('dashboard-content')
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
     <h4 class="h4-style mb-0">Notifications
@@ -50,4 +49,10 @@
 </div>
 @endforelse
 </div>
+
+@if(method_exists($notifications, 'links'))
+    <div class="pagination-wrapper mt-4">
+        {{ $notifications->links() }}
+    </div>
+@endif
 @endsection

@@ -1,7 +1,6 @@
 @extends('user.layouts.dashboard')
 {{-- Add your custom page ID and classes right here --}}
-@section('page-id', 'user-dashboard-page')
-@section('page-class', 'user-dashboard-page')
+@include('partials.page-attributes', ['pageId' => 'user-dashboard-page', 'pageClass' => 'user-dashboard-page'])
 @section('dashboard-content')
 
 @php

@@ -1,7 +1,6 @@
 @extends('admin.layouts.app')
 {{-- Add your custom page ID and classes right here --}}
-@section('page-id', 'admin-customers-create-page')
-@section('page-class', 'admin-customers-create-page')
+@include('partials.page-attributes', ['pageId' => 'admin-customers-create-page', 'pageClass' => 'admin-customers-create-page'])
 @section('page-title', isset($user) ? 'Edit User' : 'Add Customer')
 @section('content')
 
@@ -53,21 +52,14 @@
             </div>
 
             <div class="mb-3">
-                <label>Address</label>
-                <input type="text" name="address" class="form-control @error('address') is-invalid @enderror" value="{{ old('address') }}">
-                @error('address') <div class="invalid-feedback">{{ $message }}</div> @enderror
-            </div>
-
-            <div class="mb-3">
-                <label>City</label>
-                <input type="text" name="city" class="form-control @error('city') is-invalid @enderror" value="{{ old('city') }}">
-                @error('city') <div class="invalid-feedback">{{ $message }}</div> @enderror
-            </div>
-
-            <div class="mb-3">
-                <label>Country</label>
-                <input type="text" name="country" class="form-control @error('country') is-invalid @enderror" value="{{ old('country') }}">
-                @error('country') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                @include('partials.address-fields', [
+                    'prefix' => 'customer_form',
+                    'withPhone' => false,
+                    'withFullName' => false,
+                    'withDefault' => false,
+                    'zipName' => 'postal_code',
+                    'required' => [],
+                ])
             </div>
 
             <button class="btn btn-success steve-btn">Save</button>

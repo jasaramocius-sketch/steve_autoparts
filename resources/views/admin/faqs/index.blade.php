@@ -1,7 +1,6 @@
 @extends('admin.layouts.app')
 {{-- Add your custom page ID and classes right here --}}
-@section('page-id', 'admin-faqs-index-page')
-@section('page-class', 'admin-faqs-index-page')
+@include('partials.page-attributes', ['pageId' => 'admin-faqs-index-page', 'pageClass' => 'admin-faqs-index-page'])
 @section('page-title', 'All FAQs')
 @section('content')
 
@@ -12,7 +11,7 @@
     <a href="{{ route('admin.faqs.create') }}" class="btn btn-primary"><i class="fas fa-plus"></i> Add FAQ</a>
 </div>
 
-<ul class="nav nav-tabs mb-3 flex-wrap flex-md-nowrap">
+<ul class="nav nav-tabs flex-wrap flex-md-nowrap">
     <li class="nav-item">
         <a class="nav-link {{ !request()->has('trashed') ? 'active' : '' }}" href="{{ route('admin.faqs.index') }}">Active</a>
     </li>

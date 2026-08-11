@@ -14,18 +14,18 @@
     <style>
         body { background:#f4f6f9; font-family:'Inter',sans-serif; }
         .admin-sidebar { width:260px; height:100vh; position:fixed; background:#1e1e2d; color:#fff; z-index:1001; display:flex; flex-direction:column; transition:transform .25s; }
-        .admin-sidebar .brand { padding:18px 20px; border-bottom:1px solid rgba(255,255,255,.08); font-size:18px; font-weight:700; letter-spacing:.5px; white-space:nowrap; display:flex; align-items:center; justify-content:space-between; }
+        .admin-sidebar .brand { padding:10px 0px; border-bottom:1px solid rgba(255,255,255,.08); font-size:18px; font-weight:700; letter-spacing:.5px; white-space:nowrap; display:flex; align-items:center; justify-content:space-between; }
         .admin-sidebar .brand a { flex:1; font-size:1rem;}
         .sidebar-close-btn { display:none; background:none; border:none; color:rgba(255,255,255,.6); font-size:18px; cursor:pointer; padding:4px 8px; border-radius:6px; transition:all .15s; }
         .sidebar-close-btn:hover { color:#fff; background:rgba(255,255,255,.1); }
-        .admin-sidebar .brand i { color:#4bc5e7; }
-        .admin-sidebar .nav-wrap { flex:1; overflow-y:auto; padding:12px 0; direction: rtl;}
+        /* .admin-sidebar .brand i { color:#4bc5e7; } */
+        .admin-sidebar .nav-wrap { flex:1; overflow-y:auto; padding:12px 0 72px 0; direction: rtl;}
         .admin-sidebar .nav-wrap { scrollbar-width: thin; scrollbar-color: var(--primary) transparent; }
         .admin-sidebar .nav-wrap::-webkit-scrollbar { width:1px; }
         .admin-sidebar .nav-wrap::-webkit-scrollbar-thumb { background: var(--hov-primary); border-radius:4px; }
         .scroll-box::-webkit-scrollbar-thumb:hover {background: var(--hov-primary);}
         .admin-sidebar-scroll-box.scroll-box {direction: ltr;}
-        .admin-sidebar .nav-section { font-size:10px; text-transform:uppercase; letter-spacing:1.2px; color:rgba(255,255,255,.3); padding:16px 20px 6px; font-weight:600; }
+        .admin-sidebar .nav-section { font-size:10px; text-transform:uppercase; letter-spacing:1.2px; color:var(--primary); padding:16px 20px 6px; font-weight:600; }
         .admin-sidebar .nav-item { display:flex; align-items:center; gap:12px; padding:10px 20px; color:rgba(255,255,255,.6); text-decoration:none; font-size:14px; transition:all .15s; border-left:3px solid transparent; }
         .admin-sidebar .nav-item:hover { background:rgba(255,255,255,.05); color:#fff; }
         .admin-sidebar .nav-item.active { background:rgba(255,255,255,.1); color:#fff; border-left-color:#4bc5e7; }
@@ -38,6 +38,13 @@
         .admin-navbar .user-dropdown:hover { background:#f4f6f9; }
         .admin-navbar .user-avatar { width:34px; height:34px; border-radius:50%; background:#1e1e2d; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:600; font-size:14px; overflow:hidden; flex-shrink:0; }
         .admin-navbar .user-avatar img { width:100%; height:100%; object-fit:cover; }
+        .admin-navbar.admin-navbar-bg { background-repeat:no-repeat; }
+        .admin-navbar.admin-navbar-bg { box-shadow: inset 0 0 0 9999px rgba(0,0,0,.45); }
+        .admin-navbar.admin-navbar-bg .page-title,
+        .admin-navbar.admin-navbar-bg .user-dropdown { color:#fff; }
+        .admin-navbar.admin-navbar-bg .user-dropdown:hover { background:rgba(255,255,255,.12); }
+        .admin-navbar.admin-navbar-bg .user-avatar { background:#fff; color:#1e1e2d; }
+        .admin-navbar.admin-navbar-bg .page-title { text-shadow:0 2px 6px rgba(0,0,0,.4); }
         .admin-content { flex:1; padding:24px; }
         .card-box { border-radius:12px; }
 
@@ -108,7 +115,7 @@
     @stack('page-builder-css')
 </head>
 
-@include('partials.page-attributes')
+<body id="@yield('page-id', 'default-page-id')" class="@yield('page-class', 'default-body-class')">
 
 @include('admin.partials.sidebar')
 <div class="admin-sidebar-overlay"></div>
@@ -144,12 +151,20 @@ $(document).ready(function() {
     // Bootstrap tooltips for action buttons
     var tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     tooltipTriggerList.forEach(function(el) {
-        new bootstrap.Tooltip(el);
+        new bootstrap.Tooltip(el, { trigger: 'hover' });
     });
     // For elements with title that can't have data-bs-toggle="tooltip" (e.g. modal triggers)
     document.querySelectorAll('.action-btn[title]:not([data-bs-toggle="tooltip"])').forEach(function(el) {
-        new bootstrap.Tooltip(el);
+        new bootstrap.Tooltip(el, { trigger: 'hover' });
     });
+
+    // FIX: Hide any stuck tooltip on scroll (toggle buttons keep focus otherwise)
+    document.addEventListener('scroll', function() {
+        document.querySelectorAll('.tooltip.show').forEach(function(el) {
+            el.classList.remove('show');
+            el.style.pointerEvents = 'none';
+        });
+    }, true);
 
     // FIX: Dismiss tooltip on right-click (contextmenu) before browser menu opens
     document.addEventListener('contextmenu', function(e) {

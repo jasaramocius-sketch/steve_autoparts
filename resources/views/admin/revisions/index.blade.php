@@ -1,7 +1,6 @@
 @extends('admin.layouts.app')
 {{-- Add your custom page ID and classes right here --}}
-@section('page-id', 'admin-revisions-index-page')
-@section('page-class', 'admin-revisions-index-page')
+@include('partials.page-attributes', ['pageId' => 'admin-revisions-index-page', 'pageClass' => 'admin-revisions-index-page'])
 @section('page-title', 'Revisions')
 @section('content')
 
@@ -22,6 +21,17 @@
                 <span class="text-muted small">per page</span>
             </div>
             @include('admin.partials.date-range-filter', ['filterRoute' => 'admin.revisions.index'])
+            @if($filterModelType || $filterModelId)
+                <a href="{{ route('admin.revisions.index') }}" class="btn btn-sm btn-outline-danger" title="Clear page filter">
+                    <i class="fas fa-times me-1"></i> Filtered
+                    @if($filterModelType)
+                        {{ class_basename($filterModelType) }}
+                    @endif
+                    @if($filterModelId)
+                        #{{ $filterModelId }}
+                    @endif
+                </a>
+            @endif
             <div class="text-muted small">
                 Showing {{ $revisions->firstItem() }}-{{ $revisions->lastItem() }} of {{ $revisions->total() }}
             </div>
@@ -57,6 +67,10 @@
                                 $short = class_basename($rev->model_type);
                             @endphp
                             {{ $short }}
+                            @php $relTitle = $rev->relatedTitle(); @endphp
+                            @if($relTitle)
+                                <div class="small text-muted">{{ $relTitle }}</div>
+                            @endif
                         </td>
                         <td>#{{ $rev->model_id }}</td>
                         <td>

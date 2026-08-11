@@ -40,19 +40,16 @@ class BrandController extends Controller
         $data['status'] = $request->boolean('status');
 
         if ($request->filled('image_from_manager')) {
-            $sourcePath = storage_path('app/public/' . $request->image_from_manager);
-            if (file_exists($sourcePath)) {
-                $filename = time() . '_' . uniqid() . '.' . pathinfo($request->image_from_manager, PATHINFO_EXTENSION);
-                $destDir = public_path('assets/images/brands');
-                if (!is_dir($destDir)) mkdir($destDir, 0775, true);
-                copy($sourcePath, $destDir . '/' . $filename);
-                $data['image'] = $filename;
-            }
+            $data['image'] = 'storage/' . ltrim($request->image_from_manager, '/');
         } elseif ($request->hasFile('image')) {
-            $data['image'] = saveImageWithWebp($request->file('image'), 'assets/images/brands');
+            $data['image'] = saveImageWithWebp($request->file('image'));
         }
 
-        Brand::create($data);
+        $brand = Brand::create($data);
+
+        if ($request->filled('image_from_manager')) {
+            \App\Models\Image::markUsed($request->image_from_manager, $brand);
+        }
 
         return redirect()->route('admin.brands.index')->with('success', 'Brand created successfully.');
     }
@@ -79,19 +76,16 @@ class BrandController extends Controller
         $data['status'] = $request->boolean('status');
 
         if ($request->filled('image_from_manager')) {
-            $sourcePath = storage_path('app/public/' . $request->image_from_manager);
-            if (file_exists($sourcePath)) {
-                $filename = time() . '_' . uniqid() . '.' . pathinfo($request->image_from_manager, PATHINFO_EXTENSION);
-                $destDir = public_path('assets/images/brands');
-                if (!is_dir($destDir)) mkdir($destDir, 0775, true);
-                copy($sourcePath, $destDir . '/' . $filename);
-                $data['image'] = $filename;
-            }
+            $data['image'] = 'storage/' . ltrim($request->image_from_manager, '/');
         } elseif ($request->hasFile('image')) {
-            $data['image'] = saveImageWithWebp($request->file('image'), 'assets/images/brands');
+            $data['image'] = saveImageWithWebp($request->file('image'));
         }
 
         $brand->update($data);
+
+        if ($request->filled('image_from_manager')) {
+            \App\Models\Image::markUsed($request->image_from_manager, $brand);
+        }
 
         return redirect()->route('admin.brands.index')->with('success', 'Brand updated successfully.');
     }

@@ -1,8 +1,10 @@
 @extends('layouts.app')
 {{-- Add your custom page ID and classes right here --}}
-@section('page-id', 'blog-page')
-@section('page-class', 'blog-page')
-@section('title', (isset($category) ? $category->name : 'Blogs') . ' - ' . config('app.name', 'StAutoparts'))
+@include('partials.page-attributes', ['pageId' => 'blog-page', 'pageClass' => 'blog-page'])
+@php $blogTitle = isset($category) ? $category->name : 'Blogs'; @endphp
+@section('title', $blogTitle . ' - ' . config('app.name', 'StAutoparts'))
+@section('meta_title', $blogTitle . ' | ' . config('app.name', 'StAutoparts'))
+@section('meta_description', isset($category) ? ($category->description ?? 'Blogs about ' . $category->name) : 'Latest blogs, auto parts guides and tips from ' . config('app.name', 'StAutoparts') . '.')
 
 @section('content')
 
@@ -20,6 +22,14 @@
     </div>
   </div>
 </section>
+
+@if (!empty($page->content))
+  <div class="container">
+    <div class="page-content blog-cms-intro">
+      {!! $page->content !!}
+    </div>
+  </div>
+@endif
 
 <!-- Blog Wrapper -->
 <div class="gs-blog-wrapper">

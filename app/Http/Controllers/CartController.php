@@ -14,7 +14,7 @@ class CartController extends Controller
         $cart = session('cart', []);
         $total = array_sum(array_map(fn($item) => $item['price'] * $item['qty'], $cart));
         $cartItems = session()->get('cart', []);
-        return view('cart', compact('cart', 'total','cartItems'));
+        return view('cart.index', compact('cart', 'total','cartItems'));
     }
 
     public function add(Request $request)
@@ -178,7 +178,7 @@ class CartController extends Controller
         $addresses = auth()->user()->addresses()->latest()->get();
         $vehicles = Vehicle::where('user_id', auth()->id())->get();
         $selectedVehicleId = session('selected_vehicle_id');
-        return view('checkout', compact('cart', 'total', 'addresses', 'vehicles', 'selectedVehicleId'));
+        return view('checkout.index', compact('cart', 'total', 'addresses', 'vehicles', 'selectedVehicleId'));
     }
 
     public function checkoutSubmit(Request $request)
@@ -231,7 +231,7 @@ class CartController extends Controller
             return redirect()->route('checkout');
         }
         $total = array_sum(array_map(fn($item) => $item['price'] * $item['qty'], $cart));
-        return view('delivery-info', compact('cart', 'total', 'billing'));
+        return view('checkout.delivery-info', compact('cart', 'total', 'billing'));
     }
 
     public function deliveryInfoSubmit(Request $request)
@@ -276,7 +276,7 @@ class CartController extends Controller
         $shippingCost = $shipping['cost'];
         $grandTotal = $total + $shippingCost;
         $shippingMethod = $shipping['method'];
-        return view('payment', compact('cart', 'total', 'shippingCost', 'grandTotal', 'shippingMethod'));
+        return view('checkout.payment', compact('cart', 'total', 'shippingCost', 'grandTotal', 'shippingMethod'));
     }
 
     public function paymentSubmit(Request $request)
@@ -411,7 +411,7 @@ class CartController extends Controller
             return redirect()->route('home');
         }
 
-        return view('order-confirmed', compact('order'));
+        return view('checkout.order-confirmed', compact('order'));
     }
 
     public function miniCart()

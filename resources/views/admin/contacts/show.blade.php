@@ -1,7 +1,6 @@
 @extends('admin.layouts.app')
 {{-- Add your custom page ID and classes right here --}}
-@section('page-id', 'admin-contact-detail-page')
-@section('page-class', 'admin-contact-detail-page')
+@include('partials.page-attributes', ['pageId' => 'admin-contact-detail-page', 'pageClass' => 'admin-contact-detail-page'])
 @section('page-title', 'Contact Detail')
 @section('content')
 
@@ -70,7 +69,7 @@
             <div class="card-body">
                 <div class="d-flex align-items-center gap-3">
                     @if($contact->product->image)
-                        <img src="{{ asset('assets/images/thumbnails/' . $contact->product->image) }}" alt="" style="width:60px;height:60px;object-fit:cover;border-radius:8px;">
+                        <img src="{{ storedImageUrl($contact->product->image, 'assets/images/thumbnails') }}" alt="" style="width:60px;height:60px;object-fit:cover;border-radius:8px;">
                     @endif
                     <div>
                         <a href="{{ route('product', $contact->product->slug) }}" target="_blank" class="fw-semibold text-dark text-decoration-none">{{ $contact->product->name }}</a>

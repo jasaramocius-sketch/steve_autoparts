@@ -52,6 +52,8 @@ return [
         \SteveStore\PageBuilder\Blocks\BuiltIn\FeaturesGrid::class,
         \SteveStore\PageBuilder\Blocks\BuiltIn\TestimonialCarousel::class,
         \SteveStore\PageBuilder\Blocks\BuiltIn\CTABanner::class,
+        \SteveStore\PageBuilder\Blocks\BuiltIn\SnippetBlock::class,
+        \SteveStore\PageBuilder\Blocks\BuiltIn\HtmlBlock::class,
     ],
 
     /*
@@ -71,5 +73,30 @@ return [
     |--------------------------------------------------------------------------
     */
     'asset_url' => 'vendor/page-builder',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Live URL Map
+    |--------------------------------------------------------------------------
+    |
+    | Maps a model type + slug to the canonical frontend route name. This keeps
+    | the "View Live Page" link pointing to the real page URL instead of the
+    | generic /page/{slug} fallback (which would create duplicate content for
+    | SEO). Keys are route names. Omit entries to keep the default fallback.
+    |
+    */
+    'live_url_map' => [
+        'page' => [
+            'home'               => 'home',
+            'shop'               => 'shop',
+            'faq'                => 'faq',
+            'contact'            => 'contact',
+            'about'              => 'about',
+            'privacy-policy'     => 'privacy.policy',
+            'terms-conditions'   => 'terms.conditions',
+            'return-policy'      => 'return.policy',
+            'support-policy'     => 'support.policy',
+        ],
+    ],
 
 ];

@@ -1,7 +1,6 @@
 @extends('admin.layouts.app')
 {{-- Add your custom page ID and classes right here --}}
-@section('page-id', 'admin-home-edit-page')
-@section('page-class', 'admin-home-edit-page')
+@include('partials.page-attributes', ['pageId' => 'admin-home-edit-page', 'pageClass' => 'admin-home-edit-page'])
 @section('page-title', 'Edit' . ' ' . ucfirst(str_replace('_', ' ', $section->section_name)))
 
 @section('content')
@@ -129,21 +128,23 @@
                                                 <label class="form-label mb-1"><strong>Image</strong></label>
                                                 @if($banner && !empty($banner['image']))
                                                     @php
-                                                        $previewImg = 'assets/images/home/' . $banner['image'];
-                                                        if (!file_exists(public_path($previewImg))) {
-                                                            $previewImg = 'assets/images/categories/' . $banner['image'];
-                                                        }
+                                                        $previewImg = storedImageUrl($banner['image'], 'assets/images/home');
                                                     @endphp
-                                                    <div class="mb-1">
-                                                        <img src="{{ asset($previewImg) }}" width="100" style="border-radius:4px;border:1px solid #ddd;" onerror="this.onerror=null;this.src='{{ asset('assets/images/placeholder.png') }}'">
+                                                    <div class="mb-1 banner-image-current-{{ $i }}">
+                                                        <img src="{{ $previewImg }}" width="100" style="border-radius:4px;border:1px solid #ddd;" onerror="this.onerror=null;this.src='{{ asset('assets/images/placeholder.png') }}'">
                                                     </div>
                                                 @endif
                                                 <input type="hidden" name="banners[{{ $i }}][image_from_manager]" id="banners_image_from_manager_{{ $i }}">
                                                 <input type="hidden" name="banners[{{ $i }}][existing_image]" value="{{ $banner['image'] ?? '' }}">
                                                 <div id="impPreview_banner_{{ $i }}" class="d-none mt-1"></div>
-                                                <button type="button" class="btn btn-sm btn-outline-primary mt-1" onclick="impOpen_banner_{{ $i }}()">
-                                                    <i class="fas fa-images me-1"></i> Browse Image Manager
-                                                </button>
+                                                <div class="d-flex gap-2 mt-1 flex-wrap">
+                                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="impOpen_banner_{{ $i }}()">
+                                                        <i class="fas fa-images me-1"></i> Browse Image Manager
+                                                    </button>
+                                                    <button type="button" id="clear_btn_banner_{{ $i }}" data-preview="impPreview_banner_{{ $i }}" class="btn btn-sm btn-outline-danger {{ !empty($banner['image']) ? '' : 'd-none' }}" onclick="clearPickerImage('banners_image_from_manager_{{ $i }}','impPreview_banner_{{ $i }}','.banner-image-current-{{ $i }}')">
+                                                        <i class="fas fa-times me-1"></i> Clear
+                                                    </button>
+                                                </div>
                                             </div>
                                             <div class="col-md-8">
                                                 <div class="row g-2">
@@ -209,10 +210,65 @@
                             <input type="datetime-local" name="countdown" id="countdown" class="form-control" value="{{ $extra['countdown'] ?? '' }}">
                             <small class="text-muted d-block">Sets the date/time shown in the countdown. Leave empty to use the default end date.</small>
                         </div>
+
+                        <div class="form-group mb-3">
+                            <label for="deal_image" class="form-label"><strong>Content Image</strong></label>
+                            <small class="text-muted d-block mb-2">This image appears as the section content overlay (above the countdown and button).</small>
+                            <div class="mb-2">
+                                @if($section->image)
+                                    <div class="mb-2 deal-image-current">
+                                        <img src="{{ storedImageUrl($section->image, 'assets/images/home') }}" alt="Current image"
+                                             style="max-width: 300px; height: auto; border-radius: 4px; border: 1px solid #ddd;">
+                                    </div>
+                                @endif
+                            </div>
+                            <input type="hidden" name="image_from_manager" id="image_from_manager_deal_of_day_image">
+                            <input type="hidden" name="remove_section_image" id="remove_section_image" value="0">
+                            <div id="impPreview_deal_of_day_image" class="d-none mt-2"></div>
+                            <div class="d-flex gap-2 mt-1">
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="document.getElementById('remove_section_image').value='0'; impOpen_deal_of_day_image()">
+                                    <i class="fas fa-images me-1"></i> Browse Image Manager
+                                </button>
+                                <button type="button" id="clear_btn_deal_of_day_image" data-preview="impPreview_deal_of_day_image" data-current=".deal-image-current" class="btn btn-sm btn-outline-danger {{ $section->image ? '' : 'd-none' }}" onclick="clearPickerImage('image_from_manager_deal_of_day_image','impPreview_deal_of_day_image','.deal-image-current','remove_section_image')">
+                                    <i class="fas fa-times me-1"></i> Clear Image
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="deal_bg_image" class="form-label"><strong>Background Image</strong></label>
+                            <small class="text-muted d-block mb-2">This image sets the entire section background (cover + center). If not set, the content image will be used as background.</small>
+                            @php $dealBgImage = $extra['deal_image'] ?? null; @endphp
+    <div class="mb-2">
+        @if($dealBgImage)
+            <div class="mb-2 home-image-current">
+                <img src="{{ storedImageUrl($dealBgImage, 'assets/images/home') }}" alt="Current background image"
+                     style="max-width: 300px; height: auto; border-radius: 4px; border: 1px solid #ddd;">
+            </div>
+        @endif
+    </div>
+                            <input type="hidden" name="deal_bg_image_from_manager" id="deal_bg_image_from_manager_deal_of_day">
+                            <input type="hidden" name="deal_bg_image_existing" value="{{ $dealBgImage ?? '' }}">
+                            <input type="hidden" name="remove_deal_bg_image" id="remove_deal_bg_image" value="0">
+                            <div id="impPreview_deal_bg_image" class="d-none mt-2"></div>
+                            <div class="d-flex gap-2 mt-1">
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="document.getElementById('remove_deal_bg_image').value='0'; impOpen_deal_bg_image()">
+                                    <i class="fas fa-images me-1"></i> Browse Image Manager
+                                </button>
+                                <button type="button" id="clear_btn_deal_bg_image" data-preview="impPreview_deal_bg_image" data-current=".home-image-current" class="btn btn-sm btn-outline-danger {{ $dealBgImage ? '' : 'd-none' }}" onclick="clearPickerImage('deal_bg_image_from_manager_deal_of_day','impPreview_deal_bg_image','.home-image-current','remove_deal_bg_image')">
+                                    <i class="fas fa-times me-1"></i> Clear Image
+                                </button>
+                            </div>
+                        </div>
                         @endif
+                        
 
                         @if($section->section_name === 'latest_post')
-                        @php $extra = $section->extra_data ?? []; @endphp
+                        @php
+                            $extra = $section->extra_data ?? [];
+                            $allPosts = \App\Models\Blog::where('status', 'published')->orderByDesc('created_at')->get();
+                            $selectedPostIds = collect($extra['post_ids'] ?? [])->map(fn($id) => (int) $id)->all();
+                        @endphp
                         <div class="form-group mb-3">
                             <label for="posts_count" class="form-label"><strong>Number of Posts to Show</strong></label>
                             <select name="posts_count" id="posts_count" class="form-control">
@@ -221,6 +277,18 @@
                                 @endforeach
                             </select>
                             <small class="text-muted d-block">How many latest published blog posts to display on the home page.</small>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="post_ids" class="form-label"><strong>Select Specific Posts for Home Page</strong></label>
+                            <select name="post_ids[]" id="post_ids" class="form-control" multiple size="8">
+                                @foreach($allPosts as $post)
+                                    <option value="{{ $post->id }}" {{ in_array($post->id, $selectedPostIds) ? 'selected' : '' }}>
+                                        {{ $post->title }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <small class="text-muted d-block">Hold Ctrl/Cmd to select multiple posts and choose exactly which ones appear (shown in the order selected). Leave empty to use the count-based setting above.</small>
                         </div>
                         @endif
 
@@ -322,25 +390,34 @@
                         </script>
                         @endif
 
+                        @if($section->section_name !== 'deal_of_day')
                         <div class="form-group mb-3">
-                            <label for="image" class="form-label"><strong>Image</strong></label>
-                            <div class="mb-2">
-                                @if($section->image)
-                                    <div class="mb-2">
-                                        <img src="{{ asset('assets/images/home/' . $section->image) }}" alt="Current image" 
-                                             style="max-width: 300px; height: auto; border-radius: 4px; border: 1px solid #ddd;">
-                                    </div>
-                                @endif
-                            </div>
+                            <label for="image" class="form-label"><strong>Image / Background Image</strong></label>
+                            <small class="text-muted d-block mb-2">If you set it, this image will become the background for this section on the home page (Cover + Center).</small>
+    <div class="mb-2">
+        @if($section->image)
+            <div class="mb-2 home-image-current">
+                <img src="{{ storedImageUrl($section->image, 'assets/images/home') }}" alt="Current image"
+                     style="max-width: 300px; height: auto; border-radius: 4px; border: 1px solid #ddd;">
+            </div>
+        @endif
+    </div>
                             <input type="hidden" name="image_from_manager" id="image_from_manager_home_image">
+                            <input type="hidden" name="remove_section_image" id="remove_section_image" value="0">
                             <div id="impPreview_home_image" class="d-none mt-2"></div>
-                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="impOpen_home_image()">
-                                <i class="fas fa-images me-1"></i> Browse Image Manager
-                            </button>
+                            <div class="d-flex gap-2 mt-1">
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="document.getElementById('remove_section_image').value='0'; impOpen_home_image()">
+                                    <i class="fas fa-images me-1"></i> Browse Image Manager
+                                </button>
+                                <button type="button" id="clear_btn_home_image" data-preview="impPreview_home_image" data-current=".home-image-current" class="btn btn-sm btn-outline-danger {{ $section->image ? '' : 'd-none' }}" onclick="clearPickerImage('image_from_manager_home_image','impPreview_home_image','.home-image-current','remove_section_image')">
+                                    <i class="fas fa-times me-1"></i> Clear Image
+                                </button>
+                            </div>
                             @error('image')
                                 <span class="invalid-feedback d-block">{{ $message }}</span>
                             @enderror
                         </div>
+                        @endif
 
                         <div class="form-group mb-3">
                             <label for="status" class="form-label">
@@ -408,10 +485,101 @@
     }
 </style>
 
+<script>
+// Clear a selected/picked image (hidden input + preview + current image) for image-manager pickers.
+function clearPickerImage(hiddenId, previewId, currentImgSel, removeFlagId) {
+    var hidden = document.getElementById(hiddenId);
+    if (hidden) hidden.value = '';
+    var preview = document.getElementById(previewId);
+    if (preview) {
+        preview.innerHTML = '';
+        preview.classList.add('d-none');
+    }
+    if (currentImgSel) {
+        document.querySelectorAll(currentImgSel).forEach(function(el) {
+            el.classList.add('d-none');
+        });
+    }
+    if (removeFlagId) {
+        var flag = document.getElementById(removeFlagId);
+        if (flag) flag.value = '1';
+    }
+}
+</script>
+
+<script>
+// Show the Clear button when an image is present — either an already-saved image
+// (.home-image-current / .deal-image-current etc.) OR a newly picked one (preview div).
+document.addEventListener('DOMContentLoaded', function() {
+    var obsConfig = { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] };
+    document.querySelectorAll('[data-preview]').forEach(function(btn) {
+        var previewId  = btn.getAttribute('data-preview');
+        var currentSel = btn.getAttribute('data-current');   // e.g. ".home-image-current"
+        var preview    = document.getElementById(previewId);
+        if (!preview) return;
+
+        var update = function() {
+            // 1. New image just picked from the manager?
+            var hasPickedImage = preview.querySelector('img') !== null;
+
+            // 2. Existing saved image still visible? (not yet cleared by user click)
+            var hasExistingImage = false;
+            if (currentSel) {
+                var existing = document.querySelectorAll(currentSel);
+                existing.forEach(function(el) {
+                    if (!el.classList.contains('d-none')) hasExistingImage = true;
+                });
+            }
+
+            btn.classList.toggle('d-none', !hasPickedImage && !hasExistingImage);
+        };
+
+        // Watch the preview div for new picks
+        new MutationObserver(update).observe(preview, obsConfig);
+
+        // Also watch each existing-image container so the button hides after Clear is clicked
+        if (currentSel) {
+            document.querySelectorAll(currentSel).forEach(function(el) {
+                new MutationObserver(update).observe(el, { attributes: true, attributeFilter: ['class'] });
+            });
+        }
+
+        update(); // run once on page load
+    });
+});
+</script>
+
+<script>
+// Keep "Select Specific Posts" selection capped at "Number of Posts to Show".
+function enforcePostLimit() {
+    var countSel = document.getElementById('posts_count');
+    var postSel = document.getElementById('post_ids');
+    if (!countSel || !postSel) return;
+    var max = parseInt(countSel.value, 10) || 2;
+    var opts = Array.prototype.slice.call(postSel.selectedOptions);
+    if (opts.length > max) {
+        for (var i = opts.length - 1; i >= max; i--) {
+            opts[i].selected = false;
+        }
+    }
+}
+document.addEventListener('DOMContentLoaded', function () {
+    var countSel = document.getElementById('posts_count');
+    var postSel = document.getElementById('post_ids');
+    if (countSel) countSel.addEventListener('change', enforcePostLimit);
+    if (postSel) postSel.addEventListener('change', enforcePostLimit);
+});
+</script>
+
 @include('admin.partials.image-manager-picker', ['pickerId' => 'home_image', 'targetInput' => 'image_from_manager'])
 
 @for($i = 0; $i < 3; $i++)
 @include('admin.partials.image-manager-picker', ['pickerId' => 'banner_' . $i, 'targetInput' => 'banners[' . $i . '][image_from_manager]'])
 @endfor
+
+@if($section->section_name === 'deal_of_day')
+@include('admin.partials.image-manager-picker', ['pickerId' => 'deal_of_day_image', 'targetInput' => 'image_from_manager'])
+@include('admin.partials.image-manager-picker', ['pickerId' => 'deal_bg_image', 'targetInput' => 'deal_bg_image_from_manager'])
+@endif
 
 @endsection

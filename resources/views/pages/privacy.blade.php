@@ -1,7 +1,8 @@
 @extends('layouts.app'){{-- Add your custom page ID and classes right here --}}
-@section('page-id', 'user-privacy-policy-page')
-@section('page-class', 'user-privacy-policy-page')
-@section('title', 'Privacy Policy' . ' - ' . config('app.name', 'StAutoparts'))
+@include('partials.page-attributes', ['pageId' => 'user-privacy-policy-page', 'pageClass' => 'user-privacy-policy-page'])
+@section('title', $page->meta_title ?? ('Privacy Policy' . ' - ' . config('app.name', 'StAutoparts')))
+@section('meta_title', $page->meta_title ?? 'Privacy Policy | ' . config('app.name', 'StAutoparts'))
+@section('meta_description', $page->meta_description ?? null)
 @section('content')
 <div class="shop-hero py-4">
   <div class="container-fluid px-4">

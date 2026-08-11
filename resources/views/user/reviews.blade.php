@@ -1,7 +1,6 @@
 @extends('user.layouts.dashboard')
 {{-- Add your custom page ID and classes right here --}}
-@section('page-id', 'user-reviews-page')
-@section('page-class', 'user-reviews-page')
+@include('partials.page-attributes', ['pageId' => 'user-reviews-page', 'pageClass' => 'user-reviews-page'])
 @section('dashboard-content')
 
 <div class="user-reviews-page">
@@ -44,7 +43,7 @@
                 <td data-label="Product">
                     <div class="d-flex align-items-center gap-2">
                         @if($item['product_image'])
-                            <img src="{{ asset('assets/images/thumbnails/' . $item['product_image']) }}" alt="" style="width:40px;height:40px;object-fit:cover;border-radius:6px;">
+                            <img src="{{ storedImageUrl($item['product_image'], 'assets/images/thumbnails') }}" alt="" style="width:40px;height:40px;object-fit:cover;border-radius:6px;">
                         @else
                             <div style="width:40px;height:40px;background:#f0f0f0;border-radius:6px;display:flex;align-items:center;justify-content:center;">
                                 <i class="fas fa-image text-muted"></i>
@@ -70,9 +69,9 @@
                 </td>
                 <td data-label="Status">
                     @if($item['status'] === 'pending')
-                        <span class="badge bg-warning text-dark" style="font-size:11px;">Pending</span>
+                        <span class="badge badge--warning mb-1" style="font-size:11px;">Pending</span>
                     @else
-                        <span class="badge bg-success" style="font-size:11px;">Reviewed</span>
+                        <span class="badge badge--success" style="font-size:11px;">Reviewed</span>
                     @endif
                 </td>
                 <td data-label="Action" class="table-action-col">
@@ -81,7 +80,7 @@
                             <button type="button" class="action-btn btn-invoice review-action-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Write Review"
                                 data-slug="{{ $item['product_slug'] }}"
                                 data-name="{{ $item['product_name'] }}"
-                                data-image="{{ $item['product_image'] ? asset('assets/images/thumbnails/' . $item['product_image']) : asset('assets/images/placeholder.png') }}"
+                                data-image="{{ storedImageUrl($item['product_image'], 'assets/images/thumbnails') }}"
                                 data-status="{{ $item['status'] }}"
                                 data-review-id=""
                                 data-rating="{{ $item['rating'] }}"
@@ -99,7 +98,7 @@
                             <button type="button" class="action-btn btn-view review-view-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="View Review"
                                 data-slug="{{ $item['product_slug'] }}"
                                 data-name="{{ $item['product_name'] }}"
-                                data-image="{{ $item['product_image'] ? asset('assets/images/thumbnails/' . $item['product_image']) : asset('assets/images/placeholder.png') }}"
+                                data-image="{{ storedImageUrl($item['product_image'], 'assets/images/thumbnails') }}"
                                 data-rating="{{ $item['rating'] }}"
                                 data-text="{{ addslashes($item['text'] ?? '') }}"
                                 data-images="{!! htmlentities(json_encode($item['images'] ?? [])) !!}"
@@ -112,7 +111,7 @@
                             <button type="button" class="action-btn btn-invoice review-edit-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Edit Review"
                                 data-slug="{{ $item['product_slug'] }}"
                                 data-name="{{ $item['product_name'] }}"
-                                data-image="{{ $item['product_image'] ? asset('assets/images/thumbnails/' . $item['product_image']) : asset('assets/images/placeholder.png') }}"
+                                data-image="{{ storedImageUrl($item['product_image'], 'assets/images/thumbnails') }}"
                                 data-review-id="{{ $item['review_id'] ?? '' }}"
                                 data-rating="{{ $item['rating'] }}"
                                 data-text="{{ addslashes($item['text'] ?? '') }}"

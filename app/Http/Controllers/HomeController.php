@@ -79,7 +79,7 @@ class HomeController extends Controller
             ->get()
             ->keyBy('section_name');
 
-        if (! $sections->has('top_brands_heading')) {
+        if (! HomePageSection::where('section_name', 'top_brands_heading')->exists()) {
             HomePageSection::create([
                 'section_name' => 'top_brands_heading',
                 'title' => 'Top Brands',
@@ -122,7 +122,19 @@ class HomeController extends Controller
         if ($latestPostLimit < 1 || $latestPostLimit > 12) {
             $latestPostLimit = 2;
         }
-        $latestPosts = Blog::where('status', 'published')->latest()->take($latestPostLimit)->get();
+
+        $selectedPostIds = $latestPostSection?->extra_data['post_ids'] ?? [];
+        $selectedPostIds = is_array($selectedPostIds) ? array_filter(array_map('intval', $selectedPostIds)) : [];
+
+        if (!empty($selectedPostIds)) {
+            $latestPosts = Blog::where('status', 'published')
+                ->whereIn('id', $selectedPostIds)
+                ->orderByRaw('FIELD(id, ' . implode(',', $selectedPostIds) . ')')
+                ->take($latestPostLimit)
+                ->get();
+        } else {
+            $latestPosts = Blog::where('status', 'published')->latest()->take($latestPostLimit)->get();
+        }
 
         $brandsSection = $sections->get('top_brands_heading');
         $brandsExtra = $brandsSection?->extra_data ?? [];
@@ -146,7 +158,7 @@ class HomeController extends Controller
 
         $brands = $brandsQuery->get();
 
-        return view('home', compact('categories', 'featuredProducts', 'exploreTabs', 'heroSection', 'banners', 'bestSelling', 'sections', 'latestPosts', 'brands'));
+        return view('home.index', compact('categories', 'featuredProducts', 'exploreTabs', 'heroSection', 'banners', 'bestSelling', 'sections', 'latestPosts', 'brands') + ['page' => Page::where('slug', 'home')->where('status', true)->first()]);
     }
 
     private function buildExploreTabs($section): array
@@ -198,18 +210,33 @@ class HomeController extends Controller
         return $result;
     }
 
-    public function about() { return view('pages.about'); }
-    public function contact() { return view('pages.contact'); }
-    public function blog() { return view('pages.blog'); }
+    public function about()
+    {
+        $page = Page::where('slug', 'about')->where('status', true)->first();
+        if ($page) {
+            return view('pages.show', compact('page'));
+        }
+        return view('pages.about');
+    }
+    public function contact()
+    {
+        $page = Page::where('slug', 'contact')->where('status', true)->first();
+        return view('pages.contact', compact('page'));
+    }
     public function page($slug)
     {
+        $canonicalRoute = config("page-builder.live_url_map.page.$slug");
+        if ($canonicalRoute) {
+            return redirect()->route($canonicalRoute, [], 301);
+        }
+
         $page = Page::where('slug', $slug)->where('status', true)->firstOrFail();
         return view('pages.show', compact('page'));
     }
     public function faq()
     {
         $faqs = Faq::where('status', true)->orderBy('order')->get();
-        return view('pages.faq', compact('faqs'));
+        return view('pages.faq', compact('faqs') + ['page' => Page::where('slug', 'faq')->where('status', true)->first()]);
     }
     public function privacy()
     {

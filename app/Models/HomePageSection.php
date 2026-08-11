@@ -27,4 +27,42 @@ class HomePageSection extends Model
         'extra_data' => 'json',
         'status' => 'boolean',
     ];
+
+    public function imagePath(): ?string
+    {
+        if (! $this->image) {
+            return null;
+        }
+
+        return storedImageUrl($this->image, 'assets/images/home');
+    }
+
+    public function bgStyle(): string
+    {
+        $path = $this->imagePath();
+        if (! $path) {
+            return '';
+        }
+
+        return "style=\"background-image: url('{$path}'); background-size: cover; background-position: center;\"";
+    }
+
+    public function dealImagePath(): ?string
+    {
+        $extra = $this->extra_data ?? [];
+        $dealImage = $extra['deal_image'] ?? null;
+        if (! $dealImage) {
+            return null;
+        }
+        return storedImageUrl($dealImage, 'assets/images/home');
+    }
+
+    public function dealBgStyle(): string
+    {
+        $path = $this->dealImagePath();
+        if (! $path) {
+            return '';
+        }
+        return "style=\"background-image: url('{$path}'); background-size: cover; background-position: center;\"";
+    }
 }

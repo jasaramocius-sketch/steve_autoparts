@@ -25,7 +25,7 @@
     .imp-selected-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
     .imp-selected-list .imp-sel-item { position: relative; width: 70px; height: 70px; border-radius: 6px; overflow: hidden; border: 2px solid #198754; }
     .imp-selected-list .imp-sel-item img { width: 100%; height: 100%; object-fit: cover; }
-    .imp-selected-list .imp-sel-item .imp-sel-remove { position: absolute; top: 2px; right: 2px; background: #dc3545; color: #fff; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; }
+    .imp-selected-list .imp-sel-item .imp-sel-remove { position: absolute; top: 2px; right: 2px; background: #dc3545; color: #fff; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; padding:10px; }
 </style>
 
 <!-- Image Manager Picker Modal -->

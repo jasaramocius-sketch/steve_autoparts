@@ -239,6 +239,8 @@ class AdminController extends Controller
         $perPage = in_array((int)$request->per_page, [10, 20, 50, 100]) ? (int)$request->per_page : 20;
         $dateFrom = $request->query('date_from');
         $dateTo = $request->query('date_to');
+        $filterModelType = $request->query('model_type');
+        $filterModelId = $request->query('model_id');
 
         $revisions = Revision::with('user');
         if ($dateFrom) {
@@ -247,13 +249,19 @@ class AdminController extends Controller
         if ($dateTo) {
             $revisions->whereDate('created_at', '<=', $dateTo);
         }
+        if ($filterModelType) {
+            $revisions->where('model_type', $filterModelType);
+        }
+        if ($filterModelId) {
+            $revisions->where('model_id', (int) $filterModelId);
+        }
 
         $revisions = $revisions->orderBy($sortBy, $sortDir)
             ->paginate($perPage)
             ->appends($request->query())
             ->onEachSide(1);
 
-        return view('admin.revisions.index', compact('revisions', 'sortBy', 'sortDir'));
+        return view('admin.revisions.index', compact('revisions', 'sortBy', 'sortDir', 'filterModelType', 'filterModelId'));
     }
 
     public function revisionDetail($id)
@@ -313,25 +321,23 @@ class AdminController extends Controller
             'nav_menu',
         ];
 
-        $imageKeys = ['header_logo', 'header_favicon', 'mobile_logo', 'footer_logo'];
+        $imageKeys = ['header_logo', 'header_favicon', 'mobile_logo', 'footer_logo', 'admin_header_bg'];
 
         foreach ($keys as $key) {
             $managerKey = 'image_from_manager_' . $key;
             if (in_array($key, $imageKeys) && $request->filled($managerKey)) {
-                $sourcePath = storage_path('app/public/' . $request->input($managerKey));
-                if (file_exists($sourcePath)) {
-                    $filename = time() . '_' . uniqid() . '.' . pathinfo($request->input($managerKey), PATHINFO_EXTENSION);
-                    copy($sourcePath, public_path('assets/images/' . $filename));
-                    Setting::set($key, $filename);
-                }
+                Setting::set($key, 'storage/' . ltrim($request->input($managerKey), '/'));
+                \App\Models\Image::markUsed($request->input($managerKey));
             } elseif ($request->hasFile($key)) {
-                $file = $request->file($key);
-                $filename = time() . uniqid() . '.' . $file->getClientOriginalExtension();
-                $file->move(public_path('assets/images'), $filename);
+                $filename = saveImageWithWebp($request->file($key));
                 Setting::set($key, $filename);
             } elseif ($request->has($key)) {
                 Setting::set($key, $request->input($key));
             }
+        }
+
+        if ($request->boolean('remove_admin_header_bg')) {
+            Setting::set('admin_header_bg', '');
         }
 
         return redirect()->route('admin.settings.header')->with('success', 'Header settings updated successfully.');

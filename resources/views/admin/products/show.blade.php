@@ -1,7 +1,6 @@
 @extends('admin.layouts.app')
 {{-- Add your custom page ID and classes right here --}}
-@section('page-id', 'admin-products-show-page')
-@section('page-class', 'admin-products-show-page')
+@include('partials.page-attributes', ['pageId' => 'admin-products-show-page', 'pageClass' => 'admin-products-show-page'])
 @section('page-title', 'Product Details — ' . $product->name)
 @section('content')
 
@@ -46,7 +45,7 @@
             </div>
             <div class="card-body">
                 @if($product->image)
-                    <img src="{{ asset('assets/images/thumbnails/' . $product->image) }}" alt="{{ $product->name }}" class="img-fluid rounded" style="max-height:350px;">
+                    <img src="{{ storedImageUrl($product->image, 'assets/images/thumbnails') }}" alt="{{ $product->name }}" class="img-fluid rounded" style="max-height:350px;">
                 @else
                     <div class="text-muted text-center py-5"><i class="fas fa-image fa-3x mb-2"></i><br>No image uploaded</div>
                 @endif
@@ -97,10 +96,10 @@
                         {!! $product->policy_text !!}
                     </div>
                     @endif
-                    @if(!empty($product->features) && count($product->features))
+                    @if(!empty($product->features) && count($product->features ?? []))
                     <div class="tab-pane fade" id="features" role="tabpanel">
                         <ul class="mb-0">
-                            @foreach($product->features as $feature)
+                            @foreach(($product->features ?? []) as $feature)
                                 <li>{{ $feature }}</li>
                             @endforeach
                         </ul>

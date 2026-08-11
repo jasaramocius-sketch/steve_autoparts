@@ -132,14 +132,6 @@ class DashboardController extends Controller
     // -------------------------------------------------------------
     // Vendor related methods removed – not needed in simplified role model
     // -------------------------------------------------------------
-    // -------------------------------------------------------------
-    // Rider Dashboard
-    // -------------------------------------------------------------
-    public function adminDashboard()
-    {
-        return view('dashboard.index');
-    }
-
     public function staffDashboard()
     {
         $topProducts = DB::table('order_items')
@@ -196,7 +188,7 @@ class DashboardController extends Controller
 
         $orders = $query->latest()->paginate(10);
 
-        return view('user.orders', compact('orders'));
+        return view('user.orders.index', compact('orders'));
     }
 
     public function wishlist()
@@ -223,12 +215,87 @@ class DashboardController extends Controller
         $followedSellers = [];
 
         if ($userId) {
-            $followedSellers = \App\Models\FollowedSeller::where('user_id', $userId)
+            $followedSellers = \App\Models\FollowedSeller::with('seller')
+                ->where('user_id', $userId)
                 ->orderBy('created_at', 'desc')
                 ->get();
         }
 
-        return view('user.followed-sellers', compact('followedSellers'));
+        $availableSellers = \App\Models\Seller::where('status', true)->orderBy('name')->get();
+
+        return view('user.followed-sellers', compact('followedSellers', 'availableSellers'));
+    }
+
+    public function storeFollowedSeller(Request $request)
+    {
+        $request->validate([
+            'seller_id' => 'required|exists:sellers,id',
+        ]);
+
+        $seller = \App\Models\Seller::findOrFail($request->seller_id);
+
+        if ($seller->status !== true) {
+            return response()->json(['success' => false, 'message' => 'This seller is not available.']);
+        }
+
+        $existing = \App\Models\FollowedSeller::withTrashed()
+            ->where('user_id', Auth::id())
+            ->where('seller_id', $seller->id)
+            ->first();
+
+        if ($existing) {
+            if (!$existing->trashed()) {
+                return response()->json(['success' => false, 'message' => 'You are already following this seller.']);
+            }
+            $existing->restore();
+            return response()->json(['success' => true, 'seller' => $existing]);
+        }
+
+        $followedSeller = \App\Models\FollowedSeller::create([
+            'user_id' => Auth::id(),
+            'seller_id' => $seller->id,
+            'seller_name' => $seller->name,
+            'location' => $seller->location,
+            'description' => $seller->description,
+            'products' => 0,
+            'rating' => 0,
+            'followers' => 0,
+        ]);
+
+        return response()->json(['success' => true, 'seller' => $followedSeller]);
+    }
+
+    public function destroyFollowedSeller($id)
+    {
+        $followedSeller = \App\Models\FollowedSeller::where('user_id', Auth::id())
+            ->where('id', $id)
+            ->firstOrFail();
+
+        $followedSeller->delete();
+
+        return response()->json(['success' => true]);
+    }
+
+    public function getSellerDetails($id)
+    {
+        $followedSeller = \App\Models\FollowedSeller::with('seller')
+            ->where('user_id', Auth::id())
+            ->where('id', $id)
+            ->firstOrFail();
+
+        $seller = [
+            'seller_name' => $followedSeller->seller_name,
+            'location' => $followedSeller->location,
+            'description' => $followedSeller->description,
+            'products' => $followedSeller->products,
+            'rating' => $followedSeller->rating,
+            'followers' => $followedSeller->followers,
+            'seller_image' => ($followedSeller->seller && $followedSeller->seller->image)
+                ? storedImageUrl($followedSeller->seller->image, 'assets/images')
+                : null,
+        ];
+
+        return response()->json(['success' => true, 'seller' => $seller]);
     }
 
     public function vehicles()
@@ -273,7 +340,7 @@ class DashboardController extends Controller
 
         $userId = Auth::id();
         Notification::where('user_id', $userId)->unread()->update(['is_read' => true]);
-        $notifications = Notification::where('user_id', $userId)->latest()->get();
+        $notifications = Notification::where('user_id', $userId)->latest()->paginate(10);
         $unreadCount = 0;
 
         return view('user.notifications', compact('notifications', 'unreadCount'));
@@ -492,7 +559,8 @@ class DashboardController extends Controller
         $reviewedSlugs = [];
         $items = [];
         foreach ($products as $product) {
-            foreach ($product->reviews_data as $review) {
+            $reviews = is_array($product->reviews_data) ? $product->reviews_data : [];
+            foreach ($reviews as $review) {
                 if (($review['user_id'] ?? null) == $userId && !($review['deleted'] ?? false)) {
                     $reviewedSlugs[] = $product->slug;
                     $items[] = [

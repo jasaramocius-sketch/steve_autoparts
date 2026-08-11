@@ -1,7 +1,6 @@
 @extends('admin.layouts.app')
 {{-- Add your custom page ID and classes right here --}}
-@section('page-id', 'admin-settings-footer-page')
-@section('page-class', 'admin-settings-footer-page')
+@include('partials.page-attributes', ['pageId' => 'admin-settings-footer-page', 'pageClass' => 'admin-settings-footer-page'])
 @section('page-title', 'Footer Settings')
 @section('content')
 <div class="container-fluid admin-settings-footer">
@@ -43,8 +42,8 @@
     function footerLinkRowHtml(link) {
         link = link || {};
         return '<div class="d-flex align-items-center gap-2 mb-1 flex-wrap footer-link-row">' +
-            '<input type="text" class="form-control form-control-sm footer-link-label" placeholder="Label" value="' + (link.label || '') + '" style="max-width:220px;">' +
-            '<input type="text" class="form-control form-control-sm footer-link-url" placeholder="URL (e.g. /shop)" value="' + (link.url || '') + '" style="max-width:260px;">' +
+            '<input type="text" class="form-control form-control-sm footer-link-label" placeholder="Label" value="' + (link.label || '') + '" style="max-width:100%; width:auto;">' +
+            '<input type="text" class="form-control form-control-sm footer-link-url" placeholder="URL (e.g. /shop)" value="' + (link.url || '') + '" style="max-width:100%; width:auto;">' +
             '<button type="button" class="action-btn btn-cancel footer-remove-link" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
             '</div>';
     }
@@ -61,40 +60,124 @@
     }
 
     function renderFooterColumn(col, index) {
-        col = col || {};
-        var type = (footerTypes.indexOf(col.type) !== -1) ? col.type : 'links';
-        var span = (footerSpans.indexOf(parseInt(col.span, 10)) !== -1) ? parseInt(col.span, 10) : 2;
-        var heading = col.heading || '';
+    col = col || {};
 
-        var html = '<div class="card mb-2 footer-col-card border-0 shadow-sm" data-index="' + index + '">' +
+    var type = (footerTypes.indexOf(col.type) !== -1)
+        ? col.type
+        : 'links';
+
+    var span = (footerSpans.indexOf(parseInt(col.span, 10)) !== -1)
+        ? parseInt(col.span, 10)
+        : 2;
+
+    var heading = col.heading || '';
+
+    var html =
+        '<div class="card mb-2 footer-col-card border-0 shadow-sm" data-index="' + index + '">' +
+
             '<div class="card-body py-2 px-3">' +
-            '<div class="d-flex align-items-center gap-2 mb-1 flex-wrap">' +
-            '<span class="footer-drag-handle text-muted" style="cursor:grab"><i class="fas fa-grip-vertical"></i></span>' +
-            '<select class="form-select form-select-sm footer-col-type" style="max-width:150px;">' +
-            '<option value="links"' + (type === 'links' ? ' selected' : '') + '>Links</option>' +
-            '<option value="newsletter"' + (type === 'newsletter' ? ' selected' : '') + '>Newsletter</option>' +
-            '<option value="contact"' + (type === 'contact' ? ' selected' : '') + '>Contact / Logo</option>' +
-            '</select>' +
-            '<input type="text" class="form-control form-control-sm footer-col-heading" placeholder="Heading" value="' + heading + '" style="max-width:230px;">' +
-            '<select class="form-select form-select-sm footer-col-span" style="max-width:120px;">' +
-            '<option value="2"' + (span === 2 ? ' selected' : '') + '>lg-2 (narrow)</option>' +
-            '<option value="3"' + (span === 3 ? ' selected' : '') + '>lg-3</option>' +
-            '<option value="4"' + (span === 4 ? ' selected' : '') + '>lg-4 (wide)</option>' +
-            '<option value="6"' + (span === 6 ? ' selected' : '') + '>lg-6 (half)</option>' +
-            '<option value="12"' + (span === 12 ? ' selected' : '') + '>lg-12 (full)</option>' +
-            '</select>' +
-            '<button type="button" class="action-btn btn-cancel ms-auto footer-remove-col" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Remove Column"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>' +
-            '</div>' +
-            '<div class="footer-type-note small text-muted ' + (type === 'links' ? 'd-none' : '') + '" data-note="' + type + '">' +
-            (type === 'newsletter'
-                ? 'This column shows the newsletter subscribe form and social icons.'
-                : 'This column shows the footer logo plus the phone, email and address from Header Settings.') +
-            '</div>' +
-            (type === 'links' ? footerLinksBlock(col) : '') +
-            '</div></div>';
 
-        return html;
-    }
+                '<div class="d-flex align-items-center gap-2 mb-1 flex-wrap">' +
+
+                    '<span class="footer-drag-handle text-muted" style="cursor:grab">' +
+                        '<i class="fas fa-grip-vertical"></i>' +
+                    '</span>' +
+
+                    '<select ' +
+                        'id="footer-col-type-' + index + '" ' +
+                        'name="footer_columns[' + index + '][type]" ' +
+                        'class="form-select form-select-sm footer-col-type" ' +
+                        'style="max-width:100%; width:auto;">' +
+
+                        '<option value="links"' +
+                            (type === 'links' ? ' selected' : '') +
+                        '>Links</option>' +
+
+                        '<option value="newsletter"' +
+                            (type === 'newsletter' ? ' selected' : '') +
+                        '>Newsletter</option>' +
+
+                        '<option value="contact"' +
+                            (type === 'contact' ? ' selected' : '') +
+                        '>Contact / Logo</option>' +
+
+                    '</select>' +
+
+                    '<input ' +
+                        'type="text" ' +
+                        'id="footer-col-heading-' + index + '" ' +
+                        'name="footer_columns[' + index + '][heading]" ' +
+                        'class="form-control form-control-sm footer-col-heading" ' +
+                        'placeholder="Heading" ' +
+                        'value="' + heading + '" ' +
+                        'style="max-width:100%; width:auto;">' +
+
+                    '<select ' +
+                        'id="footer-col-span-' + index + '" ' +
+                        'name="footer_columns[' + index + '][span]" ' +
+                        'class="form-select form-select-sm footer-col-span" ' +
+                        'style="max-width:100%; width:auto;">' +
+
+                        '<option value="2"' +
+                            (span === 2 ? ' selected' : '') +
+                        '>lg-2 (narrow)</option>' +
+
+                        '<option value="3"' +
+                            (span === 3 ? ' selected' : '') +
+                        '>lg-3</option>' +
+
+                        '<option value="4"' +
+                            (span === 4 ? ' selected' : '') +
+                        '>lg-4 (wide)</option>' +
+
+                        '<option value="6"' +
+                            (span === 6 ? ' selected' : '') +
+                        '>lg-6 (half)</option>' +
+
+                        '<option value="12"' +
+                            (span === 12 ? ' selected' : '') +
+                        '>lg-12 (full)</option>' +
+
+                    '</select>' +
+
+                    '<button ' +
+                        'type="button" ' +
+                        'class="action-btn btn-cancel ms-auto footer-remove-col" ' +
+                        'data-bs-toggle="tooltip" ' +
+                        'data-bs-placement="top" ' +
+                        'data-bs-original-title="Remove Column">' +
+
+                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+                            'stroke-linecap="round" stroke-linejoin="round">' +
+                            '<polyline points="3 6 5 6 21 6"/>' +
+                            '<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6' +
+                                'm3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>' +
+                        '</svg>' +
+
+                    '</button>' +
+
+                '</div>' +
+
+                '<div class="footer-type-note small text-muted ' +
+                    (type === 'links' ? 'd-none' : '') +
+                    '" data-note="' + type + '">' +
+
+                    (
+                        type === 'newsletter'
+                            ? 'This column shows the newsletter subscribe form and social icons.'
+                            : 'This column shows the footer logo plus the phone, email and address from Header Settings.'
+                    ) +
+
+                '</div>' +
+
+                (type === 'links' ? footerLinksBlock(col) : '') +
+
+            '</div>' +
+
+        '</div>';
+
+    return html;
+}
 
     function rebuildFooterJson() {
         var cols = [];

@@ -1,7 +1,6 @@
 @extends('user.layouts.dashboard')
 {{-- Add your custom page ID and classes right here --}}
-@section('page-id', 'user-profile-page')
-@section('page-class', 'user-profile-page')
+@include('partials.page-attributes', ['pageId' => 'user-profile-page', 'pageClass' => 'user-profile-page'])
 @section('dashboard-content')
 
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 mb-4">
@@ -16,7 +15,7 @@
     <div class="col-lg-4">
         <div class="card mb-4">
             <div class="card-body text-center">
-                <img src="{{ $profile->avatar ? asset($profile->avatar) : asset('assets/images/avatar-place.png') }}"
+                <img src="{{ $profile->avatar ? storedImageUrl($profile->avatar) : asset('assets/images/avatar-place.png') }}"
                      class="rounded-circle mb-3"
                      style="width: 120px; height: 120px; object-fit: cover;">
                 <h5 class="mb-1">{{ $profile->name }}</h5>
@@ -134,36 +133,12 @@
                                                     <button type="button" class="btn-close steve-btn" data-bs-dismiss="modal" aria-label="Close"></button>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <div class="row g-3">
-                                                        <div class="col-md-6">
-                                                            <label class="form-label">Full Name</label>
-                                                            <input type="text" name="full_name" class="form-control" value="{{ $address->full_name }}" required>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <label class="form-label">Phone</label>
-                                                            <input type="tel" name="phone" class="form-control" inputmode="numeric" value="{{ $address->phone }}" required>
-                                                        </div>
-                                                        <div class="col-12">
-                                                            <label class="form-label">Address</label>
-                                                            <textarea name="address" class="form-control texteditor" rows="2" required>{{ $address->address }}</textarea>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <label class="form-label">City</label>
-                                                            <input type="text" name="city" class="form-control" value="{{ $address->city }}" required>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <label class="form-label">State</label>
-                                                            <input type="text" name="state" class="form-control" value="{{ $address->state }}">
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <label class="form-label">Country</label>
-                                                            <input type="text" name="country" class="form-control" value="{{ $address->country }}" required>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <label class="form-label">Zip Code</label>
-                                                            <input type="text" name="zip_code" class="form-control" value="{{ $address->zip_code }}" required>
-                                                        </div>
-                                                    </div>
+                                                    @include('partials.address-fields', [
+                                                        'prefix' => 'edit_' . $address->id,
+                                                        'value' => $address,
+                                                        'withFullName' => true,
+                                                        'withPhone' => true,
+                                                    ])
                                                 </div>
                                                 <div class="modal-footer">
                                                     <button type="button" class="btn btn-secondary steve-btn modal-cancel-btn" data-bs-dismiss="modal">Cancel</button>
