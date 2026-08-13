@@ -30,7 +30,7 @@
                     <label class="form-label">Image</label>
                     @if($brand->image)
                         <div class="mt-2">
-                            <img src="{{ asset('assets/images/brands/' . $brand->image) }}" width="80" style="border-radius:4px;">
+                            <img src="{{ storedImageUrl($brand->image, 'assets/images/brands') }}" width="80" style="border-radius:4px;" onerror="this.onerror=null;this.src='{{ asset('assets/images/placeholder.png') }}'">
                             <small class="text-muted ms-2">Current Image</small>
                         </div>
                     @endif

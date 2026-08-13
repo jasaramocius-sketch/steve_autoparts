@@ -6,10 +6,9 @@
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <div class="d-flex align-items-center gap-2">
-        <a href="{{ route('admin.sellers.index') }}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left"></i> Back</a>
         <h5 class="mb-0">Followers of "{{ $seller->name }}" ({{ $followers->total() }})</h5>
     </div>
-    <a href="{{ route('admin.sellers.edit', $seller->id) }}" class="btn btn-primary btn-sm"><i class="fas fa-edit"></i> Edit Seller</a>
+    <a href="{{ route('admin.sellers.edit', $seller->id) }}" class="btn btn-primary"><i class="fas fa-edit"></i> Edit Seller</a>
 </div>
 
 <div class="card border-0 shadow-sm">

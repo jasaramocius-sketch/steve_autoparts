@@ -17,6 +17,7 @@
             <div class="card-body text-center">
                 <img src="{{ $profile->avatar ? storedImageUrl($profile->avatar) : asset('assets/images/avatar-place.png') }}"
                      class="rounded-circle mb-3"
+                     onerror="this.onerror=null;this.src='{{ asset('assets/images/avatar-place.png') }}';"
                      style="width: 120px; height: 120px; object-fit: cover;">
                 <h5 class="mb-1">{{ $profile->name }}</h5>
                 <p class="text-muted mb-1">{{ $profile->email }}</p>
@@ -122,7 +123,7 @@
                                 </div>
 
                                 <!-- Edit Address Modal -->
-                                <div class="modal fade" id="editAddressModal{{ $address->id }}" tabindex="-1">
+                                <div class="modal fade address-modal" id="editAddressModal{{ $address->id }}" tabindex="-1">
                                     <div class="modal-dialog modal-dialog-centered">
                                         <form action="{{ route('user.addresses.update', $address->id) }}" method="POST">
                                             @csrf @method('PUT')

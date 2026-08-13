@@ -61,7 +61,7 @@
                     @error('image') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     @if($blog->image)
                         <div class="mt-2">
-                            <img src="{{ asset('assets/images/blogs/' . $blog->image) }}" width="80" style="border-radius:4px;">
+                            <img src="{{ storedImageUrl($blog->image, 'assets/images/blogs') }}" width="80" style="border-radius:4px;" onerror="this.onerror=null;this.src='{{ asset('assets/images/placeholder.png') }}'">
                             <small class="text-muted ms-2">Current Image</small>
                         </div>
                     @endif

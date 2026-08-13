@@ -84,7 +84,7 @@
             <div class="gs-sm-recent-post-wrapper">
               @foreach($recentBlogs->take(4) as $post)
               <a href="{{ route('blog.show', $post->slug) }}" class="recent-post d-flex">
-                {!! imgTag('assets/images/blogs/'.($post->image ?? 'placeholder.jpg'), '', '', 'width="80" height="80"') !!}
+                {!! imgTag(storedPath($post->image, 'assets/images/blogs', 'assets/images/blogs/placeholder.jpg'), '', '', 'width="80" height="80"') !!}
                 <div class="recent-post-content">
                   <h6 class="post-title">{{ Str::limit($post->title, 50) }}</h6>
                   <span class="post-date">
@@ -109,7 +109,7 @@
         <div class="gs-main-single-blog">
           <div class="left-side-content">
             <a href="{{ route('blog.show', $blog->slug) }}">
-              {!! imgTag('assets/images/blogs/'.($blog->image ?? 'placeholder.jpg'), $blog->title, 'blog-img') !!}
+              {!! imgTag(storedPath($blog->image, 'assets/images/blogs', 'assets/images/blogs/placeholder.jpg'), $blog->title, 'blog-img') !!}
             </a>
           </div>
           <div class="right-side-content">

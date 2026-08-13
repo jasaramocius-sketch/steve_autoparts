@@ -43,7 +43,7 @@
                         <td class="ps-3">{{ $brand->id }}</td>
                         <td>
                             @if($brand->image)
-                                <img src="{{ asset('assets/images/brands/' . $brand->image) }}" width="50" height="50" style="object-fit:cover; border-radius:4px;">
+                                <img src="{{ storedImageUrl($brand->image, 'assets/images/brands') }}" width="50" height="50" style="object-fit:cover; border-radius:4px;" onerror="this.onerror=null;this.src='{{ asset('assets/images/placeholder.png') }}'">
                             @else
                                 <span class="text-muted">—</span>
                             @endif

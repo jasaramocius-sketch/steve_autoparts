@@ -93,6 +93,6 @@ class Product extends Model
 
     public function galleryImages()
     {
-        return $this->morphMany(Image::class, 'attachable')->orderBy('id');
+        return $this->belongsToMany(Image::class, 'image_product', 'product_id', 'image_id');
     }
 }

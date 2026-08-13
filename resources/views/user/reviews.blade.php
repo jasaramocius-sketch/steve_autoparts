@@ -33,7 +33,6 @@
             <tr>
                 <th>Product</th>
                 <th>Review</th>
-                <th>Status</th>
                 <th>Action</th>
             </tr>
         </thead>
@@ -67,17 +66,10 @@
                         </div>
                     @endif
                 </td>
-                <td data-label="Status">
-                    @if($item['status'] === 'pending')
-                        <span class="badge badge--warning mb-1" style="font-size:11px;">Pending</span>
-                    @else
-                        <span class="badge badge--success" style="font-size:11px;">Reviewed</span>
-                    @endif
-                </td>
                 <td data-label="Action" class="table-action-col">
                     @if($item['status'] === 'pending')
                         <div class="action-buttons" style="justify-content:flex-end;">
-                            <button type="button" class="action-btn btn-invoice review-action-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Write Review"
+                            <button type="button" class="action-btn btn-invoice review-action-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Add Review"
                                 data-slug="{{ $item['product_slug'] }}"
                                 data-name="{{ $item['product_name'] }}"
                                 data-image="{{ storedImageUrl($item['product_image'], 'assets/images/thumbnails') }}"
@@ -87,9 +79,9 @@
                                 data-text=""
                                 data-images="[]"
                                 data-date="">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
                                 </svg>
                             </button>
                         </div>
@@ -108,19 +100,36 @@
                                     <circle cx="12" cy="12" r="3"></circle>
                                 </svg>
                             </button>
-                            <button type="button" class="action-btn btn-invoice review-edit-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Edit Review"
-                                data-slug="{{ $item['product_slug'] }}"
-                                data-name="{{ $item['product_name'] }}"
-                                data-image="{{ storedImageUrl($item['product_image'], 'assets/images/thumbnails') }}"
-                                data-review-id="{{ $item['review_id'] ?? '' }}"
-                                data-rating="{{ $item['rating'] }}"
-                                data-text="{{ addslashes($item['text'] ?? '') }}"
-                                data-images="{!! htmlentities(json_encode($item['images'] ?? [])) !!}">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                </svg>
-                            </button>
+                            @if(!empty($item['review_id']))
+                                <button type="button" class="action-btn btn-invoice review-edit-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Edit Review"
+                                    data-slug="{{ $item['product_slug'] }}"
+                                    data-name="{{ $item['product_name'] }}"
+                                    data-image="{{ storedImageUrl($item['product_image'], 'assets/images/thumbnails') }}"
+                                    data-review-id="{{ $item['review_id'] ?? '' }}"
+                                    data-rating="{{ $item['rating'] }}"
+                                    data-text="{{ addslashes($item['text'] ?? '') }}"
+                                    data-images="{!! htmlentities(json_encode($item['images'] ?? [])) !!}">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                    </svg>
+                                </button>
+                            @else
+                                <button type="button" class="action-btn btn-invoice review-action-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Add Review"
+                                    data-slug="{{ $item['product_slug'] }}"
+                                    data-name="{{ $item['product_name'] }}"
+                                    data-image="{{ storedImageUrl($item['product_image'], 'assets/images/thumbnails') }}"
+                                    data-status="{{ $item['status'] }}"
+                                    data-review-id=""
+                                    data-rating="0"
+                                    data-text=""
+                                    data-images="[]">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    </svg>
+                                </button>
+                            @endif
                             <button type="button" class="action-btn btn-cancel review-delete-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Delete Review"
                                 data-slug="{{ $item['product_slug'] }}"
                                 data-review-id="{{ $item['review_id'] ?? '' }}"
@@ -159,8 +168,8 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title fw-600 h5" id="reviewModalTitle">Write a Review</h5>
-        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
+        <button type="button" class="btn-close steve-btn" data-bs-dismiss="modal" aria-label="Close">
+          <!-- <span aria-hidden="true">&times;</span> -->
         </button>
       </div>
 

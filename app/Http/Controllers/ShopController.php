@@ -79,6 +79,52 @@ class ShopController extends Controller
         return $query;
     }
 
+    private function applyVehicleFilter(Request $request, $query, bool $autoFirst = false)
+    {
+        $selectedVehicle = null;
+        $vehicleMatchCount = null;
+        $vehicleFilterCleared = session('shop_vehicle_cleared', false);
+
+        if (Auth::check()) {
+            $selectedVehicleId = session('selected_vehicle_id');
+            if ($selectedVehicleId) {
+                $selectedVehicle = Vehicle::where('user_id', Auth::id())->where('id', $selectedVehicleId)->first();
+            }
+            if (!$selectedVehicle && $autoFirst) {
+                $selectedVehicle = Vehicle::where('user_id', Auth::id())->first();
+            }
+        }
+
+        $hasVehicleFilters = $request->filled('year') || $request->filled('make') || $request->filled('model');
+
+        if ($selectedVehicle && !$hasVehicleFilters && !$vehicleFilterCleared) {
+            $request->merge([
+                'year' => $selectedVehicle->year,
+                'make' => $selectedVehicle->make,
+                'model' => $selectedVehicle->model,
+            ]);
+        }
+
+        if ($vehicleFilterCleared || $hasVehicleFilters) {
+            $selectedVehicle = null;
+        }
+
+        // When a garage vehicle is applied, count matching products. On zero match,
+        // fall back to showing all products but keep the vehicle alert (with the 0
+        // count) so the user knows no parts fit their vehicle.
+        if ($selectedVehicle) {
+            $vehicleQuery = (clone $query);
+            $this->filterProducts($request, $vehicleQuery);
+            $vehicleMatchCount = $vehicleQuery->count();
+
+            if ($vehicleMatchCount === 0) {
+                $request->merge(['year' => '', 'make' => '', 'model' => '']);
+            }
+        }
+
+        return compact('selectedVehicle', 'vehicleMatchCount');
+    }
+
     private function getSharedData()
     {
         $categoryTree = Category::topLevel()
@@ -124,64 +170,34 @@ class ShopController extends Controller
 
     public function index(Request $request)
     {
-        $selectedVehicle = null;
-        $vehicleFilterCleared = session('shop_vehicle_cleared', false);
-
-        if (Auth::check()) {
-            $selectedVehicleId = session('selected_vehicle_id');
-            if ($selectedVehicleId) {
-                $selectedVehicle = Vehicle::where('user_id', Auth::id())->where('id', $selectedVehicleId)->first();
-            }
-            if (!$selectedVehicle) {
-                $selectedVehicle = Vehicle::where('user_id', Auth::id())->first();
-            }
-        }
-
-        $hasVehicleFilters = $request->filled('year') || $request->filled('make') || $request->filled('model');
-
-        if ($selectedVehicle && !$hasVehicleFilters && !$vehicleFilterCleared) {
-            $request->merge([
-                'year' => $selectedVehicle->year,
-                'make' => $selectedVehicle->make,
-                'model' => $selectedVehicle->model,
-            ]);
-        }
-
-        if ($vehicleFilterCleared || $hasVehicleFilters) {
-            $selectedVehicle = null;
-        }
-
         $productsQuery = Product::where('status', true);
-
-        // When the garage vehicle filter is auto-applied, count matching products.
-        // Only apply the vehicle filter when at least one product matches. On zero
-        // match, fall back to showing all products but keep the vehicle alert bar
-        // (with the 0 count) so the user knows no parts fit their vehicle.
-        $vehicleMatchCount = null;
-        if ($selectedVehicle) {
-            $vehicleQuery = (clone $productsQuery);
-            $this->filterProducts($request, $vehicleQuery);
-            $vehicleMatchCount = $vehicleQuery->count();
-
-            if ($vehicleMatchCount === 0) {
-                $request->merge(['year' => '', 'make' => '', 'model' => '']);
-            }
-        }
+        $vehicleData = $this->applyVehicleFilter($request, $productsQuery, true);
 
         $this->filterProducts($request, $productsQuery);
         $products = $productsQuery->paginate(24)->onEachSide(1)->withQueryString();
 
         return view('shop.index', array_merge(
-            compact('products', 'selectedVehicle', 'vehicleMatchCount'),
+            $vehicleData,
+            compact('products'),
             $this->getSharedData(),
             ['page' => \App\Models\Page::where('slug', 'shop')->where('status', true)->first()]
         ));
     }
 
-    public function clearVehicleFilter()
+    public function clearVehicleFilter(Request $request)
     {
         session(['shop_vehicle_cleared' => true]);
-        return redirect()->route('shop');
+
+        $url = $request->headers->get('referer') ?: route('shop');
+        $path = $url;
+        $query = [];
+        if (str_contains($url, '?')) {
+            [$path, $qs] = explode('?', $url, 2);
+            parse_str($qs, $query);
+        }
+        unset($query['year'], $query['make'], $query['model'], $query['page']);
+
+        return redirect($path . (!empty($query) ? '?' . http_build_query($query) : ''));
     }
 
     public function customerProducts(Request $request)
@@ -228,11 +244,14 @@ class ShopController extends Controller
         $categoryIds = $category->getAllDescendantIds();
 
         $productsQuery = Product::whereIn('category_id', $categoryIds)->where('status', true);
+        $vehicleData = $this->applyVehicleFilter($request, $productsQuery);
+
         $this->filterProducts($request, $productsQuery);
         $products = $productsQuery->paginate(24)->onEachSide(1)->withQueryString();
 
         return view('shop.index', array_merge(
             compact('products', 'currentCategory'),
+            $vehicleData,
             array_filter(compact('currentSubcategory', 'currentChildcategory')),
             $this->getSharedData()
         ));
@@ -256,11 +275,14 @@ class ShopController extends Controller
         }
 
         $productsQuery = Product::whereIn('category_id', $categoryIds)->where('status', true);
+        $vehicleData = $this->applyVehicleFilter($request, $productsQuery);
+
         $this->filterProducts($request, $productsQuery);
         $products = $productsQuery->paginate(24)->onEachSide(1)->withQueryString();
 
         return view('shop.index', array_merge(
             compact('products', 'currentCategory', 'currentSubcategory', 'currentChildcategory'),
+            $vehicleData,
             $this->getSharedData()
         ));
     }

@@ -43,3 +43,6 @@ storage/file-backups/
 *.sql.bak
 storage/file-backups/
 notes
+TASKS.md
+chat-watcher.mjs
+chat-logs

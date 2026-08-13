@@ -68,7 +68,7 @@ if (!function_exists('saveImageWithWebp')) {
 }
 
 if (!function_exists('saveImageFromUrlWithWebp')) {
-    function saveImageFromUrlWithWebp(string $url, string $dir): ?string
+    function saveImageFromUrlWithWebp(string $url, string $dir = 'uploads'): ?string
     {
         $response = \Illuminate\Support\Facades\Http::get($url);
         if ($response->failed()) {
@@ -163,7 +163,8 @@ if (!function_exists('imgTag')) {
         }
 
         $checkPath = str_starts_with($src, 'uploads/') ? 'storage/' . $src : $src;
-        if (!file_exists(public_path($checkPath))) {
+        $isRemote = (bool) preg_match('#^https?://#i', $src);
+        if (!$isRemote && !file_exists(public_path($checkPath))) {
             $src = 'assets/images/placeholder.png';
             $checkPath = $src;
         }

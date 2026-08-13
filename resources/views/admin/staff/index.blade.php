@@ -63,7 +63,7 @@
 
                                 <td>
                                     <img
-                                        src="{{ asset('assets/images/customers/' . ($user->image ?? 'default.png')) }}"
+                                        src="{{ storedImageUrl($user->avatar, 'assets/images', 'assets/images/avatar-place.png') }}"
                                         width="60"
                                         class="rounded"
                                         alt="{{ $user->name }}">

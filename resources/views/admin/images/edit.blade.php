@@ -26,14 +26,25 @@
                         <tr><th class="text-muted">Size</th><td>{{ $image->size_in_kb }}</td></tr>
                         <tr><th class="text-muted">Dimensions</th><td>{{ $image->width }} x {{ $image->height }} px</td></tr>
                         <tr>
-                            <th class="text-muted">Attached To</th>
+                            <th class="text-muted align-top">Attached To</th>
                             <td>
-                                @if($image->attachable_type && $image->attachable)
-                                    {{ class_basename($image->attachable_type) }} #{{ $image->attachable_id }}
-                                    ({{ $image->attachable->name ?? $image->attachable->title ?? 'N/A' }})
-                                @else
+                                @forelse($usageLocations as $loc)
+                                    <div class="mb-1">
+                                        @if(!empty($loc['route']))
+                                            <a href="{{ $loc['route'] }}" target="_blank" class="text-decoration-none">{{ $loc['type'] }} #{{ $loc['id'] }}</a>
+                                        @else
+                                            <span>{{ $loc['type'] }} #{{ $loc['id'] }}</span>
+                                        @endif
+                                        @if(!empty($loc['label']))
+                                            <span class="text-muted">({{ $loc['label'] }})</span>
+                                        @endif
+                                        @if(!empty($loc['usages']))
+                                            <small class="text-success">— {{ implode(', ', $loc['usages']) }}</small>
+                                        @endif
+                                    </div>
+                                @empty
                                     <span class="text-danger">Unused</span>
-                                @endif
+                                @endforelse
                             </td>
                         </tr>
                     </table>

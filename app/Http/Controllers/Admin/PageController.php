@@ -69,6 +69,7 @@ class PageController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
+            'slug' => 'nullable|string|max:255',
             'short_description' => 'nullable|string|max:255',
             'content' => 'nullable|string',
             'meta_title' => 'nullable|string|max:255',
@@ -76,7 +77,13 @@ class PageController extends Controller
         ]);
 
         $data = $request->only(['title', 'short_description', 'content', 'meta_title', 'meta_description']);
-        $data['slug'] = Str::slug($request->title);
+
+        $slug = Str::slug($request->input('slug') ?: $request->title);
+        if (Page::where('slug', $slug)->exists()) {
+            return back()->withErrors(['slug' => 'This slug is already in use. Please choose another.'])->withInput();
+        }
+        $data['slug'] = $slug;
+
         $data['short_description'] = $request->input('short_description') ?: null;
         $data['content'] = static::normalizeContent($request->input('content'));
         $data['image'] = $request->filled('image_from_manager') ? 'storage/' . ltrim($request->input('image_from_manager'), '/') : null;
@@ -104,6 +111,7 @@ class PageController extends Controller
 
         $request->validate([
             'title' => 'required|string|max:255',
+            'slug' => 'nullable|string|max:255',
             'short_description' => 'nullable|string|max:255',
             'content' => 'nullable|string',
             'meta_title' => 'nullable|string|max:255',
@@ -111,6 +119,13 @@ class PageController extends Controller
         ]);
 
         $data = $request->only(['title', 'short_description', 'content', 'meta_title', 'meta_description']);
+
+        $slug = Str::slug($request->input('slug') ?: $request->title);
+        if (Page::where('slug', $slug)->where('id', '!=', $page->id)->exists()) {
+            return back()->withErrors(['slug' => 'This slug is already in use. Please choose another.'])->withInput();
+        }
+        $data['slug'] = $slug;
+
         $data['short_description'] = $request->input('short_description') ?: null;
         $data['content'] = static::normalizeContent($request->input('content'));
         if ($request->boolean('remove_section_image')) {

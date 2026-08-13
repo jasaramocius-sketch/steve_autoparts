@@ -18,13 +18,9 @@ class Notification extends Model
         'is_read',
         'is_deleted',
     ];
-
-    protected function casts(): array
-    {
-        return [
-            'is_read' => 'boolean',
-        ];
-    }
+    protected $casts = [
+        'is_read' => 'boolean',
+    ];
 
     public function user(): BelongsTo
     {

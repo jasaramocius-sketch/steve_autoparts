@@ -28,7 +28,6 @@
     <link rel="stylesheet" href="{{ asset('assets/front/css/dynamic-font.css') }}">
     <link rel="icon" href="{{ storedImageUrl(\App\Models\Setting::get('header_favicon') ?? '1730880696Fabpng.png', 'assets/images') }}">
     <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-bs5.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://unirateapi.com/lander/static/css/unirate-widgets.css">
 
     <link href="https://fonts.googleapis.com/css?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Jost:wght@100..900&display=swap" rel="stylesheet">
@@ -262,9 +261,12 @@
                             </li>
                             @auth
                             <li class="d-none d-md-flex gap-2 align-items-center dropdown">
-                                <a href="{{ route('user.dashboard') }}" class="a-tag-hover-color dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    My Account
-                                </a>
+                                <!-- <a href="{{ route('user.dashboard') }}" class="a-tag-hover-color dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa-regular fa-circle-user"></i> My Account
+                                </a> -->
+                                <p class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa-regular fa-circle-user"></i> {{ Str::limit(Auth::user()->name, 10, '...') }}
+                                </p>
                                 <ul class="dropdown-menu">
                                     <li><a class="dropdown-item" href="{{ route('user.dashboard') }}">Dashboard</a></li>
                                     <li><a class="dropdown-item" href="{{ route('logout') }}">Logout</a></li>
@@ -282,6 +284,9 @@
                             </li>
                             <li class="bell-icon-col d-none d-md-flex align-items-center" style="list-style:none;" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Notifications">
                                 <a href="{{ route('user.notifications') }}" class="position-relative" style="color:#fff;text-decoration:none;line-height:1;">
+                                    @if(!empty($unreadNotificationCount) && $unreadNotificationCount > 0)
+                                        <span class="cart-count" id="notification-count">{{ $unreadNotificationCount }}</span>
+                                    @endif
                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="21" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                                         <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
@@ -721,7 +726,6 @@
     </footer>
 
     <!-- Essential Js Files -->
-    <script src="https://unirateapi.com/lander/static/js/unirate-widgets.js" async></script>
     <script src="{{ asset('assets/front/js/jquery.min.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-bs5.min.js"></script>
     <script src="{{ asset('assets/front/js/slick.js') }}"></script>

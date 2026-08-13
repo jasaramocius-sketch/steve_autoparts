@@ -1,6 +1,6 @@
 @php $adminHeaderBg = \App\Models\Setting::get('admin_header_bg'); @endphp
 <link rel="stylesheet" href="{{ asset('assets/front/css/style.css') }}?v={{ filemtime(public_path('assets/front/css/style.css')) }}">
-<div class="admin-navbar admin-dashboard-header @if($adminHeaderBg) admin-navbar-bg @endif" @if($adminHeaderBg) style="background-image:url('{{ asset('assets/images/' . $adminHeaderBg) }}'); background-size:cover; background-position:center;" @endif>
+<div class="admin-navbar admin-dashboard-header @if($adminHeaderBg) admin-navbar-bg @endif" @if($adminHeaderBg) style="background-image:url('{{ storedImageUrl($adminHeaderBg, 'assets/images') }}'); background-size:cover; background-position:center;" @endif>
     <div class="d-flex align-items-center gap-2">
         <button class="btn btn-sm btn-outline-secondary d-md-none steve-btn" id="sidebarToggle" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Toggle sidebar">
             <i class="fas fa-bars"></i>

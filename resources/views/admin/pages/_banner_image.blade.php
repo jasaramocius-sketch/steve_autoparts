@@ -1,5 +1,4 @@
 <div class="col-md-12">
-    <label class="form-label d-block"><strong>Title Banner Image</strong></label>
     <small class="text-muted d-block mb-2">This image is shown as the background of the page title banner on the frontend. If not set, the page title shows on a plain background.</small>
 
     @if (isset($page) && $page->image)

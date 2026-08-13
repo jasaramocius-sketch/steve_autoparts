@@ -162,7 +162,7 @@
     </div>
 
 <!-- Edit Address Modal -->
-<div class="modal fade" id="editAddressModal{{ $address->id }}" tabindex="-1">
+<div class="modal fade address-modal" id="editAddressModal{{ $address->id }}" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <form action="{{ route('user.addresses.update', $address->id) }}" method="POST">
             @csrf @method('PUT')
@@ -199,7 +199,7 @@
 @endforelse
 
 <!-- Add Address Modal -->
-<div class="modal fade" id="addAddressModal" tabindex="-1">
+<div class="modal fade address-modal" id="addAddressModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <form action="{{ route('user.addresses.store') }}" method="POST">
             @csrf

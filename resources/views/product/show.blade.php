@@ -1117,37 +1117,6 @@ function updateQty(change) {
 
 updateQty(0);
 
-document.querySelectorAll('.wishlist-btn').forEach(btn => {
-  btn.addEventListener('click', function() {
-    const form = this.closest('form');
-    const formData = new FormData(form);
-    fetch(form.action, {
-      method: 'POST',
-      body: formData,
-      headers: { 'X-Requested-With': 'XMLHttpRequest' }
-    })
-    .then(r => r.json())
-    .then(data => {
-      if (data.success) {
-        const svg = this.querySelector('.wishlist-svg');
-        if (svg) {
-          svg.setAttribute('fill', data.action === 'added' ? '#030712' : 'none');
-        } else {
-          const icon = this.querySelector('i');
-          const text = this.querySelector('span');
-          if (data.action === 'added') {
-            icon.className = 'fas fa-heart';
-            text.textContent = 'Remove Wishlist';
-          } else {
-            icon.className = 'far fa-heart';
-            text.textContent = 'Add Wishlist';
-          }
-        }
-      }
-    })
-    .catch(() => {});
-  });
-});
 
 // Star picker
 const starPicker = document.getElementById('starPicker');

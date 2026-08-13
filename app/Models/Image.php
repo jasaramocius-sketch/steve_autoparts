@@ -42,6 +42,114 @@ class Image extends Model
         return $this->morphTo();
     }
 
+    public function products()
+    {
+        return $this->belongsToMany(Product::class, 'image_product', 'image_id', 'product_id');
+    }
+
+    /**
+     * Build a list of every place this image is referenced across the site
+     * (product primary/gallery, categories, brands, sellers, blogs, pages,
+     * home page sections, header settings, and the morph "owner" record).
+     */
+    public function usageLocations(): array
+    {
+        if (!$this->relationLoaded('products')) {
+            $this->load('products');
+        }
+
+        $norm = static::normalizePath($this->path) ?? $this->path;
+        $matches = function ($value) use ($norm) {
+            if ($value === null || trim((string) $value) === '') {
+                return false;
+            }
+            return (static::normalizePath($value) ?? $value) === $norm;
+        };
+
+        $locations = [];
+        $add = function ($type, $id, $label = '', $route = null, $usage = null) use (&$locations) {
+            $key = $type . ':' . $id;
+            if (!isset($locations[$key])) {
+                $locations[$key] = [
+                    'type' => $type,
+                    'id' => $id,
+                    'label' => $label,
+                    'route' => $route,
+                    'usages' => [],
+                ];
+            }
+            if ($usage) {
+                $locations[$key]['usages'][] = $usage;
+            }
+        };
+
+        // Products via gallery pivot
+        foreach ($this->products as $product) {
+            $add('Product', $product->id, $product->name, route('admin.products.edit', $product->id), 'Gallery');
+        }
+
+        // Entities that store an image path in their image column
+        foreach (Product::withTrashed()->whereNotNull('image')->where('image', '!=', '')->get() as $item) {
+            if ($matches($item->image)) {
+                $add('Product', $item->id, $item->name, route('admin.products.edit', $item->id), 'Primary Image');
+            }
+        }
+        foreach (Category::withTrashed()->whereNotNull('image')->where('image', '!=', '')->get() as $item) {
+            if ($matches($item->image)) {
+                $add('Category', $item->id, $item->name, route('admin.categories.edit', $item->id));
+            }
+        }
+        foreach (Brand::withTrashed()->whereNotNull('image')->where('image', '!=', '')->get() as $item) {
+            if ($matches($item->image)) {
+                $add('Brand', $item->id, $item->name, route('admin.brands.edit', $item->id));
+            }
+        }
+        foreach (Seller::withTrashed()->whereNotNull('image')->where('image', '!=', '')->get() as $item) {
+            if ($matches($item->image)) {
+                $add('Seller', $item->id, $item->name, route('admin.sellers.edit', $item->id));
+            }
+        }
+        foreach (Blog::withTrashed()->whereNotNull('image')->where('image', '!=', '')->get() as $item) {
+            if ($matches($item->image)) {
+                $add('Blog', $item->id, $item->title, route('admin.blogs.edit', $item->id));
+            }
+        }
+        foreach (Page::withTrashed()->whereNotNull('image')->where('image', '!=', '')->get() as $item) {
+            if ($matches($item->image)) {
+                $add('Page', $item->id, $item->title, route('admin.pages.edit', $item->id));
+            }
+        }
+        foreach (HomePageSection::whereNotNull('image')->get() as $item) {
+            if ($matches($item->image)) {
+                $add('Home Page Section', $item->id, $item->section_name, route('admin.home-page.edit'));
+            }
+            $dealImage = $item->extra_data['deal_image'] ?? null;
+            if ($matches($dealImage)) {
+                $add('Home Page Section', $item->id, $item->section_name . ' (Deal Image)', route('admin.home-page.edit'));
+            }
+        }
+
+        // Header/footer settings
+        foreach (['header_logo', 'header_favicon', 'mobile_logo', 'footer_logo', 'admin_header_bg'] as $key) {
+            $value = \App\Models\Setting::get($key);
+            if ($matches($value)) {
+                $add('Site Setting', $key, ucwords(str_replace('_', ' ', $key)), route('admin.settings.header'));
+            }
+        }
+
+        // Morph owner (kept for backwards compatibility)
+        if ($this->attachable_type && $this->attachable) {
+            $add(
+                class_basename($this->attachable_type),
+                $this->attachable_id,
+                $this->attachable->name ?? $this->attachable->title ?? '',
+                null
+            );
+        }
+
+        return array_values($locations);
+    }
+
     public function getSizeInKbAttribute(): string
     {
         return $this->size ? round($this->size / 1024, 1) . ' KB' : '-';
@@ -150,50 +258,6 @@ class Image extends Model
         $image->save();
     }
 
-    public static function attachPath(string $path, Model $attachable): self
-    {
-        $norm = static::normalizePath($path);
-        if (!$norm) {
-            throw new \InvalidArgumentException('Invalid image path.');
-        }
-
-        $existing = static::where('path', $norm)->first();
-
-        if (
-            $existing
-            && $existing->attachable_type === get_class($attachable)
-            && (int) $existing->attachable_id === (int) $attachable->getKey()
-        ) {
-            return $existing;
-        }
-
-        if ($existing && $existing->attachable_type === null && $existing->attachable_id === null) {
-            $existing->attachable_type = get_class($attachable);
-            $existing->attachable_id = $attachable->getKey();
-            $existing->is_unused = false;
-            $existing->save();
-            return $existing;
-        }
-
-        $source = $existing ?: static::createFromPath($norm);
-
-        return static::create([
-            'original_name' => $source->original_name,
-            'filename' => $source->filename,
-            'path' => $source->path,
-            'url' => $source->url,
-            'mime_type' => $source->mime_type,
-            'size' => $source->size,
-            'width' => $source->width,
-            'height' => $source->height,
-            'alt_text' => $source->alt_text,
-            'title' => $source->title,
-            'is_unused' => false,
-            'attachable_type' => get_class($attachable),
-            'attachable_id' => $attachable->getKey(),
-        ]);
-    }
-
     public static function createFromPath(string $path): self
     {
         $full = resolveImageSource($path);
@@ -210,5 +274,35 @@ class Image extends Model
             'height' => $info[1] ?? null,
             'is_unused' => true,
         ]);
+    }
+
+    /**
+     * Attach an image to a product gallery. The same image row is reused across
+     * products (via the image_product pivot) — no duplicate rows or file copies.
+     */
+    public static function attachToProduct(string $path, Product $product): self
+    {
+        $norm = static::normalizePath($path);
+        if (!$norm) {
+            throw new \InvalidArgumentException('Invalid image path.');
+        }
+
+        $image = static::where('path', $norm)->first();
+        if (!$image) {
+            $image = static::createFromPath($norm);
+        }
+
+        if ($product->galleryImages()->where('image_product.image_id', $image->id)->doesntExist()) {
+            $product->galleryImages()->attach($image->id);
+        }
+
+        if ($image->attachable_type === null && $image->attachable_id === null) {
+            $image->attachable_type = Product::class;
+            $image->attachable_id = $product->getKey();
+            $image->is_unused = false;
+            $image->save();
+        }
+
+        return $image;
     }
 }

@@ -10,6 +10,7 @@ use App\Models\Image;
 use App\Models\Wishlist;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
@@ -143,13 +144,7 @@ class ProductController extends Controller
 
         $this->attachGalleryImagesFromManager($product, $request->gallery_images_from_manager);
 
-        if ($request->hasFile('gallery_images')) {
-            foreach ($request->file('gallery_images') as $file) {
-                if ($file->isValid()) {
-                    Image::storeFromUpload($file, 'products/gallery', $product);
-                }
-            }
-        }
+        $this->attachGalleryUploads($product, $request->file('gallery_images'));
 
         if ($product->category_id) {
             $userIds = \App\Models\Wishlist::whereHas('product', fn($q) => $q->where('category_id', $product->category_id))
@@ -226,26 +221,53 @@ class ProductController extends Controller
         }
 
         if ($request->has('delete_gallery_ids')) {
-            $images = Image::whereIn('id', $request->delete_gallery_ids)
-                ->where('attachable_type', Product::class)
-                ->where('attachable_id', $product->id)
-                ->get();
-            foreach ($images as $img) {
-                $img->delete();
-            }
+            $this->detachGalleryImages($product, $request->delete_gallery_ids);
         }
 
-        if ($request->hasFile('gallery_images')) {
-            foreach ($request->file('gallery_images') as $file) {
-                if ($file->isValid()) {
-                    Image::storeFromUpload($file, 'products/gallery', $product);
-                }
-            }
-        }
+        $this->attachGalleryUploads($product, $request->file('gallery_images'));
 
         $this->attachGalleryImagesFromManager($product, $request->gallery_images_from_manager);
 
         return redirect()->route('admin.products.index')->with('success', 'Product updated successfully!');
+    }
+
+    private function attachGalleryUploads(Product $product, $files): void
+    {
+        if (!$files) {
+            return;
+        }
+
+        foreach ($files as $file) {
+            if ($file->isValid()) {
+                $image = Image::storeFromUpload($file, 'products/gallery', $product);
+                $product->galleryImages()->attach($image->id);
+            }
+        }
+    }
+
+    private function detachGalleryImages(Product $product, array $imageIds): void
+    {
+        $product->galleryImages()->detach($imageIds);
+
+        foreach ($imageIds as $imageId) {
+            $image = Image::find($imageId);
+            if (!$image) {
+                continue;
+            }
+
+            $hasOtherOwners = DB::table('image_product')->where('image_id', $imageId)->exists();
+
+            if (
+                !$hasOtherOwners
+                && $image->attachable_type === Product::class
+                && (int) $image->attachable_id === (int) $product->id
+            ) {
+                $image->attachable_type = null;
+                $image->attachable_id = null;
+                $image->is_unused = true;
+                $image->save();
+            }
+        }
     }
 
     private function attachGalleryImagesFromManager(Product $product, ?string $galleryImagesFromManager): void
@@ -264,13 +286,8 @@ class ProductController extends Controller
                 continue;
             }
 
-            $imgPath = Image::normalizePath($imgPath);
-            if (!$imgPath) {
-                continue;
-            }
-
             try {
-                Image::attachPath($imgPath, $product);
+                Image::attachToProduct($imgPath, $product);
             } catch (\Throwable $e) {
                 \Log::warning('Unable to attach gallery image to product', [
                     'product_id' => $product->id,

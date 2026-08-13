@@ -16,6 +16,7 @@
             <div class="card-body">
                 <img src="{{ $profile->avatar ? storedImageUrl($profile->avatar) : asset('assets/images/avatar-place.png') }}"
                      class="rounded-circle mb-3"
+                     onerror="this.onerror=null;this.src='{{ asset('assets/images/avatar-place.png') }}';"
                      style="width: 120px; height: 120px; object-fit: cover;">
                 <h5 class="mb-1">{{ $profile->name }}</h5>
                 <p class="text-muted mb-0">{{ $profile->email }}</p>

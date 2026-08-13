@@ -136,14 +136,25 @@ function edit_address(id) {
         $('#addressFormMethod').val('PUT');
         $('#af_phone').val(data.phone);
         $('#af_address').val(data.address);
-        $('#af_city').val(data.city);
-        $('#af_state').val(data.state);
         var countrySel = $('#af_country');
         if (countrySel.length && countrySel.find('option[value="' + data.country + '"]').length === 0) {
             countrySel.append($('<option>', { value: data.country, text: data.country }));
         }
         countrySel.val(data.country);
-        countrySel.trigger('change');
+        // Use a native change event so address-fields' addEventListener
+        // handler runs (jQuery .trigger() only fires jQuery-bound handlers).
+        if (countrySel[0]) countrySel[0].dispatchEvent(new Event('change', { bubbles: true }));
+        var stateSel = $('#af_state');
+        if (data.state && stateSel.find('option[value="' + data.state + '"]').length === 0) {
+            stateSel.append($('<option>', { value: data.state, text: data.state }));
+        }
+        stateSel.val(data.state);
+        if (stateSel[0]) stateSel[0].dispatchEvent(new Event('change', { bubbles: true }));
+        var citySel = $('#af_city');
+        if (data.city && citySel.find('option[value="' + data.city + '"]').length === 0) {
+            citySel.append($('<option>', { value: data.city, text: data.city }));
+        }
+        citySel.val(data.city);
         $('#af_zip').val(data.zip_code);
         $('#af_set_default').prop('checked', !!data.set_default);
         $('#addressFormSubmit').text('Update Address');

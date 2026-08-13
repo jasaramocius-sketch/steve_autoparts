@@ -4,70 +4,275 @@
 @section('page-title', 'Add Page')
 @section('content')
 
-<div class="card border-0 shadow-sm">
-    <!-- <div class="card-header bg-white">
-        <h5 class="mb-0">Add Page</h5>
-    </div> -->
-    <div class="card-body">
-        <form action="{{ route('admin.pages.store') }}" method="POST">
-            @csrf
+<style>
+.page-builder-nav {
+    width: 180px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 16px;
+}
+.nav-link-section {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    color: #6b7280 !important;
+    text-decoration: none !important;
+}
+.nav-link-section i { width: 16px; text-align: center; }
+.nav-link-section.active,
+.nav-link-section:hover {
+    background: rgba(52, 84, 209, 0.08);
+    color: #1c1e26 !important;
+}
+.min-width-0 { min-width: 0; }
 
-            <div class="row g-3">
-                <div class="col-md-8">
-                    <label class="form-label">Title *</label>
-                    <input type="text" name="title" class="form-control @error('title') is-invalid @enderror" value="{{ old('title') }}" required>
-                    @error('title') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                </div>
+.tab-pane { display: none; }
+.tab-pane.active-pane { display: block; }
 
-                <div class="col-md-4">
-                    <label class="form-label">Short Description</label>
-                    <input type="text" name="short_description" class="form-control @error('short_description') is-invalid @enderror" value="{{ old('short_description') }}">
+.status-pill {
+    border: none;
+    font-size: 0.75rem;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: var(--primary);
+    color: #fff;
+    white-space: nowrap;
+    cursor: pointer;
+}
+.status-pill.is-active {
+    background: #028d5c;
+    color: #ffffff;
+}
+
+.banner-dropzone { position: relative; }
+.banner-dropzone .dz-placeholder {
+    display: block;
+    border: 1.5px dashed #cfcfca;
+    border-radius: 8px;
+    padding: 28px;
+    text-align: center;
+    color: #9a9992;
+    font-size: 0.85rem;
+}
+
+.serp-preview {
+    background: #f7f7f5;
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: arial, sans-serif;
+}
+.serp-url { font-size: 13px; color: #4d5156; }
+.serp-title { font-size: 18px; color: #1a0dab; line-height: 1.3; margin: 2px 0; }
+.serp-desc { font-size: 13px; color: #4d5156; line-height: 1.4; }
+</style>
+
+<form action="{{ route('admin.pages.store') }}" method="POST" id="pageForm">
+    @csrf
+
+    <div class="d-flex gap-4 align-items-start page-builder">
+
+        {{-- Section nav --}}
+        <div class="page-builder-nav">
+            <div class="text-muted small mb-2">Pages / New</div>
+            <nav class="nav flex-column gap-1">
+                <a href="#s-details" class="nav-link-section active" data-target="s-details"><i class="fas fa-file-alt"></i> Details</a>
+                <a href="#s-banner" class="nav-link-section" data-target="s-banner"><i class="fas fa-image"></i> Banner</a>
+                <a href="#s-seo" class="nav-link-section" data-target="s-seo"><i class="fas fa-search"></i> SEO</a>
+                <a href="#s-content" class="nav-link-section" data-target="s-content"><i class="fas fa-edit"></i> Content</a>
+            </nav>
+        </div>
+
+        <div class="flex-grow-1 min-width-0">
+
+            {{-- Header bar: title + status + save --}}
+            <div class="d-flex align-items-center gap-2 pb-3 mb-4 border-bottom page-header-bar">
+                <input type="text" name="title" id="titleInput" class="form-control form-control-lg border-0 fw-semibold flex-grow-1 @error('title') is-invalid @enderror"
+                       placeholder="Untitled page" value="{{ old('title') }}" maxlength="255" required style="font-size:1.25rem; box-shadow:none; padding-left:15px;">
+                @error('title') <div class="invalid-feedback">{{ $message }}</div> @enderror
+
+                <button type="button" id="statusPill" class="status-pill {{ old('status', true) ? 'is-active' : '' }}" data-active="{{ old('status', 1) ? '1' : '0' }}">
+                    {{ old('status', true) ? 'Active' : 'Inactive' }}
+                </button>
+                <input type="hidden" name="status" id="statusInput" value="{{ old('status', 1) }}">
+
+                <button type="submit" class="btn btn-primary steve-btn text-nowrap"><i class="fas fa-save me-1"></i> Save page</button>
+                <a href="{{ route('admin.pages.index') }}" class="btn btn-outline-secondary text-nowrap"><i class="fas fa-times me-1"></i> Cancel</a>
+            </div>
+
+            {{-- Page Details --}}
+            <section id="s-details" class="card border-0 shadow-sm mb-3 tab-pane">
+                <div class="card-body">
+                    <h5 class="mb-3">Page details</h5>
+
+                    <label class="form-label">Short description</label>
+                    <input type="text" name="short_description" class="form-control mb-3 @error('short_description') is-invalid @enderror"
+                           placeholder="One line summary shown in listings" value="{{ old('short_description') }}" maxlength="255">
                     @error('short_description') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                </div>
 
-                <div class="col-md-4">
-                    <label class="form-label">&nbsp;</label>
-                    <div class="form-check mt-2">
-                        <input type="checkbox" name="status" value="1" class="form-check-input" id="status" checked>
-                        <label class="form-check-label" for="status">Active</label>
-                    </div>
-                </div>
+                    <label class="form-label mb-1">Slug</label>
+                    <input type="text" name="slug" id="slugInput" class="form-control mb-1 @error('slug') is-invalid @enderror"
+                           placeholder="Auto-generated from the title" value="{{ old('slug') }}" maxlength="255">
+                    @error('slug') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    <div class="form-text mb-3">Leave empty to auto-generate from the title.</div>
 
-                <div class="col-md-4">
-                    <label class="form-label">&nbsp;</label>
-                    <div class="form-check mt-2">
+                    <div class="form-check form-switch">
                         <input type="checkbox" name="show_title" value="1" class="form-check-input" id="show_title" checked>
-                        <label class="form-check-label" for="show_title">Show Page Title</label>
+                        <label class="form-check-label" for="show_title">Show page title on the front end</label>
                     </div>
                 </div>
+            </section>
 
-                @include('admin.pages._banner_image')
-
-                <div class="col-md-6">
-                    <label class="form-label">Meta Title</label>
-                    <input type="text" name="meta_title" class="form-control @error('meta_title') is-invalid @enderror" value="{{ old('meta_title') }}">
-                    @error('meta_title') <div class="invalid-feedback">{{ $message }}</div> @enderror
+            {{-- Title Banner Image --}}
+            <section id="s-banner" class="card border-0 shadow-sm mb-3 tab-pane">
+                <div class="card-body">
+                    <h5 class="mb-1">Title banner image</h5>
+                    <div class="banner-dropzone">
+                        @include('admin.pages._banner_image')
+                    </div>
                 </div>
+            </section>
 
-                <div class="col-md-6">
-                    <label class="form-label">Meta Description</label>
-                    <textarea name="meta_description" class="form-control @error('meta_description') is-invalid @enderror" rows="2">{{ old('meta_description') }}</textarea>
-                    @error('meta_description') <div class="invalid-feedback">{{ $message }}</div> @enderror
+            {{-- SEO --}}
+            <section id="s-seo" class="card border-0 shadow-sm mb-3 tab-pane">
+                <div class="card-body">
+                    <h5 class="mb-1">Search appearance</h5>
+                    <p class="text-muted small mb-3">Control how this page looks in search results.</p>
+
+                    {{-- Live SERP preview --}}
+                    <div class="serp-preview mb-4">
+                        <div class="text-muted small mb-1">Preview</div>
+                        <div class="serp-url">yoursite.com &rsaquo; pages</div>
+                        <div class="serp-title" id="serpTitle">{{ old('meta_title') ?: (old('title') ?: 'Untitled page') }}</div>
+                        <div class="serp-desc" id="serpDesc">{{ old('meta_description') ?: 'Add a meta description to control this snippet.' }}</div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Meta title</label>
+                            <input type="text" name="meta_title" id="meta_title" class="form-control @error('meta_title') is-invalid @enderror" value="{{ old('meta_title') }}" maxlength="60">
+                            @error('meta_title') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <div class="form-text text-end mb-0">Recommended 60 characters. <span id="meta_title_count" class="fw-semibold font-monospace">{{ mb_strlen(old('meta_title') ?? '') }}</span>/60</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Meta description</label>
+                            <textarea name="meta_description" id="meta_description" class="form-control @error('meta_description') is-invalid @enderror" rows="2" maxlength="500">{{ old('meta_description') }}</textarea>
+                            @error('meta_description') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <div class="form-text text-end mb-0">Recommended 160 characters. <span id="meta_description_count" class="fw-semibold font-monospace">{{ mb_strlen(old('meta_description') ?? '') }}</span>/500</div>
+                        </div>
+                    </div>
                 </div>
+            </section>
 
-                <div class="col-md-12">
-                    <label class="form-label">Content</label>
+            {{-- Content --}}
+            <section id="s-content" class="card border-0 shadow-sm mb-3 tab-pane">
+                <div class="card-body">
+                    <h5 class="mb-3">Content</h5>
                     <textarea name="content" class="form-control texteditor @error('content') is-invalid @enderror" rows="12">{{ old('content') }}</textarea>
                     @error('content') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
-            </div>
+            </section>
 
-            <div class="mt-4">
-                <button class="btn btn-primary steve-btn"><i class="fas fa-save"></i> Save</button>
-                <a href="{{ route('admin.pages.index') }}" class="btn btn-secondary">Cancel</a>
-            </div>
-        </form>
+        </div>
     </div>
-</div>
+</form>
 
 @endsection
+
+@push('scripts')
+<script>
+(function() {
+    function bindCharCount(inputId, countId) {
+        var input = document.getElementById(inputId);
+        var count = document.getElementById(countId);
+        if (!input || !count) return;
+        var update = function() {
+            count.textContent = input.value.length;
+        };
+        input.addEventListener('input', update);
+        update();
+    }
+    bindCharCount('meta_title', 'meta_title_count');
+    bindCharCount('meta_description', 'meta_description_count');
+
+    // Live SERP preview
+    var titleInput = document.getElementById('titleInput');
+    var metaTitle = document.getElementById('meta_title');
+    var metaDesc = document.getElementById('meta_description');
+    var serpTitle = document.getElementById('serpTitle');
+    var serpDesc = document.getElementById('serpDesc');
+
+    function refreshSerpTitle() {
+        serpTitle.textContent = metaTitle.value || titleInput.value || 'Untitled page';
+    }
+    titleInput.addEventListener('input', refreshSerpTitle);
+    metaTitle.addEventListener('input', refreshSerpTitle);
+    metaDesc.addEventListener('input', function() {
+        serpDesc.textContent = metaDesc.value || 'Add a meta description to control this snippet.';
+    });
+
+    // Slug: auto-generate from the title until the user edits it manually
+    var slugInput = document.getElementById('slugInput');
+    var slugFromTitle = true;
+
+    function slugify(str) {
+        return (str || '').toLowerCase().trim()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/[\s_]+/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-+|-+$/g, '');
+    }
+
+    if (slugInput) {
+        slugFromTitle = slugInput.value === '';
+        slugInput.addEventListener('input', function() {
+            slugFromTitle = slugInput.value === '';
+        });
+        titleInput.addEventListener('input', function() {
+            if (slugFromTitle) {
+                slugInput.value = slugify(titleInput.value);
+            }
+        });
+    }
+
+    // Status pill toggle
+    var pill = document.getElementById('statusPill');
+    var statusInput = document.getElementById('statusInput');
+    pill.addEventListener('click', function() {
+        var active = statusInput.value === '1';
+        active = !active;
+        statusInput.value = active ? '1' : '0';
+        pill.textContent = active ? 'Active' : 'Inactive';
+        pill.classList.toggle('is-active', active);
+    });
+
+    // Side tab switching: show only the selected section's pane
+    var navLinks = document.querySelectorAll('.nav-link-section');
+    var panes = document.querySelectorAll('.tab-pane');
+
+    function showTab(targetId) {
+        panes.forEach(function(pane) {
+            pane.classList.toggle('active-pane', pane.id === targetId);
+        });
+        navLinks.forEach(function(l) {
+            l.classList.toggle('active', l.dataset.target === targetId);
+        });
+    }
+
+    navLinks.forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            showTab(link.dataset.target);
+        });
+    });
+
+    // Start on the first tab, unless a validation error is hiding in another tab
+    var errorPane = document.querySelector('.tab-pane .is-invalid');
+    var startTarget = errorPane ? errorPane.closest('.tab-pane').id : navLinks[0].dataset.target;
+    showTab(startTarget);
+})();
+</script>
+@endpush

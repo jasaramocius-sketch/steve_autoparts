@@ -93,7 +93,7 @@
                                     <small class="text-muted d-block mb-2">Background image of the admin top bar (the container that holds the page title).</small>
                                     @if (!empty($settings['admin_header_bg']))
                                         <div class="mb-2 admin-header-bg-current">
-                                            <img src="{{ asset('assets/images/' . $settings['admin_header_bg']) }}" alt="Admin Header Background"
+                                            <img src="{{ storedImageUrl($settings['admin_header_bg'], 'assets/images') }}" alt="Admin Header Background"
                                                  style="max-width:300px;max-height:80px;border-radius:4px;border:1px solid #ddd;object-fit:cover;">
                                         </div>
                                     @endif

@@ -210,9 +210,20 @@ class HomeController extends Controller
         return $result;
     }
 
+    private function pageOrAbort($slug)
+    {
+        $page = Page::where('slug', $slug)->first();
+
+        if ($page && !$page->status) {
+            abort(404);
+        }
+
+        return $page;
+    }
+
     public function about()
     {
-        $page = Page::where('slug', 'about')->where('status', true)->first();
+        $page = $this->pageOrAbort('about');
         if ($page) {
             return view('pages.show', compact('page'));
         }
@@ -220,7 +231,7 @@ class HomeController extends Controller
     }
     public function contact()
     {
-        $page = Page::where('slug', 'contact')->where('status', true)->first();
+        $page = $this->pageOrAbort('contact');
         return view('pages.contact', compact('page'));
     }
     public function page($slug)
@@ -236,11 +247,12 @@ class HomeController extends Controller
     public function faq()
     {
         $faqs = Faq::where('status', true)->orderBy('order')->get();
-        return view('pages.faq', compact('faqs') + ['page' => Page::where('slug', 'faq')->where('status', true)->first()]);
+        $page = $this->pageOrAbort('faq');
+        return view('pages.faq', compact('faqs') + ['page' => $page]);
     }
     public function privacy()
     {
-        $page = Page::where('slug', 'privacy-policy')->where('status', true)->first();
+        $page = $this->pageOrAbort('privacy-policy');
         if ($page) {
             return view('pages.show', compact('page'));
         }
@@ -249,7 +261,7 @@ class HomeController extends Controller
 
     public function terms()
     {
-        $page = Page::where('slug', 'terms-conditions')->where('status', true)->first();
+        $page = $this->pageOrAbort('terms-conditions');
         if ($page) {
             return view('pages.show', compact('page'));
         }
@@ -257,7 +269,7 @@ class HomeController extends Controller
     }
     public function returnPolicy()
     {
-        $page = Page::where('slug', 'return-policy')->where('status', true)->first();
+        $page = $this->pageOrAbort('return-policy');
         if ($page) {
             return view('pages.show', compact('page'));
         }
@@ -266,7 +278,7 @@ class HomeController extends Controller
 
     public function supportPolicy()
     {
-        $page = Page::where('slug', 'support-policy')->where('status', true)->first();
+        $page = $this->pageOrAbort('support-policy');
         if ($page) {
             return view('pages.show', compact('page'));
         }

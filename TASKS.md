@@ -2261,3 +2261,79 @@ Revisions **4808–4809** (05 Aug 05:15).
 **Problem:** The compare and quick-view (eye) icon buttons in the product card had no tooltips, so their purpose was unclear.
 
 **Solution:** `partials/product-card.blade.php` — compare link gets `data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Compare"` and the eye link gets `title="Quick View"` (auto-initialized by the existing Bootstrap tooltip init in `public/assets/front/js/script.js`).
+
+## 150. Address Form — Country → State/City Cascade Fix (13 Aug 2026)
+
+**Problem:** The country → state → city dropdowns did not cascade properly: state/city stayed disabled until a country was chosen, changing country left stale selections, and the checkout "edit address" modal never refreshed city because jQuery `.trigger('change')` only fires jQuery-bound handlers — not the native `addEventListener` handler bound in the partial.
+
+**Files changed:**
+- `resources/views/partials/address-fields.blade.php` — `refresh()` now enables State only when a country is chosen, and City only when both country AND state are chosen (mirrors the country → state cascade); country `change` handler resets `stateEl.value`/`cityEl.value` + `data-selected` before refreshing.
+- `resources/views/checkout/index.blade.php` — `edit_address` replaced jQuery `.trigger('change')` with native `dispatchEvent(new Event('change', { bubbles: true }))`; sets state/city after country change and fires a native state change so the city select enables; appends missing state/city options.
+
+**Verified:** headless-Chrome walkthrough of all add/edit flows (add modal, empty country, India+Maharashtra city enable, country switch reset, checkout edit prefill, dashboard server-rendered edit modal).
+
+## 151. Cart Page — Placeholder Image Bug (13 Aug 2026)
+
+**Problem:** Cart and mini-cart showed the placeholder image for products that had valid absolute image URLs stored.
+
+**Files changed:**
+- `app/helpers.php` — `storedPath()` now passes absolute URLs (`http(s)://`) through instead of returning the fallback, consistent with `storedImageUrl()`.
+- `app/Helpers/image.php` — `imgTag()` skips the local `file_exists()` check for `http(s)://` srcs (previously the URL was swapped back to the placeholder).
+
+**Verified:** cart renders the real storage URL (HTTP 200).
+
+## 152. Full-Site Image Audit (13 Aug 2026)
+
+**Details:** DB-vs-filesystem scan plus headless crawl of front and admin pages. All image spots clean (home, shop, brands, blog, categories, product + gallery, compare, admin); 668 gallery images and all DB references resolve to existing files. 10 subcategories on the `/categories` page show the placeholder because their `image` field is empty in the DB — admin data entry fix only (no code change).
+
+## 153. Admin Pages — Edit/Create Redesign (13 Aug 2026)
+
+**Files changed:**
+- `resources/views/admin/pages/edit.blade.php` — rebuilt as sectioned cards: **Page Details** (title, Active + Show Page Title switches, short description), **Title Banner Image**, **SEO** (meta title/description with live character counters initialized server-side via `mb_strlen`), **Content** (Summernote), plus a **sticky action bar** (Update/Cancel/View Page in new tab/Last updated).
+- `resources/views/admin/pages/create.blade.php` — same redesign for the create form.
+- `resources/views/admin/pages/_banner_image.blade.php` — removed redundant inner `<strong>` label (now titled by the card header).
+
+**Verified:** blades compile, page renders live, end-to-end PUT save round-trip (probe value saved + reverted).
+
+## 154. Shop — "Vehicle" Nav Dropdown (My Vehicles) + Category Vehicle Filter (13 Aug 2026)
+
+**Problem:** Users could not switch the applied vehicle filter directly from the product navigation; category/subcategory pages showed the "Vehicle:" chip (shared via middleware) but never actually filtered products; clearing the vehicle filter dumped the user to plain `/shop`, losing category/search/sort context.
+
+**Files changed:**
+- `resources/views/shop/index.blade.php` — added a **"Vehicle"** dropdown inside `product-nav-wrapper` (after Brand) listing the logged-in user's My Vehicles, wrapped in `@auth` + `$userVehicles->isNotEmpty()` so it is hidden via code when the user has no saved vehicles (or is a guest). Options: "All Vehicles" + each saved vehicle; defaults to the currently applied vehicle. Auto-submits POST on change — `user.vehicles.select/{id}` to set the session vehicle, `shop.clear-vehicle` to clear.
+- `app/Http/Controllers/ShopController.php`:
+  - New `applyVehicleFilter(Request $request, $query, bool $autoFirst)` helper (extracted from shop `index()` vehicle logic: session/first-vehicle selection, request merge, match-count with zero-match fallback). `index()` calls it with `$autoFirst = true` (existing behavior preserved); `category()` and `subcategory()` call it with `$autoFirst = false` — category pages now really filter by the selected vehicle but never auto-apply the first one.
+  - `clearVehicleFilter()` now redirects to the previous URL (stripping stale `year`/`make`/`model`/`page`) instead of `route('shop')`.
+- `app/Http/Controllers/DashboardController.php` — `selectVehicle()` strips stale `year`/`make`/`model`/`page` params from the previous URL before redirecting, so the nav dropdown always wins over stale sidebar filters.
+
+**Verified (live, 3 test users):** dropdown present for users with vehicles and hidden for no-vehicle users and guests; select/clear round-trip on both shop and category pages with context preserved (`?sort=...` kept); sidebar year/make/model params stripped on select; existing sidebar "Vehicle" widget untouched.
+
+## 155. Admin Pages — Editable Slug Field (13 Aug 2026)
+
+**Problem:** The page slug was auto-generated from the title and could not be edited from the admin (update never saved a slug at all), so URLs were locked to the original title.
+
+**Files changed:**
+- `resources/views/admin/pages/edit.blade.php` — new **Slug** input in the "Page details" section with a live-preview link below it (`route('page.show', $page->slug)`, using the `a-tag-text-hover` style); the header "View page" link now updates live too (`#viewPageLink`). JS auto-slugifies the title while the slug field is untouched, and switches to manual mode as soon as the admin types.
+- `resources/views/admin/pages/create.blade.php` — same Slug input (auto-generated from the title when left empty).
+- `app/Http/Controllers/Admin/PageController.php` — `store()` and `update()` now accept `slug`, slugify it (`Str::slug`), fall back to the title when empty, and reject duplicates via `back()->withErrors(['slug' => ...])` (ignoring the current page on update).
+
+**Verified (live):** edit round-trip changes the slug and frontend URL; duplicate slug rejected (value unchanged); create with a custom slug (`My Custom Slug` → `my-custom-slug`) and with an empty slug (`Test Auto Slug Page` → `test-auto-slug-page`).
+
+## 156. Inactive Pages Still Opening on Frontend (13 Aug 2026)
+
+**Problem:** Setting a page inactive from All Pages did not block its public URL. `HomeController::faq()` always rendered `pages.faq`, and `terms()`/`privacy()`/`about()`/etc. fell back to static `pages.*` blade views when the CMS record was inactive, so FAQ and Terms & Conditions kept opening despite `status` being false.
+
+**Files changed:**
+- `app/Http/Controllers/HomeController.php` — added a private `pageOrAbort($slug)` helper: loads the Page record, `abort(404)` when it exists but `status` is false, otherwise returns it (null → caller keeps the static-view fallback). Applied to `about()`, `contact()`, `faq()`, `privacy()`, `terms()`, `returnPolicy()`, `supportPolicy()`. The generic `page()` route already 404ed via `firstOrFail` + `status=true`.
+
+**Verified (live):** `/faq`, `/terms`, `/terms-conditions` → 404 (both currently inactive); `/privacy`, `/about-us`, `/return-policy`, `/support-policy`, `/contact-us` → 200.
+
+## 157. Console Errors — Unirate Widget + CounterUp (13 Aug 2026)
+
+**Problem:** Two console errors on every page load: (1) `unirate-widgets.js` fetched `:5072/api/widget/v1/currencies` and failed with `ERR_CONNECTION_REFUSED` — the widget's `<div id="unirate-converter">` was already commented out (`home/index.blade.php`) but its CSS + JS still loaded on every page via the shared layout and auto-initialized; (2) `script.js` logged "CounterUp library not loaded" because the jQuery counterUp lib was never included.
+
+**Files changed:**
+- `resources/views/layouts/app.blade.php` — removed the unirate CSS `<link>` and the async `unirate-widgets.js` script tag (dead feature; the converter element is commented out).
+- `public/assets/front/js/script.js` — removed the "COUNTER UP" block (guard + `console.warn`); counters on the About page are already animated by the page's own IntersectionObserver script, so the jQuery plugin block was redundant.
+
+**Verified:** rendered homepage HTML contains no unirate script/CSS (only the harmless commented-out div); `script.js` no longer emits the warning.

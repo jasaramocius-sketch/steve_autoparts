@@ -316,15 +316,8 @@ $(document).ready(function () {
   // Moved to Swiper - initialized in page scripts
 
   //******  17. COUNTER UP ******//
-  // Safely check if counterUp function exists before calling it
-  if (typeof $.fn.counterUp === 'function') {
-    $('.counter').counterUp({
-      delay: 10,
-      time: 1000
-    });
-  } else {
-    console.warn("CounterUp library not loaded. Skipping animation to prevent script crash.");
-  }
+  // Counters are animated natively via IntersectionObserver on the About page;
+  // jQuery counterUp is not loaded, so nothing to do here.
 
   //******  18. CHANGE FILE NAME OF FILE INPUT  ******//
   $('.input-file').on("change", function () {
@@ -764,6 +757,19 @@ function doWishlistAjax(form) {
         } else if (response.action === 'removed') {
           path.attr('fill', 'none');
           path.attr('stroke', 'var(--primary)');
+        }
+      }
+
+      // Single-product page: toggle <i> icon + <span> label
+      var icon = form.find('button i.fa-heart');
+      if (icon.length) {
+        var label = form.find('button span');
+        if (response.action === 'added') {
+          icon.removeClass('far').addClass('fas');
+          label.text('Remove Wishlist');
+        } else {
+          icon.removeClass('fas').addClass('far');
+          label.text('Add Wishlist');
         }
       }
     },

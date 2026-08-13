@@ -102,11 +102,10 @@
                 <td>{{ $category->id }}</td>
 
                 <td>
-                    <img src="{{ $category->image
-                        ? asset('assets/images/categories/'.$category->image)
-                        : '' }}"
+                    <img src="{{ storedImageUrl($category->image, 'assets/images/categories') }}"
                         width="50"
-                        alt="{{ $category->name }}">
+                        alt="{{ $category->name }}"
+                        onerror="this.onerror=null;this.src='{{ asset('assets/images/placeholder.png') }}'">
                 </td>
 
                 <td>{{ $category->name }}</td>

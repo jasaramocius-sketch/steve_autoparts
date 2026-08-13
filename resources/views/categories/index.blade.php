@@ -105,15 +105,21 @@
                 @if($category->children->count() > 0)
                 <div class="subcategory-list mt-2">
                         <ul class="list-unstyled mb-0" style="font-size:13px;">
-                            @foreach($category->children as $child)
-                                <li class="mb-1">
-                                    <a href="{{ route('subcategory', ['parent' => $category->slug, 'child' => $child->slug]) }}" class="text-decoration-none" style="color:#1f0300;">
-                                        {{ $child->name }}
+                            @foreach($category->children->take(3) as $child)
+                                <li class="mb-1 d-flex align-items-center">
+                                    <a href="{{ route('subcategory', ['parent' => $category->slug, 'child' => $child->slug]) }}" class="text-decoration-none d-flex align-items-center gap-2 subcategory-link" style="color:#1f0300;">
+                                        {!! imgTag($child->getDisplayImagePath(), $child->name, 'subcategory-thumb-img') !!}
+                                        <span>{{ $child->name }}</span>
                                     </a>
-                                    <span class="text-muted">({{ $child->total_products_count }})</span>
+                                    <span class="text-muted ms-1">({{ $child->total_products_count }})</span>
                                 </li>
                             @endforeach
                         </ul>
+                        @if($category->children->count() > 3)
+                        <a href="{{ route('category', $category->slug) }}" class="subcategory-view-more d-inline-flex align-items-center gap-1  fw-medium mt-1 a-tag-hover-color">
+                            View More <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                        @endif
                 </div>
                 @endif
             </div>
@@ -209,18 +215,11 @@
 </script>
 
 <style>
-#categoryContainer.categories-list-view .category-card {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 20px;
-}
 #categoryContainer.categories-list-view .category-card .category-image {
     flex: 0 0 24%;
+    border-right:1px solid #eee;
 }
-#categoryContainer.categories-list-view .category-card .category-content {
-    flex: 1;
-}
+
 #categoryContainer {
   box-sizing: border-box;
   width: 100%;
@@ -253,6 +252,23 @@
 .category-products .category-product-item:hover .category-product-name{
     color: var(--primary);
 }
+.subcategory-list .subcategory-thumb-img {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #eee;
+    background: #fff;
+}
+.subcategory-list .subcategory-link:hover span {
+    color: var(--primary);
+}
+.subcategory-list .subcategory-view-more {
+    color: var(--primary);
+    font-size: 13px;
+}
+
 /* #categoryContainer.row .col-lg-3{
     padding: 0;
 } */

@@ -210,8 +210,9 @@ class ImageController extends Controller
 
     public function edit($id)
     {
-        $image = Image::with('attachable')->findOrFail($id);
-        return view('admin.images.edit', compact('image'));
+        $image = Image::with('attachable', 'products')->findOrFail($id);
+        $usageLocations = $image->usageLocations();
+        return view('admin.images.edit', compact('image', 'usageLocations'));
     }
 
     public function update(Request $request, $id)

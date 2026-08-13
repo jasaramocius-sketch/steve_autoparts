@@ -530,6 +530,24 @@
                   </select>
                 </form>
               </div>
+              @auth
+                @if(isset($userVehicles) && $userVehicles->isNotEmpty())
+                  <div class="d-flex align-items-center gap-2 filter-vehicle-wrapper">
+                    <h5 class="mb-0" style="font-size: 14px; font-weight: 500;">Vehicle</h5>
+                    <form id="vehicle-nav-filter-form" method="POST">
+                      @csrf
+                      <select id="vehicle-nav-select" class="form-select" style="border:1px solid #c7c0bf; border-radius:4px;">
+                        <option value="">All Vehicles</option>
+                        @foreach($userVehicles as $vehicle)
+                          <option value="{{ $vehicle->id }}" {{ (isset($selectedVehicle) && $selectedVehicle && $selectedVehicle->id == $vehicle->id) ? 'selected' : '' }}>
+                            {{ $vehicle->year }} {{ $vehicle->make }} {{ $vehicle->model }}
+                          </option>
+                        @endforeach
+                      </select>
+                    </form>
+                  </div>
+                @endif
+              @endauth
             </div>
             <div class="btn-wrapper d-flex gap-2 grid-list-view-wrapper d-lg-flex w-auto justify-content-sm-end">
               @include('partials.grid-list-toggle')
@@ -686,6 +704,18 @@ $(document).ready(function() {
     // Brand Filter Auto-Submit
     $('#brand-filter-form select[name="brand"]').on('change', function() {
         $('#brand-filter-form').submit();
+    });
+
+    // Vehicle Nav Filter (My Vehicles)
+    $('#vehicle-nav-select').on('change', function() {
+        var id = this.value;
+        var form = $('#vehicle-nav-filter-form');
+        var action = '{{ route('shop.clear-vehicle') }}';
+        if (id) {
+            action = '{{ route('user.vehicles.select', 'VEHICLE_ID') }}'.replace('VEHICLE_ID', id);
+        }
+        form.attr('action', action);
+        form.submit();
     });
 
     // jQuery UI Price Slider

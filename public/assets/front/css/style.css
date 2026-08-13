@@ -444,6 +444,12 @@ p.text-lg {
   }
 }
 
+.w-60{
+  width: 60% !important;
+}
+.w-40{
+  width: 40% !important;
+}
 /* .brands-section-row-first, .best-selling-title-row, .featured-title-row-first{
     padding: 0 20px;
 } */
@@ -949,11 +955,13 @@ p.text-lg {
 .gap-12 {
   gap: 12px;
 }
+
 .admin-sidebar .brand a {
-    /* justify-content: flex-start; */
-    display: flex !important;
-    align-items: flex-end;
+  /* justify-content: flex-start; */
+  display: flex !important;
+  align-items: flex-end;
 }
+
 /******************************* theme css **********************************/
 .bg-light-white {
   background-color: var(--secondary-bg-color);
@@ -1785,10 +1793,11 @@ p.text-lg {
 
 @media (max-width: 399.97px) {
 
-.gs-title-box .title {
-  margin-bottom: 24px;
+  .gs-title-box .title {
+    margin-bottom: 24px;
+  }
 }
-}
+
 .gs-single-cat {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -1853,7 +1862,11 @@ p.text-lg {
   -ms-transform: scale(0.95);
   transform: scale(0.95);
 }
-.gs-single-cat .gs-single-cat, .gs-single-cat .gs-single-cat .category-image{
+
+.gs-single-cat .gs-single-cat
+
+/*, .gs-single-cat .gs-single-cat .category-image */
+  {
   width: 100% !important;
 }
 
@@ -3396,10 +3409,12 @@ p.text-lg {
 .gs-service-section {
   background-color: #1f0300;
 }
-.gs-service-section .service-title{
+
+.gs-service-section .service-title {
   font-size: 20px;
   line-height: 1.6;
 }
+
 .gs-service-section .services-area {
   margin: 60px 0;
 }
@@ -4622,12 +4637,16 @@ p.text-lg {
   position: relative;
   display: block;
 }
-thead tr:nth-child(1), tfoot tr:nth-child(1) {
-    border-top: 1px solid #e6e8ec;
+
+thead tr:nth-child(1),
+tfoot tr:nth-child(1) {
+  border-top: 1px solid #e6e8ec;
 }
-tbody tr:last-child{
-    border-bottom: 1px solid #e6e8ec;
+
+tbody tr:last-child {
+  border-bottom: 1px solid #e6e8ec;
 }
+
 .form-select {
   background-image: none;
   padding-right: 2.25rem;
@@ -5202,7 +5221,7 @@ tbody tr:last-child{
   }
 }
 
-.gs-breadcrumb-section::after {
+.gs-breadcrumb-section::before {
   content: "";
   position: absolute;
   top: 0;
@@ -7573,6 +7592,28 @@ li.has-megamenu.active .megamenu .single-menu h5 a:hover:after,
   align-items: center;
 }
 
+.bell-icon-col .cart-count {
+  background-color: #fff;
+  color: var(--primary);
+  width: 15px;
+  height: 15px;
+  display: block;
+  position: absolute;
+  top: -5px;
+  right: -10px;
+  border-radius: 50%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  font-size: 12px;
+}
+
 @media (max-width: 575.97px) {
 
   .icon-circle .icon-circle-cart-count,
@@ -7697,7 +7738,9 @@ li.has-megamenu.active .megamenu .single-menu h5 a:hover:after,
 .mobile-menu .mobile-nav-menu li.active>a,
 .mobile-menu .mobile-nav-menu li.active>div>a,
 .mobile-menu .mobile-nav-menu li.expanded>a,
-.mobile-menu .mobile-nav-menu li.expanded>div>a, .mobile-menu .mobile-nav-menu li.active>div>span i, .mobile-menu .mobile-nav-menu li.expanded>div>span i {
+.mobile-menu .mobile-nav-menu li.expanded>div>a,
+.mobile-menu .mobile-nav-menu li.active>div>span i,
+.mobile-menu .mobile-nav-menu li.expanded>div>span i {
   color: var(--primary) !important;
 }
 
@@ -9210,6 +9253,7 @@ form .form-rows {
 
 .table-action-col .action-buttons {
   display: flex !important;
+  justify-content: flex-end;
   gap: 5px;
 }
 
@@ -10610,6 +10654,15 @@ div.dt-container .dt-paging .dt-paging-button.last {
   }
 }
 
+/* div#viewSellerModal .modal-dialog{
+  max-width: unset;
+  width: 40%;
+}
+@media (max-width:767px) {
+  div#viewSellerModal .modal-dialog{
+  width: 97%;
+}
+} */
 .gs-modal .modal-dialog {
   width: calc(100% - 16px);
 }
@@ -11424,9 +11477,11 @@ ul.tagit li.tagit-choice .tagit-close {
 .slider-nav .steve-btn {
   padding: 5px 0px !important;
 }
-.latest-post-nav .slider-nav .steve-btn{
+
+.latest-post-nav .slider-nav .steve-btn {
   padding: 0px !important;
 }
+
 @media (max-width: 576px) {
   .custom-gap-sm-2 {
     gap: 0.7rem !important;
@@ -11569,12 +11624,16 @@ ul.tagit li.tagit-choice .tagit-close {
 .table-responsive {
   overflow-y: hidden;
 }
-#reviewModal button.close {
-    padding: 0px 6px;
-    background-color: var(--primary);
-    font-size: 26px;
-    color: #fff;
+
+#reviewModal button.close span {
+  padding: 0px 6px;
+  background-color: var(--primary);
+  font-size: 20px;
+  color: #fff;
+  line-height: 1;
+  border-radius: 8px;
 }
+
 /****************************** page styles ******************************/
 /********************** hero section start **********************/
 .hero-slider-wrapper .slick-dots {
@@ -15871,8 +15930,8 @@ button.action-btn.border-0 {
 }
 
 .home-cate-slider .category-image {
-  /* height: 200px; */
-  width: 200px;
+  height: 250px;
+  width: 250px;
   margin-bottom: 20px;
 }
 
@@ -15888,11 +15947,13 @@ button.action-btn.border-0 {
 .home-cate-slider .slick-track {
   display: flex;
 }
-.home-cate-slider .title{
+
+.home-cate-slider .title {
   font-size: 20px;
   font-weight: 600;
   margin-bottom: 10px;
 }
+
 /*Categories page*/
 .category-card {
   background: #fff;
@@ -15900,6 +15961,7 @@ button.action-btn.border-0 {
   overflow: hidden;
   transition: .3s;
   height: 100%;
+  border-radius: 0px;
 }
 
 .category-card:hover {
@@ -15917,14 +15979,10 @@ button.action-btn.border-0 {
   justify-content: center;
   align-items: center;
   text-align: center;
-  /* height: 300px; */
+  height: 250px;
   width: 100%;
 }
 
-
-.category-content {
-  padding: 20px;
-}
 
 .category-content h5 {
   font-weight: 700;
@@ -15987,14 +16045,6 @@ button.action-btn.border-0 {
   object-fit: cover;
 }
 
-.category-card {
-  /* background: #fff;
-  border: 1px solid #eee; */
-  border-radius: 0px;
-  /* padding: 25px; */
-  transition: .3s;
-  height: 100%;
-}
 
 .category-card:hover {
   box-shadow: 0 10px 30px rgba(0, 0, 0, .08);
@@ -16096,14 +16146,6 @@ button.action-btn.border-0 {
     border-color: var(--primary) !important;
     color: var(--primary) !important;
   }
-}
-
-.category-card {
-  /* border: 1px solid #eee; */
-  /* border-radius: 10px; */
-  background: #fff;
-  transition: .3s;
-  overflow: hidden;
 }
 
 
@@ -16271,7 +16313,8 @@ i.fas.fa-chevron-left:hover {
   color: #fff;
 }
 
-.best-selling-nav, .latest-post-nav {
+.best-selling-nav,
+.latest-post-nav {
   display: flex;
   justify-content: flex-end;
   gap: 5px;
@@ -16279,11 +16322,13 @@ i.fas.fa-chevron-left:hover {
   position: absolute;
   right: 0;
 }
+
 .latest-post-nav {
   align-items: flex-end !important;
   flex-direction: column !important;
   gap: 0px;
 }
+
 /* .best-selling-nav.slider-nav {
   
 } */
@@ -16292,9 +16337,11 @@ i.fas.fa-chevron-left:hover {
   justify-content: flex-end;
   position: relative;
 }
-.latest-post-title-row-first{
+
+.latest-post-title-row-first {
   position: relative;
 }
+
 a.compare_product .compare,
 .add-to-cart .add-cart-form,
 .add-to-cart a .details {
@@ -16456,6 +16503,7 @@ section.product-category.py-120 {
   display: flex;
   flex-direction: row;
   align-items: center;
+  gap: 20px;
 }
 
 /* #categoryContainer.categories-list-view .category-image {  } */
@@ -17660,21 +17708,24 @@ span.product-badge.product-cat {
     /* padding: 1.75rem; */
   }
 }
+
 .page-title-banner::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5); /* overlay */
-    z-index: 1;
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  /* overlay */
+  z-index: 1;
 }
 
-.page-title-banner > * {
-    position: relative;
-    z-index: 2;
+.page-title-banner>* {
+  position: relative;
+  z-index: 2;
 }
+
 .page-title-banner {
-    position: relative;
-  }
+  position: relative;
+}
 
 /* Unique Scope: ST Auto Parts Policy Module */
 .st-policy-wrapper {
@@ -17689,8 +17740,9 @@ span.product-badge.product-cat {
   max-width: 80rem;
   margin: 0 auto;
 }
-.st-policy-wrapper aside{
-  display:none;
+
+.st-policy-wrapper aside {
+  display: none;
 }
 
 .st-policy-grid {
@@ -17881,4 +17933,14 @@ span.product-badge.product-cat {
 .st-policy-mono-email {
   color: #ef4444;
   font-family: monospace;
+}
+
+.review-page-vr-modal .btn-close.steve-btn,
+.address-modal .btn-close.steve-btn {
+  background-color: red;
+  opacity: 1;
+  color: #fff !important;
+  filter: none;
+
+  --bs-btn-close-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23fff'%3e%3cpath d='M.293.293a1 1 0 0 1 1.414 0L8 6.586 14.293.293a1 1 0 1 1 1.414 1.414L9.414 8l6.293 6.293a1 1 0 0 1-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 0 1-1.414-1.414L6.586 8 .293 1.707a1 1 0 0 1 0-1.414z'/%3e%3c/svg%3e");
 }

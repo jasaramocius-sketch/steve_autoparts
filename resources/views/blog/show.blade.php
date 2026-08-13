@@ -38,7 +38,7 @@
 
             <!-- Featured Image -->
             <img class="fea-img img-fluid"
-                 src="{{ asset('assets/images/blogs/'.($blog->image ?? 'placeholder.jpg')) }}"
+                 src="{{ storedImageUrl($blog->image, 'assets/images/blogs', 'assets/images/blogs/placeholder.jpg') }}"
                  alt="{{ $blog->title }}">
 
             <!-- Meta Info -->
@@ -148,7 +148,7 @@
             <div class="gs-sm-recent-post-wrapper">
               @foreach($recentBlogs->take(4) as $post)
               <a href="{{ route('blog.show', $post->slug) }}" class="recent-post d-flex">
-                {!! imgTag('assets/images/blogs/'.($post->image ?? 'placeholder.jpg'), '', '', 'width="80" height="80"') !!}
+                {!! imgTag(storedPath($post->image, 'assets/images/blogs', 'assets/images/blogs/placeholder.jpg'), '', '', 'width="80" height="80"') !!}
                 <div class="recent-post-content">
                   <h6 class="post-title">{{ Str::limit($post->title, 50) }}</h6>
                   <span class="post-date">

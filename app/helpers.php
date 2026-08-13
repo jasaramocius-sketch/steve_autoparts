@@ -73,8 +73,14 @@ if (!function_exists('storedPath')) {
     function storedPath($value, ?string $legacyPrefix = null, string $fallback = 'assets/images/placeholder.png'): string
     {
         $path = normalizeImagePath($value, $legacyPrefix);
-        if (!$path || preg_match('#^https?://#i', $path)) {
+        if (!$path) {
             return $fallback;
+        }
+
+        // Absolute URLs (e.g. full storage URLs stored in the cart session)
+        // are already complete — pass them through instead of falling back.
+        if (preg_match('#^https?://#i', $path)) {
+            return $path;
         }
 
         return $path;

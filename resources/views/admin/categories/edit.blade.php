@@ -38,7 +38,7 @@
                 <div class="mb-3">
                     <label>Current Image</label>
                     <div>
-                        <img src="{{ asset('assets/images/categories/'.$category->image) }}" width="100px">
+                        <img src="{{ storedImageUrl($category->image, 'assets/images/categories') }}" width="100px" onerror="this.onerror=null;this.src='{{ asset('assets/images/placeholder.png') }}'">
                     </div>
                 </div>
             @endif

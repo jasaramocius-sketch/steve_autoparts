@@ -288,7 +288,7 @@ class DashboardController extends Controller
             ? $sellerModel->products()->where('status', true)->count()
             : $followedSeller->products;
         $products = $sellerModel
-            ? $sellerModel->products()->where('status', true)->orderBy('id')->limit(8)->get(['id', 'name', 'slug', 'price', 'image'])
+            ? $sellerModel->products()->where('status', true)->orderBy('id')->limit(4)->get(['id', 'name', 'slug', 'price', 'image'])
             : collect();
 
         $seller = [
@@ -322,7 +322,7 @@ class DashboardController extends Controller
 
         $sellerModel = $followedSeller->seller;
         $offset = (int) request('offset', 0);
-        $limit = 8;
+        $limit = 4;
 
         $query = $sellerModel
             ? $sellerModel->products()->where('status', true)
@@ -364,7 +364,18 @@ class DashboardController extends Controller
         $vehicle = Vehicle::where('user_id', Auth::id())->findOrFail($id);
         session(['selected_vehicle_id' => $vehicle->id]);
         session()->forget('shop_vehicle_cleared');
-        return back()->with('success', 'Vehicle selected: ' . $vehicle->year . ' ' . $vehicle->make . ' ' . $vehicle->model);
+
+        $url = url()->previous();
+        $path = $url;
+        $query = [];
+        if (str_contains($url, '?')) {
+            [$path, $qs] = explode('?', $url, 2);
+            parse_str($qs, $query);
+        }
+        unset($query['year'], $query['make'], $query['model'], $query['page']);
+
+        return redirect($path . (!empty($query) ? '?' . http_build_query($query) : ''))
+            ->with('success', 'Vehicle selected: ' . $vehicle->year . ' ' . $vehicle->make . ' ' . $vehicle->model);
     }
 
     public function addresses()

@@ -60,7 +60,7 @@
                         <td class="ps-3">{{ $blog->id }}</td>
                         <td>
                             @if($blog->image)
-                                <img src="{{ asset('assets/images/blogs/' . $blog->image) }}" width="50" height="50" style="object-fit:cover; border-radius:4px;">
+                                <img src="{{ storedImageUrl($blog->image, 'assets/images/blogs') }}" width="50" height="50" style="object-fit:cover; border-radius:4px;" onerror="this.onerror=null;this.src='{{ asset('assets/images/placeholder.png') }}'">
                             @else
                                 <img src="{{ asset('assets/images/blogs/placeholder.jpg') }}" width="50" height="50" style="object-fit:cover; border-radius:4px;">
                             @endif
