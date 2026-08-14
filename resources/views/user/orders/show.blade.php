@@ -157,7 +157,7 @@
     justify-content: center;
     border-radius: 50%;
     background: #f1f5f9;
-    color: #94a3b8;
+    color: #000;
     border: 2px solid #e2e8f0;
     font-size: 15px;
     font-weight: 700;
@@ -173,6 +173,7 @@
     box-shadow: 0 0 0 5px rgba(239, 43, 5, .12);
     background: var(--order-primary);
     border-color: var(--order-primary);
+    color: #fff;
 }
 
 .user-order-details-page .order-status-label {

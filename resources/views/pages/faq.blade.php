@@ -31,10 +31,10 @@
     <div class="row justify-content-center Faqs-page-row">
       <div class="col-12 col-lg-8 Faqs-page-col">
 
-        <div class="faq-search-wrap">
+        <!-- <div class="faq-search-wrap">
           <i class="fas fa-search faq-search-icon"></i>
           <input type="text" id="faqSearch" class="form-control faq-search-input" placeholder="Search questions">
-        </div>
+        </div> -->
 
         @if($faqCategories->isNotEmpty())
         <div class="faq-chip-row" id="faqChipRow">

@@ -163,12 +163,76 @@ function edit_address(id) {
 }
 
 $(document).ready(function() {
+    function validateAddressForm(form) {
+        var fields = [
+            { name: 'phone', label: 'Phone', regex: /^[0-9+\-\s()]{7,20}$/ },
+            { name: 'country', label: 'Country', regex: /.+/ },
+            { name: 'state', label: 'State', regex: /.+/, required: false },
+            { name: 'city', label: 'City', regex: /.+/ },
+            { name: 'zip_code', label: 'Zip Code', regex: /^[A-Za-z0-9\-\s]{3,20}$/ },
+            { name: 'address', label: 'Address', regex: /\S/ }
+        ];
+
+        for (var i = 0; i < fields.length; i++) {
+            var field = fields[i];
+            var input = form.querySelector('[name="' + field.name + '"]');
+            if (!input) continue;
+
+            var value = (input.value || '').trim();
+            var isRequired = input.required || (field.required !== false && field.name !== 'state');
+
+            // Focus the visible searchable-select trigger (the real field is hidden).
+            var focusInput = function() {
+                var w = input.closest ? input.closest('.address-suggest') : null;
+                var t = w && w.querySelector('.address-suggest-trigger');
+                if (t) t.focus(); else input.focus();
+            };
+
+            if (isRequired && value === '') {
+                if (window.toastr) {
+                    toastr.warning(field.label + ' is required.');
+                } else {
+                    alert(field.label + ' is required.');
+                }
+                focusInput();
+                return false;
+            }
+
+            if (value && field.regex && !field.regex.test(value)) {
+                if (window.toastr) {
+                    toastr.warning('Please enter a valid ' + field.label + '.');
+                } else {
+                    alert('Please enter a valid ' + field.label + '.');
+                }
+                focusInput();
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    $('#addressForm').data('addressAjax', '1')[0].dataset.addressAjax = '1';
+
     $('#addressForm').on('submit', function(e) {
+        var form = this;
+        form.dataset.addressAjax = '1';
+
+        if (!validateAddressForm(form)) {
+            e.preventDefault();
+            return;
+        }
+
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            e.preventDefault();
+            return;
+        }
+
         e.preventDefault();
-        var form = $(this);
-        var url = form.attr('action');
+        var url = $(form).attr('action');
         var method = $('#addressFormMethod').val();
-        var data = form.serialize();
+        var data = $(form).serialize();
 
         $.ajax({
             url: url,
@@ -182,12 +246,36 @@ $(document).ready(function() {
             },
             error: function(xhr) {
                 if (xhr.status === 422) {
-                    var errors = xhr.responseJSON.errors;
+                    var errors = (xhr.responseJSON && xhr.responseJSON.errors) || {};
                     var msg = '';
                     $.each(errors, function(key, val) {
-                        msg += val[0] + '\n';
+                        msg += (Array.isArray(val) ? val.join('\n') : val) + '\n';
                     });
-                    alert(msg);
+
+                    if (msg) {
+                        if (window.toastr) {
+                            toastr.error(msg.trim());
+                        } else {
+                            alert(msg.trim());
+                        }
+                    } else if (window.toastr) {
+                        toastr.error('Please correct the highlighted fields.');
+                    } else {
+                        alert('Please correct the highlighted fields.');
+                    }
+
+                    var firstField = Object.keys(errors)[0];
+                    if (firstField) {
+                        var firstInput = form.querySelector('[name="' + firstField + '"]');
+                        if (firstInput) {
+                            var focusEl = firstInput;
+                            var fw = firstInput.closest ? firstInput.closest('.address-suggest') : null;
+                            var ft = fw && fw.querySelector('.address-suggest-trigger');
+                            if (ft) focusEl = ft;
+                            focusEl.focus();
+                            focusEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    }
                 } else {
                     alert('Something went wrong!');
                 }

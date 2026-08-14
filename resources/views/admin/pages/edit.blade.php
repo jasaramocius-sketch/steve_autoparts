@@ -92,7 +92,7 @@
             <div class="d-flex align-items-center gap-2 pb-3 mb-4 border-bottom page-header-bar flex-wrap">
                 <div class="d-flex gap-2 align-items-center flex-grow-1 min-width-0">
                 <div class="w-60">
-                <input type="text" name="title" id="titleInput" class="form-control form-control-lg border-0 fw-semibold flex-grow-1 @error('title') is-invalid @enderror"
+                <input type="text" name="title" id="titleInput" class="page-title-input form-control form-control-lg border-0 fw-semibold flex-grow-1 @error('title') is-invalid @enderror"
                        placeholder="Untitled page" value="{{ old('title', $page->title) }}" maxlength="255" required style="font-size:1.25rem; box-shadow:none; padding-left:15px;">
                 @error('title') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>

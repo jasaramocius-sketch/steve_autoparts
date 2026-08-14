@@ -74,8 +74,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
     color: #fff;
     background: var(--primary);
@@ -499,7 +499,7 @@
         <!-- Sort & Nav Header -->
         <div class="product-nav-wrapper shadow-sm rounded border mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
           
-            <div class="d-flex align-items-center gap-3 flex-wrap filter-sort-brand-wrapper w-auto">
+            <div class="d-flex align-items-center gap-3 flex-wrap filter-sort-brand-wrapper w-80">
               <div class="d-flex align-items-center gap-2 filter-sort-wrapper">
                 <h5 class="mb-0" style="font-size: 14px; font-weight: 500;">Sort by</h5>
                 <select class="form-select" style="/*width:180px;*/ border:1px solid #c7c0bf; border-radius:4px;" id="sort-select">

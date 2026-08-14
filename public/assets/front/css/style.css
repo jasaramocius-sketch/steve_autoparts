@@ -443,7 +443,9 @@ p.text-lg {
     font-size: 16px;
   }
 }
-
+.w-80{
+  width: 80% !important;
+}
 .w-60{
   width: 60% !important;
 }
@@ -4663,6 +4665,9 @@ tbody tr:last-child {
   transform: translateY(-50%) rotate(0deg);
   transition: transform 0.2s ease;
   pointer-events: none;
+}
+.select-dropdown-icon .form-select-wrapper::after {
+  background: unset;
 }
 
 .form-select-wrapper.focused::after {
@@ -10728,7 +10733,12 @@ div.dt-container .dt-paging .dt-paging-button.last {
   gap: 24px;
   border-bottom: 1px solid #e9e6e6;
 }
-
+.modal-header .btn-close:hover{
+  background-color: var(--hov-primary) !important;
+}
+.modal-header .btn-close{
+  box-shadow:unset;
+}
 @media (max-width: 991.97px) {
   .gs-modal .modal-dialog .modal-content .modal-header {
     padding-bottom: 12px;
@@ -12705,7 +12715,10 @@ width: 94% !important;
     padding: 12px !important;
   }
 }
-
+.nice-select.disabled{
+  background-color: #e9e6e6 !important;
+  border: 1px solid #e9e6e6 !important;
+}
 .product-nav-wrapper .btn-wrapper {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -13037,6 +13050,12 @@ span.checkout-payment__image {
   grid-template-columns: repeat(4, 1fr);
   gap: 1.5rem;
 }
+/*Admin Add/Edit page - start*/
+input.page-title-input {
+    border-bottom: 1px solid #000 !important;
+    border-radius: unset;
+}
+/*Admin Add/Edit page - end*/
 
 /* Tablet */
 @media (max-width: 1299px) {

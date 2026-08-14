@@ -27,7 +27,9 @@
         <ul class="list-unstyled d-flex flex-column gap-2">
             <li><strong class="text-secondary" style="font-size: 14px;">Address:</strong> <span class="user-address text-transform-capitalize" style="font-weight: 500;">{!! $user['address'] !!}</span></li>
             <li><strong class="text-secondary" style="font-size: 14px;">City:</strong> <span class="user-city text-transform-capitalize" style="font-weight: 500;">{{ $user['city'] }}</span></li>
+            <li><strong class="text-secondary" style="font-size: 14px;">State:</strong> <span class="user-state text-transform-capitalize" style="font-weight: 500;">{{ $user['state'] }}</span></li>
             <li><strong class="text-secondary" style="font-size: 14px;">Country:</strong> <span class="user-country text-transform-capitalize" style="font-weight: 500;">{{ $user['country'] }}</span></li>
+            <li><strong class="text-secondary" style="font-size: 14px;">Zip:</strong> <span class="user-postal text-transform-capitalize" style="font-weight: 500;">{{ $user['postal_code'] }}</span></li>
         </ul>
         </div>
     </div>
@@ -59,23 +61,17 @@
                         <input type="tel" name="phone" class="form-control text-transform-capitalize" inputmode="numeric" value="{{ $user->phone }}">
                     </div>
 
-                    <div class="mb-3 d-flex flex-column flex-md-row gap-3">
-                        <div class="w-100">
-                            <label class="form-label">City</label>
-                            <input type="text" name="city" class="form-control text-transform-capitalize" value="{{ $user->city }}">
-                        </div>
-                        <div class="w-100">
-                            <label class="form-label">Country</label>
-                            <input type="text" name="country" class="form-control text-transform-capitalize" value="{{ $user->country }}">
-                        </div>
-                    </div>
+                    @include('partials.address-fields', [
+                        'prefix' => 'pro',
+                        'value' => $user,
+                        'withFullName' => false,
+                        'withPhone' => false,
+                        'withDefault' => false,
+                        'required' => [],
+                        'zipName' => 'postal_code',
+                    ])
 
-                    <div class="mb-3">
-                        <label class="form-label">Address</label>
-                        <textarea name="address" class="form-control text-transform-capitalize" rows="3">{{ $user->address }}</textarea>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary text-transform-capitalize steve-btn">Update Profile</button>
+                    <button type="submit" class="btn btn-primary text-transform-capitalize steve-btn mt-3">Update Profile</button>
                 </form>
             </div>
         </div>

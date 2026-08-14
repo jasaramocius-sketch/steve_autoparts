@@ -2337,3 +2337,39 @@ Revisions **4808–4809** (05 Aug 05:15).
 - `public/assets/front/js/script.js` — removed the "COUNTER UP" block (guard + `console.warn`); counters on the About page are already animated by the page's own IntersectionObserver script, so the jQuery plugin block was redundant.
 
 **Verified:** rendered homepage HTML contains no unirate script/CSS (only the harmless commented-out div); `script.js` no longer emits the warning.
+
+## 158. Address Country/State/City — Broken "Custom Dropdown" Design (13 Aug 2026)
+
+**Problem:** The Country/State/City dropdowns in address forms were styled/configured for the theme's `nice-select` custom dropdown (`.address-fields-row .nice-select .list` rules) but the plugin was **never initialized** — `script.js` called `$(".nice-select").niceSelect()` on a class that doesn't exist yet — so the fields rendered as plain native `<select>`s (broken/inconsistent look). An invalid stray `<div class="">` also sat inside the country `<select>`.
+
+**Files changed:**
+- `resources/views/partials/address-fields.blade.php`:
+  - Removed the invalid `<div class="">` wrapper from inside the country `<select>`.
+  - Added `.address-fields-row .nice-select` CSS (width 100%, no float, ellipsis on `.current`, arrow `right: 16px`) so the dropdown fills the field column.
+  - `wireGroup()` now converts Country/State/City to `niceSelect()` on wire-up; it first `unwrap()`s the layout's `.form-select-wrapper` chevron span (added by `app.blade.php`/admin layout JS) so the dropdown shows a single arrow.
+  - `refresh()` now calls `niceSelect('update')` on the Country select so its label stays in sync when JS prefills it (e.g., checkout). The existing `fillSelect`/`bindNiceSelectClicks` paths were already wired for nice-select.
+
+**Verified (headless Chrome, real data):** all three selects render as `nice-select` divs (City correctly `disabled` until a state is picked); no leftover `.form-select-wrapper` around them; cascade works — India → 36 states, then Gujarat enables the city list; default country United States → US states populated. Admin pages unchanged (no nice-select.js there → native selects kept).
+
+## 159. Admin Profile Address Fields — Nice-Select Conversion + State/Zip Support (13 Aug 2026)
+
+**Problem:** Every admin page that reuses `partials/address-fields` (admin profile, admin customers create/edit, admin users create/edit) rendered Country/State/City as plain native `<select>`s because the **admin** layout never loaded `nice-select.js`/CSS (only the front-end layout did after #158) — so the custom-dropdown look from the front-end was missing in admin. Additionally the admin profile summary only showed City + Country (State/Zip hidden), and `updateProfile()` silently dropped `state` and `postal_code`.
+
+**Files changed:**
+- `resources/views/admin/layouts/app.blade.php` — loaded `nice-select.css` (head) + `nice-select.js` (footer) globally, so any admin form using the partial gets the same custom dropdown as the front-end.
+- `resources/views/admin/profile.blade.php` — the "Profile Settings" form now includes `partials/address-fields` (`prefix => 'pro'`, `zipName => 'postal_code'`) giving Country/State/City + Zip fields; the summary `<ul>` now lists **State**, **Country**, and **Zip** (`user-state`, `user-country`, `user-postal` spans).
+- `app/Http/Controllers/AdminController.php` — `updateProfile()` validation now accepts `state` and `postal_code` and `update()`s them (they were never validated/saved before).
+
+**Verified (headless Chrome):** admin profile, admin customers create/edit, and admin users create/edit all render Country/State/City as `nice-select` divs (City correctly disabled until a state is picked). Live PUT save round-trip persisted `state` + `postal_code` earlier in the session (probe values saved + reverted). Note: the database was subsequently restored to a 10:27 backup by an external process, wiping the probe values and reverting the admin user's password to that backup's value.
+
+## 160. Address Cascade — Disabled State + Saved Country on Top (13 Aug 2026)
+
+**Problem:** The Country→State→City cascade logic existed but two gaps remained: (1) the nice-select plugin's click handler opened **any** `.nice-select`, including `.disabled` ones — only CSS `pointer-events: none` blocked real clicks, so the JS path still opened disabled State/City dropdowns; (2) the partial **defaulted Country to "United States"** on new forms, so State was enabled immediately (Country was never "empty"); (3) when editing an address, the saved Country stayed at its alphabetical position instead of the top of the dropdown.
+
+**Files changed:**
+- `public/assets/front/js/nice-select.js` — open/close handler selector changed to `.nice-select:not(.disabled)` so a disabled custom dropdown can never open (JS guard closes the gap CSS pointer-events already handled for real mouse clicks).
+- `resources/views/partials/address-fields.blade.php`:
+  - Country now **starts empty** on new forms (removed the `?: 'United States'` default) — State/City stay disabled until a country is actually chosen.
+  - The saved Country is now rendered **first** (right after "Select Country"), marked selected, and skipped from the alphabetical list (no duplication) — matches the `fillSelect` prepend behavior used for State/City.
+
+**Verified (headless Chrome cascade test + live pages):** with empty Country → State/City native+wrapper disabled and the disabled wrapper no longer opens on click; Country=India → State enabled (37 states), City still disabled; State=Gujarat → City enabled; changing Country while India+Gujarat+City are set clears State/City and repopulates for the new country (City re-disabled). Live pages: Add-address modal starts with empty Country; edit-address modal pre-selects the saved Country at the top with State/City `data-selected` preserved.

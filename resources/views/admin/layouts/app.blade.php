@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('assets/front/css/backend.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/front/css/nice-select.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-bs5.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('assets/front/css/toastr.min.css') }}">
 
@@ -138,6 +139,7 @@
 <script src="{{ asset('assets/front/js/jquery-ui.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-bs5.min.js"></script>
 <script src="{{ asset('assets/front/js/toastr.min.js') }}"></script>
+<script src="{{ asset('assets/front/js/nice-select.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 
 <script>

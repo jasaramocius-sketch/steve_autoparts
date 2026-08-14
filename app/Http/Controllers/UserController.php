@@ -190,7 +190,7 @@ class UserController extends Controller
             'city' => 'nullable|string|max:255',
             'state' => 'nullable|string|max:255',
             'country' => 'nullable|string|max:255',
-            'postal_code' => 'nullable|string|max:20',
+            'postal_code' => 'nullable|string|max:20|regex:/^[A-Za-z0-9\-\s]{3,20}$/',
             'status' => 'nullable|in:active,inactive',
         ]);
 
@@ -227,7 +227,7 @@ class UserController extends Controller
             'city' => 'nullable|string|max:255',
             'state' => 'nullable|string|max:255',
             'country' => 'nullable|string|max:255',
-            'postal_code' => 'nullable|string|max:20',
+            'postal_code' => 'nullable|string|max:20|regex:/^[A-Za-z0-9\-\s]{3,20}$/',
             'status' => 'nullable|in:active,inactive',
         ]);
 

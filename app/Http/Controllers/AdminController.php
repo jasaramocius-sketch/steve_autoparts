@@ -133,12 +133,14 @@ class AdminController extends Controller
             'phone'   => 'nullable|string|max:255|regex:/^[0-9+\-\s()]*$/',
             'address' => 'nullable|string|max:255',
             'city'    => 'nullable|string|max:255',
+            'state'   => 'nullable|string|max:255',
             'country' => 'nullable|string|max:255',
+            'postal_code' => 'nullable|string|max:255|regex:/^[A-Za-z0-9\-\s]{3,20}$/',
         ]);
 
-        $user->update($request->only(['name', 'email', 'phone', 'address', 'city', 'country']));
+        $user->update($request->only(['name', 'email', 'phone', 'address', 'city', 'state', 'country', 'postal_code']));
 
-        session()->put('user_profile', $user->only(['id', 'name', 'email', 'role', 'phone', 'address', 'city', 'country']));
+        session()->put('user_profile', $user->only(['id', 'name', 'email', 'role', 'phone', 'address', 'city', 'state', 'country', 'postal_code']));
 
         return back()->with('success', 'Profile updated successfully.');
     }
