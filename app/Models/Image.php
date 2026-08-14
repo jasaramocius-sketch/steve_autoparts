@@ -184,7 +184,13 @@ class Image extends Model
 
     public function scopeConvertible($query)
     {
-        return $query->whereIn('mime_type', ['image/jpeg', 'image/pjpeg', 'image/jpg']);
+        return $query->whereIn('mime_type', ['image/jpeg', 'image/pjpeg', 'image/jpg', 'image/png', 'image/gif']);
+    }
+
+    public function hasWebpVersion(): bool
+    {
+        $baseName = pathinfo($this->filename, PATHINFO_FILENAME);
+        return static::where('filename', $baseName . '.webp')->exists();
     }
 
     public static function storeFromUpload(

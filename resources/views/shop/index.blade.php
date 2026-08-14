@@ -19,8 +19,8 @@
     background-color: var(--primary) !important;
   }
   .product-nav-wrapper .btn-wrapper .view-btn {
-    width: 42px;
-    height: 42px;
+    width: 40px;
+    /* height: 40px; — using padding instead */
     border: 1px solid var(--primary);
     background: #fff;
     color: var(--primary);
@@ -45,7 +45,7 @@
   .cat-toggle-btn .fa-minus { display: none; }
   /* .cat-toggle-btn .fa-plus { display: inline; } */
   .cat-toggle-btn:not(.collapsed) .fa-minus { display: inline; }
-  .cat-toggle-btn:not(.collapsed) .fa-plus { display: none; }
+  /* .cat-toggle-btn:not(.collapsed) .fa-plus lives in custom.css */
   /* Active filter chips */
   .active-filter-chips-label {
     font-size: 13px;
@@ -205,8 +205,8 @@
                       @endif
                       @if($topCat->children->count() > 0)
                         <button class="btn p-0 border-0 cat-toggle-btn {{ $isTopActive ? '' : 'collapsed' }} steve-btn" data-bs-toggle="collapse" data-bs-target="#cat_{{ $topCat->id }}">
-                          <i class="fa-solid fa-plus" style="font-size: 11px;"></i>
-                          <i class="fa-solid fa-minus" style="font-size: 11px;"></i>
+                          <i class="fa-solid fa-plus" style="font-size: 9px;"></i>
+                          <i class="fa-solid fa-minus" style="font-size: 9px;"></i>
                         </button>
                       @endif
                     </div>

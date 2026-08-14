@@ -43,6 +43,8 @@ use App\Http\Controllers\Admin\ImageController;
 
 use App\Http\Controllers\CurrencyController;
 
+use App\Http\Controllers\LocationController;
+
 /*
 |--------------------------------------------------------------------------
 | PUBLIC
@@ -50,6 +52,8 @@ use App\Http\Controllers\CurrencyController;
 */
 
 Route::get('/currency', [CurrencyController::class, 'rates']);
+Route::get('/address/states', [LocationController::class, 'states'])->name('location.states');
+Route::get('/address/cities', [LocationController::class, 'cities'])->name('location.cities');
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/shop', [ShopController::class, 'index'])->name('shop');

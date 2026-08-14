@@ -16,8 +16,19 @@
     <h4 style="color: #1f0300; font-weight: 600;" class="mb-3">Account Details</h4>
     <div class="list-wrapper">
     <div class="row w-100">
-        <div class="col-md-6">
-        <ul class="list-unstyled d-flex flex-column gap-2">
+        <div class="col-md-3">
+            <ul>
+            <li>
+                @if(Auth::user()->avatar)
+                    <img src="{{ storedImageUrl(Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}" width="100%" class="border">
+                @else
+                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                @endif
+            </li>
+        </ul>
+        </div>
+        <div class="col-md-3">        
+        <ul class="list-unstyled d-flex flex-column gap-2">            
             <li><strong class="text-secondary" style="font-size: 14px;">Name:</strong> <span class="user-name text-transform-capitalize" style="font-weight: 500;">{{ $user['name'] }}</span></li>
             <li><strong class="text-secondary" style="font-size: 14px;">Email Address:</strong> <span class="user-email text-transform-capitalize" style="font-weight: 500;">{{ $user['email'] }}</span></li>
             <li><strong class="text-secondary" style="font-size: 14px;">Phone:</strong> <span class="user-phone text-transform-capitalize" style="font-weight: 500;">{{ $user['phone'] }}</span></li>
@@ -44,6 +55,26 @@
             <div class="card-body">
                 <form action="{{ route('admin.profile.update') }}" method="POST">
                     @csrf
+
+                    <div class="mb-3">
+                        <label class="form-label">Profile Photo</label>
+                        <input type="hidden" name="image_from_manager" id="image_from_manager_avatar">
+                        <div class="d-flex align-items-center gap-3">
+                            <div id="impPreview_avatar" style="width:80px;height:80px;border-radius:50%;overflow:hidden;border:2px solid #eee;background:#f0f0f0;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                @if(Auth::user()->avatar)
+                                    <img src="{{ storedImageUrl(Auth::user()->avatar) }}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;">
+                                @else
+                                    <span style="font-size:32px;font-weight:600;color:#999;">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</span>
+                                @endif
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="impOpen_avatar()">
+                                    <i class="fas fa-images me-1"></i> Pick from Image Manager
+                                </button>
+                                <div><small class="text-muted">Select a profile photo from Image Manager</small></div>
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="mb-3 d-flex flex-column flex-md-row gap-3">
                         <div class="w-100">
@@ -109,3 +140,5 @@
 </div>
 
 @endsection
+
+@include('admin.partials.image-manager-picker', ['pickerId' => 'avatar', 'targetInput' => 'image_from_manager'])

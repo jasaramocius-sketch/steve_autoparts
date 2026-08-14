@@ -6,15 +6,15 @@ class AddressHelper
 {
     public static function countries(): array
     {
-        $path = public_path('assets/front/js/countries-states-data.json');
-        if (file_exists($path)) {
-            $content = @file_get_contents($path);
-            if ($content !== false) {
-                $data = json_decode($content, true);
-                if (is_array($data) && isset($data['countries']) && is_array($data['countries'])) {
-                    return $data['countries'];
-                }
+        try {
+            $names = \Illuminate\Support\Facades\Cache::rememberForever('address_countries', function () {
+                return \App\Models\Country::query()->orderBy('name')->pluck('name')->all();
+            });
+            if (is_array($names) && count($names)) {
+                return $names;
             }
+        } catch (\Throwable $e) {
+            // DB unavailable — fall through to the static list.
         }
 
         return [

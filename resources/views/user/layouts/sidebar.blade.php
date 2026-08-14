@@ -24,7 +24,7 @@
         <ul class="gs-dashboard-user-sidebar-wrapper nav flex-column p-0">
             <div class="p-4 text-center mb-4 border-bottom position-relative bg-white rounded">
                 <span class="avatar avatar-md mb-3">
-                    <img src="{{ auth()->user() && auth()->user()->avatar ? storedImageUrl(auth()->user()->avatar) : asset('assets/images/avatar-place.png') }}" class="image rounded-circle" onerror="this.onerror=null;this.src='{{ asset('assets/images/avatar-place.png') }}';" width="100">
+                    {!! imgTag(storedPath(auth()->user()->avatar), auth()->user()->name, 'image rounded-circle', 'onerror="this.onerror=null;this.src=\''.asset('assets/images/avatar-place.png').'\'' . '"' . ' width="100"') !!}
                 </span>
                 <h4 class="h5 fs-14 mb-1 fw-700 text-dark">{{ auth()->user()->name ?? session('user_profile.name') }}</h4>
                 <div class="text-truncate opacity-60 fs-12">{{ auth()->user()->email ?? session('user_profile.email') }}</div>

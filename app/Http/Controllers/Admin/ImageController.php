@@ -181,12 +181,14 @@ class ImageController extends Controller
         }
 
         $filter = $request->filter;
+        $convertibleMimes = ['image/jpeg', 'image/pjpeg', 'image/jpg', 'image/png', 'image/gif'];
         if ($filter === 'unused') {
             $query->whereNull('attachable_type')->whereNull('attachable_id');
         } elseif ($filter === 'attached') {
             $query->whereNotNull('attachable_type');
         } elseif ($filter === 'convertible') {
-            $query->whereIn('mime_type', ['image/jpeg', 'image/pjpeg']);
+            $query->whereIn('mime_type', $convertibleMimes)
+                  ->whereRaw("SUBSTRING_INDEX(filename, '.', 1) NOT IN (SELECT SUBSTRING_INDEX(filename, '.', 1) FROM images WHERE mime_type = 'image/webp')");
         }
 
         $sort = $request->sort ?? 'created_at';
@@ -197,11 +199,14 @@ class ImageController extends Controller
 
         $images = $query->paginate(24)->onEachSide(2)->withQueryString();
 
+        $convertibleQuery = Image::whereIn('mime_type', $convertibleMimes)
+            ->whereRaw("SUBSTRING_INDEX(filename, '.', 1) NOT IN (SELECT SUBSTRING_INDEX(filename, '.', 1) FROM images WHERE mime_type = 'image/webp')");
+
         $stats = [
             'total' => Image::count(),
             'unused' => Image::whereNull('attachable_type')->whereNull('attachable_id')->count(),
             'attached' => Image::whereNotNull('attachable_type')->count(),
-            'convertible' => Image::whereIn('mime_type', ['image/jpeg', 'image/pjpeg'])->count(),
+            'convertible' => $convertibleQuery->count(),
             'total_size' => Image::sum('size'),
         ];
 
@@ -235,8 +240,8 @@ class ImageController extends Controller
     {
         $image = Image::findOrFail($id);
 
-        if (!in_array($image->mime_type, ['image/jpeg', 'image/pjpeg', 'image/jpg'])) {
-            return back()->with('error', 'Only JPEG images can be converted to WebP.');
+        if (!in_array($image->mime_type, ['image/jpeg', 'image/pjpeg', 'image/jpg', 'image/png', 'image/gif'])) {
+            return back()->with('error', 'Only JPEG, PNG, and GIF images can be converted to WebP.');
         }
 
         $sourcePath = $image->file_path;
@@ -245,20 +250,16 @@ class ImageController extends Controller
         }
 
         $webpFilename = pathinfo($image->filename, PATHINFO_FILENAME) . '.webp';
+
+        if (Image::where('filename', $webpFilename)->exists()) {
+            return back()->with('error', 'This image is already converted to WebP.');
+        }
+
         $destPath = dirname($sourcePath) . '/' . $webpFilename;
 
-        $info = getimagesize($sourcePath);
-        if ($info === false) {
-            return back()->with('error', 'Could not read source image.');
+        if (!convertToWebp($sourcePath, $destPath, 80)) {
+            return back()->with('error', 'Could not convert image to WebP.');
         }
-
-        $imageResource = imagecreatefromjpeg($sourcePath);
-        if (!$imageResource) {
-            return back()->with('error', 'Could not create image resource.');
-        }
-
-        imagewebp($imageResource, $destPath, 80);
-        imagedestroy($imageResource);
 
         $webpSize = filesize($destPath);
         $webpInfo = getimagesize($destPath);
@@ -298,7 +299,7 @@ class ImageController extends Controller
         }
 
         $images = Image::whereIn('id', $ids)
-            ->whereIn('mime_type', ['image/jpeg', 'image/pjpeg'])
+            ->whereIn('mime_type', ['image/jpeg', 'image/pjpeg', 'image/jpg', 'image/png', 'image/gif'])
             ->get();
 
         $converted = 0;
@@ -310,13 +311,12 @@ class ImageController extends Controller
                 if (!file_exists($sourcePath)) { $failed++; continue; }
 
                 $webpFilename = pathinfo($image->filename, PATHINFO_FILENAME) . '.webp';
+
+                if (Image::where('filename', $webpFilename)->exists()) { $converted++; continue; }
+
                 $destPath = dirname($sourcePath) . '/' . $webpFilename;
 
-                $imageResource = imagecreatefromjpeg($sourcePath);
-                if (!$imageResource) { $failed++; continue; }
-
-                imagewebp($imageResource, $destPath, 80);
-                imagedestroy($imageResource);
+                if (!convertToWebp($sourcePath, $destPath, 80)) { $failed++; continue; }
 
                 $webpSize = filesize($destPath);
                 $dimensions = getimagesize($destPath);

@@ -37,9 +37,7 @@
           <div class="gs-blog-card">
 
             <!-- Featured Image -->
-            <img class="fea-img img-fluid"
-                 src="{{ storedImageUrl($blog->image, 'assets/images/blogs', 'assets/images/blogs/placeholder.jpg') }}"
-                 alt="{{ $blog->title }}">
+            {!! imgTag(storedPath($blog->image, 'assets/images/blogs', 'assets/images/blogs/placeholder.jpg'), $blog->title, 'fea-img img-fluid') !!}
 
             <!-- Meta Info -->
             <div class="meta-info-wrapper">

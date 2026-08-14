@@ -42,7 +42,7 @@
                 <td data-label="Product">
                     <div class="d-flex align-items-center gap-2">
                         @if($item['product_image'])
-                            <img src="{{ storedImageUrl($item['product_image'], 'assets/images/thumbnails') }}" alt="" style="width:40px;height:40px;object-fit:cover;border-radius:6px;">
+                            {!! imgTag(storedPath($item['product_image'], 'assets/images/thumbnails'), '', '', 'style="width:40px;height:40px;object-fit:cover;border-radius:6px;"') !!}
                         @else
                             <div style="width:40px;height:40px;background:#f0f0f0;border-radius:6px;display:flex;align-items:center;justify-content:center;">
                                 <i class="fas fa-image text-muted"></i>
@@ -272,7 +272,6 @@
 </div>
 
 <style>
-body.modal-open { overflow-y: scroll !important; padding-right: 0 !important; }
 .review-image-upload-wrapper { display: flex; align-items: center; }
 .review-img-thumb { position: relative; width: 60px; height: 60px; overflow: hidden; border: 1px solid #ebedf2; }
 .review-img-thumb img { width: 100%; height: 100%; object-fit: cover; }

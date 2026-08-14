@@ -3,7 +3,7 @@
 @include('partials.page-attributes', ['pageId' => 'user-followed-sellers-page', 'pageClass' => 'user-followed-sellers-page'])
 @section('dashboard-content')
 
-<section>
+<section class="followed-sellers-section">
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
         <div>
             <h4 class="h4-style mb-0">Followed Sellers</h4>
@@ -14,15 +14,15 @@
         </button>
     </div>
 
-    <div class="row g-4">
+    <div class="row g-4 user-followed-sellers-grid">
         @forelse($followedSellers as $seller)
             <div class="col-lg-6">
                 <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-start gap-3 mb-3">
+                    <div class="card-body user-followed-seller-card">
+                        <div class="d-flex align-items-start gap-3 mb-3 user-followed-seller-header">
                             <div class="avatar avatar-lg rounded-circle bg-light d-flex align-items-center justify-content-center" style="width:72px; height:72px; overflow:hidden;">
                                 @if($seller->seller && $seller->seller->image)
-                                    <img src="{{ storedImageUrl($seller->seller->image, 'assets/images') }}" alt="{{ $seller->seller_name }}" style="width:100%;height:100%;object-fit:cover;">
+                                    {!! imgTag(storedPath($seller->seller->image, 'assets/images'), $seller->seller_name, '', 'style="width:100%;height:100%;object-fit:cover;"') !!}
                                 @else
                                     <span class="fs-4 text-primary">{{ strtoupper(substr($seller->seller_name, 0, 1)) }}</span>
                                 @endif
@@ -33,7 +33,7 @@
                             </div>
                         </div>
 
-                        <div class="text-secondary" style="line-height:1.6;">{!! $seller->description !!}</div>
+                        <div class="text-secondary user-followed-seller-description" style="line-height:1.6;">{!! $seller->description !!}</div>
 
                         @php
                             $sellerProducts = $seller->seller ? $seller->seller->products : collect();
@@ -42,7 +42,7 @@
                             $followerCount = $seller->seller ? $seller->seller->followers_count : $seller->followers;
                         @endphp
 
-                        <div class="d-flex flex-wrap gap-3 mt-4">
+                        <div class="d-flex flex-wrap gap-3 mt-4 user-followed-seller-stats">
                             <div class="badge bg-light text-dark p-2 rounded">
                                 <strong>{{ $productCount }}</strong> Products
                             </div>
@@ -54,11 +54,11 @@
                             </div>
                         </div>
 
-                        <div class="mt-4 d-flex gap-2">
-                            <button type="button" class="btn btn-primary view-seller-btn" data-seller-id="{{ $seller->id }}" data-seller-name="{{ $seller->seller_name }}">
+                        <div class="mt-4 d-flex gap-2 user-followed-seller-actions">
+                            <button type="button" class="btn btn-primary view-seller-btn steve-btn" data-seller-id="{{ $seller->id }}" data-seller-name="{{ $seller->seller_name }}">
                                 <i class="fas fa-eye me-1"></i> View Seller
                             </button>
-                            <button type="button" class="btn btn-outline-danger unfollow-btn" data-seller-id="{{ $seller->id }}" data-seller-name="{{ $seller->seller_name }}">
+                            <button type="button" class="btn btn-outline-danger unfollow-btn h-40px" data-seller-id="{{ $seller->id }}" data-seller-name="{{ $seller->seller_name }}">
                                 <i class="fas fa-user-minus me-1"></i> Unfollow
                             </button>
                         </div>
@@ -95,7 +95,7 @@
                                     <input type="radio" name="seller_id" value="{{ $s->id }}" class="form-check-input m-0">
                                     <span class="seller-option-avatar rounded-circle bg-light d-inline-flex align-items-center justify-content-center" style="width:40px;height:40px;overflow:hidden;flex-shrink:0;">
                                         @if($s->image)
-                                            <img src="{{ storedImageUrl($s->image, 'assets/images') }}" alt="{{ $s->name }}" style="width:100%;height:100%;object-fit:cover;">
+                                            {!! imgTag(storedPath($s->image, 'assets/images'), $s->name, '', 'style="width:100%;height:100%;object-fit:cover;"') !!}
                                         @else
                                             <span class="text-primary">{{ strtoupper(substr($s->name, 0, 1)) }}</span>
                                         @endif

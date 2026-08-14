@@ -6,8 +6,8 @@
 @section('content')
 <style>
   .category-toolbar .view-btn {
-    width: 42px;
-    height: 42px;
+    width: 40px;
+    /* height: 40px; — using padding instead */
     border: 1px solid var(--primary);
     background: #fff;
     color: var(--primary);

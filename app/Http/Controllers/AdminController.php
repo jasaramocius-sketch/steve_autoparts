@@ -138,6 +138,14 @@ class AdminController extends Controller
             'postal_code' => 'nullable|string|max:255|regex:/^[A-Za-z0-9\-\s]{3,20}$/',
         ]);
 
+        if ($request->filled('image_from_manager')) {
+            $oldAvatar = $user->avatar;
+            $user->avatar = 'storage/' . ltrim($request->input('image_from_manager'), '/');
+            if ($oldAvatar && $oldAvatar !== $user->avatar) {
+                deleteImageFiles($oldAvatar);
+            }
+        }
+
         $user->update($request->only(['name', 'email', 'phone', 'address', 'city', 'state', 'country', 'postal_code']));
 
         session()->put('user_profile', $user->only(['id', 'name', 'email', 'role', 'phone', 'address', 'city', 'state', 'country', 'postal_code']));
@@ -341,6 +349,8 @@ class AdminController extends Controller
         if ($request->boolean('remove_admin_header_bg')) {
             Setting::set('admin_header_bg', '');
         }
+
+        Setting::set('webp_frontend', $request->boolean('webp_frontend') ? '1' : '0');
 
         return redirect()->route('admin.settings.header')->with('success', 'Header settings updated successfully.');
     }

@@ -1,21 +1,20 @@
 @php $adminHeaderBg = \App\Models\Setting::get('admin_header_bg'); @endphp
 <link rel="stylesheet" href="{{ asset('assets/front/css/style.css') }}?v={{ filemtime(public_path('assets/front/css/style.css')) }}">
 <div class="admin-navbar admin-dashboard-header @if($adminHeaderBg) admin-navbar-bg @endif" @if($adminHeaderBg) style="background-image:url('{{ storedImageUrl($adminHeaderBg, 'assets/images') }}'); background-size:cover; background-position:center;" @endif>
-    <div class="d-flex align-items-center gap-2">
-        <button class="btn btn-sm btn-outline-secondary d-md-none steve-btn" id="sidebarToggle" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Toggle sidebar">
+    <div class="d-flex align-items-center gap-2 admin-navbar-first-col">
+        <button class="btn btn-outline-secondary d-md-none steve-btn wh-40 d-flex" id="sidebarToggle" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Toggle sidebar">
             <i class="fas fa-bars"></i>
         </button>
-        <a href="{{ url()->previous() }}" class="btn btn-outline-secondary steve-btn btn-sm" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Go Back">
+        <a href="{{ url()->previous() }}" class="btn btn-outline-secondary steve-btn wh-40 d-flex" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Go Back">
             <i class="fas fa-arrow-left"></i>
         </a>
         <div class="page-title">@yield('page-title', 'Dashboard')</div>
     </div>
-    <div class="nav-actions">
-        <a href="{{ route('home') }}" target="_blank" class="btn btn-sm btn-outline-primary d-none d-md-inline-block" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="View Site">
+    <div class="nav-actions admin-navbar-second-col">
+        <a href="{{ route('home') }}" target="_blank" class="btn btn-outline-primary d-none d-md-inline-block d-flex wh-40" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="View Site">
             <i class="fas fa-external-link-alt"></i>
         </a>
-        <a href="{{ route('admin.clear.cache') }}" class="btn btn-sm btn-outline-danger"
-           onclick="return confirm('Clear all cache?')" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Clear Cache">
+        <a href="{{ route('admin.clear.cache') }}" class="btn btn-outline-danger wh-40 d-flex" onclick="return confirm('Clear all cache?')" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Clear Cache">
             <i class="fas fa-broom"></i>
         </a>
         <div class="dropdown">

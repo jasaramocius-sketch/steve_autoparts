@@ -1,8 +1,9 @@
 {{--
     Shared address fields partial — single consistent style for every address form.
     Country is a dropdown; State & City fields show a custom suggestion dropdown
-    (below the field, filtered by the selected country) using data from
-    public/assets/front/js/countries-states.js.
+    (below the field). Countries come from the DB server-side; States and Cities
+    are fetched via AJAX (GET /address/states, /address/cities) only when a
+    country/state is actually chosen, and cached in memory.
 
     Params:
       $prefix           (string, default 'addr') id prefix, must be unique per form
@@ -64,7 +65,7 @@
     <div class="col-md-6 address-country-wrapper select-dropdown-icon">
         <label class="form-label fs-14" for="{{ $p }}_country_search">Country @if($req('country'))<span class="text-danger">*</span>@endif</label>
         <div class="address-suggest">
-            <div class="form-select address-suggest-trigger @error('country') is-invalid @enderror" id="{{ $p }}_country_search" data-placeholder="Select Country" role="combobox" aria-haspopup="listbox" aria-expanded="false" tabindex="0"></div>
+            <div class="form-select address-suggest-trigger @error('country') is-invalid @enderror" id="{{ $p }}_country_search" data-placeholder="Select your Country" role="combobox" aria-haspopup="listbox" aria-expanded="false" tabindex="0"></div>
             <ul class="address-suggest-list" role="listbox"></ul>
         <select name="country" id="{{ $p }}_country" class="address-country-select @error('country') is-invalid @enderror" data-prefix="{{ $p }}" @if($req('country'))required @endif>
             <option value="">Select Country</option>
@@ -84,7 +85,7 @@
     <div class="col-md-6 address-state-wrapper select-dropdown-icon">
         <label class="form-label fs-14" for="{{ $p }}_state_search">State @if($req('state'))<span class="text-danger">*</span>@endif</label>
         <div class="address-suggest">
-            <div class="form-select address-suggest-trigger @error('state') is-invalid @enderror" id="{{ $p }}_state_search" data-placeholder="Select State" role="combobox" aria-haspopup="listbox" aria-expanded="false" tabindex="0"></div>
+            <div class="form-select address-suggest-trigger @error('state') is-invalid @enderror" id="{{ $p }}_state_search" data-placeholder="Select your State" role="combobox" aria-haspopup="listbox" aria-expanded="false" tabindex="0"></div>
             <ul class="address-suggest-list" role="listbox"></ul>
         <select name="state" id="{{ $p }}_state" class="address-state-select @error('state') is-invalid @enderror" data-prefix="{{ $p }}" data-selected="{{ $get('state') }}" data-required="{{ $req('state') ? '1' : '0' }}" @if($req('state'))required @endif>
             <option value="">Select State</option>
@@ -98,7 +99,7 @@
     <div class="col-md-6 address-city-wrapper select-dropdown-icon">
         <label class="form-label fs-14" for="{{ $p }}_city_search">City @if($req('city'))<span class="text-danger">*</span>@endif</label>
         <div class="address-suggest">
-            <div class="form-select address-suggest-trigger @error('city') is-invalid @enderror" id="{{ $p }}_city_search" data-placeholder="Select City" role="combobox" aria-haspopup="listbox" aria-expanded="false" tabindex="0"></div>
+            <div class="form-select address-suggest-trigger @error('city') is-invalid @enderror" id="{{ $p }}_city_search" data-placeholder="Select your City" role="combobox" aria-haspopup="listbox" aria-expanded="false" tabindex="0"></div>
             <ul class="address-suggest-list" role="listbox"></ul>
         <select name="city" id="{{ $p }}_city" class="address-city-select @error('city') is-invalid @enderror" data-prefix="{{ $p }}" data-selected="{{ $get('city') }}" data-required="{{ $req('city') ? '1' : '0' }}" @if($req('city'))required @endif>
             <option value="">Select City</option>
@@ -207,10 +208,6 @@
         outline: none;
         background-color: #fff;
     }
-    .address-suggest-search-input:focus {
-        border-color: #86b7fe;
-        box-shadow: 0 0 0 .2rem rgba(13, 110, 253, .15);
-    }
 
     .address-suggest-list li {
         padding: 8px 12px;
@@ -222,6 +219,7 @@
     .address-suggest-list li.active,
     .address-suggest-list li.selected { background: #f2f4f7; }
     .address-suggest-list li.empty { cursor: default; color: #999; }
+    .address-suggest-list li.placeholder-item { color: #999; cursor: pointer; }
 
     /* Keep a single consistent chevron for all address selects. */
     .address-fields-row .form-select-wrapper::after,
@@ -277,45 +275,70 @@
         border-color: var(--bs-body-color);
     }
 </style>
-    <script src="{{ asset('assets/front/js/countries-states.js') }}"></script>
 <script>
 (function () {
 
-    // Do not block the modal from opening while the full JSON dataset loads.
-    // We run the callback immediately and refresh fields again when the data arrives.
-    function whenAddressDataReady(cb) {
-        if (window.ADDRESS_DATA && Array.isArray(window.ADDRESS_DATA.countries) && window.ADDRESS_DATA.countries.length) {
-            cb();
-            return;
-        }
+    var ADDR_STATES_URL = @json(route('location.states'));
+    var ADDR_CITIES_URL = @json(route('location.cities'));
 
-        var onReady = function () {
-            document.removeEventListener('addressDataReady', onReady);
-            cb();
-        };
+    // ── Lazy AJAX loader: states/cities fetched from the DB only when a
+    //    country/state is actually chosen. Results are cached in memory so
+    //    re-selecting the same country/state never triggers another request.
+    var __addrCache    = { state: {}, city: {} };
+    var __addrPending  = { state: {}, city: {} };
 
-        document.addEventListener('addressDataReady', onReady);
+    function loadList(kind, country, state) {
+        var key = (country || '').trim() + '|' + (state || '').trim();
+        if (__addrCache[kind][key]) return Promise.resolve(__addrCache[kind][key]);
+        if (__addrPending[kind][key]) return __addrPending[kind][key];
 
-        // Same tick fallback: modal should not wait on the slow JSON fetch.
-        setTimeout(function () {
-            if (window.ADDRESS_DATA && Array.isArray(window.ADDRESS_DATA.countries) && window.ADDRESS_DATA.countries.length) {
-                document.removeEventListener('addressDataReady', onReady);
-                cb();
-            }
-        }, 0);
+        var url = kind === 'state'
+            ? ADDR_STATES_URL + '?country=' + encodeURIComponent(country)
+            : ADDR_CITIES_URL + '?country=' + encodeURIComponent(country) + '&state=' + encodeURIComponent(state);
+
+        __addrPending[kind][key] = fetch(url, { cache: 'no-cache' })
+            .then(function (response) {
+                if (!response.ok) throw new Error('Location data failed: ' + response.status);
+                return response.json();
+            })
+            .then(function (data) {
+                var respKey = kind === 'state' ? 'states' : 'cities';
+                var list = (data && data[respKey]) || [];
+                __addrCache[kind][key] = list;
+                return list;
+            })
+            .catch(function (err) {
+                delete __addrPending[kind][key];
+                throw err;
+            });
+
+        return __addrPending[kind][key];
     }
 
-    // ── Return states[] or cities[] for a given country name ─────────────────────
-    function getList(kind, country) {
-        if (!window.ADDRESS_DATA || !country) return [];
-        var map = window.ADDRESS_DATA[kind === 'state' ? 'states' : 'cities'];
-        if (!map) return [];
-        var key = country.trim();
-        if (map[key]) return map[key];
-        // case-insensitive fallback
-        var lo = key.toLowerCase();
-        var found = Object.keys(map).filter(function(k){ return k.toLowerCase() === lo; });
-        return found.length ? map[found[0]] : [];
+    // ── Saved value of a state/city select ──────────────────────────────────
+    // data-selected is the source of truth for a pre-existing value (set
+    // server-side or by prefill code). The .value fallback covers external
+    // setters, but the internal "__loading__" placeholder must never be
+    // treated as a real selection.
+    function savedValue(el) {
+        if (!el) return '';
+        var v = (el.getAttribute('data-selected') || '').trim();
+        if (v && v !== '__loading__') return v;
+        return '';
+    }
+
+    // Show a disabled "Loading…" option while an AJAX request is in flight.
+    function setLoading(el, placeholder) {
+        if (!el) return;
+        el.innerHTML = '';
+        var opt = document.createElement('option');
+        opt.value = '__loading__';
+        opt.textContent = 'Loading…';
+        opt.disabled = true;
+        opt.selected = true;
+        el.appendChild(opt);
+        el.disabled = true;
+        el.required = false;
     }
 
     // ── Fill a <select> with options and refresh its nice-select wrapper ──────────
@@ -330,6 +353,7 @@
 
         if (enabled && Array.isArray(items) && items.length) {
             var list = items.slice();
+            if (selectedVal === '__loading__') selectedVal = '';
             if (selectedVal && list.indexOf(selectedVal) === -1) list.unshift(selectedVal);
             list.forEach(function(val) {
                 var o = document.createElement('option');
@@ -357,12 +381,16 @@
         var stateEl = document.getElementById(prefix + '_state');
         var cityEl  = document.getElementById(prefix + '_city');
 
+        function notify(el) {
+            if (el && el.dispatchEvent) el.dispatchEvent(new Event('addrFieldUpdated', { bubbles: true }));
+        }
+
         function refresh() {
             var country    = (countryEl.value || '').trim();
             var hasCountry = country !== '';
 
-            var savedState = stateEl ? (stateEl.getAttribute('data-selected') || stateEl.value || '') : '';
-            var savedCity  = cityEl  ? (cityEl.getAttribute('data-selected')  || cityEl.value  || '') : '';
+            var savedState = savedValue(stateEl);
+            var savedCity  = savedValue(cityEl);
             var hasState   = savedState !== '';
 
             if (stateEl && stateEl.nextElementSibling && stateEl.nextElementSibling.classList) {
@@ -372,17 +400,49 @@
                 cityEl.nextElementSibling.classList.remove('open');
             }
 
-            // State: enabled only once a country is chosen.
-            fillSelect(stateEl, getList('state', country), savedState, hasCountry, 'Select State');
+            if (hasCountry) {
+                // State: enabled only once a country is chosen.
+                setLoading(stateEl, 'Select State');
+                loadList('state', country).then(function(states) {
+                    // Stale-guard: the country may have changed while fetching.
+                    if ((countryEl.value || '').trim() !== country) return;
+                    var curState = savedValue(stateEl);
+                    fillSelect(stateEl, states, curState, true, 'Select State');
+                    notify(stateEl);
+                }).catch(function() {
+                    if ((countryEl.value || '').trim() !== country) return;
+                    var curState = savedValue(stateEl);
+                    fillSelect(stateEl, [], curState, true, 'Select State');
+                    notify(stateEl);
+                });
+            } else {
+                fillSelect(stateEl, [], '', false, 'Select State');
+                fillSelect(cityEl, [], '', false, 'Select City');
+                notify(stateEl);
+                notify(cityEl);
+                return;
+            }
 
-            // City: enabled only once both a country AND a state are chosen
-            // (mirrors the country -> state cascade).
-            fillSelect(cityEl, getList('city', country), savedCity, hasCountry && hasState, 'Select City');
-
-            // Let the searchable widgets re-sync their display/list after the
-            // options were rebuilt (custom event — does not trigger the cascade).
-            if (stateEl && stateEl.dispatchEvent) stateEl.dispatchEvent(new Event('addrFieldUpdated', { bubbles: true }));
-            if (cityEl  && cityEl.dispatchEvent)  cityEl.dispatchEvent(new Event('addrFieldUpdated', { bubbles: true }));
+            if (hasState) {
+                // City: enabled only once both a country AND a state are chosen
+                // (mirrors the country -> state cascade).
+                setLoading(cityEl, 'Select City');
+                loadList('city', country, savedState).then(function(cities) {
+                    // Stale-guard: the state may have changed while fetching.
+                    if (savedValue(stateEl) !== savedState) return;
+                    var curCity = savedValue(cityEl);
+                    fillSelect(cityEl, cities, curCity, true, 'Select City');
+                    notify(cityEl);
+                }).catch(function() {
+                    if (savedValue(stateEl) !== savedState) return;
+                    var curCity = savedValue(cityEl);
+                    fillSelect(cityEl, [], curCity, true, 'Select City');
+                    notify(cityEl);
+                });
+            } else {
+                fillSelect(cityEl, [], '', hasCountry && hasState, 'Select City');
+                notify(cityEl);
+            }
         }
 
         countryEl._addrWired = true;
@@ -415,23 +475,11 @@
         document.addEventListener('show.bs.modal', function(e) {
             e.target.querySelectorAll('.address-country-select').forEach(function(el) {
                 el._addrWired = false; // allow re-wiring for fresh modal opens
-                whenAddressDataReady(function() {
-                    wireGroup(el);
-                    // Sync the searchable widget display on every modal open
-                    // (covers e.g. form.reset() before the modal is shown).
-                    if (el.dispatchEvent) el.dispatchEvent(new Event('addrFieldUpdated', { bubbles: true }));
-                });
-            });
-        });
-    }
-
-    function refreshAllAddressGroups() {
-        document.querySelectorAll('.address-country-select').forEach(function(el) {
-            if (el._addrRefresh) {
-                el._addrRefresh();
-            } else {
                 wireGroup(el);
-            }
+                // Sync the searchable widget display on every modal open
+                // (covers e.g. form.reset() before the modal is shown).
+                if (el.dispatchEvent) el.dispatchEvent(new Event('addrFieldUpdated', { bubbles: true }));
+            });
         });
     }
 
@@ -482,11 +530,26 @@
 
         function renderItems() {
             var filter = (searchInput.value || '').trim().toLowerCase();
+            var hasSelection = select.value && select.value !== '';
 
             // Remove previously rendered items, keep the search row.
             for (var i = list.children.length - 1; i >= 0; i--) {
                 var li = list.children[i];
                 if (li !== searchRow) list.removeChild(li);
+            }
+
+            // Always show placeholder item at top of dropdown
+            if (!filter) {
+                var phItem = document.createElement('li');
+                phItem.className = 'address-suggest-item placeholder-item';
+                phItem.textContent = placeholder;
+                phItem.dataset.value = '';
+                phItem.setAttribute('role', 'option');
+                if (!hasSelection) {
+                    phItem.classList.add('selected');
+                    phItem.setAttribute('aria-selected', 'true');
+                }
+                list.appendChild(phItem);
             }
 
             var any = false;
@@ -509,7 +572,9 @@
                 any = true;
             }
 
-            if (!any) {
+            if (!any && !filter) {
+                // placeholder shown above, skip empty message
+            } else if (!any) {
                 var empty = document.createElement('li');
                 empty.className = 'empty';
                 empty.textContent = 'No options found';
@@ -696,14 +761,11 @@
         window.__addressFieldsInitRun = true;
 
         bindModalEvents();
-        document.addEventListener('addressDataReady', refreshAllAddressGroups);
 
         document.querySelectorAll('.address-country-select, .address-state-select, .address-city-select')
             .forEach(wireAddressSearch);
 
-        whenAddressDataReady(function() {
-            document.querySelectorAll('.address-country-select').forEach(wireGroup);
-        });
+        document.querySelectorAll('.address-country-select').forEach(wireGroup);
 
         document.addEventListener('submit', function(e) {
             var form = e.target;

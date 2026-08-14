@@ -44,108 +44,9 @@
       border-bottom-color: #e62e04 !important;
     }
 
-    .fs-10 { font-size: 0.625rem !important; }
-    .fs-11 { font-size: 0.6875rem !important; }
-    .fs-12 { font-size: 0.75rem !important; }
-    .fs-13 { font-size: 0.8125rem !important; }
-    .fs-14 { font-size: 0.875rem !important; }
-    .fs-15 { font-size: 0.9375rem !important; }
-    .fs-16 { font-size: 1rem !important; }
-    .fs-17 { font-size: 1.0625rem !important; }
-    .fs-18 { font-size: 1.125rem !important; }
-    .fs-20 { font-size: 1.25rem !important; }
-
-    .fw-100 { font-weight: 100 !important; }
-    .fw-200 { font-weight: 200 !important; }
-    .fw-300 { font-weight: 300 !important; }
-    .fw-400 { font-weight: 400 !important; }
-    .fw-500 { font-weight: 500 !important; }
-    .fw-600 { font-weight: 600 !important; }
-    .fw-700 { font-weight: 700 !important; }
-    .fw-800 { font-weight: 800 !important; }
-    .fw-900 { font-weight: 900 !important; }
-
-    .opacity-10 { opacity: 0.1 !important; }
-    .opacity-20 { opacity: 0.2 !important; }
-    .opacity-30 { opacity: 0.3 !important; }
-    .opacity-40 { opacity: 0.4 !important; }
-    .opacity-50 { opacity: 0.5 !important; }
-    .opacity-60 { opacity: 0.6 !important; }
-    .opacity-70 { opacity: 0.7 !important; }
-    .opacity-80 { opacity: 0.8 !important; }
-    .opacity-90 { opacity: 0.9 !important; }
-
-    .gutters-5 {
-      margin-right: -5px;
-      margin-left: -5px;
-    }
-    .gutters-5 > .col,
-    .gutters-5 > [class*="col-"] {
-      padding-right: 5px;
-      padding-left: 5px;
-    }
-    .sm-gutters-10 {
-      margin-right: -10px;
-      margin-left: -10px;
-    }
-    .sm-gutters-10 > .col,
-    .sm-gutters-10 > [class*="col-"] {
-      padding-right: 10px;
-      padding-left: 10px;
-    }
-    @media (min-width: 576px) {
-      .sm-gutters-10 {
-        margin-right: -5px;
-        margin-left: -5px;
-      }
-      .sm-gutters-10 > .col,
-      .sm-gutters-10 > [class*="col-"] {
-        padding-right: 5px;
-        padding-left: 5px;
-      }
-    }
-
-    .img-fit {
-      max-height: 100%;
-      width: 100%;
-      object-fit: cover;
-    }
-    .size-60px {
-      width: 60px !important;
-      height: 60px !important;
-    }
-    .btn-circle {
-      border-radius: 50% !important;
-      width: 36px;
-      height: 36px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-    }
-    .btn-soft-primary {
-      background: rgba(230, 46, 4, 0.1);
-      color: #e62e04;
-      border: 1px solid transparent;
-    }
-    .btn-soft-primary:hover {
-      background: #e62e04;
-      color: #fff;
-    }
-    .aiz-plus-minus .btn-icon {
-      width: 36px;
-      height: 36px;
-      padding: 0;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-    }
-    .aiz-plus-minus input {
-      width: 44px;
-      background: transparent;
-      font-weight: 600;
-    }
+    {{-- Utility classes (.fs-*, .fw-*, .opacity-*, .gutters-5, .sm-gutters-10,
+         .img-fit, .size-60px, .btn-circle, .btn-soft-primary,
+         .aiz-plus-minus) live in custom.css — removed the duplicates here. --}}
     @media (max-width: 991px) {
       .aiz-plus-minus { width: fit-content; }
     }
@@ -308,7 +209,7 @@
                             </svg>
                         </button>
                         <a class="header-logo-wrapper" href="{{ route('home') }}">
-                            <img src="{{ storedImageUrl(\App\Models\Setting::get('header_logo') ?? 'BwSkuSZ7ZYGWPc4Zk3CfeFzcn49dHpx3143n4WKS.png', 'assets/images') }}" alt="logo" class="logo" onerror="this.onerror=null;this.src='{{ asset('assets/images/placeholder.png') }}'">
+                            {!! imgTag(storedPath(\App\Models\Setting::get('header_logo') ?? 'BwSkuSZ7ZYGWPc4Zk3CfeFzcn49dHpx3143n4WKS.png', 'assets/images'), 'logo', 'logo', 'onerror="this.onerror=null;this.src=\''.asset('assets/images/placeholder.png').'\'' . '"') !!}
                         </a>
                     </div>
                     <div class="nav-center">
@@ -359,7 +260,7 @@
     <div class="mobile-menu">
         <div class="mobile-menu-top">
             <a href="{{ route('home') }}">
-                <img src="{{ storedImageUrl(\App\Models\Setting::get('mobile_logo') ?? '1730281141Whitepng.png', 'assets/images') }}" alt="logo" class="logo">
+                {!! imgTag(storedPath(\App\Models\Setting::get('mobile_logo') ?? '1730281141Whitepng.png', 'assets/images'), 'logo', 'logo') !!}
             </a>
             <svg class="close" xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none">
                 <path d="M18 6L6 18M6 6L18 18" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
@@ -369,7 +270,7 @@
             @if(Auth::check())
                 <div class="d-flex align-items-center gap-2">
                     @if(Auth::user()->avatar)
-                        <img src="{{ storedImageUrl(Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">
+                        {!! imgTag(storedPath(Auth::user()->avatar), Auth::user()->name, '', 'style="width:36px;height:36px;border-radius:50%;object-fit:cover;"') !!}
                     @else
                         <div style="width:36px;height:36px;border-radius:50%;background:#1e1e2d;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;flex-shrink:0;">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</div>
                     @endif

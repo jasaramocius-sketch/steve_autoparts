@@ -53,17 +53,35 @@
             </div>
 
             {{-- Convert --}}
-            @if(in_array($image->mime_type, ['image/jpeg', 'image/pjpeg']))
-            <div class="card border-0 shadow-sm mt-3">
-                <div class="card-body text-center">
-                    <form action="{{ route('admin.images.convert', $image->id) }}" method="POST">
-                        @csrf
-                        <button type="submit" class="btn btn-success w-100 steve-btn">
-                            <i class="fas fa-exchange-alt"></i> Convert to WebP
-                        </button>
-                    </form>
+            @if(in_array($image->mime_type, ['image/jpeg', 'image/pjpeg', 'image/jpg', 'image/png', 'image/gif']))
+                @if($image->hasWebpVersion())
+                <div class="card border-0 shadow-sm mt-3">
+                    <div class="card-body text-center">
+                        <span class="badge bg-success fs-6 mb-2"><i class="fas fa-check-circle me-1"></i> Already Converted to WebP</span>
+                        <p class="text-muted small mb-2">This image has already been converted.</p>
+                        @php
+                            $baseName = pathinfo($image->filename, PATHINFO_FILENAME);
+                            $webpImage = \App\Models\Image::where('filename', $baseName . '.webp')->first();
+                        @endphp
+                        @if($webpImage)
+                            <a href="{{ route('admin.images.edit', $webpImage->id) }}" class="btn btn-outline-success btn-sm steve-btn">
+                                <i class="fas fa-eye"></i> View WebP Version
+                            </a>
+                        @endif
+                    </div>
                 </div>
-            </div>
+                @else
+                <div class="card border-0 shadow-sm mt-3">
+                    <div class="card-body text-center">
+                        <form action="{{ route('admin.images.convert', $image->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn-success w-100 steve-btn">
+                                <i class="fas fa-exchange-alt"></i> Convert to WebP
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                @endif
             @endif
         </div>
 

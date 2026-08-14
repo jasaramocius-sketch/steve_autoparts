@@ -15,10 +15,7 @@
     <div class="col-lg-4">
         <div class="card mb-4">
             <div class="card-body text-center">
-                <img src="{{ $profile->avatar ? storedImageUrl($profile->avatar) : asset('assets/images/avatar-place.png') }}"
-                     class="rounded-circle mb-3"
-                     onerror="this.onerror=null;this.src='{{ asset('assets/images/avatar-place.png') }}';"
-                     style="width: 120px; height: 120px; object-fit: cover;">
+                {!! imgTag(storedPath($profile->avatar), $profile->name, 'rounded-circle mb-3', 'onerror="this.onerror=null;this.src=\''.asset('assets/images/avatar-place.png').'\'' . '"' . ' style="width:120px;height:120px;object-fit:cover;"') !!}
                 <h5 class="mb-1">{{ $profile->name }}</h5>
                 <p class="text-muted mb-1">{{ $profile->email }}</p>
                 <p class="text-muted mb-0">{{ $profile->phone ?? 'No phone number added' }}</p>
@@ -98,9 +95,11 @@
                                         <div class="address-actions-dropdown custom-address-dropdown">
                                             <button type="button" class="address-action-toggle custom-address-toggle steve-btn" aria-haspopup="true" aria-expanded="false">&#x22EE;</button>
                                             <div class="address-action-menu custom-address-menu">
-                                                <button type="button" class="action-btn btn-edit" data-bs-toggle="modal" data-bs-target="#editAddressModal{{ $address->id }}" title="Edit">
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                                                </button>
+                                                <span data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
+                                                    <button type="button" class="action-btn btn-edit" data-bs-toggle="modal" data-bs-target="#editAddressModal{{ $address->id }}">
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                                    </button>
+                                                </span>
                                                 @if(!$address->set_default)
                                                 <form action="{{ route('checkout.address.default', $address->id) }}" method="POST" class="d-inline">
                                                     @csrf

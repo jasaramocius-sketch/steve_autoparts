@@ -834,7 +834,7 @@
 .user-table .view-btn {
   display: inline-flex;
   width: 40px;
-  height: 40px;
+  /* height: 40px; — using padding instead */
   justify-content: center;
   align-items: center;
   border-radius: 4px;
@@ -870,7 +870,7 @@
   align-items: center;
   background-color: #e9e6e6;
   width: 40px;
-  height: 40px;
+  /* height: 40px; — using padding instead */
   border-radius: 4px;
   color: #351c1a;
   border: none;

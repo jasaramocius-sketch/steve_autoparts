@@ -26,7 +26,7 @@
     opacity: 1;
 }
 .details_slider_nav .swiper-slide {
-    margin: 0 6px;
+    /* margin: 0 6px; */
     width: auto;
     flex-shrink: 0;
 }
@@ -65,6 +65,7 @@
 
 .details_slider_thumb {
     display: block;
+    position: relative;
     /* min-height: 450px; */
 }
 .details_slider_thumb .swiper-slide img {
@@ -83,6 +84,72 @@
 }
 .details_slider_thumb_item picture img{
   height: 100%;
+}
+
+/* ── Amazon-style hover zoom ── */
+.zoom-wrapper {
+    position: relative;
+}
+.zoom-container {
+    position: relative;
+    overflow: hidden;
+    border-radius: 16px;
+    cursor: crosshair;
+}
+.zoom-container .zoom-lens {
+    display: none;
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    border: 2px solid rgba(0,0,0,0.15);
+    border-radius: 50%;
+    background-repeat: no-repeat;
+    pointer-events: none;
+    z-index: 10;
+    box-shadow: 0 0 0 10px rgba(0,0,0,0.04);
+}
+.zoom-result {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: calc(100% + 15px);
+    width: 100%;
+    height: 100%;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    background-repeat: no-repeat;
+    background-color: #fff;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    z-index: 20;
+    overflow: hidden;
+}
+.zoom-wrapper:hover .zoom-lens {
+    display: block;
+}
+.zoom-wrapper:hover .zoom-result {
+    display: block;
+}
+/* Swiper zoom module styles */
+.swiper-zoom-container {
+    width: 100%;
+    height: 100%;
+}
+.swiper-zoom-container picture,
+.swiper-zoom-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.swiper-slide-zoomed {
+    cursor: grab;
+}
+@media (max-width: 991.98px) {
+    .zoom-container .zoom-result {
+        display: none !important;
+    }
+    .zoom-container:hover .zoom-result {
+        display: none !important;
+    }
 }
 .shop_details_text {
     padding: 0px 50px;
@@ -248,7 +315,7 @@
 
 .details_qty_input input {
     width: 60px;
-    height: 45px;
+    min-height: 40px;
     padding: 0;
     text-align: center;
     background: none;
@@ -263,14 +330,14 @@
 
 .details_qty_input button {
     width: 35px;
-    height: 45px;
+    min-height: 40px;
     font-weight: 400;
     color: #333;
     background: #F5F5F5;
     transition: all linear .3s;
     padding: 0;
     font-size: 15px;
-    line-height: 45px;
+    line-height: 40px;
     text-align: center;
     border: none;
     cursor: pointer;
@@ -623,24 +690,30 @@
           <!-- Gallery Column -->
           <div class="col-lg-6">
             <div class="shop_details_slider_area">
-              <div class="swiper details_slider_thumb">
-                <div class="swiper-wrapper">
-                @php
-                  $galleryImages = isset($product['galleryImages']) && $product['galleryImages'] ? $product['galleryImages'] : collect();
-                @endphp
-                @if($product['image'])
-                  <div class="swiper-slide details_slider_thumb_item">
-                    {!! imgTag(storedPath($product['image'], 'assets/images/thumbnails'), $product['name'], 'img-fluid w-100') !!}
+              <div class="zoom-wrapper">
+                <div class="zoom-container">
+                  <div class="swiper details_slider_thumb" id="productGallery">
+                    <div class="swiper-wrapper">
+                    @php
+                      $galleryImages = isset($product['galleryImages']) && $product['galleryImages'] ? $product['galleryImages'] : collect();
+                    @endphp
+                    @if($product['image'])
+                      <div class="swiper-slide details_slider_thumb_item swiper-zoom-container">
+                        {!! imgTag(storedPath($product['image'], 'assets/images/thumbnails'), $product['name'], 'img-fluid w-100') !!}
+                      </div>
+                    @endif
+                    @foreach($galleryImages as $gi)
+                      <div class="swiper-slide details_slider_thumb_item swiper-zoom-container">
+                        {!! imgTag(storedPath($gi->path), $product['name'], 'img-fluid w-100') !!}
+                      </div>
+                    @endforeach
+                    </div>
                   </div>
-                @endif
-                @foreach($galleryImages as $gi)
-                  <div class="swiper-slide details_slider_thumb_item">
-                    <img src="{{ storedImageUrl($gi->path) }}" alt="{{ $product['name'] }}" class="img-fluid w-100">
-                  </div>
-                @endforeach
+                  <div class="zoom-lens" id="zoomLens"></div>
                 </div>
+                <div class="zoom-result" id="zoomResult"></div>
               </div>
-              <div class="swiper details_slider_nav">
+              <div class="swiper details_slider_nav" id="productGalleryNav">
                 <div class="swiper-wrapper">
                 @if($product['image'])
                   <div class="swiper-slide details_slider_nav_item">
@@ -649,7 +722,7 @@
                 @endif
                 @foreach($galleryImages as $gi)
                   <div class="swiper-slide details_slider_nav_item">
-                    <img src="{{ storedImageUrl($gi->path) }}" alt="{{ $product['name'] }}" class="img-fluid w-100">
+                    {!! imgTag(storedPath($gi->path), $product['name'], 'img-fluid w-100') !!}
                   </div>
                 @endforeach
                 </div>
@@ -774,7 +847,7 @@
         </div>
 
         <!-- Description & Reviews Tabs -->
-        <div class="tab-product-des-wrapper mt-5 pt-4">
+        <div class="tab-product-des-wrapper pt-4">
           <ul class="nav nav-tabs" id="myTab" role="tablist">
             <li class="nav-item" role="presentation">
               <button class="nav-link template-btn steve-btn active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description-tab-pane" type="button" role="tab" aria-controls="description-tab-pane" aria-selected="true">Description</button>
@@ -1363,7 +1436,7 @@ function updateProductRating(rating, count) {
 }
 
 $(document).ready(function() {
-  var galleryNav = new Swiper('.details_slider_nav', {
+  var galleryNav = new Swiper('#productGalleryNav', {
     slidesPerView: 4,
     spaceBetween: 10,
     allowTouchMove: false,
@@ -1375,13 +1448,17 @@ $(document).ready(function() {
     },
   });
 
-  var thumbSwiper = new Swiper('.details_slider_thumb', {
+  var thumbSwiper = new Swiper('#productGallery', {
     slidesPerView: 1,
     spaceBetween: 0,
     effect: 'fade',
     fadeEffect: { crossFade: true },
     grabCursor: true,
     allowTouchMove: true,
+    zoom: {
+      maxRatio: 3,
+      minRatio: 1,
+    },
     thumbs: {
       swiper: galleryNav,
     },
@@ -1405,7 +1482,64 @@ $(document).ready(function() {
 
   thumbSwiper.on('slideChangeTransitionEnd', function() {
     centerNavSlide(thumbSwiper.activeIndex);
+    resetZoom();
   });
+
+  /* ── Amazon-style hover zoom (desktop only) ── */
+  var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  if (!isMobile && window.innerWidth > 991) {
+    var wrapper = document.querySelector('.zoom-wrapper');
+    var container = document.querySelector('.zoom-container');
+    var lens = document.getElementById('zoomLens');
+    var result = document.getElementById('zoomResult');
+    if (!wrapper || !container || !lens || !result) return;
+
+    var zoomFactor = 3;
+
+    function updateZoom(e) {
+      var activeSlide = thumbSwiper.slides[thumbSwiper.activeIndex];
+      if (!activeSlide) return;
+      var img = activeSlide.querySelector('img');
+      if (!img) return;
+
+      var rect = container.getBoundingClientRect();
+      var x = e.clientX - rect.left;
+      var y = e.clientY - rect.top;
+
+      if (x < 0 || x > rect.width || y < 0 || y > rect.height) {
+        resetZoom();
+        return;
+      }
+
+      var lensX = x - lens.offsetWidth / 2;
+      var lensY = y - lens.offsetHeight / 2;
+      lens.style.left = lensX + 'px';
+      lens.style.top = lensY + 'px';
+
+      var bgW = rect.width * zoomFactor;
+      var bgH = rect.height * zoomFactor;
+      var bgX = -(x * zoomFactor - result.offsetWidth / 2);
+      var bgY = -(y * zoomFactor - result.offsetHeight / 2);
+
+      lens.style.backgroundImage = 'url(' + img.src + ')';
+      lens.style.backgroundSize = bgW + 'px ' + bgH + 'px';
+      lens.style.backgroundPosition = bgX + 'px ' + bgY + 'px';
+      lens.style.display = 'block';
+
+      result.style.backgroundImage = 'url(' + img.src + ')';
+      result.style.backgroundSize = bgW + 'px ' + bgH + 'px';
+      result.style.backgroundPosition = bgX + 'px ' + bgY + 'px';
+      result.style.display = 'block';
+    }
+
+    function resetZoom() {
+      lens.style.display = 'none';
+      result.style.display = 'none';
+    }
+
+    wrapper.addEventListener('mousemove', updateZoom);
+    wrapper.addEventListener('mouseleave', resetZoom);
+  }
 });
 </script>
 @endsection

@@ -14,10 +14,7 @@
     <div class="col-lg-4">
         <div class="card mb-4 text-center">
             <div class="card-body">
-                <img src="{{ $profile->avatar ? storedImageUrl($profile->avatar) : asset('assets/images/avatar-place.png') }}"
-                     class="rounded-circle mb-3"
-                     onerror="this.onerror=null;this.src='{{ asset('assets/images/avatar-place.png') }}';"
-                     style="width: 120px; height: 120px; object-fit: cover;">
+                {!! imgTag(storedPath($profile->avatar), $profile->name, 'rounded-circle mb-3', 'onerror="this.onerror=null;this.src=\''.asset('assets/images/avatar-place.png').'\'' . '"' . ' style="width:120px;height:120px;object-fit:cover;"') !!}
                 <h5 class="mb-1">{{ $profile->name }}</h5>
                 <p class="text-muted mb-0">{{ $profile->email }}</p>
             </div>
@@ -95,7 +92,7 @@
 
                     <div class="d-flex gap-2 mt-4">
                         <button type="submit" class="btn btn-primary fs-14 fw-600 steve-btn">Save Changes</button>
-                        <a href="{{ route('user.profile') }}" class="btn btn-secondary fs-14 fw-600 steve-btn">Cancel</a>
+                        <a href="{{ route('user.profile') }}" class="btn btn-primary fs-14 fw-600 steve-btn">Cancel</a>
                     </div>
                 </form>
             </div>

@@ -533,7 +533,7 @@ $(document).ready(function () {
   new Swiper('.featured-products.product-cards-slider', {
     slidesPerView: 4,
     spaceBetween: 24,
-    freeMode: true,
+    // freeMode: true,
     grabCursor: true,
     swipeToSlide: true,
     freeModeSticky: true,
@@ -557,7 +557,7 @@ $(document).ready(function () {
   new Swiper('.best-selling.product-cards-slider', {
     slidesPerView: 4,
     spaceBetween: 24,
-    freeMode: true,
+    // freeMode: true,
     grabCursor: true,
     swipeToSlide: true,
     freeModeSticky: true,

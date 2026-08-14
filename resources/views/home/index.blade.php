@@ -481,7 +481,7 @@
             <div class="col-lg-4 col-md-6 col-sm-6 wow-replaced p-0" data-wow-delay=".1s">
                 <a href="{{ $brand->website ?: route('shop', ['brand' => $brand->slug]) }}">
                     <div class="single-brands">
-                        <img src="{{ storedImageUrl($brand->image, 'assets/images/brands') }}" alt="{{ $brand->name }}">
+                        {!! imgTag(storedPath($brand->image, 'assets/images/brands'), $brand->name) !!}
                     </div>
                 </a>
             </div>
@@ -604,7 +604,7 @@
             new Swiper('.home-cate-slider', {
                 slidesPerView: 6,
                 spaceBetween: 20,
-                freeMode: true,
+                // freeMode: true,
                 grabCursor: true,
                 swipeToSlide: true,
                 freeModeSticky: true,

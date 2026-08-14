@@ -193,7 +193,11 @@ if (!function_exists('imgTag')) {
 
         $html = '<img src="' . asset($assetSrc) . '" alt="' . e($alt) . '"' . $classAttr . ' onerror="' . $onerror . '"' . $extraAttr . '>';
 
-        if ($assetWebp) {
+        static $webpFrontend = null;
+        if ($webpFrontend === null) {
+            $webpFrontend = \App\Models\Setting::get('webp_frontend', '1') === '1';
+        }
+        if ($assetWebp && $webpFrontend) {
             $html = '<picture><source srcset="' . asset($assetWebp) . '" type="image/webp">' . $html . '</picture>';
         }
 

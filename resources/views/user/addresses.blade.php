@@ -149,9 +149,11 @@
             <span>{{ $address->phone }}</span>
         </div>
         <div class="address-actions action-buttons">
-            <button class="action-btn btn-edit" data-bs-toggle="modal" data-bs-target="#editAddressModal{{ $address->id }}" title="Edit">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-            </button>
+            <span data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
+                <button class="action-btn btn-edit" data-bs-toggle="modal" data-bs-target="#editAddressModal{{ $address->id }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                </button>
+            </span>
             <form action="{{ route('user.addresses.destroy', $address->id) }}" method="POST" onsubmit="return confirm('Remove this address?')" class="d-inline">
                 @csrf @method('DELETE')
                 <button class="action-btn btn-cancel" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Delete">

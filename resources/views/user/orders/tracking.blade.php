@@ -94,7 +94,7 @@
 }
 
 .gs-order-track-section .track-form-field .form-control {
-    min-height: 46px;
+    min-height: 40px;
     border-color: #dbe2ea;
     border-radius: 8px;
     box-shadow: none;
@@ -106,7 +106,7 @@
 }
 
 .gs-order-track-section .track-submit {
-    min-height: 46px;
+    min-height: 40px;
     white-space: nowrap;
     border-radius: 8px;
 }
@@ -466,10 +466,6 @@
                         placeholder="e.g. ORD6A4B3FD08A462"
                         autocomplete="off"
                     >
-
-                    @error('order_number')
-                        <small class="track-error">{{ $message }}</small>
-                    @enderror
                 </div>
 
                 <button type="submit" class="template-btn btn-forms steve-btn track-submit">
@@ -477,6 +473,9 @@
                     Track Order
                 </button>
             </div>
+            @error('order_number')
+                <small class="track-error">{{ $message }}</small>
+            @enderror
         </form>
     </div>
 

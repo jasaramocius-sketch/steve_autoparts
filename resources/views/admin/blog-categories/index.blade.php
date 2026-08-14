@@ -53,7 +53,7 @@
                         <th><a href="{{ sortUrl('slug', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Slug {!! sortIndicator('slug', $sortBy, $sortDir) !!}</a></th>
                         <th>Blog</th>
                         <th><a href="{{ sortUrl('status', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Status {!! sortIndicator('status', $sortBy, $sortDir) !!}</a></th>
-                        <th class="pe-3">Action</th>
+                        <th class="pe-3 text-align-end">Action</th>
                     </tr>
                 </thead>
                 <tbody>

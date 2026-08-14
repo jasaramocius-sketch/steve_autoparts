@@ -152,6 +152,20 @@
                                    value="{{ $settings['footer_copyright'] ?? 'COPYRIGHT &copy; :year. All Rights Reserved By STautoparts' }}">
                         </div>
 
+                        <hr>
+                        <div class="form-group mb-3">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <label class="form-label fw-bold mb-0">Serve WebP Images on Frontend</label>
+                                    <small class="text-muted d-block">When enabled, browsers that support WebP will automatically receive optimized WebP images instead of JPG/PNG. Uses &lt;picture&gt; tag with fallback for older browsers.</small>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" name="webp_frontend" value="1" id="webpFrontendToggle"
+                                        {{ ($settings['webp_frontend'] ?? '1') === '1' ? 'checked' : '' }}>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary steve-btn">
                                 <i class="fas fa-save"></i> Save

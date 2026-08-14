@@ -100,11 +100,6 @@
 @endsection
 @section('style')
 <style>
-.cart-summary-item-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
 @media (max-width: 991px) {
   .cart-summary-item-group .cart-summary-item {
     margin-bottom: 0.5rem;

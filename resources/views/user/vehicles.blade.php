@@ -19,12 +19,14 @@
         </div>
         <div class="d-flex gap-2">
             <div class="action-buttons">
-                <button class="action-btn btn-edit" data-bs-toggle="modal" data-bs-target="#editVehicleModal{{ $vehicle->id }}" title="Edit">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                    </svg>
-                </button>
+                <span data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
+                    <button class="action-btn btn-edit" data-bs-toggle="modal" data-bs-target="#editVehicleModal{{ $vehicle->id }}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                    </button>
+                </span>
                 <form action="{{ route('user.vehicles.destroy', $vehicle->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Remove this vehicle?')">
                     @csrf @method('DELETE')
                     <button class="action-btn btn-cancel" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Delete">
@@ -83,7 +85,7 @@
 <!-- Add Vehicle Modal -->
 <div class="modal fade" id="addVehicleModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <form action="{{ route('user.vehicles.store') }}" method="POST">
+        <form action="{{ route('user.vehicles.store') }}" method="POST" class="w-100">
             @csrf
             <div class="modal-content">
                 <div class="modal-header"><h5 class="modal-title">Add Vehicle</h5><button class="btn-close steve-btn" data-bs-dismiss="modal"></button></div>

@@ -145,16 +145,21 @@ function edit_address(id) {
         // handler runs (jQuery .trigger() only fires jQuery-bound handlers).
         if (countrySel[0]) countrySel[0].dispatchEvent(new Event('change', { bubbles: true }));
         var stateSel = $('#af_state');
+        stateSel.attr('data-selected', data.state || '');
         if (data.state && stateSel.find('option[value="' + data.state + '"]').length === 0) {
             stateSel.append($('<option>', { value: data.state, text: data.state }));
         }
         stateSel.val(data.state);
         if (stateSel[0]) stateSel[0].dispatchEvent(new Event('change', { bubbles: true }));
         var citySel = $('#af_city');
+        // Set data-selected BEFORE the async cities fetch resolves so the
+        // cascade's fillSelect preserves the saved city value.
+        citySel.attr('data-selected', data.city || '');
         if (data.city && citySel.find('option[value="' + data.city + '"]').length === 0) {
             citySel.append($('<option>', { value: data.city, text: data.city }));
         }
         citySel.val(data.city);
+        if (citySel[0]) citySel[0].dispatchEvent(new Event('change', { bubbles: true }));
         $('#af_zip').val(data.zip_code);
         $('#af_set_default').prop('checked', !!data.set_default);
         $('#addressFormSubmit').text('Update Address');

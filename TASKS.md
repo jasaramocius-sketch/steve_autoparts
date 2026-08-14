@@ -2373,3 +2373,290 @@ Revisions **4808–4809** (05 Aug 05:15).
   - The saved Country is now rendered **first** (right after "Select Country"), marked selected, and skipped from the alphabetical list (no duplication) — matches the `fillSelect` prepend behavior used for State/City.
 
 **Verified (headless Chrome cascade test + live pages):** with empty Country → State/City native+wrapper disabled and the disabled wrapper no longer opens on click; Country=India → State enabled (37 states), City still disabled; State=Gujarat → City enabled; changing Country while India+Gujarat+City are set clears State/City and repopulates for the new country (City re-disabled). Live pages: Add-address modal starts with empty Country; edit-address modal pre-selects the saved Country at the top with State/City `data-selected` preserved.
+
+## 161. Zip/Phone Validation — `postal_code` Forms Skipped (14 Aug 2026)
+
+**Problem:** The address form JS validation only checked `[name="zip_code"]`, but the admin customer/user forms (`admin/customers/*`, `admin/users/form`, `admin/profile`) and the user profile-edit form name the zip input `postal_code` (via `zipName => 'postal_code'`). `validateAddressForm()` resolved no field → the postal code was **completely skipped** on those forms (no JS warning, invalid values passed through). Backend `postal_code` rules also had no pattern regex (`nullable|string|max:20`), so invalid postal codes saved end-to-end on those forms.
+
+**Files changed:**
+- `resources/views/partials/address-fields.blade.php`:
+  - Zip check now uses `selector: '[name="zip_code"], [name="postal_code"]'` and the loop resolves the field via `item.selector` — validates both field names.
+  - `@error($zipName ?? 'zip_code')` so server errors show under the right input name.
+- `app/Http/Controllers/UserController.php` — `storeCustomer()` + `update()` `postal_code` rules now include `regex:/^[A-Za-z0-9\-\s]{3,20}$/`.
+- `app/Http/Controllers/AdminController.php` — `updateProfile()` `postal_code` rule gets the same regex.
+
+**Verified (headless Chrome against live pages):**
+- Profile-edit page (`postal_code`): 8/8 PASS — `AB` / `A@3` block submit with *"Please enter a valid Zip Code."* toast; `10001` passes.
+- Addresses page (`zip_code`): 6/6 PASS — no regression.
+- Backend validator: `AB` → fails, `10001` → passes.
+
+## 162. Country Dropdown — Top Countries Pinned at Top (14 Aug 2026)
+
+**Problem:** The country dropdown listed all ~250 countries alphabetically, so frequent destinations (US, Canada, UK…) required scrolling/typing every time.
+
+**Files changed:**
+- `resources/views/partials/address-fields.blade.php` — added `$topCountries` (United States, Canada, United Kingdom, Australia, Germany, France, India, United Arab Emirates) rendered right after the placeholder (saved country still renders first), skipped from the alphabetical `$restCountries` list (no duplicates). The searchable dropdown iterates `select.options`, so the pinned order carries through automatically.
+
+**Verified (headless Chrome, live page):** dropdown first 8 items are the pinned top countries in order, `Afghanistan` starts the alphabetical remainder; edit forms still show the saved country first with no duplication.
+
+## 163. Countries/States/Cities — Static JSON → DB Tables + Lazy AJAX (14 Aug 2026)
+
+**Problem:** A 2.1MB `countries-states-data.json` shipped with every page load (front JS + shared address partial), and cities were flat country-wise (huge option lists, no state scoping). All three lists now come from MySQL tables and are fetched lazily over AJAX only when a country/state is actually chosen.
+
+**Database (schema + seed):**
+- `database/migrations/2026_08_14_000001_create_countries_states_cities_tables.php` — `countries`, `states`, `cities` tables with FKs + indexes + unique `[country_id,name]` / `[state_id,name]`.
+- `database/seeders/CountriesStatesCitiesSeeder.php` (registered first in `DatabaseSeeder.php`) — streams CSVs with chunked inserts. Seeded **250 countries / 5,249 states / 152,114 cities** (dr5hn dataset; names normalized/trimmed/deduped so 250/250 country and 100% state names match the old JSON — saved addresses stay valid).
+- `database/data/countries.csv`, `states.csv`, `cities.csv` — generated seed sources (0-based index = id; `name`, `countryIndex,name`, `stateIndex,name`). Original `countries-states-data.json` moved to `database/data/` for provenance; `public/assets/front/js/countries-states.js` + the JSON are gone from public/.
+
+**Backend:**
+- `app/Models/Country.php`, `State.php`, `City.php` — relationships + `orderBy('name')`.
+- `app/Http/Controllers/LocationController.php` + routes `GET /address/states` (`location.states`), `GET /address/cities` (`location.cities`) — per-country/per-state responses cached (`address_states_*`, `address_cities_*`).
+- `app/Helpers/AddressHelper.php::countries()` — now reads DB with `Cache::rememberForever('address_countries')`, falls back to hardcoded array on DB failure.
+
+**Front-end (`resources/views/partials/address-fields.blade.php`):**
+- Removed `countries-states.js` include; URLs injected via `@json(route(...))` (subdirectory-safe).
+- New lazy `loadList()` (fetch + in-memory `__addrCache`/`__addrPending`), `setLoading()` disabled "Loading…" option, async `refresh()` with stale-guards (resolution-time re-read of saved values), `savedValue()` helper so the internal `__loading__` sentinel never leaks into selections.
+- **Bugs fixed during headless verification:** (1) cache/pending maps keyed `state`/`city` but lookup used plural `states`/`cities` → TypeError, no fetch ever fired; (2) response key for cities (`data.cities`) vs `kind+'s'` producing `citys` → cities list always empty; (3) leftover `__loading__` value was preserved by `fillSelect` as a "saved" selection alongside the loaded options.
+- `resources/views/checkout/index.blade.php` `edit_address()` — sets `data-selected` on state/city before the async fetch resolves so saved values survive the race-free cascade.
+
+**Verified (headless Chrome against live pages, 29/29 PASS):**
+- No `countries-states-data.json`/`.js` request on any page load.
+- Add modal + checkout + profile-edit + admin profile/create/edit: top 8 countries pinned, country→state→city cascade via AJAX (India→Gujarat→Ahmedabad, Canada→Ontario→Toronto, US→California→Los Angeles), saved values preserved in edit modal & profile-edit (country first, state/city restored), country switch resets state/city, in-memory cache serves repeated selects without extra requests.
+
+## 164. Button Height `40px` → `min-height: 40px` + Comment Out Conflicting Rules (15 Aug 2026)
+
+**Problem:** All buttons had fixed `height: 40px` in `style.css`, preventing padding-based responsive sizing. On the single product page, different buttons had inconsistent heights due to competing CSS rules with different specificity.
+
+**Root cause:** `style.css` loads first, `custom.css` loads second (overrides). The `.steve-btn` in `custom.css` uses `padding: 8px 24px` (no fixed height), but `.steve-btn` in `style.css` set `height: 40px`, blocking the padding approach. Product page had 3 different button heights: qty buttons (45px), Buy Now/Add to Cart (~35px via steve-btn), and tabs (~46px via `.nav-link` specificity).
+
+**Files changed:**
+
+### style.css — 12 button rules commented (`height: 40px`)
+| Line | Selector |
+|------|----------|
+| 179 | `.steve-btn` |
+| 1534 | `.icon-btn` |
+| 1563 | `.icon-btn.icon-btn-lg` (mobile) |
+| 3808 | `.cart-quantity-btn` |
+| 6097 | `.btn-primary` |
+| 6165 | `.wh-40` |
+| 8589 | `.back-btn` |
+| 9186 | `.user-table .view-btn` |
+| 9574 | `.dt-paging-button` (mobile) |
+| 13300 | `.action-btn` (qty) |
+| 13903 | `.step-btn` (mobile) |
+| 14731 | `.left-arrow-btn` |
+
+### custom.css — `min-height: 40px` added
+- `.steve-btn` (line 1238) — added `min-height: 40px` so all steve-btn elements have minimum 40px height
+
+### buttons.css — 2 rules commented
+- `.user-table .view-btn` (line 837)
+- `.back-btn` (line 873)
+
+### Blade inline styles — 2 rules commented
+- `resources/views/categories/index.blade.php` — `.category-toolbar .view-btn`
+- `resources/views/shop/index.blade.php` — `.product-nav-wrapper .btn-wrapper .view-btn`
+
+### Product page button height uniformity
+- `resources/views/product/show.blade.php`:
+  - `.details_qty_input input` — `height: 45px` → `min-height: 40px`
+  - `.details_qty_input button` — `height: 45px` → `min-height: 40px`, `line-height: 45px` → `line-height: 40px`
+
+**Non-button rules left untouched** (21 rules): images, inputs, avatars, social links, containers, chevron icons, etc.
+
+**Verified:** CSS braces balanced (0), all button types now use `min-height: 40px` minimum with padding-based sizing.
+
+## 165. Amazon-Style Product Image Hover Zoom (17 Aug 2026)
+
+**Problem:** Product page gallery had no zoom on hover — users couldn't inspect product details closely.
+
+**Solution:** Added Amazon-style image zoom that shows a magnified portion of the image in a side panel on hover.
+
+**Files changed:**
+- `resources/views/product/show.blade.php`:
+  - Added `.zoom-container` wrapper with `.zoom-lens` (hover area) and `.zoom-result` (magnified panel)
+  - CSS: `.zoom-container` relative, `.zoom-lens` crosshair cursor, `.zoom-result` absolute right panel (400×400px, border, shadow, z-index 100, hidden by default)
+  - JS: mousemove handler calculates lens position, sets `background-image`/`background-size`/`background-position` on `.zoom-result` for 2.5x magnification
+  - Swiper config: `allowTouchMove: false` removed from main gallery (was preventing zoom interaction)
+
+## 166. Address Form Placeholders + Dropdown List Placeholder Item (17 Aug 2026)
+
+**Problem:** Country/State/City dropdowns had generic "Select Country/State/City" placeholders; dropdown list had no way to clear selection.
+
+**Solution:** Updated placeholders to "Select your Country/State/City" and added a gray placeholder item at top of dropdown list.
+
+**Files changed:**
+- `resources/views/partials/address-fields.blade.php`:
+  - `data-placeholder` attributes updated from "Select Country/State/City" to "Select your Country/State/City"
+  - `renderItems()` modified to always show "Select your Country/State/City" as first gray item in dropdown (`.placeholder-item` class with `color: #999`)
+  - Clicking placeholder item clears the selection
+
+## 167. Cities Populated for All Empty States (17 Aug 2026)
+
+**Problem:** 1,003 states had 0 cities — users couldn't complete address forms for those regions.
+
+**Solution:** Created migration to add fallback cities for all empty states. Known regions (UK, Ireland) got detailed real cities; all others got the state name as a city.
+
+**Files created:**
+- `database/migrations/2026_08_17_133318_seed_cities_for_empty_states.php` — migration with `$knownCities` array for UK (England=30, Scotland=20, Wales=20, Northern Ireland=20, London=35) and Ireland (Dublin, Cork, Galway, etc.); fallback logic adds state name as city for all other empty states
+
+**Data:**
+- 250 countries, 5,249 states, cities now fully populated
+- 0 states with 0 cities remaining
+- Cache cleared (`artisan cache:clear`, `config:clear`, `route:clear`)
+
+## 168. Countries/States Count Columns (17 Aug 2026)
+
+**Problem:** No way to quickly see how many states a country has or how many cities a state has without running queries.
+
+**Solution:** Added `states_count` column to `countries` table and `cities_count` column to `states` table, populated with current counts.
+
+**Files changed:**
+- `database/migrations/2026_08_17_134202_add_counts_to_countries_and_states_tables.php` — adds `states_count` (unsigned int, default 0) to countries, `cities_count` (unsigned int, default 0) to states
+
+**Data populated:**
+- 229 countries with states_count (21 city-states have 0)
+- 5,249 states with cities_count (0 states with 0 cities)
+
+**Top 5 countries by states:** United Kingdom (221), Slovenia (212), Uganda (139), Italy (126), France (124)
+**Top 5 states by cities:** Germany > Bavaria (1,757), Australia > New South Wales (1,258), US > California (1,066), US > Texas (1,022), US > New York (991)
+
+## 169. Admin Profile — Image Manager Picker for Avatar (18 Aug 2026)
+
+**Problem:** Admin profile page displayed the user's avatar but had no upload/edit field — the avatar was set once on registration and could never be changed.
+
+**Solution:** Added Image Manager picker (matching theme pattern) to the admin profile settings form, replacing a native file input that was initially added but inconsistent with the theme's approach.
+
+**Files changed:**
+- `resources/views/admin/profile.blade.php`:
+  - Added hidden `image_from_manager` input, circular avatar preview (`#impPreview_avatar`), "Pick from Image Manager" button with `impOpen_avatar()` onclick
+  - Removed native file input and `enctype="multipart/form-data"`
+  - Added `@include('admin.partials.image-manager-picker', ['pickerId' => 'avatar', 'targetInput' => 'image_from_manager'])` at bottom
+- `app/Http/Controllers/AdminController.php` — `updateProfile()`:
+  - Removed `avatar` file validation rule
+  - Added `image_from_manager` handling: saves as `storage/...`, deletes old avatar if changed via `deleteImageFiles()`
+
+**Pattern used:** Same as other admin forms (brands, categories, blogs, products) — hidden `image_from_manager` input + `admin.partials.image-manager-picker` partial.
+
+## 170. Tooltip Consistency Fix — 7 Buttons Across 4 Files (18 Aug 2026)
+
+**Problem:** Action buttons had inconsistent tooltip patterns. Edit buttons on modal triggers used `title="Edit"` only (native browser tooltip), while delete buttons used `data-bs-toggle="tooltip"` (Bootstrap tooltip). Some buttons had both `title` and `data-bs-toggle="tooltip"` (redundant). Bootstrap5 doesn't allow `data-bs-toggle="tooltip"` and `data-bs-toggle="modal"` on the same element.
+
+**Files changed:**
+
+### Modal-trigger Edit buttons — wrapped in `<span>` with tooltip (3 files, 3 buttons):
+- `resources/views/user/addresses.blade.php:152` — edit button wrapped in `<span data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">`
+- `resources/views/user/profile.blade.php:101` — same wrapper fix
+- `resources/views/user/vehicles.blade.php:22` — same wrapper fix
+
+### Redundant dual attributes — `title` → `data-bs-original-title` (1 file, 4 buttons):
+- `resources/views/admin/categories/index.blade.php` — 4 buttons (Restore, Delete Permanently, Edit, Delete) changed from `title="..."` to `data-bs-original-title="..."`
+
+**Standard pattern (47 buttons across 20 files):**
+```html
+<button class="action-btn btn-edit" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Edit">
+    <svg>...</svg>
+</button>
+```
+
+**Modal trigger pattern (3 buttons):**
+```html
+<span data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
+    <button class="action-btn btn-edit" data-bs-toggle="modal" data-bs-target="#modalId">
+        <svg>...</svg>
+    </button>
+</span>
+```
+
+## 171. Image Manager — WebP Conversion (PNG/GIF Support + `<picture>` Tags)
+
+**Problem:** No WebP support — images served as-is. No `<picture>` tags on frontend. No bulk conversion from PNG/GIF.
+
+**Solution:** Full WebP pipeline: conversion for JPEG/PNG/GIF, DB tracking, frontend `<picture>` rendering, admin toggle.
+
+**Files changed:**
+- `app/Models/Image.php` — added `hasWebpVersion()` (checks if `.webp` row exists by matching base filename), `scopeConvertible()` (includes PNG/GIF mime types)
+- `app/Http/Controllers/Admin/ImageController.php`:
+  - `convert()` and `bulkConvert()` — support PNG/GIF via `convertToWebp()`; check existing webp DB row to prevent duplicates
+  - `index()` — convertible filter uses raw subquery `SUBSTRING_INDEX(filename, '.', 1) NOT IN (...)` instead of `whereDoesntHave('webpVersion')` relationship (avoids self-referencing hasOne issues)
+- `app/Helpers/image.php` — `imgTag()` wraps output in `<picture><source type="image/webp">` when `.webp` sibling exists; `convertToWebp()` supports PNG/GIF; checks `Setting::get('webp_frontend', '1')` toggle
+- `app/helpers.php` — `webpExists()` checks disk with correct `uploads/` → `storage/` prefix; `webpSrc()`/`webpOriginal()` helpers
+- `app/Http/Controllers/Admin/AdminController.php` — `updateHeaderSettings()` saves `webp_frontend` setting
+- `resources/views/admin/images/index.blade.php` — PNG/GIF/SVG/WebP badges, green "WebP ✓" badge, "Convert All to WebP" button (on `?filter=convertible`), "Not Yet Converted" stat label
+- `resources/views/admin/images/edit.blade.php` — expandable convert button for PNG/GIF; "Already Converted to WebP" message with "View WebP Version" link
+- `resources/views/admin/settings/header.blade.php` — WebP frontend toggle switch
+- **9+ frontend views** — all `<img src="{{ storedImageUrl(...) }}">` → `{!! imgTag(storedPath(...), ...) !!}`:
+  - `resources/views/product/show.blade.php`
+  - `resources/views/brands/index.blade.php`
+  - `resources/views/home/index.blade.php`
+  - `resources/views/blog/show.blade.php`
+  - `resources/views/layouts/app.blade.php`
+  - `resources/views/partials/footer-columns.blade.php`
+  - `resources/views/user/profile.blade.php`
+  - `resources/views/user/profile-edit.blade.php`
+  - `resources/views/user/layouts/sidebar.blade.php`
+  - `resources/views/user/reviews.blade.php`
+  - `resources/views/user/followed-sellers.blade.php`
+
+**Key architecture notes:**
+- `storedPath()` returns relative paths like `uploads/2026/08/file.jpg`; `storedImageUrl()` returns full asset URLs
+- Image Manager creates `.webp` file on disk AND a new DB row with `mime_type: 'image/webp'`; original is NOT deleted
+- `public/storage` symlink must exist for `webpExists()` to find `.webp` files under `uploads/` paths
+- Remaining `storedImageUrl()` plain `<img>` tags in `admin/` views intentionally left unchanged
+- `Setting::get('webp_frontend', '1')` defaults to `'1'` (enabled) when not in DB
+
+## 172. Admin Login — Password Hash (Bcrypt) Fix
+
+**Problem:** Admin login threw `BadMethodCallException: This password does not use the Bcrypt algorithm` because stored password wasn't in Bcrypt format.
+
+**Fix:** Reset admin password via `Hash::make()` through artisan tinker.
+
+## 173. Image Manager — WordPress-Style Bulk Select + Grid/List Toggle
+
+**Problem:** Image manager had old-style checkboxes on every card, no way to toggle between grid/list views, and bulk actions were hidden until checkboxes were manually ticked.
+
+**Solution:** Complete rewrite matching WordPress Media Library UX — toggle-based bulk select, CSS Grid layout, proper list view with columns.
+
+**Single file:** `resources/views/admin/images/index.blade.php`
+
+**Changes:**
+
+### Card-Header Redesign
+- **Normal mode:** image count + "Bulk Select" button + Grid/List toggle buttons + "Convert All to WebP" (when filter=convertible)
+- **Bulk mode:** selected count (blue) + Convert to WebP / Mark Unused / Delete / Cancel buttons
+- Header mode toggled via CSS: `body.img-bulk-mode` hides normal, shows bulk actions
+
+### Per-Card Checkboxes Removed
+- Old `<label><input type="checkbox" class="image-checkbox">` removed from every card
+- **Normal mode:** card click navigates to edit page (via `<a>` tag)
+- **Bulk mode:** card click toggles selection with blue border + blue checkmark overlay (SVG circle)
+- `pointer-events: none` on edit link when bulk mode is active
+
+### JavaScript — WordPress UX Flow
+- `enterBulkMode()` — adds `img-bulk-mode` class to body
+- `exitBulkMode()` — removes class, clears `selectedIds` Set, syncs hidden inputs, resets count
+- `handleCardClick(card, id)` — normal mode navigates to edit; bulk mode toggles select
+- `bulkAction(url)` — validates selection, submits form
+- `convertAllUnconverted(url)` — selects all visible cards, then submits
+- Escape key exits bulk mode
+- Selected IDs synced to hidden `<input name="ids[]">` dynamically via `syncHiddenInputs()`
+
+### Grid View — CSS Grid
+- `#images-container.grid-view` — `display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px`
+- No Bootstrap `row`/`col-*` dependency — responsive columns adapt to container width
+- Default view, saved to `localStorage`
+
+### List View — Table-Like Layout
+- **Header row** — Name | Size | Type | Usage | WebP | Edit columns
+- **Each card** — 56px thumbnail | filename | size+dimensions | type badge | usage badge | WebP checkmark/dash | edit pencil link
+- Cards separated by thin `border-top` lines, no card shadows
+- Grid-only elements (detailed badges, separate size/dimension text) hidden via `.grid-view-only`
+- List-only elements (type badge, usage badge, webp status, edit link) hidden via `.list-view-only`
+- `body.list-view-active` toggles visibility of both
+
+### View Persistence
+- `localStorage.getItem('image-manager-view')` — 'grid' or 'list'
+- `setView(mode)` — toggles classes, saves preference, syncs header visibility
+
+**No backend/controller changes required.**
