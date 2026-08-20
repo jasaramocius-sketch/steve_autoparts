@@ -528,16 +528,41 @@ document.querySelectorAll('.change-qty').forEach(button => {
 });
 
 
+function observeSwiperAutoplayGlobal(swiper) {
+  if (!window.IntersectionObserver) { swiper.autoplay.start(); return; }
+  var firstRun = true;
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        if (firstRun) {
+          firstRun = false;
+          swiper.slideNext(600);
+          swiper.autoplay.start();
+        } else {
+          swiper.autoplay.start();
+        }
+      } else {
+        swiper.autoplay.stop();
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '50px 0px' });
+  observer.observe(swiper.el);
+}
+
 $(document).ready(function () {
 
-  new Swiper('.featured-products.product-cards-slider', {
+  var featuredSwiper = new Swiper('.featured-products.product-cards-slider', {
     slidesPerView: 4,
     spaceBetween: 24,
-    // freeMode: true,
     grabCursor: true,
     swipeToSlide: true,
     freeModeSticky: true,
     touchThreshold: 5,
+    autoplay: {
+      delay: 3000,
+      disableOnInteraction: false,
+      enabled: false,
+    },
     navigation: {
       prevEl: '.featured-prev',
       nextEl: '.featured-next',
@@ -549,19 +574,24 @@ $(document).ready(function () {
       0: { slidesPerView: 1 },
     },
   });
+  observeSwiperAutoplayGlobal(featuredSwiper);
 
 });
 
 $(document).ready(function () {
 
-  new Swiper('.best-selling.product-cards-slider', {
+  var bestSellingSwiper = new Swiper('.best-selling.product-cards-slider', {
     slidesPerView: 4,
     spaceBetween: 24,
-    // freeMode: true,
     grabCursor: true,
     swipeToSlide: true,
     freeModeSticky: true,
     touchThreshold: 5,
+    autoplay: {
+      delay: 3000,
+      disableOnInteraction: false,
+      enabled: false,
+    },
     navigation: {
       prevEl: '.best-selling-prev',
       nextEl: '.best-selling-next',
@@ -573,6 +603,7 @@ $(document).ready(function () {
       0: { slidesPerView: 1 },
     },
   });
+  observeSwiperAutoplayGlobal(bestSellingSwiper);
 
 });
 

@@ -599,15 +599,39 @@
 
 @section('scripts')
 <script>
+    function observeSwiperAutoplay(swiper) {
+        var firstRun = true;
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    if (firstRun) {
+                        firstRun = false;
+                        swiper.slideNext(600);
+                        swiper.autoplay.start();
+                    } else {
+                        swiper.autoplay.start();
+                    }
+                } else {
+                    swiper.autoplay.stop();
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '50px 0px' });
+        observer.observe(swiper.el);
+    }
+
     $(document).ready(function() {
         if ($('.home-cate-slider').length) {
-            new Swiper('.home-cate-slider', {
+            var cateSwiper = new Swiper('.home-cate-slider', {
                 slidesPerView: 6,
                 spaceBetween: 20,
-                // freeMode: true,
                 grabCursor: true,
                 swipeToSlide: true,
                 freeModeSticky: true,
+                autoplay: {
+                    delay: 3000,
+                    disableOnInteraction: false,
+                    enabled: false,
+                },
                 navigation: {
                     prevEl: '.cate-prev',
                     nextEl: '.cate-next',
@@ -620,15 +644,17 @@
                     0: { slidesPerView: 1 },
                 },
             });
+            observeSwiperAutoplay(cateSwiper);
         }
         if ($('.latest-posts-slider').length) {
-            new Swiper('.latest-posts-slider', {
+            var postsSwiper = new Swiper('.latest-posts-slider', {
                 slidesPerView: 3,
                 spaceBetween: 24,
                 grabCursor: true,
                 autoplay: {
                     delay: 3000,
                     disableOnInteraction: false,
+                    enabled: false,
                 },
                 navigation: {
                     prevEl: '.latest-posts-prev',
@@ -641,6 +667,7 @@
                     0: { slidesPerView: 1 },
                 },
             });
+            observeSwiperAutoplay(postsSwiper);
         }
     });
 

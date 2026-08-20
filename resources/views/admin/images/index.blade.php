@@ -19,8 +19,6 @@
     .select-overlay .check-circle svg { width: 20px; height: 20px; }
     body.img-bulk-mode .image-card .image-edit-link { pointer-events: none; }
     body.img-bulk-mode .image-card:hover { border-color: #0d6efd !important; }
-    .view-toggle .btn { padding: 5px 10px; font-size: 13px; }
-    .view-toggle .btn.active { background: #0d6efd; color: #fff; border-color: #0d6efd; }
     #images-container.list-view { display: flex; flex-direction: column; gap: 0; }
     #images-container.list-view .grid-item { width: 100%; }
     #images-container.list-view .image-card { display: flex; align-items: center; border-radius: 0; border-left: none; border-right: none; border-top: none; }
@@ -164,7 +162,7 @@
                 <div class="bulk-header-normal">
                     <span>{{ $images->total() }} images found</span>
                     <button type="button" class="btn btn-sm btn-outline-primary steve-btn" onclick="enterBulkMode()">
-                        <i class="fas fa-check-double"></i> Bulk Select
+                        Bulk Select
                     </button>
                     @if(request('filter') === 'convertible')
                         <button type="button" class="btn btn-sm btn-success steve-btn" onclick="convertAllUnconverted('{{ route('admin.images.bulk-convert') }}')">
@@ -174,25 +172,25 @@
                 </div>
                 <div class="bulk-header-actions">
                     <span><span class="selected-count" id="selected-count">0</span> selected</span>
-                    <button type="button" class="btn btn-sm btn-success steve-btn" onclick="bulkAction('{{ route('admin.images.bulk-convert') }}')">
+                    <button type="button" class="btn btn-sm btn-success steve-btn gap-1" onclick="bulkAction('{{ route('admin.images.bulk-convert') }}')">
                         <i class="fas fa-exchange-alt"></i> Convert to WebP
                     </button>
-                    <button type="button" class="btn btn-sm btn-warning steve-btn" onclick="bulkAction('{{ route('admin.images.bulk-mark-unused') }}')">
+                    <button type="button" class="btn btn-sm btn-warning steve-btn gap-1" onclick="bulkAction('{{ route('admin.images.bulk-mark-unused') }}')">
                         <i class="fas fa-tag"></i> Mark Unused
                     </button>
-                    <button type="button" class="btn btn-sm btn-danger steve-btn" onclick="if(confirm('Delete selected images permanently? This will also delete the physical file.')) bulkAction('{{ route('admin.images.bulk-delete') }}')">
+                    <button type="button" class="btn btn-sm btn-danger steve-btn gap-1" onclick="if(confirm('Delete selected images permanently? This will also delete the physical file.')) bulkAction('{{ route('admin.images.bulk-delete') }}')">
                         <i class="fas fa-trash"></i> Delete
                     </button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary steve-btn" onclick="exitBulkMode()">
+                    <button type="button" class="btn btn-sm btn-outline-secondary steve-btn gap-1" onclick="exitBulkMode()">
                         <i class="fas fa-times"></i> Cancel
                     </button>
                 </div>
-                <div class="d-flex gap-1 view-toggle">
-                    <button type="button" class="btn btn-outline-secondary btn-sm" id="view-grid-btn" onclick="setView('grid')" title="Grid View">
-                        <i class="fas fa-th"></i>
+                <div class="d-flex gap-1">
+                    <button type="button" class="view-btn steve-btn active" id="view-grid-btn" onclick="setView('grid')" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Grid View">
+                        <i class="fas fa-th-large"></i>
                     </button>
-                    <button type="button" class="btn btn-outline-secondary btn-sm" id="view-list-btn" onclick="setView('list')" title="List View">
-                        <i class="fas fa-list"></i>
+                    <button type="button" class="view-btn steve-btn" id="view-list-btn" onclick="setView('list')" data-bs-toggle="tooltip" data-bs-placement="bottom" title="List View">
+                        <i class="fas fa-bars"></i>
                     </button>
                 </div>
             </div>

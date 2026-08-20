@@ -135,7 +135,7 @@ button {
   .steve-btn {
     /* font-size: 12px !important;
     padding: 8px 24px !important; */
-    min-he
+    
   }
 
   .admin-dashboard-header .steve-btn,
@@ -16880,7 +16880,7 @@ section.product-category.py-120 {
 .gs-explore-product-section .product-cards-slider .single-product .content-wrapper {
   background-color: var(--secondary-bg-color);
   flex: 1;
-  min-height: 150px;
+  /* min-height: 150px; */
 }
 
 .cat-no-products {

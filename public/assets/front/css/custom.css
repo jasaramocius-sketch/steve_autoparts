@@ -71,11 +71,6 @@
   width: 100%;
 }
 
-.gs-explore-product-section .product-cards-slider .single-product .content-wrapper {
-  background-color: var(--secondary-bg-color);
-  flex: 1;
-  min-height: 150px;
-}
 
 .single-service .icon-wrapper img {
   width: 60px !important;
