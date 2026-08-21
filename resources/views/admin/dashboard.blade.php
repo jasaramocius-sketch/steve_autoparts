@@ -126,7 +126,7 @@
 
 <div class="row g-3">
     <div class="col-md-5">
-        <div class="card border-0 shadow-sm h-100">
+        <div id="orders-status-chart-card" class="card border-0 shadow-sm h-100">
             <div class="card-header bg-white border-bottom py-3">
                 <h5 class="mb-0 fw-bold"><i class="fas fa-chart-pie me-2"></i>Orders by Status</h5>
             </div>
@@ -142,7 +142,7 @@
         </div>
     </div>
     <div class="col-md-7 admin-panal-revenue-chart">
-        <div class="card border-0 shadow-sm h-100">
+        <div id="revenue-chart-card" class="card border-0 shadow-sm h-100">
             <div class="card-header bg-white border-bottom py-3 d-flex align-items-center justify-content-between revenue-chart-navbar">
                 <h5 class="mb-0 fw-bold revenue-chart-title"><i class="fas fa-chart-line me-2"></i><span id="revenueChartTitle">Monthly Revenue</span></h5>
                 <div class="btn-group btn-group-sm revenue-chart-buttons" role="group">
@@ -386,6 +386,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.querySelectorAll('[data-view]').forEach(function(b) { b.classList.remove('active'); });
                 this.classList.add('active');
                 renderRevenueChart(this.dataset.view);
+                document.getElementById('revenue-chart-card').scrollIntoView({ behavior: 'smooth', block: 'center' });
             });
         });
 

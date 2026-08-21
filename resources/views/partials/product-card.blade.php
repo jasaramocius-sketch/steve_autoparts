@@ -38,7 +38,7 @@
             </form>
         @endif
         <a href="{{ route('product', $p->slug) }}">
-            {!! imgTag(storedPath($pImage, 'assets/images/thumbnails'), $p->name, 'product-img') !!}
+            {!! imgTag(storedPath($pImage, 'assets/images/thumbnails'), $p->name, 'product-img', '', 300) !!}
         </a>
         <div class="add-to-cart">
             <a class="compare_product" href="javascript:;" data-href="{{ route('compare.add', ['product_id' => $p->id]) }}" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="bottom" title="Compare">

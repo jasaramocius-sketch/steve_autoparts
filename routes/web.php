@@ -170,7 +170,7 @@ Route::prefix('admin')->group(function () {
 
     Route::get('/login', [AdminAuthController::class, 'showLogin'])->name('admin.login');
     Route::post('/login', [AdminAuthController::class, 'login'])->name('admin.login.submit');
-    Route::match(['get', 'post'], '/logout', [AdminAuthController::class, 'logout'])->name('logout');
+    Route::match(['get', 'post'], '/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
     
 
 });

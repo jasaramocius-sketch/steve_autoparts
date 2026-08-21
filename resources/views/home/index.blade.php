@@ -9,11 +9,28 @@
 <!-- hero section start -->
 @if($heroSection)
 <section class="hero-slider-wrapper">
-    <div class="gs-hero-section" style="background-image: url('{{ $heroSection->image ? storedImageUrl($heroSection->image, 'assets/images/home') : asset('assets/images/sliders/1730872837Hero03-minpng.png') }}'); background-size: cover; background-position: center; min-height: 520px; display: flex; align-items: center;">
+    <div class="gs-hero-section" style="position:relative; min-height:520px; display:flex; align-items:center; overflow:hidden;">
+        @php
+            $heroImg = $heroSection->image ? storedImageUrl($heroSection->image, 'assets/images/home') : 'assets/images/sliders/1730872837Hero03-minpng.png';
+            $heroAssetPng = str_starts_with($heroImg, 'uploads/') ? 'storage/' . $heroImg : $heroImg;
+            $heroCheckPath = str_starts_with($heroImg, 'uploads/') ? 'storage/' . $heroImg : $heroImg;
+            $heroWebpAsset = null;
+            if (file_exists(public_path(preg_replace('/\.[^.]+$/', '.webp', $heroCheckPath)))) {
+                $heroWebpAsset = str_starts_with($heroImg, 'uploads/') ? 'storage/' . preg_replace('/\.[^.]+$/', '.webp', $heroImg) : preg_replace('/\.[^.]+$/', '.webp', $heroImg);
+            }
+        @endphp
+        @if($heroWebpAsset)
+        <picture style="position:absolute;inset:0;width:100%;height:100%;z-index:0;">
+            <source srcset="{{ asset($heroWebpAsset) }}" type="image/webp">
+            <img src="{{ asset($heroAssetPng) }}" alt="" fetchpriority="high" style="width:100%;height:100%;object-fit:cover;">
+        </picture>
+        @else
+        <img src="{{ asset($heroAssetPng) }}" alt="" fetchpriority="high" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;">
+        @endif
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-12 col-md-6 col-lg-6">
-                    <div class="hero-content">
+                    <div class="hero-content" style="position:relative; z-index:1;">
                         @if($heroSection->subtitle)
                             <h6 class="subtitle wow-replaced" style="color:var(--hov-primary)">{{ $heroSection->subtitle }}</h6>
                         @endif
@@ -68,7 +85,7 @@
                         <div class="gs-single-cat">
                             <div class="category-image">
                                 @php $categoryImage = $category['image'] ?? 'assets/images/placeholder.png'; @endphp
-                                {!! imgTag($categoryImage, $category['name']) !!}
+                                {!! imgTag($categoryImage, $category['name'], '', '', 250) !!}
                             </div>
                             <h3 class="title">{{ $category['name'] }}</h3>
                             <p class="des"> 
@@ -139,17 +156,26 @@
             @empty
                 <div class="col-lg-4 wow-replaced" data-wow-delay=".2s">
                     <a href="{{ route('shop') }}" class="">
-                        <img class="w-100 h-100 object-fit-cover" src="{{ asset('assets/images/arrival/1730872869Banner12-minpng.png') }}" alt="offer product">
+                        <picture>
+                            <source srcset="{{ asset('assets/images/arrival/1730872869Banner12-minpng.webp') }}" type="image/webp">
+                            <img class="w-100 h-100 object-fit-cover" src="{{ asset('assets/images/arrival/1730872869Banner12-minpng.png') }}" alt="offer product" loading="lazy" decoding="async">
+                        </picture>
                     </a>
                 </div>
                 <div class="col-md-6 col-lg-4 wow-replaced" data-wow-delay=".2s">
                     <a href="{{ route('shop') }}" class="">
-                        <img class="w-100 h-100 object-fit-cover" src="{{ asset('assets/images/arrival/1730872879Banner13-minpng.png') }}" alt="offer product">
+                        <picture>
+                            <source srcset="{{ asset('assets/images/arrival/1730872879Banner13-minpng.webp') }}" type="image/webp">
+                            <img class="w-100 h-100 object-fit-cover" src="{{ asset('assets/images/arrival/1730872879Banner13-minpng.png') }}" alt="offer product" loading="lazy" decoding="async">
+                        </picture>
                     </a>
                 </div>
                 <div class="col-md-6 col-lg-4 wow-replaced" data-wow-delay=".2s">
                     <a href="{{ route('shop') }}" class="">
-                        <img class="w-100 h-100 object-fit-cover" src="{{ asset('assets/images/arrival/1730872888Banner14-minpng.png') }}" alt="offer product">
+                        <picture>
+                            <source srcset="{{ asset('assets/images/arrival/1730872888Banner14-minpng.webp') }}" type="image/webp">
+                            <img class="w-100 h-100 object-fit-cover" src="{{ asset('assets/images/arrival/1730872888Banner14-minpng.png') }}" alt="offer product" loading="lazy" decoding="async">
+                        </picture>
                     </a>
                 </div>
             @endforelse
@@ -244,7 +270,7 @@
                 {!! imgTag($dealRelPath, 'deal of the day', 'img-fluid') !!}
             </div>
             <div class="deal-of-day-img h-100">
-                {!! imgTag($dealRelPath, 'deal of the day', 'wow-replaced h-100') !!}
+                {!! imgTag($dealRelPath, 'deal of the day', 'wow-replaced h-100 object-fit-cover') !!}
             </div>
             @endif
         </div>
@@ -295,7 +321,7 @@
             <div class="col-lg-3 col-md-6 col-sm-12 services-area wow-removed">
                 <div class="single-service d-flex flex-lg-column flex-xl-row text-lg-center text-xl-start">
                     <div class="icon-wrapper">
-                        <img src="{{ asset('assets/images/services/1667473770badgepng.png') }}" alt="service">
+                        <picture><source srcset="{{ asset('assets/images/services/1667473770badgepng.webp') }}" type="image/webp"><img src="{{ asset('assets/images/services/1667473770badgepng.png') }}" alt="service" loading="lazy" decoding="async"></picture>
                     </div>
                     <div class="service-content">
                         <h3 class="service-title">Manage Quality</h3>
@@ -306,7 +332,7 @@
             <div class="col-lg-3 col-md-6 col-sm-12 services-area wow-removed">
                 <div class="single-service d-flex flex-lg-column flex-xl-row text-lg-center text-xl-start">
                     <div class="icon-wrapper">
-                        <img src="{{ asset('assets/images/services/1667473742carts1png.png') }}" alt="service">
+                        <picture><source srcset="{{ asset('assets/images/services/1667473742carts1png.webp') }}" type="image/webp"><img src="{{ asset('assets/images/services/1667473742carts1png.png') }}" alt="service" loading="lazy" decoding="async"></picture>
                     </div>
                     <div class="service-content">
                         <h3 class="service-title">Win $100 To Shop</h3>
@@ -317,7 +343,7 @@
             <div class="col-lg-3 col-md-6 col-sm-12 services-area wow-removed">
                 <div class="single-service d-flex flex-lg-column flex-xl-row text-lg-center text-xl-start">
                     <div class="icon-wrapper">
-                        <img src="{{ asset('assets/images/services/1667473728customer-service-agentpng.png') }}" alt="service">
+                        <picture><source srcset="{{ asset('assets/images/services/1667473728customer-service-agentpng.webp') }}" type="image/webp"><img src="{{ asset('assets/images/services/1667473728customer-service-agentpng.png') }}" alt="service" loading="lazy" decoding="async"></picture>
                     </div>
                     <div class="service-content">
                         <h3 class="service-title">Best Online Support</h3>
@@ -328,7 +354,7 @@
             <div class="col-lg-3 col-md-6 col-sm-12 services-area wow-removed">
                 <div class="single-service d-flex flex-lg-column flex-xl-row text-lg-center text-xl-start">
                     <div class="icon-wrapper">
-                        <img src="{{ asset('assets/images/services/1667473683money-bagpng.png') }}" alt="service">
+                        <picture><source srcset="{{ asset('assets/images/services/1667473683money-bagpng.webp') }}" type="image/webp"><img src="{{ asset('assets/images/services/1667473683money-bagpng.png') }}" alt="service" loading="lazy" decoding="async"></picture>
                     </div>
                     <div class="service-content">
                         <h3 class="service-title">Money Back Guarantee</h3>
@@ -508,84 +534,84 @@
             <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 wow-replaced p-0" data-wow-delay=".1s">
                 <a href="#">
                     <div class="single-partner">
-                        <img src="{{ asset('assets/images/partner/1571289583p1.jpg') }}" alt="partner">
+                        <img src="{{ asset('assets/images/partner/1571289583p1.jpg') }}" alt="partner" loading="lazy" decoding="async">
                     </div>
                 </a>
             </div>
             <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 wow-replaced p-0" data-wow-delay=".1s">
                 <a href="#">
                     <div class="single-partner">
-                        <img src="{{ asset('assets/images/partner/1571289601p2.jpg') }}" alt="partner">
+                        <img src="{{ asset('assets/images/partner/1571289601p2.jpg') }}" alt="partner" loading="lazy" decoding="async">
                     </div>
                 </a>
             </div>
             <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 wow-replaced p-0" data-wow-delay=".1s">
                 <a href="#">
                     <div class="single-partner">
-                        <img src="{{ asset('assets/images/partner/1571289608p3.jpg') }}" alt="partner">
+                        <img src="{{ asset('assets/images/partner/1571289608p3.jpg') }}" alt="partner" loading="lazy" decoding="async">
                     </div>
                 </a>
             </div>
             <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 wow-replaced p-0" data-wow-delay=".1s">
                 <a href="#">
                     <div class="single-partner">
-                        <img src="{{ asset('assets/images/partner/1571289614p4.jpg') }}" alt="partner">
+                        <img src="{{ asset('assets/images/partner/1571289614p4.jpg') }}" alt="partner" loading="lazy" decoding="async">
                     </div>
                 </a>
             </div>
             <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 wow-replaced p-0" data-wow-delay=".1s">
                 <a href="#">
                     <div class="single-partner">
-                        <img src="{{ asset('assets/images/partner/1571289621p5.jpg') }}" alt="partner">
+                        <img src="{{ asset('assets/images/partner/1571289621p5.jpg') }}" alt="partner" loading="lazy" decoding="async">
                     </div>
                 </a>
             </div>
             <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 wow-replaced p-0" data-wow-delay=".1s">
                 <a href="#">
                     <div class="single-partner">
-                        <img src="{{ asset('assets/images/partner/1571289627p6.jpg') }}" alt="partner">
+                        <img src="{{ asset('assets/images/partner/1571289627p6.jpg') }}" alt="partner" loading="lazy" decoding="async">
                     </div>
                 </a>
             </div>
             <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 wow-replaced p-0" data-wow-delay=".1s">
                 <a href="#">
                     <div class="single-partner">
-                        <img src="{{ asset('assets/images/partner/1571289634p7.jpg') }}" alt="partner">
+                        <img src="{{ asset('assets/images/partner/1571289634p7.jpg') }}" alt="partner" loading="lazy" decoding="async">
                     </div>
                 </a>
             </div>
             <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 wow-replaced p-0" data-wow-delay=".1s">
                 <a href="#">
                     <div class="single-partner">
-                        <img src="{{ asset('assets/images/partner/1571289642p8.jpg') }}" alt="partner">
+                        <img src="{{ asset('assets/images/partner/1571289642p8.jpg') }}" alt="partner" loading="lazy" decoding="async">
                     </div>
                 </a>
             </div>
             <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 wow-replaced p-0" data-wow-delay=".1s">
                 <a href="#">
                     <div class="single-partner">
-                        <img src="{{ asset('assets/images/partner/1571289650p9.jpg') }}" alt="partner">
+                        <img src="{{ asset('assets/images/partner/1571289650p9.jpg') }}" alt="partner" loading="lazy" decoding="async">
                     </div>
                 </a>
             </div>
             <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 wow-replaced p-0" data-wow-delay=".1s">
                 <a href="#">
                     <div class="single-partner">
-                        <img src="{{ asset('assets/images/partner/1571289657p10.jpg') }}" alt="partner">
+                        <img src="{{ asset('assets/images/partner/1571289657p10.jpg') }}" alt="partner" loading="lazy" decoding="async">
                     </div>
                 </a>
             </div>
             <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 wow-replaced p-0" data-wow-delay=".1s">
                 <a href="#">
                     <div class="single-partner">
-                        <img src="{{ asset('assets/images/partner/1571289669p12.jpg') }}" alt="partner">
+                        <img src="{{ asset('assets/images/partner/1571289669p12.jpg') }}" alt="partner" loading="lazy" decoding="async">
                     </div>
                 </a>
             </div>
             <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 wow-replaced p-0" data-wow-delay=".1s">
                 <a href="#">
                     <div class="single-partner">
-                        <img src="{{ asset('assets/images/partner/1571289675p13.jpg') }}" alt="partner">
+                        <img src="{{ asset('assets/images/partner/1571289675p13.jpg') }}" alt="partner" loading="lazy" decoding="async">
                     </div>
                 </a>
             </div>

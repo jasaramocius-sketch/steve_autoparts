@@ -4,19 +4,12 @@
 @section('page-title', 'Edit Image - ' . $image->original_name)
 @section('content')
 <div class="container-fluid px-0">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="fw-bold mb-0"><i class="fas fa-image me-2"></i>Edit Image</h4>
-        <a href="{{ route('admin.images.index') }}" class="btn btn-outline-secondary btn-sm">
-            <i class="fas fa-arrow-left"></i> Back to Images
-        </a>
-    </div>
-
     <div class="row g-4">
         {{-- Image Preview --}}
         <div class="col-md-5">
             <div class="card border-0 shadow-sm">
                 <div class="card-body text-center">
-                    <img src="{{ $image->thumb_url }}" alt="{{ $image->alt_text ?? $image->original_name }}" class="img-fluid rounded" style="max-height:400px;" onerror="this.onerror=null;this.src='{{ asset("assets/images/placeholder.png") }}'">
+                    <img src="{{ $image->thumb_url }}" alt="{{ $image->alt_text ?? $image->original_name }}" class="img-fluid" style="max-height:400px;" onerror="this.onerror=null;this.src='{{ asset("assets/images/placeholder.png") }}'">
                     <hr>
                     <div class="table-responsive">
                     <table class="table table-sm table-borderless text-start small mb-0">

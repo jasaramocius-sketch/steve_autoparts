@@ -3,65 +3,111 @@
 @section('page-title', 'Image Manager')
 @section('content')
 <style>
-    .image-card { cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; position: relative; }
+    .image-card { cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s, opacity 0.2s ease; position: relative; }
     .image-card:hover { box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,0.08); }
-    .image-card.selected { border: 2px solid #0d6efd !important; box-shadow: 0 0 0 0.2rem rgba(13,110,253,0.15); }
+
+    /* === BULK MODE: all cards dim === */
+    body.img-bulk-mode .image-card { opacity: 0.55; }
+    body.img-bulk-mode .image-card:hover { opacity: 0.8; }
+    body.img-bulk-mode .image-card.selected { opacity: 1; border: 2px solid #0d6efd !important; box-shadow: 0 0 0 0.2rem rgba(13,110,253,0.15); }
+    body.img-bulk-mode .image-card .image-edit-link { pointer-events: none; }
+    body.img-bulk-mode .image-card { cursor: pointer; }
+
+    /* === GRID VIEW SELECT OVERLAY (original blue check-circle design) === */
     .select-overlay {
         display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(13,110,253,0.08); z-index: 5; align-items: center; justify-content: center;
+        background: rgba(13,110,253,0.08); z-index: 7; align-items: center; justify-content: center;
     }
     .image-card.selected .select-overlay { display: flex; }
     .select-overlay .check-circle {
-        width: 36px; height: 36px; background: #0d6efd; border-radius: 50%;
+        width: 36px; height: 36px; background: #0d6efd;
         display: flex; align-items: center; justify-content: center;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.25); top: 0; position: absolute; right: 0;
     }
     .select-overlay .check-circle svg { width: 20px; height: 20px; }
-    body.img-bulk-mode .image-card .image-edit-link { pointer-events: none; }
-    body.img-bulk-mode .image-card:hover { border-color: #0d6efd !important; }
+
+    /* === LIST VIEW === */
     #images-container.list-view { display: flex; flex-direction: column; gap: 0; }
     #images-container.list-view .grid-item { width: 100%; }
-    #images-container.list-view .image-card { display: flex; align-items: center; border-radius: 0; border-left: none; border-right: none; border-top: none; }
+    #images-container.list-view .image-card { display: flex; align-items: flex-start; border-radius: 0; border-left: none; border-right: none; border-top: none;flex-direction: row; }
+    #images-container.list-view .image-card.selected { border-left: 2px solid #0d6efd !important; }
     #images-container.list-view .grid-item + .grid-item { border-top: 1px solid #dee2e6; }
     #images-container.list-view .image-card .thumb-wrap {
-        width: 56px; height: 56px; min-width: 56px; border-radius: 6px;
-        overflow: hidden; background: #f8f9fa; display: flex; align-items: center; justify-content: center;
+        width: 140px !important; height: 140px !important; overflow: hidden; background: #f8f9fa; display: flex; align-items: center; justify-content: center;
     }
     #images-container.list-view .image-card .thumb-wrap img { width: 100%; height: 100%; object-fit: cover; }
-    #images-container.list-view .image-card .card-info { flex: 1; padding: 8px 16px; min-width: 0; display: flex; align-items: center; gap: 24px; }
-    #images-container.list-view .image-card .card-info .info-name { flex: 2; min-width: 0; }
+    #images-container.list-view .image-card .card-info { flex: 1; padding: 8px 16px; min-width: 0; display: flex; align-items: flex-start; gap: 10px;     flex-direction: column;}
+    #images-container.list-view .image-card .card-info .info-name { min-width: 0; }
     #images-container.list-view .image-card .card-info .info-name .text-truncate { font-size: 13px; font-weight: 500; color: #212529; }
-    #images-container.list-view .image-card .card-info .info-meta { flex: 1; font-size: 12px; color: #6c757d; white-space: nowrap; }
+    #images-container.list-view .image-card .card-info .info-meta { font-size: 12px; color: #6c757d; white-space: nowrap; }
     #images-container.list-view .image-card .card-info .info-type { flex: 0 0 60px; }
     #images-container.list-view .image-card .card-info .info-usage { flex: 1; }
     #images-container.list-view .image-card .card-info .info-webp { flex: 0 0 70px; text-align: center; }
     #images-container.list-view .image-card .card-info .info-edit { flex: 0 0 40px; text-align: center; }
     #images-container.list-view .image-card .card-info .info-edit a { color: #0d6efd; font-size: 13px; }
     #images-container.list-view .image-card .card-badges { display: none; }
-    #images-container.list-view .image-card .select-overlay { width: 56px; height: 56px; min-width: 56px; border-radius: 6px; }
+    #images-container.list-view .image-card .select-overlay { display: none !important; }
+    .grid-view .image-card .list-bulk-check { display: none !important; }
+    .grid-view .image-edit-link { flex-direction: column;}
+    #images-container.list-view .image-card .list-bulk-check { align-items: center; justify-content: center; padding: 4px;}
+    .list-view .start-0 {right: 0;left: unset !important;}
+    .list-view .image-card .list-bulk-check { display: flex; }
+    body.img-bulk-mode.list-view-active #images-container.list-view .image-card .card-info { padding-left: 8px; }
+    #images-container.list-view .image-card .grid-view-only { display: none !important; }
+
+    /* === LIST HEADER === */
     .list-header {
-        display: flex; align-items: center; padding: 8px 16px; background: #f8f9fa;
+        display: none; align-items: center; padding: 8px 16px; background: #f8f9fa;
         border: 1px solid #dee2e6; border-radius: 6px; margin-bottom: 4px; font-size: 11px;
         font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #6c757d;
     }
+    body.list-view-active .list-header { display: flex; }
+    .list-header .lh-check { width: 38px; display: none; align-items: center; justify-content: center; }
+    body.img-bulk-mode.list-view-active .list-header .lh-check { display: flex; }
     .list-header .lh-name { flex: 2; padding-left: 72px; }
+    body.img-bulk-mode.list-view-active .list-header .lh-name { padding-left: 0; }
     .list-header .lh-meta { flex: 1; }
     .list-header .lh-type { flex: 0 0 60px; }
     .list-header .lh-usage { flex: 1; }
     .list-header .lh-webp { flex: 0 0 70px; text-align: center; }
     .list-header .lh-edit { flex: 0 0 40px; text-align: center; }
     .list-view-only { display: none; }
-    body.list-view-active .list-view-only { display: flex; }
-    body.list-view-active .grid-view-only { display: none; }
-    #images-container.grid-view {
-        display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px;
-    }
+    body.list-view-active .list-view-only { display: flex !important; }
+    body.list-view-active .grid-view-only { display: none !important; }
+
+    /* === GRID VIEW === */
+    #images-container.grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; }
     #images-container.grid-view .grid-item { width: 100%; }
+
+    /* === HEADER BULK ACTIONS === */
     .bulk-header-normal, .bulk-header-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .bulk-header-actions { display: none !important; }
     body.img-bulk-mode .bulk-header-normal { display: none !important; }
     body.img-bulk-mode .bulk-header-actions { display: flex !important; }
+    body.img-bulk-mode .view-toggle-wrap { display: none !important; }
     .selected-count { font-weight: 600; color: #0d6efd; }
+
+    /* === BULK CHECK (shared) === */
+    .bulk-check {
+        width: 18px; height: 18px; border: 2px solid #adb5bd; border-radius: 3px;
+        background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center;
+        transition: all 0.15s ease; flex-shrink: 0; position: relative;
+    }
+    .bulk-check:hover { border-color: #0d6efd; }
+    body.img-bulk-mode .image-card.selected .bulk-check {
+        background: #0d6efd; border-color: #0d6efd;
+    }
+    body.img-bulk-mode .image-card.selected .bulk-check::after {
+        content: ''; position: absolute; width: 5px; height: 9px;
+        border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg); margin-top: -2px;
+    }
+    .bulk-check.checked {
+        background: #0d6efd; border-color: #0d6efd;
+    }
+    .bulk-check.checked::after {
+        content: ''; position: absolute; width: 5px; height: 9px;
+        border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg); margin-top: -2px;
+    }
 </style>
 
 <div class="container-fluid px-0">
@@ -161,53 +207,55 @@
             <div class="card-header bg-white d-flex justify-content-between align-items-center" style="min-height:48px;">
                 <div class="bulk-header-normal">
                     <span>{{ $images->total() }} images found</span>
-                    <button type="button" class="btn btn-sm btn-outline-primary steve-btn" onclick="enterBulkMode()">
+                    <button type="button" class="btn btn-outline-primary steve-btn" id="bulk-select-btn">
                         Bulk Select
                     </button>
                     @if(request('filter') === 'convertible')
-                        <button type="button" class="btn btn-sm btn-success steve-btn" onclick="convertAllUnconverted('{{ route('admin.images.bulk-convert') }}')">
+                        <button type="button" class="btn btn-success steve-btn" onclick="convertAllUnconverted('{{ route('admin.images.bulk-convert') }}')">
                             <i class="fas fa-bolt"></i> Convert All to WebP
                         </button>
                     @endif
                 </div>
                 <div class="bulk-header-actions">
+                    <div class="lh-check"><div class="bulk-check" id="select-all-check"></div></div>
                     <span><span class="selected-count" id="selected-count">0</span> selected</span>
-                    <button type="button" class="btn btn-sm btn-success steve-btn gap-1" onclick="bulkAction('{{ route('admin.images.bulk-convert') }}')">
+                    <button type="button" class="btn btn-success steve-btn gap-1" onclick="bulkAction('{{ route('admin.images.bulk-convert') }}')">
                         <i class="fas fa-exchange-alt"></i> Convert to WebP
                     </button>
-                    <button type="button" class="btn btn-sm btn-warning steve-btn gap-1" onclick="bulkAction('{{ route('admin.images.bulk-mark-unused') }}')">
+                    <button type="button" class="btn btn-warning steve-btn gap-1" onclick="bulkAction('{{ route('admin.images.bulk-mark-unused') }}')">
                         <i class="fas fa-tag"></i> Mark Unused
                     </button>
-                    <button type="button" class="btn btn-sm btn-danger steve-btn gap-1" onclick="if(confirm('Delete selected images permanently? This will also delete the physical file.')) bulkAction('{{ route('admin.images.bulk-delete') }}')">
-                        <i class="fas fa-trash"></i> Delete
+                    <button type="button" class="btn btn-danger steve-btn gap-1" onclick="if(confirm('Delete selected images permanently? This will also delete the physical file.')) bulkAction('{{ route('admin.images.bulk-delete') }}')">
+                        <i class="fas fa-trash"></i> Delete Permanently
                     </button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary steve-btn gap-1" onclick="exitBulkMode()">
+                    <button type="button" class="btn btn-outline-secondary steve-btn gap-1" id="bulk-cancel-btn">
                         <i class="fas fa-times"></i> Cancel
                     </button>
                 </div>
-                <div class="d-flex gap-1">
-                    <button type="button" class="view-btn steve-btn active" id="view-grid-btn" onclick="setView('grid')" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Grid View">
+                <div class="d-flex gap-1 view-toggle-wrap">
+                    <button type="button" class="view-btn steve-btn active" id="view-grid-btn" data-view="grid" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Grid View">
                         <i class="fas fa-th-large"></i>
                     </button>
-                    <button type="button" class="view-btn steve-btn" id="view-list-btn" onclick="setView('list')" data-bs-toggle="tooltip" data-bs-placement="bottom" title="List View">
+                    <button type="button" class="view-btn steve-btn" id="view-list-btn" data-view="list" data-bs-toggle="tooltip" data-bs-placement="bottom" title="List View">
                         <i class="fas fa-bars"></i>
                     </button>
                 </div>
             </div>
             <div class="card-body p-3">
-                <div id="images-header" class="list-header list-view-only" style="display:none;">
+                <!-- <div id="images-header" class="list-header">
+                    <div class="lh-check"><div class="bulk-check" id="select-all-check"></div></div>
                     <div class="lh-name">Name</div>
                     <div class="lh-meta">Size</div>
                     <div class="lh-type">Type</div>
                     <div class="lh-usage">Usage</div>
                     <div class="lh-webp">WebP</div>
                     <div class="lh-edit"><i class="fas fa-pen"></i></div>
-                </div>
+                </div> -->
                 <div id="images-container" class="grid-view">
                     @foreach($images as $image)
                     @php $hasWebp = $image->hasWebpVersion(); @endphp
                     <div class="grid-item">
-                        <div class="card border h-100 image-card" data-id="{{ $image->id }}" onclick="handleCardClick(this, {{ $image->id }})">
+                        <div class="card border h-100 image-card" data-id="{{ $image->id }}">
                             <div class="select-overlay">
                                 <div class="check-circle">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
@@ -215,19 +263,22 @@
                                     </svg>
                                 </div>
                             </div>
-                            @if($hasWebp)
-                                <span class="position-absolute top-0 end-0 m-2 badge bg-success" style="z-index:6;" title="Already converted to WebP"><i class="fas fa-check"></i> WebP</span>
+                            <div class="list-bulk-check">
+                                <div class="bulk-check"></div>
+                            </div>
+                            @if($hasWebp && $image->mime_type !== 'image/webp')
+                                <span class="position-absolute top-0 start-0 m-2 badge bg-success" style="z-index:6;" title="Already converted to WebP"><i class="fas fa-check"></i> WebP</span>
                             @endif
-                            <a href="{{ route('admin.images.edit', $image->id) }}" class="text-decoration-none text-dark image-edit-link">
+                            <a href="{{ route('admin.images.edit', $image->id) }}" class="text-decoration-none text-dark image-edit-link d-flex gap-1">
                                 <div class="thumb-wrap" style="height:140px;overflow:hidden;background:#f8f9fa;display:flex;align-items:center;justify-content:center;">
-                                    <img src="{{ $image->thumb_url }}" alt="{{ $image->alt_text ?? $image->original_name }}" style="max-width:100%;max-height:100%;object-fit:contain;" loading="lazy" onerror="this.onerror=null;this.src='{{ asset("assets/images/placeholder.png") }}'">
+                                    <img src="{{ $image->thumb_url }}" alt="{{ $image->alt_text ?? $image->original_name }}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" onerror="this.onerror=null;this.src='{{ asset("assets/images/placeholder.png") }}'">
                                 </div>
                                 <div class="card-info p-2 small">
                                     <div class="info-name">
                                         <div class="text-truncate fw-medium" title="{{ $image->original_name }}">{{ $image->original_name }}</div>
                                     </div>
-                                    <div class="info-meta grid-view-only">{{ $image->size_in_kb }}</div>
-                                    <div class="info-meta grid-view-only">{{ $image->width }}x{{ $image->height }}</div>
+                                    <div class="info-meta grid-view-only">{{ $image->size_in_kb }} | {{ $image->width }}x{{ $image->height }}</div>
+                                    <div class="info-meta grid-view-only"></div>
                                     <div class="card-badges d-flex justify-content-between mt-1 gap-1 flex-wrap grid-view-only">
                                         <span class="badge {{ $image->attachable_type ? 'bg-light text-success border border-success-subtle' : 'bg-light text-secondary border border-secondary-subtle' }}">
                                             {{ $image->attachable_type ? class_basename($image->attachable_type) : 'Unused' }}
@@ -245,25 +296,27 @@
                                         @endif
                                     </div>
                                     <div class="info-meta list-view-only" style="display:none;">{{ $image->size_in_kb }} | {{ $image->width }}x{{ $image->height }}</div>
-                                    <div class="info-type list-view-only" style="display:none;">
-                                        @if(in_array($image->mime_type, ['image/jpeg', 'image/pjpeg', 'image/jpg']))
-                                            <span class="badge bg-light text-warning border border-warning-subtle">JPEG</span>
-                                        @elseif($image->mime_type === 'image/png')
-                                            <span class="badge bg-light text-primary border border-primary-subtle">PNG</span>
-                                        @elseif($image->mime_type === 'image/gif')
-                                            <span class="badge bg-light border" style="color:#9b59b6;border-color:#d7bde2;">GIF</span>
-                                        @elseif($image->mime_type === 'image/webp')
-                                            <span class="badge bg-light text-info border border-info-subtle">WebP</span>
-                                        @elseif($image->mime_type === 'image/svg+xml')
-                                            <span class="badge bg-light text-secondary border border-secondary-subtle">SVG</span>
-                                        @endif
+                                    <div class="card-badges d-flex justify-content-between mt-1 gap-1 flex-wrap list-view-only" style="display:none;">
+                                        <div class="info-type list-view-only" style="display:none;">
+                                            @if(in_array($image->mime_type, ['image/jpeg', 'image/pjpeg', 'image/jpg']))
+                                                <span class="badge bg-light text-warning border border-warning-subtle">JPEG</span>
+                                            @elseif($image->mime_type === 'image/png')
+                                                <span class="badge bg-light text-primary border border-primary-subtle">PNG</span>
+                                            @elseif($image->mime_type === 'image/gif')
+                                                <span class="badge bg-light border" style="color:#9b59b6;border-color:#d7bde2;">GIF</span>
+                                            @elseif($image->mime_type === 'image/webp')
+                                                <span class="badge bg-light text-info border border-info-subtle">WebP</span>
+                                            @elseif($image->mime_type === 'image/svg+xml')
+                                                <span class="badge bg-light text-secondary border border-secondary-subtle">SVG</span>
+                                            @endif
+                                        </div>
+                                        <div class="info-usage list-view-only" style="display:none;">
+                                            <span class="badge {{ $image->attachable_type ? 'bg-light text-success border border-success-subtle' : 'bg-light text-secondary border border-secondary-subtle' }}">
+                                                {{ $image->attachable_type ? class_basename($image->attachable_type) : 'Unused' }}
+                                            </span>
+                                        </div>
                                     </div>
-                                    <div class="info-usage list-view-only" style="display:none;">
-                                        <span class="badge {{ $image->attachable_type ? 'bg-light text-success border border-success-subtle' : 'bg-light text-secondary border border-secondary-subtle' }}">
-                                            {{ $image->attachable_type ? class_basename($image->attachable_type) : 'Unused' }}
-                                        </span>
-                                    </div>
-                                    <div class="info-webp list-view-only" style="display:none;">
+                                    <!-- <div class="info-webp list-view-only" style="display:none;">
                                         @if($hasWebp)
                                             <span class="badge bg-success text-white"><i class="fas fa-check"></i></span>
                                         @else
@@ -272,7 +325,7 @@
                                     </div>
                                     <div class="info-edit list-view-only" style="display:none;">
                                         <a href="{{ route('admin.images.edit', $image->id) }}"><i class="fas fa-pen"></i></a>
-                                    </div>
+                                    </div> -->
                                 </div>
                             </a>
                         </div>
@@ -338,94 +391,19 @@
 (function() {
     let bulkMode = false;
     const selectedIds = new Set();
-    const checkSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+    const container = document.getElementById('images-container');
+    const header = document.getElementById('images-header');
+    const gridBtn = document.getElementById('view-grid-btn');
+    const listBtn = document.getElementById('view-list-btn');
+    const bulkForm = document.getElementById('bulk-form');
+    const bulkInputs = document.getElementById('bulk-inputs');
+    const countEl = document.getElementById('selected-count');
 
-    document.querySelector('input[name="images[]"]')?.addEventListener('change', function() {
-        const preview = document.getElementById('upload-preview');
-        preview.innerHTML = '';
-        Array.from(this.files).forEach(file => {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const col = document.createElement('div');
-                col.className = 'col-4 col-md-3';
-                col.innerHTML = '<div class="card border p-1"><img src="' + e.target.result + '" class="img-fluid rounded" style="height:80px;width:100%;object-fit:cover;"></div>';
-                preview.appendChild(col);
-            };
-            reader.readAsDataURL(file);
-        });
-    });
-
-    window.enterBulkMode = function() {
-        bulkMode = true;
-        document.body.classList.add('img-bulk-mode');
-    };
-
-    window.exitBulkMode = function() {
-        bulkMode = false;
-        document.body.classList.remove('img-bulk-mode');
-        selectedIds.clear();
-        document.querySelectorAll('.image-card.selected').forEach(c => c.classList.remove('selected'));
-        syncHiddenInputs();
-        updateBulkHeader();
-    };
-
-    window.handleCardClick = function(card, id) {
-        if (!bulkMode) {
-            window.location.href = card.querySelector('.image-edit-link')?.href || '#';
-            return;
-        }
-        if (selectedIds.has(id)) {
-            selectedIds.delete(id);
-            card.classList.remove('selected');
-        } else {
-            selectedIds.add(id);
-            card.classList.add('selected');
-        }
-        syncHiddenInputs();
-        updateBulkHeader();
-    };
-
-    function updateBulkHeader() {
-        const count = selectedIds.size;
-        document.getElementById('selected-count').textContent = count;
+    function isListView() {
+        return container && container.classList.contains('list-view');
     }
 
-    function syncHiddenInputs() {
-        const container = document.getElementById('bulk-inputs');
-        container.innerHTML = '';
-        selectedIds.forEach(id => {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'ids[]';
-            input.value = id;
-            container.appendChild(input);
-        });
-    }
-
-    window.bulkAction = function(url) {
-        if (selectedIds.size === 0) { alert('Please select at least one image.'); return; }
-        document.getElementById('bulk-form').action = url;
-        document.getElementById('bulk-form').submit();
-    };
-
-    window.convertAllUnconverted = function(url) {
-        if (!confirm('Convert all unconverted images on this page to WebP?')) return;
-        document.querySelectorAll('.image-card').forEach(card => {
-            const id = parseInt(card.dataset.id);
-            selectedIds.add(id);
-            card.classList.add('selected');
-        });
-        syncHiddenInputs();
-        updateBulkHeader();
-        document.getElementById('bulk-form').action = url;
-        document.getElementById('bulk-form').submit();
-    };
-
-    window.setView = function(mode) {
-        const container = document.getElementById('images-container');
-        const header = document.getElementById('images-header');
-        const gridBtn = document.getElementById('view-grid-btn');
-        const listBtn = document.getElementById('view-list-btn');
+    function setView(mode) {
         localStorage.setItem('image-manager-view', mode);
         if (mode === 'list') {
             container.classList.remove('grid-view');
@@ -442,14 +420,162 @@
             listBtn.classList.remove('active');
             if (header) header.style.display = 'none';
         }
-    };
+    }
 
-    const savedView = localStorage.getItem('image-manager-view') || 'grid';
-    setView(savedView);
+    function enterBulkMode() {
+        bulkMode = true;
+        document.body.classList.add('img-bulk-mode');
+    }
+
+    function exitBulkMode() {
+        bulkMode = false;
+        document.body.classList.remove('img-bulk-mode');
+        selectedIds.clear();
+        document.querySelectorAll('.image-card.selected').forEach(function(c) { c.classList.remove('selected'); });
+        if (selectAllCheck) selectAllCheck.classList.remove('checked');
+        syncInputs();
+        updateCount();
+    }
+
+    function toggleSelect(id) {
+        var card = container.querySelector('.image-card[data-id="' + id + '"]');
+        if (!card) return;
+        if (selectedIds.has(id)) {
+            selectedIds.delete(id);
+            card.classList.remove('selected');
+        } else {
+            selectedIds.add(id);
+            card.classList.add('selected');
+        }
+        syncInputs();
+        updateCount();
+        syncSelectAllCheck();
+    }
+
+    function syncSelectAllCheck() {
+        if (!selectAllCheck) return;
+        var total = document.querySelectorAll('.image-card').length;
+        if (selectedIds.size === total && total > 0) {
+            selectAllCheck.classList.add('checked');
+        } else {
+            selectAllCheck.classList.remove('checked');
+        }
+    }
+
+    function selectAll() {
+        var allSelected = true;
+        document.querySelectorAll('.image-card').forEach(function(card) {
+            var id = parseInt(card.dataset.id);
+            if (!selectedIds.has(id)) allSelected = false;
+        });
+        document.querySelectorAll('.image-card').forEach(function(card) {
+            var id = parseInt(card.dataset.id);
+            if (allSelected) {
+                selectedIds.delete(id);
+                card.classList.remove('selected');
+            } else {
+                selectedIds.add(id);
+                card.classList.add('selected');
+            }
+        });
+        syncInputs();
+        updateCount();
+        syncSelectAllCheck();
+    }
+
+    function updateCount() {
+        if (countEl) countEl.textContent = selectedIds.size;
+    }
+
+    function syncInputs() {
+        bulkInputs.innerHTML = '';
+        selectedIds.forEach(function(id) {
+            var inp = document.createElement('input');
+            inp.type = 'hidden';
+            inp.name = 'ids[]';
+            inp.value = id;
+            bulkInputs.appendChild(inp);
+        });
+    }
+
+    function bulkAction(url) {
+        if (selectedIds.size === 0) { alert('Please select at least one image.'); return; }
+        bulkForm.action = url;
+        bulkForm.submit();
+    }
+
+    document.getElementById('bulk-select-btn').addEventListener('click', enterBulkMode);
+    document.getElementById('bulk-cancel-btn').addEventListener('click', exitBulkMode);
+
+    gridBtn.addEventListener('click', function() { setView('grid'); });
+    listBtn.addEventListener('click', function() { setView('list'); });
+
+    var selectAllCheck = document.getElementById('select-all-check');
+    if (selectAllCheck) {
+        selectAllCheck.addEventListener('click', selectAll);
+    }
+
+    container.addEventListener('click', function(e) {
+        var listCheck = e.target.closest('.list-bulk-check');
+        if (listCheck) {
+            e.preventDefault();
+            e.stopPropagation();
+            var card = listCheck.closest('.image-card');
+            if (!card) return;
+            var id = parseInt(card.dataset.id);
+            if (!bulkMode) enterBulkMode();
+            toggleSelect(id);
+            return;
+        }
+
+        var card = e.target.closest('.image-card');
+        if (!card) return;
+        var id = parseInt(card.dataset.id);
+
+        if (!bulkMode) {
+            var link = card.querySelector('.image-edit-link');
+            if (link) window.location.href = link.href;
+            return;
+        }
+
+        toggleSelect(id);
+    });
 
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && bulkMode) exitBulkMode();
     });
+
+    document.querySelector('input[name="images[]"]')?.addEventListener('change', function() {
+        var preview = document.getElementById('upload-preview');
+        preview.innerHTML = '';
+        Array.from(this.files).forEach(function(file) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var col = document.createElement('div');
+                col.className = 'col-4 col-md-3';
+                col.innerHTML = '<div class="card border p-1"><img src="' + e.target.result + '" class="img-fluid rounded" style="height:80px;width:100%;object-fit:cover;"></div>';
+                preview.appendChild(col);
+            };
+            reader.readAsDataURL(file);
+        });
+    });
+
+    window.bulkAction = bulkAction;
+    window.convertAllUnconverted = function(url) {
+        if (!confirm('Convert all unconverted images on this page to WebP?')) return;
+        document.querySelectorAll('.image-card').forEach(function(card) {
+            var id = parseInt(card.dataset.id);
+            selectedIds.add(id);
+            card.classList.add('selected');
+        });
+        syncInputs();
+        updateCount();
+        bulkForm.action = url;
+        bulkForm.submit();
+    };
+
+    var savedView = localStorage.getItem('image-manager-view') || 'grid';
+    setView(savedView);
 })();
 </script>
 @endpush

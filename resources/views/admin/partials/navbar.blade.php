@@ -51,7 +51,7 @@
                 <li><a class="dropdown-item" href="{{ route('admin.profile') }}"><i class="fas fa-user-cog fa-fw me-2"></i>My Profile</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
-                    <form action="{{ route('logout') }}" method="POST">
+                    <form action="{{ route('admin.logout') }}" method="POST">
                         @csrf
                         <button type="submit" class="dropdown-item steve-btn"><i class="fas fa-sign-out-alt fa-fw me-2"></i>Logout</button>
                     </form>

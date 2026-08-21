@@ -287,20 +287,22 @@
               @endforeach
               <div class="price-range">
                 <div id="price-slider" class="mb-3" style="margin-top: 15px;"></div>
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                  <span class="text-muted" style="font-size: 14px;">Range:</span>
-                  <span id="price-range-label" style="font-weight: 600; color: #1f0300;">{{ currency_format(0) }} - {{ currency_format(1000) }}</span>
-                </div>
                 @php
                     $rate = config('currencies.' . session('currency', 'USD') . '.rate', 1);
+                    $sliderMax = $maxProductPrice * $rate;
                 @endphp
-                <input type="hidden" id="price-min" name="min_price" value="{{ request('min_price', 0 * $rate) }}">
-                <input type="hidden" id="price-max" name="max_price" value="{{ request('max_price', 1000 * $rate) }}">
-                <input type="hidden" id="price-rate" name="price_rate" value="{{ $rate }}">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <span class="text-muted" style="font-size: 14px;">Range:</span>
+                  <span id="price-range-label" style="font-weight: 600; color: #1f0300;">{{ currency_format(0) }} - {{ currency_format($maxProductPrice) }}</span>
+                </div>
+                <input type="hidden" id="price-min" name="min_price" value="{{ request('min_price', 0) }}">
+                <input type="hidden" id="price-max" name="max_price" value="{{ request('max_price', $sliderMax) }}">
+                <input type="hidden" id="price-currency-symbol" value="{{ $currencySymbol }}">
+                <input type="hidden" id="price-slider-max" value="{{ $sliderMax }}">
                 <div class="price-range-actions apply-clear-action-btn d-flex gap-2">
                   <button type="submit" class="btn btn-sm w-100 text-white steve-btn" id="apply-price-filter">Apply Filter</button>
-                  @if(request()->has('min_price') || request()->has('max_price'))
-                    <button type="button" class="btn btn-sm btn-outline-secondary w-100 steve-btn" id="clear-price-filter">Clear</button>
+                  @if(request()->filled('min_price') || request()->filled('max_price'))
+                    <button type="button" class="btn btn-sm w-100 text-white steve-btn" id="clear-price-filter">Clear</button>
                   @endif
                 </div>
               </div>
@@ -349,7 +351,7 @@
                 @endif
                 <div class="vehicle-filter-form-actions apply-clear-action-btn d-flex flex-row gap-2">
                 <button type="submit" class="btn btn-sm w-100 text-white steve-btn">Apply Filter</button>
-                @if(request()->hasAny(['year', 'make', 'model']))
+                @if(request()->filled('year') || request()->filled('make') || request()->filled('model'))
                   <a href="{{ url()->current() }}" class="btn btn-sm w-100 text-white steve-btn">Clear Filter</a>
                 @endif
                 </div>
@@ -568,7 +570,7 @@
           $hasPriceParams = request()->filled('min_price') || request()->filled('max_price');
           $minPriceVal = (float) request('min_price', 0);
           $maxPriceVal = (float) request('max_price', 0);
-          $hasPriceFilter = $hasPriceParams && ($minPriceVal > 0 || $maxPriceVal < 1000);
+          $hasPriceFilter = $hasPriceParams && ($minPriceVal > 0 || $maxPriceVal < ($maxProductPrice * $rate));
           $hasVehicleChips = !isset($selectedVehicle) || !$selectedVehicle;
           $hasVehicleFilterChip = isset($selectedVehicle) && $selectedVehicle;
           $hasYearFilter = $hasVehicleChips && request()->filled('year');
@@ -609,7 +611,7 @@
             @if($hasPriceFilter)
               <span class="filter-chip">
                 <span class="filter-chip-label">Price:</span>
-                <span class="filter-chip-value">${{ number_format($minPriceVal, 0) }} - ${{ number_format($maxPriceVal, 0) }}</span>
+                <span class="filter-chip-value">{{ $currencySymbol }}{{ number_format($minPriceVal, 0) }} - {{ $currencySymbol }}{{ number_format($maxPriceVal, 0) }}</span>
                 <a href="{{ request()->fullUrlWithQuery(['min_price' => null, 'max_price' => null, 'page' => null]) }}" class="filter-chip-clear" data-bs-toggle="tooltip" data-bs-placement="top" title="Remove price filter">
                   <i class="las la-times"></i>
                 </a>
@@ -693,6 +695,33 @@
 @section('scripts')
 <script>
 $(document).ready(function() {
+    // Build clean URLs for filter forms (no trailing "?" when empty)
+    function buildCleanFilterUrl(form) {
+        var params = new URLSearchParams();
+        form.find('input, select').each(function() {
+            if ($(this).prop('disabled')) return;
+            var name = $(this).attr('name');
+            if (!name) return;
+            if ($(this).is('select') && !this.value) return;
+            if ($(this).attr('type') === 'hidden' && !this.value) return;
+            if (name.endsWith('[]')) {
+                var baseName = name.slice(0, -2);
+                $(this).closest(form).find('[name="' + name + '"]').each(function() {
+                    if (this.value) params.append(baseName, this.value);
+                });
+            } else {
+                params.set(name, this.value);
+            }
+        });
+        var qs = params.toString();
+        var base = form.attr('action');
+        return qs ? base + '?' + qs : base;
+    }
+    $('#vehicle-filter-form').on('submit', function(e) {
+        e.preventDefault();
+        window.location.href = buildCleanFilterUrl($(this));
+    });
+
     // Sort Handler
     $('#sort-select').on('change', function() {
         var url = new URL(window.location.href);
@@ -719,19 +748,33 @@ $(document).ready(function() {
     });
 
     // jQuery UI Price Slider
+    var priceSymbol = $("#price-currency-symbol").val() || '$';
+    var sliderMaxVal = parseInt($("#price-slider-max").val()) || 1000;
     var minPrice = parseInt("{{ request('min_price', 0) }}") || 0;
-    var maxPrice = parseInt("{{ request('max_price', 1000) }}") || 1000;
+    var maxPrice = parseInt("{{ request('max_price', 0) }}") || sliderMaxVal;
 
     $("#price-slider").slider({
-        range: true, min: 0, max: 1000,
+        range: true, min: 0, max: sliderMaxVal,
         values: [minPrice, maxPrice],
         slide: function(event, ui) {
             $("#price-min").val(ui.values[0]);
             $("#price-max").val(ui.values[1]);
-            $("#price-range-label").text("$" + ui.values[0] + " - $" + ui.values[1]);
+            $("#price-range-label").text(priceSymbol + ui.values[0].toLocaleString() + " - " + priceSymbol + ui.values[1].toLocaleString());
         }
     });
-    $("#price-range-label").text("$" + $("#price-slider").slider("values", 0) + " - $" + $("#price-slider").slider("values", 1));
+    $("#price-range-label").text(priceSymbol + $("#price-slider").slider("values", 0).toLocaleString() + " - " + priceSymbol + $("#price-slider").slider("values", 1).toLocaleString());
+
+    // Strip default price params on submit for clean URL
+    $("#price-filter-form").on('submit', function(e) {
+        e.preventDefault();
+        var slider = $('#price-slider');
+        var min = slider.slider('values', 0);
+        var max = slider.slider('values', 1);
+        if (min === 0 && max === sliderMaxVal) {
+            $("#price-min, #price-max").prop('disabled', true);
+        }
+        window.location.href = buildCleanFilterUrl($(this));
+    });
 
     $("#clear-price-filter").click(function() {
         $("#price-min, #price-max").val("").prop('disabled', true);

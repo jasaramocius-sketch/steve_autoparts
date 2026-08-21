@@ -141,6 +141,8 @@ class ShopController extends Controller
             $this->computeCategoryTotals($cat, $productCounts);
         });
 
+        $currency = session('currency', 'USD');
+
         return [
             'categoryTree' => $categoryTree,
             'brands' => Brand::where('status', true)->whereHas('products')->orderBy('name')->get(['id', 'name', 'slug']),
@@ -154,6 +156,8 @@ class ShopController extends Controller
                 ->select('year', 'make', 'model')
                 ->distinct()
                 ->get(),
+            'maxProductPrice' => Product::where('status', true)->max('price') ?? 1000,
+            'currencySymbol' => config('currencies.' . $currency . '.symbol', '$'),
         ];
     }
 

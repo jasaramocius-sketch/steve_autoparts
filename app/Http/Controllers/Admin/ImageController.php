@@ -197,7 +197,7 @@ class ImageController extends Controller
         if (!in_array($sort, $allowedSorts)) $sort = 'created_at';
         $query->orderBy($sort, $order === 'asc' ? 'asc' : 'desc');
 
-        $images = $query->paginate(28)->onEachSide(2)->withQueryString();
+        $images = $query->paginate(80)->onEachSide(2)->withQueryString();
 
         $convertibleQuery = Image::whereIn('mime_type', $convertibleMimes)
             ->whereRaw("SUBSTRING_INDEX(filename, '.', 1) NOT IN (SELECT SUBSTRING_INDEX(filename, '.', 1) FROM images WHERE mime_type = 'image/webp')");

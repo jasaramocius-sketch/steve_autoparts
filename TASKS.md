@@ -2660,3 +2660,58 @@ Revisions **4808–4809** (05 Aug 05:15).
 - `setView(mode)` — toggles classes, saves preference, syncs header visibility
 
 **No backend/controller changes required.**
+
+---
+
+## 174. Home Page Sliders — Scroll-Triggered Autoplay (19 Aug 2026)
+
+**Problem:** All 4 home page Swiper sliders (categories, featured products, best-selling, latest posts) had no autoplay — users had to manually swipe to see content.
+
+**Solution:** Added IntersectionObserver-based autoplay that starts when the slider enters the viewport and pauses when it leaves. First slide advances immediately with 600ms animation, then normal autoplay interval continues.
+
+**Files changed:**
+- `public/assets/front/js/script.js:531-610`:
+  - Added IntersectionObserver on `.product-cards-slider` containers (featured-products + best-selling)
+  - On entry: `slideNext(600)` then `autoplay.start()` (delay 3000ms, pauseOnMouseEnter true)
+  - On exit: `autoplay.stop()` + `slideTo(0)` (reset to first slide)
+- `resources/views/home/index.blade.php:600-663`:
+  - Added IntersectionObserver on `.home-cate-slider` (categories) and `.swiper-latest-posts` (latest posts)
+  - Same pattern: immediate `slideNext(600)` on entry, stop + reset on exit
+  - Categories: delay 2500ms; Latest posts: delay 4000ms
+
+**Key detail:** `autoplay.waitForTransition: true` ensures first `slideNext(600)` completes before the 3s/2.5s/4s timer starts.
+
+---
+
+## 175. Image Manager — Grid/List Toggle (Shop Page Style) (19 Aug 2026)
+
+**Problem:** Image Manager grid/list toggle had different styling than the shop page toggle — used custom CSS classes instead of the shared `view-btn` + `steve-btn` classes.
+
+**Solution:** Updated toggle buttons to match shop page design with consistent `steve-btn view-btn` classes and `fa-th-large`/`fa-bars` icons.
+
+**Files changed:**
+- `resources/views/admin/images/index.blade.php:237-263`:
+  - Grid button: `<button type="button" class="steve-btn view-btn active">` with `fa-th-large` icon
+  - List button: `<button type="button" class="steve-btn view-btn">` with `fa-bars` icon
+  - Removed old `<a class="view-toggle">` with `<i class="fas fa-grip-horizontal">`/`<i class="fas fa-list">`
+- `public/assets/front/css/custom.css`:
+  - Removed old `.view-toggle` CSS (was separate from shop page `.view-btn`)
+
+---
+
+## 176. BladeCompiler Permission Fix — `touch()` Utime Error (19 Aug 2026)
+
+**Problem:** `touch(): Utime failed: Operation not permitted` error in `BladeCompiler.php:215` — compiled blade views owned by `jasaram` (CLI user) while web server runs as `www-data`.
+
+**Immediate fix:** `php artisan view:clear` cleared compiled views, allowing `www-data` to regenerate them.
+
+**Root cause:** Files created by CLI (`php artisan`) are owned by the CLI user (`jasaram`), not `www-data`. Web server cannot modify/touch these files.
+
+**Permanent fix (requires manual sudo):**
+```bash
+sudo usermod -aG www-data jasaram
+sudo find /var/www/html/stautoparts/storage -type d -exec chmod 2775 {} \;
+sudo chown -R jasaram:www-data /var/www/html/stautoparts/storage/framework/views/
+```
+
+**Files affected:** None (view cache cleared, no code change)

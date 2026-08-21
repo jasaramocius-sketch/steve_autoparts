@@ -13,24 +13,29 @@
     @endif
     <meta name="robots" content="noindex, nofollow">
     
+    <!-- Preconnect for external origins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    
     <!-- Essential css files -->
     <link rel="stylesheet" href="{{ asset('assets/front/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/front/css/style.css') }}?v={{ filemtime(public_path('assets/front/css/style.css')) }}">
     <link rel="stylesheet" href="{{ asset('assets/front/css/custom.css') }}?v={{ filemtime(public_path('assets/front/css/custom.css')) }}">
     <link rel="stylesheet" href="{{ asset('assets/front/css/all.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css">
-    <link rel="stylesheet" href="{{ asset('assets/front/css/slick.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/front/css/swiper-bundle.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/front/css/nice-select.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/front/css/jquery-ui.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/front/css/animate.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/front/css/toastr.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/front/css/dynamic-font.css') }}">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <!-- Non-critical CSS - loaded async -->
+    <link rel="preload" href="{{ asset('assets/front/css/slick.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="{{ asset('assets/front/css/swiper-bundle.min.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="{{ asset('assets/front/css/nice-select.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="{{ asset('assets/front/css/jquery-ui.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="{{ asset('assets/front/css/animate.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="{{ asset('assets/front/css/toastr.min.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="{{ asset('assets/front/css/dynamic-font.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="icon" href="{{ storedImageUrl(\App\Models\Setting::get('header_favicon') ?? '1730880696Fabpng.png', 'assets/images') }}">
-    <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-bs5.min.css" rel="stylesheet">
-
     <link href="https://fonts.googleapis.com/css?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Jost:wght@100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Saira:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
     <style>
     .border-bottom-6px {
@@ -628,17 +633,16 @@
 
     <!-- Essential Js Files -->
     <script src="{{ asset('assets/front/js/jquery.min.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-bs5.min.js"></script>
-    <script src="{{ asset('assets/front/js/slick.js') }}"></script>
-    <script src="{{ asset('assets/front/js/swiper-bundle.min.js') }}"></script>
-    <script src="{{ asset('assets/front/js/jquery-ui.js') }}"></script>
-    <script src="{{ asset('assets/front/js/nice-select.js') }}?v={{ filemtime(public_path('assets/front/js/nice-select.js')) }}"></script>
-    <script src="{{ asset('assets/front/js/wow.js') }}"></script>
-    <script src="{{ asset('assets/front/js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ asset('assets/front/js/toastr.min.js') }}"></script>
-    <script src="{{ asset('assets/front/js/script.js') }}?v={{ filemtime(public_path('assets/front/js/script.js')) }}"></script>
+    <script src="{{ asset('assets/front/js/slick.js') }}" defer></script>
+    <script src="{{ asset('assets/front/js/swiper-bundle.min.js') }}" defer></script>
+    <script src="{{ asset('assets/front/js/jquery-ui.js') }}" defer></script>
+    <script src="{{ asset('assets/front/js/nice-select.js') }}?v={{ filemtime(public_path('assets/front/js/nice-select.js')) }}" defer></script>
+    <script src="{{ asset('assets/front/js/wow.js') }}" defer></script>
+    <script src="{{ asset('assets/front/js/bootstrap.bundle.min.js') }}" defer></script>
+    <script src="{{ asset('assets/front/js/toastr.min.js') }}" defer></script>
+    <script src="{{ asset('assets/front/js/script.js') }}?v={{ filemtime(public_path('assets/front/js/script.js')) }}" defer></script>
 
-    <script src="{{ asset('assets/front/js/myscript.js') }}?v={{ filemtime(public_path('assets/front/js/myscript.js')) }}"></script>
+    <script src="{{ asset('assets/front/js/myscript.js') }}?v={{ filemtime(public_path('assets/front/js/myscript.js')) }}" defer></script>
 
     <!-- Session Flash Notifications (must remain inline for Blade PHP) -->
     <script>
@@ -647,16 +651,16 @@
     </script>
 <script>
     @if(session('success'))
-        toastr.success("{{ session('success') }}");
+        document.addEventListener('DOMContentLoaded', function(){ toastr.success("{{ session('success') }}"); });
     @endif
     @if(session('error'))
-        toastr.error("{{ session('error') }}");
+        document.addEventListener('DOMContentLoaded', function(){ toastr.error("{{ session('error') }}"); });
     @endif
     @if(session('warning'))
-        toastr.warning("{{ session('warning') }}");
+        document.addEventListener('DOMContentLoaded', function(){ toastr.warning("{{ session('warning') }}"); });
     @endif
     @if(session('info'))
-        toastr.info("{{ session('info') }}");
+        document.addEventListener('DOMContentLoaded', function(){ toastr.info("{{ session('info') }}"); });
     @endif
 
     // Mobile search toggle
