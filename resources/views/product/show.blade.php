@@ -745,6 +745,7 @@
                   $avgRating = $visibleReviews->avg('rating');
                   $displayRating = round($avgRating);
                 @endphp
+                @if($visibleReviews->count() > 0)
                 <p class="rating" id="product-rating">
                   @for($i = 0; $i < 5; $i++)
                   <svg xmlns="http://www.w3.org/2000/svg" width="17" height="16" viewBox="0 0 17 16" fill="none">
@@ -753,6 +754,7 @@
                   @endfor
                   <span id="product-review-count">({{ $visibleReviews->count() }})</span>
                 </p>
+                @endif
               </div>
 
               @if($product->year && $product->make && $product->model)
@@ -1426,8 +1428,16 @@ document.addEventListener('click', (e) => {
 });
 
 function updateProductRating(rating, count) {
-  const container = document.getElementById('product-rating');
-  if (!container) return;
+  let container = document.getElementById('product-rating');
+  if (!container) {
+    if (!count) return;
+    const stockP = document.querySelector('p.stock');
+    if (!stockP) return;
+    container = document.createElement('p');
+    container.className = 'rating';
+    container.id = 'product-rating';
+    stockP.parentNode.appendChild(container);
+  }
   const svgTemplate = '<svg xmlns="http://www.w3.org/2000/svg" width="17" height="16" viewBox="0 0 17 16" fill="none"><path d="M8.5 0.5L10.4084 6.37336L16.584 6.37336L11.5878 10.0033L13.4962 15.8766L8.5 12.2467L3.50383 15.8766L5.41219 10.0033L0.416019 6.37336L6.59163 6.37336L8.5 0.5Z" fill="FILL_COLOR"></path></svg>';
   const starsHtml = Array.from({length: 5}, (_, i) =>
     svgTemplate.replace('FILL_COLOR', i < rating ? '#EEAE0B' : '#E2E8F0')

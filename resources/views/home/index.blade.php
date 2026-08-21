@@ -239,19 +239,19 @@
                         <div class="countdown-wrapper flex-wrap " id="countdown">
                             <div class="countdown-item-wrapper d-flex">
                                 <div class="countdown-item wow-replaced" data-wow-delay=".3s">
-                                    <h6 class="countdown-number" id="days"><span class="countdown-title">Day</span></h6>
+                                    <p class="countdown-number" id="days"><span class="countdown-title">Day</span></p>
                                     <span class="countdown-title">Day</span>
                                 </div>
                                 <div class="countdown-item wow-replaced" data-wow-delay=".4s">
-                                    <h6 class="countdown-number" id="hours"><span class="countdown-title">Hour</span></h6>
+                                    <p class="countdown-number" id="hours"><span class="countdown-title">Hour</span></p>
                                     <span class="countdown-title">Hour</span>
                                 </div>
                                 <div class="countdown-item wow-replaced" data-wow-delay=".5s">
-                                    <h6 class="countdown-number" id="minutes"><span class="countdown-title">Min</span></h6>
+                                    <p class="countdown-number" id="minutes"><span class="countdown-title">Min</span></p>
                                     <span class="countdown-title">Min</span>
                                 </div>
                                 <div class="countdown-item wow-replaced" data-wow-delay=".6s">
-                                    <h6 class="countdown-number" id="seconds"><span class="countdown-title">Sec</span></h6>
+                                    <p class="countdown-number" id="seconds"><span class="countdown-title">Sec</span></p>
                                     <span class="countdown-title">Sec</span>
                                 </div>
                             </div>
@@ -445,7 +445,7 @@
                         </div>
                         <div class="blog-overlay"></div>
                         <div class="post-content home-2">
-                            <h5 class="post-title">{{ $post->title }}</h5>
+                            <h3 class="post-title">{{ $post->title }}</h3>
                             <p class="date">{{ $post->created_at->format('d M, Y') }}</p>
                             <p class="post-desc">{{ Str::limit(strip_tags($post->details), 150) }}</p>
                             <span class="read-more">Read More</span>
@@ -465,7 +465,7 @@
                     </div>
                     <div class="blog-overlay"></div>
                     <div class="post-content home-2">
-                        <h5 class="post-title">{{ $post->title }}</h5>
+                        <h3 class="post-title">{{ $post->title }}</h3>
                         <p class="date">{{ $post->created_at->format('d M, Y') }}</p>
                         <p class="post-desc">{{ Str::limit(strip_tags($post->details), 150) }}</p>
                         <span class="read-more">Read More</span>
@@ -653,6 +653,7 @@
                 grabCursor: true,
                 swipeToSlide: true,
                 freeModeSticky: true,
+                speed: 800,
                 autoplay: {
                     delay: 3000,
                     disableOnInteraction: false,
@@ -677,6 +678,7 @@
                 slidesPerView: 3,
                 spaceBetween: 24,
                 grabCursor: true,
+                speed: 800,
                 autoplay: {
                     delay: 3000,
                     disableOnInteraction: false,

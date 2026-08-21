@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Dashboard Suggestion 3 - Sidebar Layout</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#d02a03;--primary2:#ff6b35;--secondary:#2d4776;--bg:#f4f5f7;--card:#fff;--text:#1e1e2d;--muted:#6c757d;--light:#a1a5b7;--border:#e9ecef;--dark:#1e1e2d;--shadow:0 1px 3px rgba(16,24,40,.05);--shadow2:0 10px 20px rgba(16,24,40,.08);--r:12px;--rs:8px}
+*{font-family:'Inter',sans-serif}body{background:var(--bg);color:var(--text);margin:0;overflow-x:hidden}
+.sb{position:fixed;left:0;top:0;bottom:0;width:250px;background:var(--dark);color:#fff;display:flex;flex-direction:column;z-index:100;transition:transform .3s}
+.sb-brand{padding:22px 22px 18px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px}
+.sb-brand i{color:var(--primary);font-size:1.3rem}.sb-brand b{font-size:1rem;font-weight:800;letter-spacing:.3px}
+.sb-brand b span{color:var(--primary)}
+.sb-nav{flex:1;padding:14px 12px;overflow-y:auto}
+.sb-nav .lbl{font-size:.65rem;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:1px;padding:10px 12px 6px}
+.sb-nav a{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:var(--rs);color:rgba(255,255,255,.72);text-decoration:none;font-size:.85rem;font-weight:500;margin-bottom:2px;transition:all .2s;position:relative}
+.sb-nav a i{width:18px;text-align:center;font-size:.95rem}
+.sb-nav a:hover{background:rgba(255,255,255,.06);color:#fff}
+.sb-nav a.active{background:linear-gradient(90deg,var(--primary),#ff5a1f);color:#fff;box-shadow:0 4px 12px rgba(208,42,3,.35)}
+.sb-nav a .cnt{margin-left:auto;background:rgba(255,255,255,.15);font-size:.65rem;font-weight:700;padding:2px 7px;border-radius:20px}
+.sb-nav a.active .cnt{background:rgba(255,255,255,.25)}
+.sb-user{padding:14px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px}
+.sb-user img,.sb-user .av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--primary),#ff6b35);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem}
+.sb-user .nm{font-size:.82rem;font-weight:600;line-height:1.2}.sb-user .rl{font-size:.68rem;color:rgba(255,255,255,.45)}
+.main{margin-left:250px;min-height:100vh}
+.topbar{background:var(--card);border-bottom:1px solid var(--border);padding:0 28px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.tsearch{position:relative;width:320px}
+.tsearch input{width:100%;padding:9px 14px 9px 38px;border:1px solid var(--border);border-radius:var(--rs);font-size:.83rem;background:var(--bg);outline:none;transition:all .2s}
+.tsearch input:focus{border-color:var(--primary);background:#fff;box-shadow:0 0 0 3px rgba(208,42,3,.08)}
+.tsearch i{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--light);font-size:.85rem}
+.tb-r{display:flex;align-items:center;gap:16px}
+.tb-ic{position:relative;width:38px;height:38px;border-radius:var(--rs);border:1px solid var(--border);background:#fff;display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;transition:all .2s;text-decoration:none}
+.tb-ic:hover{color:var(--primary);border-color:var(--primary)}
+.tb-ic .dot{position:absolute;top:-4px;right:-4px;min-width:17px;height:17px;border-radius:20px;background:var(--primary);color:#fff;font-size:.62rem;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid #fff}
+.content{padding:26px 28px}
+.pg-h{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:22px}
+.pg-h h1{font-size:1.45rem;font-weight:800;margin:0}
+.pg-h p{font-size:.83rem;color:var(--muted);margin:3px 0 0}
+.sc{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}
+.st{background:var(--card);border-radius:var(--r);padding:18px 20px;box-shadow:var(--shadow);transition:all .25s;border:1px solid transparent}
+.st:hover{transform:translateY(-2px);box-shadow:var(--shadow2)}
+.st-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.st-ic{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.05rem}
+.st.c1 .st-ic{background:rgba(208,42,3,.09);color:var(--primary)}.st.c2 .st-ic{background:rgba(13,110,253,.1);color:#0d6efd}.st.c3 .st-ic{background:rgba(253,126,20,.12);color:#fd7e14}.st.c4 .st-ic{background:rgba(25,135,84,.1);color:#198754}
+.tr{font-size:.68rem;font-weight:700;padding:3px 8px;border-radius:20px}
+.tr.up{background:rgba(25,135,84,.1);color:#198754}.tr.dn{background:rgba(220,53,69,.1);color:#dc3545}
+.st-lbl{font-size:.73rem;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.st-val{font-size:1.5rem;font-weight:800;line-height:1.15}
+.st-sub{font-size:.72rem;color:var(--light);margin-top:3px}
+.grid-main{display:grid;grid-template-columns:1fr 330px;gap:18px}
+.cm{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;margin-bottom:18px}
+.cm-h{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.cm-h h5{margin:0;font-size:.93rem;font-weight:700}
+.cm-b{padding:20px}
+.vt{display:flex;gap:4px;background:var(--bg);border-radius:var(--rs);padding:3px}
+.vt button{padding:5px 12px;border:none;background:0 0;border-radius:6px;font-size:.74rem;font-weight:600;color:var(--muted);cursor:pointer}
+.vt button.active{background:#fff;color:var(--primary);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.tm{width:100%;border-collapse:collapse}
+.tm thead th{background:#f8f9fa;font-size:.71rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:11px 18px;text-align:left}
+.tm tbody td{padding:13px 18px;font-size:.84rem;border-bottom:1px solid #f5f5f5}
+.tm tbody tr:last-child td{border-bottom:none}.tm tbody tr:hover{background:rgba(0,0,0,.015)}
+.bs{padding:4px 11px;border-radius:20px;font-size:.7rem;font-weight:600}
+.bs.s1{background:#fff3cd;color:#856404}.bs.s2{background:#cff4fc;color:#055160}.bs.s3{background:#cfe2ff;color:#084298}.bs.s4{background:#d1e7dd;color:#0f5132}
+.garage-c{display:flex;align-items:center;gap:11px;padding:11px 13px;border:1px solid var(--border);border-radius:var(--rs);margin-bottom:9px;transition:all .2s;background:#fafafa}
+.garage-c:hover,.garage-c.on{border-color:var(--primary);background:rgba(208,42,3,.03)}
+.gc-ic{width:36px;height:36px;border-radius:8px;background:rgba(45,71,118,.08);color:var(--secondary);display:flex;align-items:center;justify-content:center;font-size:.9rem}
+.gc-name{font-size:.79rem;font-weight:600}.gc-sub{font-size:.68rem;color:var(--light)}
+.wl-i{display:flex;gap:11px;align-items:center;padding:9px 0;border-bottom:1px solid #f5f5f5}
+.wl-i:last-child{border-bottom:none}
+.wp-img{width:46px;height:46px;border-radius:8px;background:#f1f3f5;border:1px solid var(--border);object-fit:cover;flex-shrink:0}
+.wp-name{font-size:.78rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px}
+.wp-price{font-size:.78rem;font-weight:800;color:var(--primary)}
+.wp-old{font-size:.68rem;color:var(--light);text-decoration:line-through}
+.nlist{list-style:none;padding:0;margin:0}
+.nitem{display:flex;gap:11px;padding:11px 0;border-bottom:1px solid #f5f5f5}
+.nitem:last-child{border-bottom:none}
+.nic{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.75rem}
+.ntxt{font-size:.76rem;line-height:1.45}.ntime{font-size:.66rem;color:var(--light)}
+.mob-tgl{display:none}
+@media(max-width:1100px){.sc{grid-template-columns:repeat(2,1fr)}.grid-main{grid-template-columns:1fr}}
+@media(max-width:992px){.sb{transform:translateX(-100%)}.sb.open{transform:none}.main{margin-left:0}.mob-tgl{display:inline-flex}}
+@media(max-width:576px){.sc{grid-template-columns:1fr}.content{padding:18px 14px}.tsearch{display:none}}
+</style>
+</head>
+<body>
+
+<aside class="sb" id="sidebar">
+<div class="sb-brand"><i class="fas fa-gears"></i><b>ST<span>AUTO</span>PARTS</b></div>
+<nav class="sb-nav">
+<div class="lbl">Menu</div>
+<a href="#" class="active"><i class="fas fa-th-large"></i> Dashboard</a>
+<a href="#"><i class="fas fa-shopping-bag"></i> Orders <span class="cnt">18</span></a>
+<a href="#"><i class="fas fa-star"></i> My Reviews <span class="cnt">5</span></a>
+<a href="#"><i class="fas fa-magnifying-glass-location"></i> Order Tracking</a>
+<a href="#"><i class="fas fa-heart"></i> My Wishlist <span class="cnt">7</span></a>
+<div class="lbl">Garage &amp; Account</div>
+<a href="#"><i class="fas fa-car"></i> My Vehicles <span class="cnt">3</span></a>
+<a href="#"><i class="fas fa-user-friends"></i> Followed Sellers</a>
+<a href="#"><i class="fas fa-map-marker-alt"></i> My Addresses</a>
+<a href="#"><i class="fas fa-bell"></i> Notifications <span class="cnt">3</span></a>
+<div class="lbl">Account</div>
+<a href="#"><i class="fas fa-user-cog"></i> Profile Settings</a>
+<a href="#" style="color:#ff8f75"><i class="fas fa-sign-out-alt"></i> Logout</a>
+</nav>
+<div class="sb-user"><div class="av">AJ</div><div><div class="nm">Ahmed Jamal</div><div class="rl">Customer since 2024</div></div></div>
+</aside>
+
+<div class="main">
+<header class="topbar">
+<button class="tb-ic mob-tgl" onclick="document.getElementById('sidebar').classList.toggle('open')" aria-label="Toggle sidebar"><i class="fas fa-bars"></i></button>
+<div class="tsearch"><i class="fas fa-search"></i><input type="text" placeholder="Search orders, parts, vehicles..."></div>
+<div class="tb-r">
+<a href="#" class="tb-ic" aria-label="Notifications"><i class="far fa-bell"></i><span class="dot">3</span></a>
+<a href="#" class="tb-ic" aria-label="Wishlist"><i class="far fa-heart"></i><span class="dot">7</span></a>
+<a href="#" class="tb-ic" aria-label="Cart"><i class="fas fa-cart-shopping"></i><span class="dot">2</span></a>
+</div>
+</header>
+
+<div class="content">
+<div class="pg-h">
+<div><h1>Dashboard</h1><p>Saturday, Aug 21, 2026 &mdash; here is what is happening with your account.</p></div>
+<a href="#" style="background:var(--primary);color:#fff;padding:9px 18px;border-radius:var(--rs);font-size:.82rem;font-weight:600;text-decoration:none"><i class="fas fa-plus me-1"></i> New Order</a>
+</div>
+
+<div class="sc">
+<div class="st c1"><div class="st-top"><div class="st-ic"><i class="fas fa-wallet"></i></div><span class="tr up">+12%</span></div><div class="st-lbl">Total Spent</div><div class="st-val">$1,245.50</div><div class="st-sub">vs last year</div></div>
+<div class="st c2"><div class="st-top"><div class="st-ic"><i class="fas fa-shopping-bag"></i></div><span class="tr up">+2</span></div><div class="st-lbl">Total Orders</div><div class="st-val">18</div><div class="st-sub">this month</div></div>
+<div class="st c3"><div class="st-top"><div class="st-ic"><i class="fas fa-clock"></i></div></div><div class="st-lbl">In Progress</div><div class="st-val">2</div><div class="st-sub">pending / processing</div></div>
+<div class="st c4"><div class="st-top"><div class="st-ic"><i class="fas fa-heart"></i></div></div><div class="st-lbl">Wishlist</div><div class="st-val">7</div><div class="st-sub">3 on sale</div></div>
+</div>
+
+<div class="grid-main">
+<div>
+<div class="cm"><div class="cm-h"><h5><i class="fas fa-chart-line me-2" style="color:var(--primary)"></i>Spending Overview</h5><div class="vt"><button class="active" data-v="m">Monthly</button><button data-v="w">Weekly</button></div></div><div class="cm-b"><canvas id="rChart" height="260"></canvas></div></div>
+<div class="cm"><div class="cm-h"><h5><i class="fas fa-receipt me-2" style="color:#198754"></i>Recent Orders</h5><a href="#" style="font-size:.8rem;color:var(--primary);text-decoration:none;font-weight:600">View All &rarr;</a></div>
+<div style="overflow-x:auto"><table class="tm"><thead><tr><th>Order</th><th>Date</th><th>Items</th><th>Total</th><th>Status</th><th>Action</th></tr></thead><tbody>
+<tr><td class="fw-semibold">#ORD-7841</td><td>Aug 18</td><td>Brake Pad Set</td><td class="fw-semibold">$145.00</td><td><span class="bs s3">Shipped</span></td><td><a href="#" title="Track" style="color:var(--secondary)"><i class="fas fa-truck-fast"></i></a></td></tr>
+<tr><td class="fw-semibold">#ORD-7812</td><td>Aug 10</td><td>Oil Filter x2</td><td class="fw-semibold">$38.50</td><td><span class="bs s4">Delivered</span></td><td><a href="#" title="Reorder" style="color:#6f42c1"><i class="fas fa-rotate-left"></i></a></td></tr>
+<tr><td class="fw-semibold">#ORD-7790</td><td>Aug 02</td><td>Headlight LED</td><td class="fw-semibold">$89.99</td><td><span class="bs s4">Delivered</span></td><td><a href="#" title="Review" style="color:#ffc107"><i class="fas fa-star"></i></a></td></tr>
+<tr><td class="fw-semibold">#ORD-7741</td><td>Jul 24</td><td>Spark Plugs x4</td><td class="fw-semibold">$52.00</td><td><span class="bs s2">Processing</span></td><td><a href="#" title="Track" style="color:var(--secondary)"><i class="fas fa-truck-fast"></i></a></td></tr>
+<tr><td class="fw-semibold">#ORD-7702</td><td>Jul 15</td><td>Air Filter</td><td class="fw-semibold">$19.99</td><td><span class="bs s1">Pending</span></td><td><a href="#" title="Pay now" style="color:var(--primary)"><i class="fas fa-credit-card"></i></a></td></tr>
+</tbody></table></div></div>
+</div>
+
+<div>
+<div class="cm"><div class="cm-h"><h5><i class="fas fa-car-side me-2" style="color:var(--secondary)"></i>My Garage</h5><a href="#" style="font-size:.75rem;color:var(--primary);text-decoration:none;font-weight:700">+ Add</a></div>
+<div class="cm-b" style="padding:16px">
+<div class="garage-c on"><div class="gc-ic"><i class="fas fa-car-side"></i></div><div><div class="gc-name">Honda Civic 2020</div><div class="gc-sub">1.8L &middot; Default</div></div></div>
+<div class="garage-c"><div class="gc-ic"><i class="fas fa-truck-pickup"></i></div><div><div class="gc-name">Toyota Hilux 2018</div><div class="gc-sub">2.8D &middot; Diesel</div></div></div>
+<div class="garage-c"><div class="gc-ic"><i class="fas fa-car"></i></div><div><div class="gc-name">Suzuki Cultus 2016</div><div class="gc-sub">1.0L &middot; Gasoline</div></div></div>
+</div></div>
+
+<div class="cm"><div class="cm-h"><h5><i class="fas fa-heart me-2" style="color:#dc3545"></i>Wishlist</h5><a href="#" style="font-size:.8rem;color:var(--primary);text-decoration:none;font-weight:600">All &rarr;</a></div>
+<div class="cm-b" style="padding:12px 20px">
+<div class="wl-i"><img src="" class="wp-img" onerror="this.style.background='#e9ecef'"><div><div class="wp-name">Disc Brake Rotor</div><span class="wp-price">$64.00</span> <span class="wp-old">$79.00</span></div></div>
+<div class="wl-i"><img src="" class="wp-img" onerror="this.style.background='#dee2e6'"><div><div class="wp-name">Timing Belt Kit</div><span class="wp-price">$112.50</span></div></div>
+<div class="wl-i"><img src="" class="wp-img" onerror="this.style.background='#ced4da'"><div><div class="wp-name">Shock Absorber Pair</div><span class="wp-price">$98.00</span> <span class="wp-old">$120.00</span></div></div>
+</div></div>
+
+<div class="cm"><div class="cm-h"><h5><i class="fas fa-bell me-2" style="color:#fd7e14"></i>Latest</h5><span style="font-size:.63rem;background:var(--primary);color:#fff;padding:2px 8px;border-radius:20px;font-weight:700">3 NEW</span></div>
+<div class="cm-b" style="padding:6px 20px 12px"><ul class="nlist">
+<li class="nitem"><div class="nic" style="background:rgba(25,135,84,.1);color:#198754"><i class="fas fa-truck"></i></div><div><div class="ntxt"><b>#ORD-7841 shipped</b> via TCS.</div><span class="ntime">2h ago</span></div></li>
+<li class="nitem"><div class="nic" style="background:rgba(208,42,3,.08);color:var(--primary)"><i class="fas fa-tags"></i></div><div><div class="ntxt"><b>Price drop</b> on wishlist item!</div><span class="ntime">1d ago</span></div></li>
+<li class="nitem"><div class="nic" style="background:rgba(13,110,253,.1);color:#0d6efd"><i class="fas fa-star"></i></div><div><div class="ntxt">Rate your recent purchase.</div><span class="ntime">3d ago</span></div></li>
+</ul></div></div>
+</div>
+</div>
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+var ctx=document.getElementById('rChart').getContext('2d');
+var g=ctx.createLinearGradient(0,0,0,260);g.addColorStop(0,'rgba(208,42,3,.15)');g.addColorStop(1,'rgba(208,42,3,.01)');
+var mL=['Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug'];
+var mD=[85,140,95,210,160,120,175,230,190,145,260,310];
+var rc=new Chart(ctx,{type:'line',data:{labels:mL,datasets:[{data:mD,fill:true,tension:.4,backgroundColor:g,borderColor:'#d02a03',borderWidth:2.5,pointBackgroundColor:'#fff',pointBorderColor:'#d02a03',pointBorderWidth:2,pointRadius:0,pointHoverRadius:6}]},options:{responsive:true,maintainAspectRatio:false,interaction:{intersect:false,mode:'index'},scales:{x:{grid:{display:false},border:{display:false},ticks:{font:{size:11,family:'Inter'},color:'#a1a5b7'}},y:{beginAtZero:true,grid:{color:'#f0f2f5'},border:{display:false},ticks:{font:{size:11,family:'Inter'},color:'#a1a5b7',callback:function(v){return '$'+v},padding:8}}},plugins:{legend:{display:false},tooltip:{backgroundColor:'#1e1e2d',padding:12,cornerRadius:8,displayColors:false,callbacks:{label:function(c){return ' Spent: $'+c.parsed.y}}}}}});
+document.querySelectorAll('.vt button').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('.vt button').forEach(function(x){x.classList.remove('active')});this.classList.add('active');if(this.dataset.v==='w'){rc.data.labels=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];rc.data.datasets[0].data=[22,45,18,60,38,90,54]}else{rc.data.labels=mL;rc.data.datasets[0].data=mD}rc.update()})});
+});
+</script>
+</body>
+</html>

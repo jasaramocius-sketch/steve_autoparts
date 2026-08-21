@@ -157,6 +157,7 @@ class ShopController extends Controller
                 ->distinct()
                 ->get(),
             'maxProductPrice' => Product::where('status', true)->max('price') ?? 1000,
+            'minProductPrice' => Product::where('status', true)->min('price') ?? 0,
             'currencySymbol' => config('currencies.' . $currency . '.symbol', '$'),
         ];
     }

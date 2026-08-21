@@ -2,7 +2,7 @@
     $p = is_array($product) ? (object) $product : $product;
     $pImage = !empty($p->image) ? $p->image : '';
     $cardClass = $cardClass ?? '';
-    $titleTag = $titleTag ?? 'h6';
+    $titleTag = $titleTag ?? 'h3';
     $titleClass = $titleClass ?? '';
     $priceTag = $priceTag ?? 'h6';
     $viewIcon = $viewIcon ?? 'svg';
@@ -30,9 +30,9 @@
             <form action="{{ route('wishlist.add') }}" method="POST" class="wishlist-form">
                 @csrf
                 <input type="hidden" name="product_id" value="{{ $p->id }}">
-                <button type="button" class="add-to-wishlist-btn wishlist-btn border-0 bg-transparent steve-btn" data-product-id="{{ $p->id }}" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Wishlist">
+                <button type="button" class="add-to-wishlist-btn wishlist-btn border-0 bg-transparent steve-btn" data-product-id="{{ $p->id }}" data-bs-toggle="tooltip" data-bs-placement="bottom" aria-label="Add to wishlist" data-bs-original-title="Wishlist">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="wishlist-svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M11.9932 5.13581C9.9938 2.7984 6.65975 2.16964 4.15469 4.31001C1.64964 6.45038 1.29697 10.029 3.2642 12.5604C4.89982 14.6651 9.84977 19.1041 11.4721 20.5408C11.6536 20.7016 11.7444 20.7819 11.8502 20.8135C11.9426 20.8411 12.0437 20.8411 12.1361 20.8135C12.2419 20.7819 12.3327 20.7016 12.5142 20.5408C14.1365 19.1041 19.0865 14.6651 20.7221 12.5604C22.6893 10.029 22.3797 6.42787 19.8316 4.31001C17.2835 2.19216 13.9925 2.7984 11.9932 5.13581Z" fill="{{ $isWished ? '#E63946' : 'none' }}" stroke="{{ $isWished ? 'none' : 'var(--primary)' }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M11.9932 5.13581C9.9938 2.7984 6.65975 2.16964 4.15469 4.31001C1.64964 6.45038 1.29697 10.029 3.2642 12.5604C4.89982 14.6651 9.84977 19.1041 11.4721 20.5408C11.6536 20.7016 11.7444 20.7819 11.8502 20.8135C11.9426 20.8411 12.0437 20.8411 12.1361 20.8135C12.2419 20.7819 12.3327 20.7016 12.5142 20.5408C14.1365 19.1041 19.0865 14.6651 20.7221 12.5604C22.6893 10.029 22.3797 6.42787 19.8316 4.31001C17.2835 2.19216 13.9925 2.7984 11.9932 5.13581Z" fill="{{ $isWished ? 'var(--primary)' : 'none' }}" stroke="{{ $isWished ? 'none' : 'var(--primary)' }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                 </button>
             </form>
@@ -82,17 +82,16 @@
             <{{ $priceTag }}><del>{{ currency_format($p->old_price) }}</del></{{ $priceTag }}>
             @endif
         </div>
+        @php
+            $visibleCardReviews = collect($p->reviews_data ?? [])->where('deleted', false);
+            $displayRating = $p->rating ?? 0;
+            $displayReviews = max($p->reviews ?? 0, $visibleCardReviews->count());
+            if ($displayRating == 0 && $visibleCardReviews->isNotEmpty()) {
+                $displayRating = round($visibleCardReviews->avg('rating'));
+            }
+        @endphp
+        @if($displayReviews > 0)
         <div class="ratings-wrapper">
-            @php
-                $displayRating = $p->rating ?? 0;
-                $displayReviews = $p->reviews ?? 0;
-                if ($displayRating == 0 && $displayReviews > 0 && !empty($p->reviews_data)) {
-                    $visible = collect($p->reviews_data ?? [])->where('deleted', false);
-                    if ($visible->isNotEmpty()) {
-                        $displayRating = round($visible->avg('rating'));
-                    }
-                }
-            @endphp
             @for($i = 0; $i < 5; $i++)
             <svg xmlns="http://www.w3.org/2000/svg" width="17" height="16" viewBox="0 0 17 16" fill="none">
                 <path d="M8.5 0.5L10.4084 6.37336L16.584 6.37336L11.5878 10.0033L13.4962 15.8766L8.5 12.2467L3.50383 15.8766L5.41219 10.0033L0.416019 6.37336L6.59163 6.37336L8.5 0.5Z" fill="{{ $i < $displayRating ? '#EEAE0B' : '#E2E8F0' }}" />
@@ -100,6 +99,7 @@
             @endfor
             <span class="rating-title">{{ $displayRating > 0 ? number_format($displayRating, 1) . ' ' : '' }}({{ $displayReviews }})</span>
         </div>
+        @endif
         <div class="add-to-cart">
             <a class="compare_product" href="javascript:;" data-href="{{ route('compare.add', ['product_id' => $p->id]) }}" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="bottom" title="Compare">
                 <div class="compare">

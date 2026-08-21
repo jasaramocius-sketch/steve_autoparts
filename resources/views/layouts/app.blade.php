@@ -22,20 +22,19 @@
     <link rel="stylesheet" href="{{ asset('assets/front/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/front/css/style.css') }}?v={{ filemtime(public_path('assets/front/css/style.css')) }}">
     <link rel="stylesheet" href="{{ asset('assets/front/css/custom.css') }}?v={{ filemtime(public_path('assets/front/css/custom.css')) }}">
-    <link rel="stylesheet" href="{{ asset('assets/front/css/all.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/front/css/all.min.css') }}">
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <!-- Non-critical CSS - loaded async -->
     <link rel="preload" href="{{ asset('assets/front/css/slick.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="{{ asset('assets/front/css/swiper-bundle.min.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="{{ asset('assets/front/css/nice-select.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="{{ asset('assets/front/css/jquery-ui.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    @stack('jquery-ui-css')
     <link rel="preload" href="{{ asset('assets/front/css/animate.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="{{ asset('assets/front/css/toastr.min.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="{{ asset('assets/front/css/dynamic-font.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="icon" href="{{ storedImageUrl(\App\Models\Setting::get('header_favicon') ?? '1730880696Fabpng.png', 'assets/images') }}">
-    <link href="https://fonts.googleapis.com/css?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@100..900&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Saira:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Jost:wght@100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Saira:ital,wght@0,100..900;1,100..900&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Jost:wght@100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Saira:ital,wght@0,100..900;1,100..900&display=swap"></noscript>
 
     <style>
     .border-bottom-6px {
@@ -46,7 +45,7 @@
       border-bottom-color: var(--green)  !important;
     }
     .active .border-bottom-6px {
-      border-bottom-color: #e62e04 !important;
+      border-bottom-color: #d02a03 !important;
     }
 
     {{-- Utility classes (.fs-*, .fw-*, .opacity-*, .gutters-5, .sm-gutters-10,
@@ -189,7 +188,7 @@
                                 </svg>
                             </li>
                             <li class="bell-icon-col d-none d-md-flex align-items-center" style="list-style:none;" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Notifications">
-                                <a href="{{ route('user.notifications') }}" class="position-relative" style="color:#fff;text-decoration:none;line-height:1;">
+                                <a href="{{ route('user.notifications') }}" class="position-relative" aria-label="Notifications" style="color:#fff;text-decoration:none;line-height:1;">
                                     @if(!empty($unreadNotificationCount) && $unreadNotificationCount > 0)
                                         <span class="cart-count" id="notification-count">{{ $unreadNotificationCount }}</span>
                                     @endif
@@ -208,13 +207,13 @@
             <div class="container custom-containerr">
                 <div class="create-navbar d-flex">
                     <div class="nav-left">
-                        <button type="button" class="header-toggle mobile-menu-toggle d-flex d-xl-none">
+                        <button type="button" class="header-toggle mobile-menu-toggle d-flex d-xl-none" aria-label="Open menu">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                                 <path d="M3 12H21M3 6H21M3 18H15" stroke="#1F0300" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
                             </svg>
                         </button>
                         <a class="header-logo-wrapper" href="{{ route('home') }}">
-                            {!! imgTag(storedPath(\App\Models\Setting::get('header_logo') ?? 'BwSkuSZ7ZYGWPc4Zk3CfeFzcn49dHpx3143n4WKS.png', 'assets/images'), 'logo', 'logo', 'onerror="this.onerror=null;this.src=\''.asset('assets/images/placeholder.png').'\'' . '"') !!}
+                            {!! imgTag(storedPath(\App\Models\Setting::get('header_logo') ?? 'BwSkuSZ7ZYGWPc4Zk3CfeFzcn49dHpx3143n4WKS.png', 'assets/images'), 'logo', 'logo', 'loading="eager" fetchpriority="high" width="60" height="63" onerror="this.onerror=null;this.src=\''.asset('assets/images/placeholder.png').'\'' . '"') !!}
                         </a>
                     </div>
                     <div class="nav-center">
@@ -225,14 +224,14 @@
                     </div>
                     <div class="nav-right d-flex align-items-center gap-3">
                         <div class="icon-circle">
-                            <button id="searchIcon" class="p-0" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Search">
+                            <button id="searchIcon" class="p-0" data-bs-toggle="tooltip" data-bs-placement="bottom" aria-label="Search" data-bs-original-title="Search">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                                     <path d="M21 21L17.5001 17.5M20 11.5C20 16.1944 16.1944 20 11.5 20C6.80558 20 3 16.1944 3 11.5C3 6.80558 6.80558 3 11.5 3C16.1944 3 20 6.80558 20 11.5Z" stroke="#1F0300" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
                                 </svg>
                             </button>
                         </div>
                         <div class="icon-circle position-relative compare-count-wrapper">
-                            <a href="{{ route('compare.index') }}" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Compare">
+                            <a href="{{ route('compare.index') }}" data-bs-toggle="tooltip" data-bs-placement="bottom" aria-label="Compare" data-bs-original-title="Compare">
                                 <span class="cart-count" id="compare-count">{{ $compareCount ?? 0 }}</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                                     <path d="M18.1777 8C23.2737 8 23.2737 16 18.1777 16C13.0827 16 11.0447 8 5.43875 8C0.85375 8 0.85375 16 5.43875 16C11.0447 16 13.0828 8 18.1788 8H18.1777Z" stroke="#1F0300" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -240,7 +239,7 @@
                             </a>
                         </div>
                         <div class="icon-circle position-relative wishlist-count-wrapper">
-                            <a href="{{ route('user.wishlist') }}" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Wishlist">
+                            <a href="{{ route('user.wishlist') }}" data-bs-toggle="tooltip" data-bs-placement="bottom" aria-label="Wishlist" data-bs-original-title="Wishlist">
                                 <span class="cart-count" id="wishlist-count">{{ $wishlistCount ?? 0 }}</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                                     <path d="M16.1111 3C19.6333 3 22 6.3525 22 9.48C22 15.8138 12.1778 21 12 21C11.8222 21 2 15.8138 2 9.48C2 6.3525 4.36667 3 7.88889 3C9.91111 3 11.2333 4.02375 12 4.92375C12.7667 4.02375 14.0889 3 16.1111 3Z" stroke="#1F0300" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -248,7 +247,7 @@
                             </a>
                         </div>
                         <div class="icon-circle position-relative cart-count-wrapper">
-                            <a href="{{ route('cart') }}" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Cart">
+                            <a href="{{ route('cart') }}" data-bs-toggle="tooltip" data-bs-placement="bottom" aria-label="Cart" data-bs-original-title="Cart">
                                 <span class="cart-count" id="cart-count">{{ $cartCount ?? 0 }}</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                                     <path d="M2 2H3.30616C3.55218 2 3.67519 2 3.77418 2.04524C3.86142 2.08511 3.93535 2.14922 3.98715 2.22995C4.04593 2.32154 4.06333 2.44332 4.09812 2.68686L4.57143 6M4.57143 6L5.62332 13.7314C5.75681 14.7125 5.82355 15.2031 6.0581 15.5723C6.26478 15.8977 6.56108 16.1564 6.91135 16.3174C7.30886 16.5 7.80394 16.5 8.79411 16.5H17.352C18.2945 16.5 18.7658 16.5 19.151 16.3304C19.4905 16.1809 19.7818 15.9398 19.9923 15.6342C20.2309 15.2876 20.3191 14.8247 20.4955 13.8988L21.8191 6.94969C21.8812 6.62381 21.9122 6.46087 21.8672 6.3335C21.8278 6.22177 21.7499 6.12768 21.6475 6.06802C21.5308 6 21.365 6 21.0332 6H4.57143ZM10 21C10 21.5523 9.55228 22 9 22C8.44772 22 8 21.5523 8 21C8 20.4477 8.44772 20 9 20C9.55228 20 10 20.4477 10 21ZM18 21C18 21.5523 17.5523 22 17 22C16.4477 22 16 21.5523 16 21C16 20.4477 16.4477 20 17 20C17.5523 20 18 20.4477 18 21Z" stroke="#1F0300" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -265,7 +264,7 @@
     <div class="mobile-menu">
         <div class="mobile-menu-top">
             <a href="{{ route('home') }}">
-                {!! imgTag(storedPath(\App\Models\Setting::get('mobile_logo') ?? '1730281141Whitepng.png', 'assets/images'), 'logo', 'logo') !!}
+                {!! imgTag(storedPath(\App\Models\Setting::get('mobile_logo') ?? '1730281141Whitepng.png', 'assets/images'), 'logo', 'logo', 'width="100%" height="100%"') !!}
             </a>
             <svg class="close" xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none">
                 <path d="M18 6L6 18M6 6L18 18" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
@@ -635,7 +634,7 @@
     <script src="{{ asset('assets/front/js/jquery.min.js') }}"></script>
     <script src="{{ asset('assets/front/js/slick.js') }}" defer></script>
     <script src="{{ asset('assets/front/js/swiper-bundle.min.js') }}" defer></script>
-    <script src="{{ asset('assets/front/js/jquery-ui.js') }}" defer></script>
+    @stack('jquery-ui-js')
     <script src="{{ asset('assets/front/js/nice-select.js') }}?v={{ filemtime(public_path('assets/front/js/nice-select.js')) }}" defer></script>
     <script src="{{ asset('assets/front/js/wow.js') }}" defer></script>
     <script src="{{ asset('assets/front/js/bootstrap.bundle.min.js') }}" defer></script>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Dashboard Suggestion 2 - Friendly Account</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#d02a03;--soft:#fdf0ec;--bg:#f6f7f9;--card:#fff;--text:#23262f;--muted:#7a7f8c;--border:#ececf1;--r:18px}
+*{font-family:'Inter',sans-serif}body{background:var(--bg);color:var(--text);margin:0;padding-bottom:50px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+.banner{background:linear-gradient(115deg,#fff 55%,var(--soft));border:1px solid var(--border);border-radius:22px;padding:26px 28px;margin-top:26px;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.b-left{display:flex;align-items:center;gap:16px}
+.av{width:62px;height:62px;border-radius:50%;background:linear-gradient(135deg,var(--primary),#ff7a45);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.25rem;flex-shrink:0}
+.banner h1{font-size:1.35rem;font-weight:800;margin:0}
+.banner p{font-size:.83rem;color:var(--muted);margin:3px 0 0}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{font-size:.72rem;font-weight:600;background:#fff;border:1px solid var(--border);padding:7px 13px;border-radius:20px;color:var(--text);text-decoration:none;display:inline-flex;gap:6px;align-items:center;transition:all .2s}
+.chip:hover{border-color:var(--primary);color:var(--primary)}
+.chip i{color:var(--primary)}
+.chip.ok{background:#e7f6ee;border-color:transparent;color:#188554}.chip.ok i{color:#188554}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:18px;margin-top:20px}
+.cardx{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.cx-h{padding:15px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.cx-h h5{margin:0;font-size:.95rem;font-weight:700;display:flex;align-items:center;gap:8px}
+.cx-h h5 i{color:var(--primary)}
+.cx-h a{font-size:.78rem;color:var(--primary);text-decoration:none;font-weight:600}
+.c8{grid-column:span 8}.c4{grid-column:span 4}.c6{grid-column:span 6}.c12{grid-column:span 12}
+.track-c{padding:20px}
+.trow{display:flex;gap:14px;align-items:flex-start}
+.timg{width:64px;height:64px;border-radius:12px;background:#f1f2f6;display:flex;align-items:center;justify-content:center;color:#b9bdc9;font-size:1.5rem;flex-shrink:0}
+.tinfo h6{font-size:.92rem;font-weight:700;margin:0}
+.tinfo p{font-size:.75rem;color:var(--muted);margin:3px 0 0}
+.hsteps{display:flex;margin:18px 0 10px}
+.hs{flex:1;text-align:center;position:relative}
+.hs::before{content:'';position:absolute;top:13px;left:-50%;width:100%;height:3px;background:var(--border)}
+.hs:first-child::before{display:none}
+.hs.done::before,.hs.now::before{background:var(--primary)}
+.hsdot{width:27px;height:27px;margin:0 auto 6px;border-radius:50%;background:#fff;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.65rem;color:var(--muted);position:relative;z-index:1}
+.hs.done .hsdot{background:var(--primary);border-color:var(--primary);color:#fff}
+.hs.now .hsdot{border-color:var(--primary);color:var(--primary)}
+.hs span{font-size:.66rem;font-weight:600;color:var(--muted)}
+.hs.now span{color:var(--primary)}
+.ocard{display:flex;gap:13px;padding:15px 20px;border-bottom:1px solid var(--border);align-items:center}
+.ocard:last-child{border-bottom:none}
+.oimgs{display:flex}
+.oimg{width:44px;height:44px;border-radius:9px;background:#f1f2f6;border:2px solid #fff;margin-left:-12px;display:flex;align-items:center;justify-content:center;color:#b9bdc9;font-size:.95rem}
+.oimg:first-child{margin-left:0}
+.oid{font-size:.84rem;font-weight:700}
+.odt{font-size:.71rem;color:var(--muted)}
+.st{font-size:.68rem;font-weight:700;padding:4px 11px;border-radius:20px}
+.st.ship{background:#e3effb;color:#2569c3}.st.del{background:#e7f6ee;color:#188554}.st.proc{background:#fef4dd;color:#a07708}.st.pen{background:#f4e8ff;color:#7c3aed}
+.oamt{margin-left:auto;text-align:right}
+.oamt b{font-size:.88rem}
+.oamt small{display:block;font-size:.67rem;color:var(--muted)}
+.garage-i{display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid var(--border)}
+.garage-i:last-child{border-bottom:none}
+.gic{width:38px;height:38px;border-radius:10px;background:var(--soft);color:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.gname{font-size:.8rem;font-weight:700}.gsub{font-size:.69rem;color:var(--muted)}
+.gfit{margin-left:auto;font-size:.66rem;font-weight:700;background:#e7f6ee;color:#188554;padding:3px 9px;border-radius:20px}
+.nitem{display:flex;gap:12px;padding:13px 20px;border-bottom:1px solid var(--border)}
+.nitem:last-child{border-bottom:none}
+.nic{width:34px;height:34px;border-radius:50%;background:var(--soft);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:.78rem;flex-shrink:0}
+.ntxt{font-size:.77rem;line-height:1.45}.ntxt b{font-weight:700}
+.ntime{font-size:.67rem;color:var(--muted)}
+.wl-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:16px 20px}
+.wcard{border:1px solid var(--border);border-radius:13px;overflow:hidden;text-decoration:none;color:var(--text);transition:all .2s;background:#fff}
+.wcard:hover{box-shadow:0 8px 18px rgba(35,38,47,.09);transform:translateY(-2px)}
+.wimg{height:86px;background:#f1f2f6;display:flex;align-items:center;justify-content:center;color:#b9bdc9;font-size:1.35rem;position:relative}
+.sale{position:absolute;top:7px;left:7px;background:var(--primary);color:#fff;font-size:.58rem;font-weight:700;padding:2px 7px;border-radius:20px}
+.wbody{padding:8px 11px}
+.wname{font-size:.73rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wprice{font-size:.79rem;font-weight:800;color:var(--primary)}
+.wold{font-size:.65rem;color:var(--muted);text-decoration:line-through;margin-left:4px}
+@media(max-width:992px){.c8,.c4,.c6{grid-column:span 12}}
+@media(max-width:520px){.banner{padding:20px}.hsteps span{font-size:.56rem}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<div class="banner">
+<div class="b-left">
+<div class="av">AJ</div>
+<div><h1>Hi Ahmed <span>&#128075;</span></h1><p>Gulberg III, Lahore &middot; ahmed@example.com</p></div>
+</div>
+<div class="chips">
+<a href="#" class="chip ok"><i class="fas fa-circle-check"></i> Profile 80% complete</a>
+<a href="#" class="chip"><i class="fas fa-box"></i> 18 Orders</a>
+<a href="#" class="chip"><i class="fas fa-heart"></i> 7 Wishlist</a>
+<a href="#" class="chip"><i class="fas fa-car"></i> 3 Vehicles</a>
+</div>
+</div>
+
+<div class="grid">
+<div class="c8">
+<div class="cardx">
+<div class="cx-h"><h5><i class="fas fa-truck-fast"></i> Your package is on the way</h5><a href="#">Track order &rarr;</a></div>
+<div class="track-c">
+<div class="trow">
+<div class="timg"><i class="fas fa-disc-drive"></i></div>
+<div class="tinfo"><h6>#ORD-7841 &mdash; Brake Pad Set (Front) + 2 more</h6><p>Placed Aug 18 &middot; $145.00 &middot; Cash on Delivery</p></div>
+<span class="st ship" style="margin-left:auto">Shipped</span>
+</div>
+<div class="hsteps">
+<div class="hs done"><div class="hsdot"><i class="fas fa-check"></i></div><span>Confirmed</span></div>
+<div class="hs done"><div class="hsdot"><i class="fas fa-check"></i></div><span>Packed</span></div>
+<div class="hs now"><div class="hsdot"><i class="fas fa-truck"></i></div><span>Shipped</span></div>
+<div class="hs"><div class="hsdot"><i class="fas fa-house-circle-check"></i></div><span>Out for delivery</span></div>
+<div class="hs"><div class="hsdot"><i class="fas fa-box-open"></i></div><span>Delivered</span></div>
+</div>
+<p style="font-size:.76rem;color:var(--muted);margin:0"><i class="fas fa-location-dot me-1" style="color:var(--primary)"></i>Arriving <b style="color:var(--text)">Thu, Aug 23</b> &middot; TCS Overnite &middot; TCS-8842-1192</p>
+</div>
+</div>
+
+<div class="cardx">
+<div class="cx-h"><h5><i class="fas fa-box"></i> Recent Orders</h5><a href="#">All orders &rarr;</a></div>
+<div class="ocard">
+<div class="oimgs"><div class="oimg"><i class="fas fa-oil-can"></i></div><div class="oimg"><i class="fas fa-filter"></i></div></div>
+<div><div class="oid">#ORD-7812</div><div class="odt">Aug 10 &middot; 2 items</div></div>
+<span class="st del">Delivered</span>
+<div class="oamt"><b>$38.50</b><small>Paid</small></div>
+</div>
+<div class="ocard">
+<div class="oimgs"><div class="oimg"><i class="fas fa-lightbulb"></i></div></div>
+<div><div class="oid">#ORD-7790</div><div class="odt">Aug 02 &middot; 1 item</div></div>
+<span class="st del">Delivered</span>
+<div class="oamt"><b>$89.99</b><small>Paid</small></div>
+</div>
+<div class="ocard">
+<div class="oimgs"><div class="oimg"><i class="fas fa-plug"></i></div></div>
+<div><div class="oid">#ORD-7741</div><div class="odt">Jul 24 &middot; 4 items</div></div>
+<span class="st proc">Processing</span>
+<div class="oamt"><b>$52.00</b><small>COD</small></div>
+</div>
+<div class="ocard">
+<div class="oimgs"><div class="oimg"><i class="fas fa-wind"></i></div></div>
+<div><div class="oid">#ORD-7702</div><div class="odt">Jul 15 &middot; 1 item</div></div>
+<span class="st pen">Payment pending</span>
+<div class="oamt"><b>$19.99</b><small>COD</small></div>
+</div>
+</div>
+
+<div class="cardx c12">
+<div class="cx-h"><h5><i class="fas fa-heart"></i> Saved for later</h5><a href="#">Open wishlist &rarr;</a></div>
+<div class="wl-grid">
+<a href="#" class="wcard"><div class="wimg"><i class="fas fa-car-battery"></i><span class="sale">SAVE 15%</span></div><div class="wbody"><div class="wname">AGM Battery 70Ah</div><span class="wprice">$118.00</span><span class="wold">$139.00</span></div></a>
+<a href="#" class="wcard"><div class="wimg"><i class="fas fa-fan"></i></div><div class="wbody"><div class="wname">Radiator Cooling Fan Assembly</div><span class="wprice">$76.50</span></div></a>
+<a href="#" class="wcard"><div class="wimg"><i class="fas fa-gauge-high"></i><span class="sale">SAVE 17%</span></div><div class="wbody"><div class="wname">Vehicle Speed Sensor OEM</div><span class="wprice">$34.00</span><span class="wold">$41.00</span></div></a>
+<a href="#" class="wcard"><div class="wimg"><i class="fas fa-oil-can"></i></div><div class="wbody"><div class="wname">Full Synthetic Oil 5W-30 4L</div><span class="wprice">$42.99</span></div></a>
+</div>
+</div>
+</div>
+
+<div class="c4">
+<div class="cardx">
+<div class="cx-h"><h5><i class="fas fa-car-side"></i> My Garage</h5><a href="#">+ Add</a></div>
+<div class="garage-i"><div class="gic"><i class="fas fa-car-side"></i></div><div><div class="gname">Honda Civic 2020</div><div class="gsub">1.8L &middot; Gasoline</div></div><span class="gfit">DEFAULT</span></div>
+<div class="garage-i"><div class="gic"><i class="fas fa-truck-pickup"></i></div><div><div class="gname">Toyota Hilux 2018</div><div class="gsub">2.8L &middot; Diesel</div></div></div>
+<div class="garage-i"><div class="gic"><i class="fas fa-car"></i></div><div><div class="gname">Suzuki Cultus 2016</div><div class="gsub">1.0L &middot; Gasoline</div></div></div>
+</div>
+
+<div class="cardx">
+<div class="cx-h"><h5><i class="fas fa-bell"></i> Updates</h5><a href="#">See all &rarr;</a></div>
+<div class="nitem"><div class="nic"><i class="fas fa-truck"></i></div><div><div class="ntxt"><b>#ORD-7841 shipped!</b> Arriving Thu via TCS.</div><span class="ntime">2 hours ago</span></div></div>
+<div class="nitem"><div class="nic"><i class="fas fa-tags"></i></div><div><div class="ntxt"><b>Price drop:</b> AGM Battery now $118 (was $139).</div><span class="ntime">Yesterday</span></div></div>
+<div class="nitem"><div class="nic"><i class="fas fa-star"></i></div><div><div class="ntxt">How was the <b>Oil Filter</b>? Write a review.</div><span class="ntime">3 days ago</span></div></div>
+</div>
+
+<div class="cardx">
+<div class="cx-h"><h5><i class="fas fa-headset"></i> Need help?</h5></div>
+<div style="padding:16px 20px;display:grid;gap:9px">
+<a href="#" class="chip" style="justify-content:flex-start"><i class="fas fa-magnifying-glass-location"></i> Track any order</a>
+<a href="#" class="chip" style="justify-content:flex-start"><i class="fas fa-file-invoice"></i> Invoices &amp; returns</a>
+<a href="#" class="chip" style="justify-content:flex-start"><i class="fab fa-whatsapp"></i> Chat on WhatsApp</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

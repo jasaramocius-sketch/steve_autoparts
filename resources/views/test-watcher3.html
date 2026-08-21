@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Suggestion 2 - Admin Panel</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #e62e04;
+            --primary-soft: rgba(230,46,4,0.08);
+            --secondary: #2d4776;
+            --accent: #7c3aed;
+            --bg: #f4f6fb;
+            --card: #ffffff;
+            --text: #1a1d2e;
+            --muted: #7b829a;
+            --light: #b0b7c9;
+            --border: #e8ebf1;
+            --r: 16px;
+            --r-sm: 10px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.03), 0 6px 16px rgba(0,0,0,0.04);
+            --shadow-hover: 0 4px 12px rgba(0,0,0,0.06), 0 12px 28px rgba(0,0,0,0.08);
+        }
+        * { font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg); color: var(--text); padding: 28px 36px; }
+
+        /* ======= TOP BAR ======= */
+        .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
+        .topbar-left h1 { font-size: 1.5rem; font-weight: 800; }
+        .topbar-left p { font-size: 0.82rem; color: var(--muted); margin-top: 2px; }
+        .topbar-right { display: flex; gap: 8px; }
+        .top-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 9px 18px; border-radius: var(--r-sm);
+            border: 1.5px solid var(--border); background: var(--card);
+            font-size: 0.8rem; font-weight: 600; color: var(--text);
+            cursor: pointer; transition: all 0.2s;
+        }
+        .top-btn:hover { border-color: var(--primary); color: var(--primary); box-shadow: var(--shadow); }
+        .top-btn.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+        .top-btn.primary:hover { background: #c42603; }
+
+        /* ======= STAT ROW ======= */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .stat-box {
+            background: var(--card);
+            border-radius: var(--r);
+            padding: 22px 24px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            transition: all 0.25s;
+            border: 1px solid transparent;
+        }
+        .stat-box:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); border-color: var(--border); }
+        .stat-icon {
+            width: 56px; height: 56px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem; flex-shrink: 0;
+        }
+        .stat-icon.i1 { background: linear-gradient(135deg, #0d6efd22, #0d6efd08); color: #0d6efd; }
+        .stat-icon.i2 { background: linear-gradient(135deg, #19875422, #19875408); color: #198754; }
+        .stat-icon.i3 { background: linear-gradient(135deg, #7c3aed22, #7c3aed08); color: #7c3aed; }
+        .stat-icon.i4 { background: linear-gradient(135deg, #e62e0422, #e62e0408); color: #e62e04; }
+        .stat-info { flex: 1; }
+        .stat-info .label { font-size: 0.73rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; }
+        .stat-info .value { font-size: 1.65rem; font-weight: 800; color: var(--text); margin: 4px 0 0; line-height: 1.1; }
+        .stat-info .change {
+            display: inline-flex; align-items: center; gap: 3px;
+            margin-top: 6px; padding: 2px 8px; border-radius: 20px;
+            font-size: 0.68rem; font-weight: 700;
+        }
+        .stat-info .change.up { background: #19875418; color: #198754; }
+        .stat-info .change.down { background: #dc354518; color: #dc3545; }
+
+        /* ======= SECOND ROW (Charts) ======= */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 3fr 1.3fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        /* ======= CARD ======= */
+        .glass-card {
+            background: var(--card);
+            border-radius: var(--r);
+            box-shadow: var(--shadow);
+            border: 1px solid transparent;
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+        .glass-card:hover { border-color: var(--border); }
+        .glass-card-head {
+            padding: 20px 24px 16px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .glass-card-head h5 { font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .glass-card-head h5 i { font-size: 0.9rem; }
+        .glass-card-body { padding: 0 24px 24px; }
+
+        /* ======= PILL TABS ======= */
+        .pill-tabs {
+            display: inline-flex; gap: 2px; background: var(--bg); border-radius: 24px; padding: 3px;
+        }
+        .pill-tab {
+            padding: 6px 14px; border: none; border-radius: 20px;
+            background: transparent; font-size: 0.73rem; font-weight: 600;
+            color: var(--muted); cursor: pointer; transition: all 0.2s;
+        }
+        .pill-tab.active { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(230,46,4,0.3); }
+        .pill-tab:hover:not(.active) { color: var(--text); }
+
+        /* ======= MINI KPI BAR (below revenue) ======= */
+        .kpi-bar {
+            display: flex; gap: 24px; padding: 16px 24px;
+            background: linear-gradient(135deg, #f8f9fc, #f0f2f8);
+            border-top: 1px solid var(--border);
+        }
+        .kpi-item { display: flex; align-items: center; gap: 8px; }
+        .kpi-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .kpi-item .kpi-label { font-size: 0.72rem; color: var(--muted); font-weight: 500; }
+        .kpi-item .kpi-val { font-size: 0.82rem; font-weight: 700; color: var(--text); }
+
+        /* ======= DONUT LEGEND ======= */
+        .donut-side-list { list-style: none; padding: 0; margin: 12px 0 0; }
+        .donut-side-list li {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 9px 0; border-bottom: 1px solid #f2f3f7;
+        }
+        .donut-side-list li:last-child { border-bottom: none; }
+        .d-left { display: flex; align-items: center; gap: 10px; }
+        .d-dot { width: 10px; height: 10px; border-radius: 3px; }
+        .d-name { font-size: 0.8rem; font-weight: 500; }
+        .d-count { font-size: 0.82rem; font-weight: 700; }
+        .d-pct { font-size: 0.7rem; color: var(--muted); margin-left: 6px; }
+
+        /* ======= BOTTOM GRID ======= */
+        .bottom-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+        }
+
+        /* ======= ORDER LIST (compact) ======= */
+        .order-list-item {
+            display: flex; align-items: center; gap: 14px;
+            padding: 12px 0; border-bottom: 1px solid #f2f3f7;
+        }
+        .order-list-item:last-child { border-bottom: none; }
+        .order-num {
+            font-size: 0.8rem; font-weight: 700; color: var(--secondary);
+            min-width: 78px;
+        }
+        .order-customer {
+            flex: 1; font-size: 0.82rem; font-weight: 500;
+        }
+        .order-amount {
+            font-size: 0.82rem; font-weight: 700; min-width: 70px; text-align: right;
+        }
+        .order-badge {
+            padding: 4px 10px; border-radius: 20px;
+            font-size: 0.68rem; font-weight: 600; white-space: nowrap;
+        }
+        .ob-pending    { background: #fff3cd; color: #856404; }
+        .ob-processing { background: #cff4fc; color: #055160; }
+        .ob-shipped    { background: #cfe2ff; color: #084298; }
+        .ob-delivered  { background: #d1e7dd; color: #0f5132; }
+        .ob-completed  { background: #e2d9f3; color: #432874; }
+        .ob-cancelled  { background: #f8d7da; color: #842029; }
+
+        /* ======= PRODUCT ROW ======= */
+        .product-row {
+            display: flex; align-items: center; gap: 12px;
+            padding: 11px 0; border-bottom: 1px solid #f2f3f7;
+        }
+        .product-row:last-child { border-bottom: none; }
+        .product-rank {
+            width: 28px; height: 28px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.72rem; font-weight: 800;
+        }
+        .rank-1 { background: linear-gradient(135deg, #ffd700, #ffaa00); color: #7a5500; }
+        .rank-2 { background: linear-gradient(135deg, #c0c0c0, #a0a0a0); color: #555; }
+        .rank-3 { background: linear-gradient(135deg, #cd7f32, #b8690e); color: #fff; }
+        .rank-n { background: var(--bg); color: var(--muted); }
+        .product-details { flex: 1; min-width: 0; }
+        .product-details .pname { font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .product-details .pcat { font-size: 0.7rem; color: var(--muted); }
+        .product-metric { text-align: right; }
+        .product-metric .pm-sales { font-size: 0.8rem; font-weight: 700; }
+        .product-metric .pm-rev { font-size: 0.7rem; color: var(--muted); }
+
+        /* ======= ACTIVITY FEED ======= */
+        .activity-item {
+            display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f2f3f7;
+        }
+        .activity-item:last-child { border-bottom: none; }
+        .activity-dot {
+            width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; flex-shrink: 0;
+        }
+        .activity-text { font-size: 0.8rem; color: var(--text); line-height: 1.4; }
+        .activity-text strong { font-weight: 600; }
+        .activity-time { font-size: 0.7rem; color: var(--light); margin-top: 2px; }
+
+        /* ======= RESPONSIVE ======= */
+        @media (max-width: 1200px) {
+            .stat-grid { grid-template-columns: repeat(2, 1fr); }
+            .bottom-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 992px) {
+            .charts-grid { grid-template-columns: 1fr; }
+            body { padding: 16px; }
+        }
+        @media (max-width: 576px) {
+            .stat-grid { grid-template-columns: 1fr; }
+            .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .pill-tabs { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ======= TOP BAR ======= -->
+<div class="topbar">
+    <div class="topbar-left">
+        <h1>Good Morning, Admin &#x1F44B;</h1>
+        <p>Here's your store overview for today</p>
+    </div>
+    <div class="topbar-right">
+        <button class="top-btn"><i class="far fa-calendar"></i> Aug 2026</button>
+        <button class="top-btn"><i class="fas fa-download"></i> Export</button>
+        <button class="top-btn primary"><i class="fas fa-plus"></i> New Product</button>
+    </div>
+</div>
+
+<!-- ======= STAT CARDS ======= -->
+<div class="stat-grid">
+    <div class="stat-box">
+        <div class="stat-icon i1"><i class="fas fa-shopping-bag"></i></div>
+        <div class="stat-info">
+            <div class="label">Total Orders</div>
+            <div class="value">1,248</div>
+            <span class="change up"><i class="fas fa-arrow-up"></i> 12.5% vs last month</span>
+        </div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-icon i2"><i class="fas fa-wallet"></i></div>
+        <div class="stat-info">
+            <div class="label">Total Revenue</div>
+            <div class="value">$48,590</div>
+            <span class="change up"><i class="fas fa-arrow-up"></i> 8.2% vs last month</span>
+        </div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-icon i3"><i class="fas fa-box-open"></i></div>
+        <div class="stat-info">
+            <div class="label">Products</div>
+            <div class="value">216</div>
+            <span class="change up"><i class="fas fa-arrow-up"></i> 24 new added</span>
+        </div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-icon i4"><i class="fas fa-users"></i></div>
+        <div class="stat-info">
+            <div class="label">Customers</div>
+            <div class="value">3,847</div>
+            <span class="change up"><i class="fas fa-arrow-up"></i> 15.3% growth</span>
+        </div>
+    </div>
+</div>
+
+<!-- ======= CHARTS ROW ======= -->
+<div class="charts-grid">
+    <!-- Revenue -->
+    <div class="glass-card">
+        <div class="glass-card-head">
+            <h5><i class="fas fa-chart-area" style="color:var(--primary)"></i> Revenue Overview</h5>
+            <div class="pill-tabs">
+                <button class="pill-tab active" data-view="monthly">Monthly</button>
+                <button class="pill-tab" data-view="weekly">Weekly</button>
+                <button class="pill-tab" data-view="daily">Daily</button>
+                <button class="pill-tab" data-view="hourly">Hourly</button>
+                <button class="pill-tab" data-view="5min">5 Min</button>
+            </div>
+        </div>
+        <div class="glass-card-body">
+            <div style="height:260px"><canvas id="revenueChart"></canvas></div>
+        </div>
+        <div class="kpi-bar">
+            <div class="kpi-item">
+                <span class="kpi-dot" style="background:#e62e04"></span>
+                <span class="kpi-label">Today</span>
+                <span class="kpi-val">$2,340</span>
+            </div>
+            <div class="kpi-item">
+                <span class="kpi-dot" style="background:#198754"></span>
+                <span class="kpi-label">This Week</span>
+                <span class="kpi-val">$14,280</span>
+            </div>
+            <div class="kpi-item">
+                <span class="kpi-dot" style="background:#0d6efd"></span>
+                <span class="kpi-label">This Month</span>
+                <span class="kpi-val">$48,590</span>
+            </div>
+            <div class="kpi-item">
+                <span class="kpi-dot" style="background:#7c3aed"></span>
+                <span class="kpi-label">Avg. Order</span>
+                <span class="kpi-val">$189</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders by Status -->
+    <div class="glass-card">
+        <div class="glass-card-head">
+            <h5><i class="fas fa-chart-pie" style="color:var(--accent)"></i> Orders Status</h5>
+        </div>
+        <div class="glass-card-body">
+            <div style="max-width:180px; margin:0 auto;">
+                <canvas id="doughnutChart"></canvas>
+            </div>
+            <ul class="donut-side-list">
+                <li>
+                    <span class="d-left"><span class="d-dot" style="background:#6f42c1"></span><span class="d-name">Completed</span></span>
+                    <span><span class="d-count">740</span><span class="d-pct">(59.3%)</span></span>
+                </li>
+                <li>
+                    <span class="d-left"><span class="d-dot" style="background:#198754"></span><span class="d-name">Delivered</span></span>
+                    <span><span class="d-count">312</span><span class="d-pct">(25.0%)</span></span>
+                </li>
+                <li>
+                    <span class="d-left"><span class="d-dot" style="background:#0d6efd"></span><span class="d-name">Shipped</span></span>
+                    <span><span class="d-count">87</span><span class="d-pct">(7.0%)</span></span>
+                </li>
+                <li>
+                    <span class="d-left"><span class="d-dot" style="background:#0dcaf0"></span><span class="d-name">Processing</span></span>
+                    <span><span class="d-count">45</span><span class="d-pct">(3.6%)</span></span>
+                </li>
+                <li>
+                    <span class="d-left"><span class="d-dot" style="background:#dc3545"></span><span class="d-name">Cancelled</span></span>
+                    <span><span class="d-count">41</span><span class="d-pct">(3.3%)</span></span>
+                </li>
+                <li>
+                    <span class="d-left"><span class="d-dot" style="background:#ffc107"></span><span class="d-name">Pending</span></span>
+                    <span><span class="d-count">23</span><span class="d-pct">(1.8%)</span></span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- ======= BOTTOM ROW ======= -->
+<div class="bottom-grid">
+    <!-- Recent Orders -->
+    <div class="glass-card">
+        <div class="glass-card-head">
+            <h5><i class="fas fa-receipt" style="color:#198754"></i> Recent Orders</h5>
+            <a href="#" style="font-size:0.78rem; color:var(--primary); font-weight:600; text-decoration:none;">View All &rarr;</a>
+        </div>
+        <div class="glass-card-body">
+            <div class="order-list-item">
+                <span class="order-num">#1248</span>
+                <span class="order-customer">Ahmed Khan</span>
+                <span class="order-amount">$245</span>
+                <span class="order-badge ob-shipped">Shipped</span>
+            </div>
+            <div class="order-list-item">
+                <span class="order-num">#1247</span>
+                <span class="order-customer">Sara Malik</span>
+                <span class="order-amount">$89</span>
+                <span class="order-badge ob-processing">Processing</span>
+            </div>
+            <div class="order-list-item">
+                <span class="order-num">#1246</span>
+                <span class="order-customer">Riaz Ahmed</span>
+                <span class="order-amount">$312</span>
+                <span class="order-badge ob-delivered">Delivered</span>
+            </div>
+            <div class="order-list-item">
+                <span class="order-num">#1245</span>
+                <span class="order-customer">Fatima Hussain</span>
+                <span class="order-amount">$67</span>
+                <span class="order-badge ob-pending">Pending</span>
+            </div>
+            <div class="order-list-item">
+                <span class="order-num">#1244</span>
+                <span class="order-customer">Muhammad Ali</span>
+                <span class="order-amount">$156</span>
+                <span class="order-badge ob-completed">Completed</span>
+            </div>
+            <div class="order-list-item">
+                <span class="order-num">#1243</span>
+                <span class="order-customer">Ayesha Noor</span>
+                <span class="order-amount">$420</span>
+                <span class="order-badge ob-cancelled">Cancelled</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Products (Ranked) -->
+    <div class="glass-card">
+        <div class="glass-card-head">
+            <h5><i class="fas fa-trophy" style="color:#ffaa00"></i> Top Products</h5>
+        </div>
+        <div class="glass-card-body">
+            <div class="product-row">
+                <span class="product-rank rank-1">1</span>
+                <div class="product-details">
+                    <div class="pname">Brake Pad Set - Front</div>
+                    <div class="pcat">Brakes & Components</div>
+                </div>
+                <div class="product-metric">
+                    <div class="pm-sales">342</div>
+                    <div class="pm-rev">$12,650</div>
+                </div>
+            </div>
+            <div class="product-row">
+                <span class="product-rank rank-2">2</span>
+                <div class="product-details">
+                    <div class="pname">Oil Filter - Premium</div>
+                    <div class="pcat">Engine Parts</div>
+                </div>
+                <div class="product-metric">
+                    <div class="pm-sales">298</div>
+                    <div class="pm-rev">$4,470</div>
+                </div>
+            </div>
+            <div class="product-row">
+                <span class="product-rank rank-3">3</span>
+                <div class="product-details">
+                    <div class="pname">Headlight Assembly LED</div>
+                    <div class="pcat">Lighting</div>
+                </div>
+                <div class="product-metric">
+                    <div class="pm-sales">215</div>
+                    <div class="pm-rev">$8,600</div>
+                </div>
+            </div>
+            <div class="product-row">
+                <span class="product-rank rank-n">4</span>
+                <div class="product-details">
+                    <div class="pname">Air Filter Element</div>
+                    <div class="pcat">Engine Parts</div>
+                </div>
+                <div class="product-metric">
+                    <div class="pm-sales">189</div>
+                    <div class="pm-rev">$2,835</div>
+                </div>
+            </div>
+            <div class="product-row">
+                <span class="product-rank rank-n">5</span>
+                <div class="product-details">
+                    <div class="pname">Spark Plug Iridium</div>
+                    <div class="pcat">Ignition</div>
+                </div>
+                <div class="product-metric">
+                    <div class="pm-sales">176</div>
+                    <div class="pm-rev">$1,760</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activity Feed -->
+    <div class="glass-card">
+        <div class="glass-card-head">
+            <h5><i class="fas fa-bell" style="color:var(--primary)"></i> Activity Feed</h5>
+        </div>
+        <div class="glass-card-body">
+            <div class="activity-item">
+                <span class="activity-dot" style="background:#198754"></span>
+                <div>
+                    <div class="activity-text"><strong>Order #1248</strong> has been shipped to Ahmed Khan</div>
+                    <div class="activity-time">2 minutes ago</div>
+                </div>
+            </div>
+            <div class="activity-item">
+                <span class="activity-dot" style="background:#0d6efd"></span>
+                <div>
+                    <div class="activity-text">New customer <strong>Fatima Hussain</strong> registered</div>
+                    <div class="activity-time">18 minutes ago</div>
+                </div>
+            </div>
+            <div class="activity-item">
+                <span class="activity-dot" style="background:#fd7e14"></span>
+                <div>
+                    <div class="activity-text"><strong>5 products</strong> were low on stock and restocked</div>
+                    <div class="activity-time">1 hour ago</div>
+                </div>
+            </div>
+            <div class="activity-item">
+                <span class="activity-dot" style="background:#dc3545"></span>
+                <div>
+                    <div class="activity-text">Order <strong>#1243</strong> was cancelled by customer</div>
+                    <div class="activity-time">2 hours ago</div>
+                </div>
+            </div>
+            <div class="activity-item">
+                <span class="activity-dot" style="background:#7c3aed"></span>
+                <div>
+                    <div class="activity-text">Coupon <strong>SUMMER20</strong> redeemed 23 times today</div>
+                    <div class="activity-time">3 hours ago</div>
+                </div>
+            </div>
+            <div class="activity-item">
+                <span class="activity-dot" style="background:#198754"></span>
+                <div>
+                    <div class="activity-text">Payment of <strong>$420</strong> confirmed for Order #1239</div>
+                    <div class="activity-time">4 hours ago</div>
+                </div>
+            </div>
+            <div class="activity-item">
+                <span class="activity-dot" style="background:#0dcaf0"></span>
+                <div>
+                    <div class="activity-text">Daily backup completed successfully</div>
+                    <div class="activity-time">5 hours ago</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    /* ===== REVENUE ===== */
+    var rCtx = document.getElementById('revenueChart').getContext('2d');
+    var grad = rCtx.createLinearGradient(0, 0, 0, 260);
+    grad.addColorStop(0, 'rgba(230,46,4,0.12)');
+    grad.addColorStop(1, 'rgba(230,46,4,0.01)');
+
+    var mLabels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var mData = [12400, 19800, 15600, 22100, 18900, 24500, 21300, 28700, 25100, 31200, 27800, 35400];
+
+    var rChart = new Chart(rCtx, {
+        type: 'line',
+        data: {
+            labels: mLabels,
+            datasets: [{
+                label: 'Revenue',
+                data: mData,
+                fill: true,
+                tension: 0.45,
+                backgroundColor: grad,
+                borderColor: '#e62e04',
+                borderWidth: 2.5,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: '#e62e04',
+                pointBorderWidth: 2,
+                pointRadius: 0,
+                pointHoverRadius: 7,
+                pointHoverBackgroundColor: '#e62e04',
+                pointHoverBorderColor: '#fff',
+                pointHoverBorderWidth: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { intersect: false, mode: 'index' },
+            scales: {
+                x: { grid: { display: false }, border: { display: false }, ticks: { font: { size: 11, family: 'Plus Jakarta Sans', weight: '500' }, color: '#b0b7c9' } },
+                y: { beginAtZero: true, grid: { color: '#f0f2f7', drawBorder: false }, border: { display: false }, ticks: { font: { size: 11, family: 'Plus Jakarta Sans' }, color: '#b0b7c9', callback: function(v){ return '$'+(v/1000)+'K'; }, padding: 8 } }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: { backgroundColor: '#1a1d2e', titleFont: { size: 13, weight: '600', family: 'Plus Jakarta Sans' }, bodyFont: { size: 12, family: 'Plus Jakarta Sans' }, padding: 12, cornerRadius: 10, displayColors: false, callbacks: { label: function(c){ return ' Revenue: $' + c.parsed.y.toLocaleString(); } } }
+            }
+        }
+    });
+
+    document.querySelectorAll('.pill-tab').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.pill-tab').forEach(function(b){b.classList.remove('active');});
+            this.classList.add('active');
+            var v = this.dataset.view, labels, data;
+            if (v==='weekly'){labels=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];data=[3200,4100,3800,5200,4600,6100,4900];}
+            else if(v==='daily'){labels=['12AM','3AM','6AM','9AM','12PM','3PM','6PM','9PM'];data=[200,150,380,1200,1800,2100,1600,800];}
+            else if(v==='hourly'){labels=['00:00','05:00','10:00','15:00','20:00'];data=[120,80,450,680,320];}
+            else if(v==='5min'){labels=['00','05','10','15','20','25','30','35','40','45','50','55'];data=[15,22,18,35,28,42,38,50,45,55,48,60];}
+            else{labels=mLabels;data=mData;}
+            rChart.data.labels=labels; rChart.data.datasets[0].data=data; rChart.update();
+        });
+    });
+
+    /* ===== DOUGHNUT ===== */
+    var dCtx = document.getElementById('doughnutChart').getContext('2d');
+    new Chart(dCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Completed','Delivered','Shipped','Processing','Cancelled','Pending'],
+            datasets: [{ data: [740,312,87,45,41,23], backgroundColor: ['#6f42c1','#198754','#0d6efd','#0dcaf0','#dc3545','#ffc107'], borderColor: '#fff', borderWidth: 3, hoverOffset: 6 }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: true, cutout: '70%',
+            plugins: {
+                legend: { display: false },
+                tooltip: { backgroundColor: '#1a1d2e', titleFont: { size: 13, weight: '600', family: 'Plus Jakarta Sans' }, bodyFont: { size: 12, family: 'Plus Jakarta Sans' }, padding: 10, cornerRadius: 10, callbacks: { label: function(c){var t=c.dataset.data.reduce(function(a,b){return a+b;},0);return ' '+c.label+': '+c.parsed+' ('+((c.parsed/t)*100).toFixed(1)+'%)';} } }
+            }
+        },
+        plugins: [{
+            id: 'center', beforeDraw: function(chart) {
+                var w=chart.width, h=chart.height, ctx=chart.ctx;
+                ctx.restore();
+                ctx.font='800 22px Plus Jakarta Sans, sans-serif'; ctx.textBaseline='middle'; ctx.textAlign='center'; ctx.fillStyle='#1a1d2d';
+                ctx.fillText('1,248', w/2, h/2-5);
+                ctx.font='500 10px Plus Jakarta Sans, sans-serif'; ctx.fillStyle='#b0b7c9';
+                ctx.fillText('Total', w/2, h/2+13);
+                ctx.save();
+            }
+        }]
+    });
+});
+</script>
+
+</body>
+</html>
+

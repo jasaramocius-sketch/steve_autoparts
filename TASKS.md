@@ -2715,3 +2715,220 @@ sudo chown -R jasaram:www-data /var/www/html/stautoparts/storage/framework/views
 ```
 
 **Files affected:** None (view cache cleared, no code change)
+
+---
+
+## 177. PageSpeed Optimization — Asset Minification + .htaccess Caching/Gzip (20 Aug 2026)
+
+**Problem:** Slow page loads — unminified CSS/JS shipped to browsers (style.css 377KB readable, jquery-ui.js 521KB, slick.js 90KB, script.js 29KB), no browser caching headers, no gzip compression.
+
+**Solution:** Minified all large front assets, added full browser-caching + compression + security headers to `public/.htaccess`.
+
+**Minification results (.bak backups created then removed same day):**
+| File | Before | After | Saved |
+|---|---|---|---|
+| `public/assets/front/css/style.css` | 377 KB (18,003 lines) | 308 KB (1 line) | 69 KB |
+| `public/assets/front/js/jquery-ui.js` | 521 KB (18,563 lines) | 257 KB | 264 KB |
+| `public/assets/front/js/slick.js` | 90 KB (3,038 lines) | 43 KB | 47 KB |
+| `public/assets/front/js/script.js` | 29 KB | 14 KB | 15 KB |
+
+**`public/.htaccess` additions (+40 lines):**
+- `mod_expires.c`: images/fonts `access plus 1 year`, css/js `access plus 1 month`, html `0 seconds`
+- `mod_headers.c`: `Cache-Control: public, max-age=31536000, immutable` for static assets; `no-cache, must-revalidate` for html; security headers `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy: strict-origin-when-cross-origin`
+- `mod_deflate.c`: DEFLATE for html/css/js/json/svg
+
+---
+
+## 178. Front Layout — Async CSS, Deferred JS, Preconnects (20 Aug 2026)
+
+**Problem:** Render-blocking CSS/JS in `layouts/app.blade.php` delayed first paint: 8 non-critical stylesheets + 10 synchronous scripts (incl. Summernote loaded on every front page though only used in admin).
+
+**Files changed:**
+- `resources/views/layouts/app.blade.php`:
+  - `<link rel="preconnect">` to fonts.googleapis.com, fonts.gstatic.com, cdnjs.cloudflare.com
+  - Non-critical CSS (line-awesome CDN, slick, swiper, nice-select, jquery-ui, animate, toastr, dynamic-font) switched to `rel="preload" as="style" onload="this.rel='stylesheet'"` async pattern
+  - Removed render-blocking Summernote CSS + JS from front layout (admin-only dependency)
+  - All JS except jQuery now `defer` (slick, swiper, jquery-ui, nice-select, wow, bootstrap, toastr, script.js, myscript.js)
+  - Session toastr flash calls wrapped in `DOMContentLoaded` (toastr loads deferred)
+  - Added Poppins + Saira Google Font families
+- `resources/views/admin/images/edit.blade.php` — removed header row (Back link duplicated breadcrumb); preview img `rounded` class removed
+
+---
+
+## 179. Responsive Images — srcset/sizes Pipeline in `imgTag()` (20 Aug 2026)
+
+**Problem:** Full-size originals served to every viewport; no `srcset`; images not lazy-loaded.
+
+**Files changed:**
+- `app/Helpers/image.php`:
+  - New `ensureResponsiveVariant(string $src, int $targetWidth)` — GD-based on-demand resize: generates `{name}_{width}.webp` variant next to original (quality 80, alpha preserved for PNG), cached on disk, returns null when source ≤ target width
+  - `imgTag()` new signature: `imgTag($src, $alt, $class, $extra, int $displayWidth = 0)` — when `$displayWidth > 0`, emits `srcset` (250w + 500w variants) + `sizes="{displayWidth}px"`; `<picture>` wraps responsive webp source when WebP frontend toggle enabled, else inline srcset
+  - All `imgTag()` output now includes `loading="lazy" decoding="async"`
+- `resources/views/partials/product-card.blade.php` — product image `imgTag(..., 300)`
+- `resources/views/home/index.blade.php` — category slider images `imgTag(..., 250)`; offer banners + services icons + partner logos → `<picture>` webp sources + lazy loading; deal-of-day image gets `object-fit-cover`
+
+---
+
+## 180. Home Hero — LCP Fix (`fetchpriority="high"` + WebP Picture) (20 Aug 2026)
+
+**Problem:** Hero was a CSS `background-image` — not discoverable by the browser preload scanner, no WebP variant, hurt LCP.
+
+**Files changed:**
+- `resources/views/home/index.blade.php` — hero background replaced with real `<img>` (`position:absolute; inset:0; object-fit:cover`) with `fetchpriority="high"`; wrapped in `<picture>` with `.webp` source when a sibling webp exists (checked via `preg_replace('/\.[^.]+$/', '.webp', ...)`) ; hero content raised to `z-index:1`
+
+---
+
+## 181. Shop Price Filter — Real Max Price + Session Currency + Clean URLs (20 Aug 2026)
+
+**Problem:** Price range slider hardcoded 0–1000 (products cost more; filter silently capped); labels/chips always showed `$` regardless of session currency; submitting filters produced ugly URLs with empty params / trailing `?`; Clear buttons rendered for empty-string params (`request()->has()` vs `filled()`).
+
+**Files changed:**
+- `app/Http/Controllers/ShopController.php` — `getSharedData()` returns `maxProductPrice` (`Product::where('status',true)->max('price') ?? 1000`) and `currencySymbol` (from session currency config)
+- `resources/views/shop/index.blade.php`:
+  - Slider max = `$maxProductPrice * $rate`; hidden inputs `#price-slider-max` / `#price-currency-symbol` feed JS
+  - Range label + filter chips use session currency symbol with `toLocaleString()`
+  - `hasPriceFilter` chip condition compares against dynamic max instead of 1000
+  - Vehicle/price Clear buttons use `request()->filled()`
+  - New `buildCleanFilterUrl(form)` — builds query string skipping empties/disabled fields; vehicle form intercepts submit → clean redirect; price form strips default full-range (0–max) params on submit
+
+---
+
+## 182. Admin Logout Route Name Collision Fix (20 Aug 2026)
+
+**Problem:** Admin logout route was named `logout` (same as the user-facing auth route name space) — `route('logout')` in admin navbar resolved against the wrong route group.
+
+**Files changed:**
+- `routes/web.php` — admin logout route renamed `logout` → `admin.logout`
+- `resources/views/admin/partials/navbar.blade.php` — dropdown form action → `route('admin.logout')`
+
+---
+
+## 183. Admin Dashboard — Revenue Chart Scroll Into View (20 Aug 2026)
+
+**Files changed:**
+- `resources/views/admin/dashboard.blade.php` — chart cards got ids (`orders-status-chart-card`, `revenue-chart-card`); clicking Monthly/Weekly/Today view buttons smooth-scrolls the revenue chart card to center
+
+---
+
+## 184. Image Manager — Pagination 80/Page + Bulk & List View Polish (20 Aug 2026)
+
+**Files changed:**
+- `app/Http/Controllers/Admin/ImageController.php` — index pagination `28` → `80` per page
+- `resources/views/admin/images/index.blade.php` (~402 lines):
+  - Bulk mode: all cards dim to 0.55 opacity, selected cards full opacity + blue border/check overlay (top-right corner badge)
+  - List view redesign: 140×140px thumbnails, column-stacked card info, blue left-border on selected rows, overlay hidden (checkbox-style `bulk-check` shown instead)
+  - List header checkbox column appears only in bulk mode; view-toggle hidden while bulk mode active
+  - Grid view kept as CSS grid `repeat(auto-fill, minmax(180px, 1fr))`
+
+---
+
+## 185. PageSpeed Test Reports — Measured Scores (20–21 Aug 2026)
+
+Lighthouse reports saved for verification of tasks #177–180:
+- `public/PageSpeedTest/desktop-20260820T153039.html` — Desktop: Performance **86**, Accessibility 79, Best Practices 92, SEO 63
+- `mobile-20260821T112243.html` (repo root) — Mobile: Performance **69**, Accessibility 84, Best Practices **100**, SEO 63
+
+**Housekeeping (uncommitted):** root-level mockup/report files moved into `public/` (`admin-dashboard-suggestion.html`, `admin-dashboard-suggestion-2.html`, `PageSpeedTest/`); `buttons.html` + stale `localhost-*.html` report deleted; `test-watcher2.html` modified + `test-watcher3.html` created (file-watcher verification fixtures).
+
+---
+
+## 186. Mobile Performance — TTFB 1.5s → 0.15s (21 Aug 2026)
+
+Root cause: `View::composer('*')` in `AppServiceProvider` ran `childrenRecursive` on every request — **4,030 of 4,099 total queries** per page load (category tree explosion).
+
+**Files changed:**
+- `app/Providers/AppServiceProvider.php` — composer category tree wrapped in `cache()->remember('front_mobile_category_tree_v1', 21600, ...)`; `Category::saved`/`Category::deleted` hooks flush the key
+- `config/cache.php` — `'serializable_classes'` whitelist added (`Illuminate\Support\Collection`, `Illuminate\Database\Eloquent\Collection`, `App\Models\Category`) — without it cached Eloquent models unserialize as `__PHP_Incomplete_Class`
+- Ran `php artisan config:cache` (opcache already enabled web-side; `view:cache` skipped — www-data ownership issue from #176; `route:cache` impossible — 7 closure routes)
+
+**Result:** home 1.5s → **0.145s**, shop 0.95s → **0.114s**, categories 0.28s → **0.065s**
+
+---
+
+## 187. Mobile Performance — Render-Blocking & Payload (21 Aug 2026)
+
+**Files changed:**
+- `resources/views/layouts/app.blade.php`:
+  - 3 render-blocking Google Fonts `<link>`s merged into 1 async `preload/onload` link (+`<noscript>` fallback)
+  - Header logo: `loading="eager" fetchpriority="high" width="60" height="63"` (was lazy — LCP image); mobile-menu + footer logos got ratio-correct `width`/`height`
+  - jquery-ui CSS preload + JS moved to `@stack('jquery-ui-css')` / `@stack('jquery-ui-js')` (loaded only where used)
+  - `all.css` → `all.min.css` (152KB → 93KB, csso)
+- `resources/views/shop/index.blade.php` — pushes jquery-ui CSS+JS via the new stacks
+- `app/Helpers/image.php` — `imgTag()` now lets `$extra` override default `loading=`/`decoding=` attrs
+- `public/assets/front/js/script.js` — removed dead `#slider-range` init block (element doesn't exist anywhere; real slider is `#price-slider`, shop-only)
+
+---
+
+## 188. Mobile Accessibility — Buttons, Links, Contrast, Headings (21 Aug 2026)
+
+Fixes Lighthouse "button-name ×26", "link-name ×3", "link-in-text-block", "color-contrast ×15", "heading-order ×5":
+
+**Files changed:**
+- `resources/views/partials/product-card.blade.php` — wishlist button `aria-label="Add to wishlist"`; default `$titleTag` h6 → h3
+- `resources/views/layouts/app.blade.php` — header-toggle `aria-label="Open menu"`; searchIcon `aria-label="Search"`
+- `resources/views/partials/footer-columns.blade.php` — social links aria-labels (Facebook/Twitter/LinkedIn)
+- `public/assets/front/css/custom.css` — `.copyright-hyperlink-text` underlined (in-text-link cue); `.gs-footer-bottom .text-secondary` → `#a2a2ab`; `.gs-footer-bottom .copyright-hyperlink-text` → `#ff8560`
+- `public/assets/front/css/style.css` — `--primary` `#e62e04` → `#d02a03` (white-on-primary 4.41 → 5.23, primary-on-white/#f6f6f6 also pass); price `del` color `#b7aead` → `#6e6966`
+- `resources/views/home/index.blade.php` — countdown numbers h6 → `<p>` (not headings); post titles h5 → h3
+
+SEO stays 63 by decision (hardcoded `noindex,nofollow` in layouts kept). Verified: all pages 200, mobile menu renders from cache, shop slider intact, home warm TTFB ~0.15s.
+
+**Follow-up (Agent Accessibility audit):** notification bell link (`a.position-relative`) had no accessible name → `aria-label="Notifications"`; also added aria-labels to Compare/Wishlist/Cart header icon links (tooltip-only names don't count in static HTML).
+
+---
+
+## 189. Front-end Assets — Beautified Minified Sources (21 Aug 2026)
+
+Beautified the two single-line minified files we'd been patching surgically (js-beautify, 2-space indent). `custom.css`, `myscript.js` were already readable; `all.css` is Font Awesome vendor build — left untouched.
+
+**Files changed:**
+- `public/assets/front/css/style.css` — 308KB minified → 351KB formatted
+- `public/assets/front/js/script.js` — 14KB minified → 17KB formatted
+
+**Verified:** CSS re-parses cleanly (csso round-trip), JS passes `node --check`, home/shop/category all 200. No payload concern — `mod_deflate` serves style.css at ~44KB gzipped; layout `?v=filemtime` cache-busters pick up the new versions automatically. Pre-beautify backups: `/tmp/opencode/style.css`, `/tmp/opencode/script.js`.
+
+---
+
+## 190. Lighthouse Report Files — 403 Fix (21 Aug 2026)
+
+`public/desktop-20260820T153039.html` + `public/mobile-20260821T112243.html` were mode `600` (owner-only) after the #185 housekeeping move, so Apache's `www-data` couldn't read them → "Forbidden". Set both to `644`; URLs `http://localhost/stautoparts/{mobile-20260821T112243,desktop-20260820T153039}.html` now load.
+
+---
+
+## 191. Swiper Observer — Investigated, No Bug Found (21 Aug 2026)
+
+Report: "swiper observer not working". Verified with headless Chrome (puppeteer-core + system Chrome, desktop 1280×800 & mobile 390×844 viewports):
+
+- All active home sliders (`home-cate-slider`, `featured-products`, `best-selling`) autoplay-start on scroll-into-view (`realIndex` advances) and stop when scrolled away — IntersectionObserver pattern from 4946065b intact after script.js beautify
+- `.latest-posts-slider` absent by design: `$showAsSlider = $latestPostsCount >= 4`; currently 2 posts → grid renders
+- Zero console errors/warnings/failed requests on home (live capture + both Lighthouse reports)
+
+Likely stale browser cache — hard refresh advised. Test scripts kept at `/tmp/opencode/swiper-test.js`, `/tmp/opencode/console-capture.js`.
+
+---
+
+## 192. Shop Filters — Apply Buttons, Real Min Price, Floored Display (21 Aug 2026)
+
+**Files changed:**
+- `app/Http/Controllers/ShopController.php` — added `minProductPrice` (`Product::min('price')`) alongside max
+- `resources/views/shop/index.blade.php`:
+  - Price slider min = lowest product price floored, max floored too (11.99/499.99 → **$11 - $499**, was $0 - $499.99); new `#price-slider-min` hidden input; JS default-min bug fixed (absent param → sliderMinVal)
+  - Price Apply disabled until slider moves off full range (`slide`/`change` toggle); Vehicle Apply disabled until year/make/model selected — both server-side initial state + JS toggling
+- `public/assets/front/js/script.js` — **fixed console TypeError on all non-home pages**: Swiper 11 keeps unmatched selector string in `el`, so `observeSwiperAutoplayGlobal` crashed on `.observe(el)`; guard now `e.el instanceof Element`
+
+**Verified (puppeteer):** both buttons disabled initially → enable on value → disable on reset; 0 page errors across home/shop/category/brands.
+
+---
+
+## 193. User Dashboard — Design Suggestion Mockups (21 Aug 2026)
+
+**Files added:**
+- `public/user-dashboard-suggestion.html` — Suggestion 1 "Clean Corporate": welcome header + avatar, 4 stat cards (Total Spent / Orders / Pending / Wishlist), Spending Overview line chart (monthly/weekly toggle) + Orders-by-Status doughnut, Recent Orders table, My Garage vehicles, Wishlist preview, Profile Completeness ring (80%), Quick Actions grid
+- `public/user-dashboard-suggestion-2.html` — Suggestion 2 "Modern Auto": dark navy gradient hero with shipment alert, horizontal stat strip, Active Shipment vertical timeline tracker (placed → paid → shipped → out for delivery → delivered), Recent Orders cards with product thumbs, Saved-for-Later wishlist grid, Garage sidebar card, Notifications feed, Quick Actions
+
+**Notes:**
+- Both standalone static HTML (Bootstrap 5.3 CDN + Font Awesome 6.5 + Inter + Chart.js), same conventions as `admin-dashboard-suggestion*.html`
+- Primary color uses current brand **#d02a03** (admin mockups still show old #e62e04)
+- Based on real user dashboard data: stats from `DashboardController::userDashboard()` (total_spent/pending/completed/wishlist), sidebar sections (orders, reviews, tracking, wishlist, followed sellers, vehicles, addresses, notifications)
+
+**Verified (puppeteer):** both load 200; no JS errors (only favicon.ico 404); no horizontal overflow at 1440px & 390px; ud1 charts render (860x280 line, 190x190 doughnut); screenshots at `/tmp/opencode/ud1-{desktop,mobile}.png`, `/tmp/opencode/ud2-{desktop,mobile}.png`

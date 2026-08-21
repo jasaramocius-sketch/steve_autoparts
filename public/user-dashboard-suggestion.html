@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Dashboard Suggestion 1 - My Account</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#d02a03;--soft:#fdf0ec;--bg:#f8f9fb;--card:#fff;--text:#23262f;--muted:#7a7f8c;--border:#ececf1;--r:16px}
+*{font-family:'Inter',sans-serif}body{background:var(--bg);color:var(--text);margin:0;padding:28px 20px 48px}
+.wrap{max-width:1080px;margin:0 auto}
+.hello{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:22px}
+.hello h1{font-size:1.5rem;font-weight:800;margin:0}
+.hello p{font-size:.85rem;color:var(--muted);margin:2px 0 0}
+.av{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--primary),#ff7a45);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800}
+.tiles{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:26px}
+.tile{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px 10px;text-align:center;text-decoration:none;color:var(--text);transition:all .2s;display:block}
+.tile:hover{transform:translateY(-3px);box-shadow:0 10px 22px rgba(35,38,47,.08);color:var(--primary);border-color:transparent}
+.t-ic{width:44px;height:44px;margin:0 auto 9px;border-radius:12px;background:var(--soft);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:1.05rem}
+.tile b{font-size:.78rem;font-weight:600;display:block}
+.tile small{font-size:.68rem;color:var(--muted)}
+.cardx{background:var(--card);border:1px solid var(--border);border-radius:var(--r);margin-bottom:20px;overflow:hidden}
+.cx-h{padding:16px 22px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.cx-h h5{margin:0;font-size:.98rem;font-weight:700}
+.cx-h a{font-size:.8rem;color:var(--primary);text-decoration:none;font-weight:600}
+.ship{padding:22px}
+.ship-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.ship-top .oid{font-size:.95rem;font-weight:700}
+.ship-top .odt{font-size:.76rem;color:var(--muted)}
+.pill{font-size:.72rem;font-weight:700;background:#e7f6ee;color:#188554;padding:5px 13px;border-radius:20px}
+.steps{display:flex;margin:6px 0 20px}
+.step{flex:1;text-align:center;position:relative}
+.step::before{content:'';position:absolute;top:15px;left:-50%;width:100%;height:3px;background:var(--border)}
+.step:first-child::before{display:none}
+.step.done::before,.step.now::before{background:var(--primary)}
+.sdot{width:32px;height:32px;margin:0 auto 7px;border-radius:50%;background:#fff;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.72rem;color:var(--muted);position:relative;z-index:1}
+.step.done .sdot{background:var(--primary);border-color:var(--primary);color:#fff}
+.step.now .sdot{border-color:var(--primary);color:var(--primary);box-shadow:0 0 0 4px rgba(208,42,3,.12)}
+.step span{font-size:.7rem;font-weight:600;color:var(--muted);display:block}
+.step.done span,.step.now span{color:var(--text)}
+.eta{font-size:.78rem;background:var(--soft);color:var(--primary);border-radius:10px;padding:10px 14px;display:inline-flex;gap:8px;align-items:center;font-weight:600}
+.oitem{display:flex;align-items:center;gap:14px;padding:14px 22px;border-top:1px solid var(--border)}
+.oimg{width:54px;height:54px;border-radius:10px;background:#f1f2f6;display:flex;align-items:center;justify-content:center;color:#b9bdc9;font-size:1.2rem;flex-shrink:0}
+.oname{font-size:.85rem;font-weight:600}
+.osub{font-size:.73rem;color:var(--muted)}
+.oprice{font-size:.88rem;font-weight:800;margin-left:auto}
+.obtns{display:flex;gap:8px;margin-left:18px}
+.btn-s{font-size:.75rem;font-weight:600;padding:8px 14px;border-radius:9px;text-decoration:none;border:1px solid var(--border);color:var(--text);background:#fff;white-space:nowrap}
+.btn-s:hover{border-color:var(--primary);color:var(--primary)}
+.btn-s.fill{background:var(--primary);border-color:var(--primary);color:#fff}
+.btn-s.fill:hover{background:#b82403;color:#fff}
+.duo{display:grid;grid-template-columns:1.4fr 1fr;gap:20px}
+.wl-row{display:flex;gap:12px;overflow-x:auto;padding:16px 20px}
+.wcard{min-width:150px;border:1px solid var(--border);border-radius:12px;overflow:hidden;text-decoration:none;color:var(--text);transition:all .2s;background:#fff}
+.wcard:hover{box-shadow:0 8px 18px rgba(35,38,47,.09);transform:translateY(-2px)}
+.wimg{height:96px;background:#f1f2f6;display:flex;align-items:center;justify-content:center;color:#b9bdc9;font-size:1.5rem;position:relative}
+.sale{position:absolute;top:8px;left:8px;background:var(--primary);color:#fff;font-size:.6rem;font-weight:700;padding:2px 7px;border-radius:20px}
+.wbody{padding:9px 11px}
+.wname{font-size:.74rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wprice{font-size:.8rem;font-weight:800;color:var(--primary)}
+.wold{font-size:.66rem;color:var(--muted);text-decoration:line-through;margin-left:4px}
+.garage-i{display:flex;align-items:center;gap:12px;padding:12px 20px;border-top:1px solid var(--border)}
+.garage-i:first-of-type{border-top:none}
+.gic{width:40px;height:40px;border-radius:10px;background:var(--soft);color:var(--primary);display:flex;align-items:center;justify-content:center}
+.gname{font-size:.82rem;font-weight:700}.gsub{font-size:.7rem;color:var(--muted)}
+.def{margin-left:auto;font-size:.62rem;font-weight:700;color:var(--primary);background:var(--soft);padding:3px 9px;border-radius:20px}
+@media(max-width:900px){.tiles{grid-template-columns:repeat(3,1fr)}.duo{grid-template-columns:1fr}}
+@media(max-width:520px){.tiles{grid-template-columns:repeat(2,1fr)}.obtns{display:none}.steps span{font-size:.58rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="hello">
+<div class="d-flex align-items-center gap-3">
+<div class="av">AJ</div>
+<div><h1>Hello, Ahmed!</h1><p>From your account you can view orders, manage your garage and more.</p></div>
+</div>
+<a href="#" class="btn-s"><i class="fas fa-cart-shopping me-1"></i> Cart (2)</a>
+</div>
+
+<div class="tiles">
+<a href="#" class="tile"><div class="t-ic"><i class="fas fa-box"></i></div><b>Orders</b><small>18 total</small></a>
+<a href="#" class="tile"><div class="t-ic"><i class="fas fa-rotate-left"></i></div><b>Buy Again</b><small>Quick reorder</small></a>
+<a href="#" class="tile"><div class="t-ic"><i class="fas fa-car"></i></div><b>Garage</b><small>3 vehicles</small></a>
+<a href="#" class="tile"><div class="t-ic"><i class="fas fa-heart"></i></div><b>Wishlist</b><small>7 saved</small></a>
+<a href="#" class="tile"><div class="t-ic"><i class="fas fa-star"></i></div><b>Reviews</b><small>5 written</small></a>
+<a href="#" class="tile"><i class="fas fa-map-marker-alt t-ic"></i><b>Addresses</b><small>2 saved</small></a>
+</div>
+
+<div class="cardx">
+<div class="cx-h"><h5><i class="fas fa-truck-fast me-2" style="color:var(--primary)"></i>Arriving Thursday &mdash; #ORD-7841</h5><a href="#">Track &rarr;</a></div>
+<div class="ship">
+<div class="ship-top"><div><span class="oid">Brake Pad Set + 2 more items</span><div class="odt">Placed Aug 18 &middot; Total $145.00 &middot; Cash on Delivery</div></div><span class="pill">Shipped</span></div>
+<div class="steps">
+<div class="step done"><div class="sdot"><i class="fas fa-check"></i></div><span>Placed</span></div>
+<div class="step done"><div class="sdot"><i class="fas fa-check"></i></div><span>Packed</span></div>
+<div class="step now"><div class="sdot"><i class="fas fa-truck"></i></div><span>Shipped</span></div>
+<div class="step"><div class="sdot"><i class="fas fa-house-circle-check"></i></div><span>Out for delivery</span></div>
+<div class="step"><div class="sdot"><i class="fas fa-box-open"></i></div><span>Delivered</span></div>
+</div>
+<span class="eta"><i class="fas fa-location-dot"></i> TCS-8842-1192 &middot; On the way to Gulberg III, Lahore</span>
+</div>
+</div>
+
+<div class="duo">
+<div class="cardx">
+<div class="cx-h"><h5>Recent Orders</h5><a href="#">View all &rarr;</a></div>
+<div class="oitem"><div class="oimg"><i class="fas fa-oil-can"></i></div><div><div class="oname">Full Synthetic Oil 5W-30</div><div class="osub">#ORD-7812 &middot; Aug 10 &middot; Delivered</div></div><span class="oprice">$42.99</span><div class="obtns"><a href="#" class="btn-s fill">Buy again</a><a href="#" class="btn-s">Review</a></div></div>
+<div class="oitem"><div class="oimg"><i class="fas fa-lightbulb"></i></div><div><div class="oname">LED Headlight H4 Pair</div><div class="osub">#ORD-7790 &middot; Aug 02 &middot; Delivered</div></div><span class="oprice">$89.99</span><div class="obtns"><a href="#" class="btn-s fill">Buy again</a><a href="#" class="btn-s">Review</a></div></div>
+<div class="oitem"><div class="oimg"><i class="fas fa-plug"></i></div><div><div class="oname">Iridium Spark Plugs x4</div><div class="osub">#ORD-7741 &middot; Jul 24 &middot; Processing</div></div><span class="oprice">$52.00</span><div class="obtns"><a href="#" class="btn-s">Details</a></div></div>
+<div class="oitem"><div class="oimg"><i class="fas fa-wind"></i></div><div><div class="oname">Engine Air Filter</div><div class="osub">#ORD-7702 &middot; Jul 15 &middot; Pending payment</div></div><span class="oprice">$19.99</span><div class="obtns"><a href="#" class="btn-s fill">Pay now</a></div></div>
+</div>
+
+<div>
+<div class="cardx">
+<div class="cx-h"><h5><i class="fas fa-car-side me-2" style="color:var(--primary)"></i>My Garage</h5><a href="#">+ Add vehicle</a></div>
+<div class="garage-i"><div class="gic"><i class="fas fa-car-side"></i></div><div><div class="gname">Honda Civic 2020</div><div class="gsub">1.8L &middot; Gasoline</div></div><span class="def">DEFAULT</span></div>
+<div class="garage-i"><div class="gic"><i class="fas fa-truck-pickup"></i></div><div><div class="gname">Toyota Hilux 2018</div><div class="gsub">2.8L &middot; Diesel</div></div></div>
+<div class="garage-i"><div class="gic"><i class="fas fa-car"></i></div><div><div class="gname">Suzuki Cultus 2016</div><div class="gsub">1.0L &middot; Gasoline</div></div></div>
+</div>
+
+<div class="cardx">
+<div class="cx-h"><h5><i class="fas fa-heart me-2" style="color:var(--primary)"></i>Saved for later</h5><a href="#">Wishlist &rarr;</a></div>
+<div class="wl-row">
+<a href="#" class="wcard"><div class="wimg"><i class="fas fa-car-battery"></i><span class="sale">-15%</span></div><div class="wbody"><div class="wname">AGM Battery 70Ah</div><span class="wprice">$118</span><span class="wold">$139</span></div></a>
+<a href="#" class="wcard"><div class="wimg"><i class="fas fa-fan"></i></div><div class="wbody"><div class="wname">Cooling Fan Assy</div><span class="wprice">$76.50</span></div></a>
+<a href="#" class="wcard"><div class="wimg"><i class="fas fa-gauge-high"></i><span class="sale">-17%</span></div><div class="wbody"><div class="wname">Speed Sensor OEM</div><span class="wprice">$34</span><span class="wold">$41</span></div></a>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

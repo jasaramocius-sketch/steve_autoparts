@@ -92,27 +92,31 @@ class AppServiceProvider extends ServiceProvider
             $cartCount = count($cart);
             $cartTotal = array_sum(array_map(fn($item) => ($item['price'] ?? 0) * ($item['qty'] ?? ($item['quantity'] ?? 0)), $cart));
 
-            $mobileCategoryTree = \App\Models\Category::topLevel()
-                ->where('status', true)
-                ->with('childrenRecursive')
-                ->get();
+            $mobileCategoryTree = cache()->remember('front_mobile_category_tree_v1', 21600, function () {
+                $tree = \App\Models\Category::topLevel()
+                    ->where('status', true)
+                    ->with('childrenRecursive')
+                    ->get();
 
-            $mobileProductCounts = \App\Models\Product::where('status', true)
-                ->selectRaw('category_id, COUNT(*) as count')
-                ->groupBy('category_id')
-                ->pluck('count', 'category_id');
+                $productCounts = \App\Models\Product::where('status', true)
+                    ->selectRaw('category_id, COUNT(*) as count')
+                    ->groupBy('category_id')
+                    ->pluck('count', 'category_id');
 
-            $setDescendantCount = function ($category, $counts) use (&$setDescendantCount) {
-                $total = $counts->get($category->id, 0);
-                foreach ($category->children as $child) {
-                    $total += $setDescendantCount($child, $counts);
-                }
-                $category->descendant_count = $total;
-                return $total;
-            };
+                $setDescendantCount = function ($category, $counts) use (&$setDescendantCount) {
+                    $total = $counts->get($category->id, 0);
+                    foreach ($category->children as $child) {
+                        $total += $setDescendantCount($child, $counts);
+                    }
+                    $category->descendant_count = $total;
+                    return $total;
+                };
 
-            $mobileCategoryTree->each(function ($cat) use ($mobileProductCounts, $setDescendantCount) {
-                $setDescendantCount($cat, $mobileProductCounts);
+                $tree->each(function ($cat) use ($setDescendantCount, $productCounts) {
+                    $setDescendantCount($cat, $productCounts);
+                });
+
+                return $tree;
             });
 
             $view->with([
@@ -129,5 +133,8 @@ class AppServiceProvider extends ServiceProvider
         if (app()->runningInConsole()) {
             SiteChangeLogger::log('info', 'Application booted in console');
         }
+
+        \App\Models\Category::saved(fn () => cache()->forget('front_mobile_category_tree_v1'));
+        \App\Models\Category::deleted(fn () => cache()->forget('front_mobile_category_tree_v1'));
     }
 }

@@ -138,43 +138,6 @@
 @endif -->
 
 <div class="dashboard-row dashboard-additional-block-3">
-    <div class="dashboard-column dashboard-package-column">
-        <div class="acc-info-wrapper">
-            <h4>Purchased Package</h4>
-            <div class="list-wrapper">
-                <ul>
-                    @if(!empty($packages) && $packages->count())
-                        <li><span>Package:</span> {{ $packages->first()->name ?? 'Premium' }}</li>
-                        <li><span>Expires:</span> {{ $packages->first()->expires_at ?? 'N/A' }}</li>
-                    @else
-                        <li class="text-muted">Package Not Found</li>
-                        <li><a href="#" class="btn btn-sm btn-dark steve-btn px-4">Upgrade Package</a></li>
-                    @endif
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <div class="dashboard-column dashboard-shipping-column">
-        <div class="acc-info-wrapper">
-            <h4>Default Shipping Address</h4>
-            <div class="list-wrapper">
-                <ul>
-                    @if(isset($address) && $address && $address->name)
-                        <li><span>Name:</span> {{ $address->name }}</li>
-                        <li><span>Address:</span> {{ $address->address }}, {{ $address->city }}, {{ $address->state }} {{ $address->zip }}</li>
-                        <li><span>Phone:</span> {{ $address->phone ?? 'N/A' }}</li>
-                    @else
-                        <li class="text-muted">No default address found</li>
-                        <li><a href="{{ route('user.addresses') }}" class="btn btn-sm btn-dark steve-btn px-4">Add New Address</a></li>
-                    @endif
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="dashboard-row dashboard-additional-block-3">
     <div class="dashboard-column" style="width: 100%;">
         <div class="acc-info-wrapper">
             <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
@@ -192,7 +155,7 @@
                                         <div class="text-muted" style="font-size: 12px;">{{ $vehicle->engine }}</div>
                                     @endif
                                 </div>
-                                <a href="{{ route('shop', ['year' => $vehicle->year, 'make' => $vehicle->make, 'model' => $vehicle->model]) }}" class="btn btn-sm steve-btn text-white" style="font-size: 11px; padding: 4px 10px; border-radius: 4px;">
+                                <a href="{{ route('shop', ['year' => $vehicle->year, 'make' => $vehicle->make, 'model' => $vehicle->model]) }}" class="btn steve-btn btn-primary text-white" style="">
                                     <i class="las la-search"></i> Shop
                                 </a>
                             </div>

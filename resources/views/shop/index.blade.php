@@ -1,4 +1,10 @@
 @extends('layouts.app')
+@push('jquery-ui-css')
+    <link rel="preload" href="{{ asset('assets/front/css/jquery-ui.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+@endpush
+@push('jquery-ui-js')
+    <script src="{{ asset('assets/front/js/jquery-ui.js') }}" defer></script>
+@endpush
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'shop-page', 'pageClass' => 'shop-page'])
 @php $shopTitle = isset($pageTitle) ? $pageTitle : (isset($currentChildcategory) ? $currentChildcategory->name : (isset($currentSubcategory) ? $currentSubcategory->name : (isset($currentCategory) ? $currentCategory->name : 'Shop'))); $shopMeta = (isset($page) && $page->meta_title) ? $page->meta_title : null; $shopDesc = (isset($page) && $page->meta_description) ? $page->meta_description : null; @endphp
@@ -289,18 +295,21 @@
                 <div id="price-slider" class="mb-3" style="margin-top: 15px;"></div>
                 @php
                     $rate = config('currencies.' . session('currency', 'USD') . '.rate', 1);
-                    $sliderMax = $maxProductPrice * $rate;
+                    $sliderMin = (int) floor(($minProductPrice ?? 0) * $rate);
+                    $sliderMax = (int) floor($maxProductPrice * $rate);
+                    $hasAppliedPrice = request()->filled('min_price') || request()->filled('max_price');
                 @endphp
                 <div class="d-flex justify-content-between align-items-center mb-3">
                   <span class="text-muted" style="font-size: 14px;">Range:</span>
-                  <span id="price-range-label" style="font-weight: 600; color: #1f0300;">{{ currency_format(0) }} - {{ currency_format($maxProductPrice) }}</span>
+                  <span id="price-range-label" style="font-weight: 600; color: #1f0300;">{{ currency_format($sliderMin) }} - {{ currency_format($sliderMax) }}</span>
                 </div>
-                <input type="hidden" id="price-min" name="min_price" value="{{ request('min_price', 0) }}">
+                <input type="hidden" id="price-min" name="min_price" value="{{ request('min_price', $sliderMin) }}">
                 <input type="hidden" id="price-max" name="max_price" value="{{ request('max_price', $sliderMax) }}">
                 <input type="hidden" id="price-currency-symbol" value="{{ $currencySymbol }}">
+                <input type="hidden" id="price-slider-min" value="{{ $sliderMin }}">
                 <input type="hidden" id="price-slider-max" value="{{ $sliderMax }}">
                 <div class="price-range-actions apply-clear-action-btn d-flex gap-2">
-                  <button type="submit" class="btn btn-sm w-100 text-white steve-btn" id="apply-price-filter">Apply Filter</button>
+                  <button type="submit" class="btn btn-sm w-100 text-white steve-btn" id="apply-price-filter" {{ $hasAppliedPrice ? '' : 'disabled' }}>Apply Filter</button>
                   @if(request()->filled('min_price') || request()->filled('max_price'))
                     <button type="button" class="btn btn-sm w-100 text-white steve-btn" id="clear-price-filter">Clear</button>
                   @endif
@@ -350,7 +359,7 @@
                 </select>
                 @endif
                 <div class="vehicle-filter-form-actions apply-clear-action-btn d-flex flex-row gap-2">
-                <button type="submit" class="btn btn-sm w-100 text-white steve-btn">Apply Filter</button>
+                <button type="submit" class="btn btn-sm w-100 text-white steve-btn" id="apply-vehicle-filter" {{ (request()->filled('year') || request()->filled('make') || request()->filled('model')) ? '' : 'disabled' }}>Apply Filter</button>
                 @if(request()->filled('year') || request()->filled('make') || request()->filled('model'))
                   <a href="{{ url()->current() }}" class="btn btn-sm w-100 text-white steve-btn">Clear Filter</a>
                 @endif
@@ -446,6 +455,18 @@
               cascade();
             });
 
+            var vehicleApplyBtn = document.getElementById('apply-vehicle-filter');
+            function toggleVehicleApply() {
+              if (!vehicleApplyBtn) return;
+              var hasValue = (yearEl && yearEl.value) || (makeEl && makeEl.value) || (modelEl && modelEl.value);
+              vehicleApplyBtn.disabled = !hasValue;
+              vehicleApplyBtn.classList.toggle('disabled', !hasValue);
+            }
+            [yearEl, makeEl, modelEl].forEach(function(el) {
+              if (el) el.addEventListener('change', toggleVehicleApply);
+            });
+            toggleVehicleApply();
+
             cascade();
           })();
           </script>
@@ -501,7 +522,7 @@
         <!-- Sort & Nav Header -->
         <div class="product-nav-wrapper shadow-sm rounded border mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
           
-            <div class="d-flex align-items-center gap-3 flex-wrap filter-sort-brand-wrapper w-80">
+            <div class="d-flex align-items-center gap-3 flex-wrap filter-sort-brand-wrapper w-84 w-77">
               <div class="d-flex align-items-center gap-2 filter-sort-wrapper">
                 <h5 class="mb-0" style="font-size: 14px; font-weight: 500;">Sort by</h5>
                 <select class="form-select" style="/*width:180px;*/ border:1px solid #c7c0bf; border-radius:4px;" id="sort-select">
@@ -551,7 +572,7 @@
                 @endif
               @endauth
             </div>
-            <div class="btn-wrapper d-flex gap-2 grid-list-view-wrapper d-lg-flex w-auto justify-content-sm-end">
+            <div class="btn-wrapper d-flex gap-2 grid-list-view-wrapper d-lg-flex justify-content-sm-end w-10">
               @include('partials.grid-list-toggle')
             </div>
         </div>
@@ -749,20 +770,37 @@ $(document).ready(function() {
 
     // jQuery UI Price Slider
     var priceSymbol = $("#price-currency-symbol").val() || '$';
+    var sliderMinVal = parseInt($("#price-slider-min").val()) || 0;
     var sliderMaxVal = parseInt($("#price-slider-max").val()) || 1000;
-    var minPrice = parseInt("{{ request('min_price', 0) }}") || 0;
+    var minPriceRaw = "{{ request('min_price', '') }}";
+    var minPrice = minPriceRaw === '' ? sliderMinVal : (parseInt(minPriceRaw) || sliderMinVal);
     var maxPrice = parseInt("{{ request('max_price', 0) }}") || sliderMaxVal;
 
     $("#price-slider").slider({
-        range: true, min: 0, max: sliderMaxVal,
+        range: true, min: sliderMinVal, max: sliderMaxVal,
         values: [minPrice, maxPrice],
         slide: function(event, ui) {
             $("#price-min").val(ui.values[0]);
             $("#price-max").val(ui.values[1]);
             $("#price-range-label").text(priceSymbol + ui.values[0].toLocaleString() + " - " + priceSymbol + ui.values[1].toLocaleString());
+        },
+        change: function(event, ui) {
+            togglePriceApply();
         }
     });
     $("#price-range-label").text(priceSymbol + $("#price-slider").slider("values", 0).toLocaleString() + " - " + priceSymbol + $("#price-slider").slider("values", 1).toLocaleString());
+
+    function isDefaultPriceRange() {
+        var v = $("#price-slider").slider("values");
+        return v[0] === sliderMinVal && v[1] === sliderMaxVal;
+    }
+    function togglePriceApply() {
+        var btn = $("#apply-price-filter");
+        if (!btn.length) return;
+        var disabled = isDefaultPriceRange();
+        btn.prop('disabled', disabled).toggleClass('disabled', disabled);
+    }
+    togglePriceApply();
 
     // Strip default price params on submit for clean URL
     $("#price-filter-form").on('submit', function(e) {
@@ -770,7 +808,7 @@ $(document).ready(function() {
         var slider = $('#price-slider');
         var min = slider.slider('values', 0);
         var max = slider.slider('values', 1);
-        if (min === 0 && max === sliderMaxVal) {
+        if (min === sliderMinVal && max === sliderMaxVal) {
             $("#price-min, #price-max").prop('disabled', true);
         }
         window.location.href = buildCleanFilterUrl($(this));

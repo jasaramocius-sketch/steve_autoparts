@@ -47,7 +47,7 @@
     <div class="{{ $footerColClass }}">
         @if($footerType === 'contact')
             <a class="header-logo-wrapper" href="{{ route('home') }}">
-                {!! imgTag(storedPath(\App\Models\Setting::get('footer_logo') ?? '1730281141Whitepng.png', 'assets/images'), 'logo', 'logo mb-3') !!}
+                {!! imgTag(storedPath(\App\Models\Setting::get('footer_logo') ?? '1730281141Whitepng.png', 'assets/images'), 'logo', 'logo mb-3', 'width="60" height="63"') !!}
             </a>
             <a class="wow-replaced d-block mb-2 text-white" data-wow-delay=".1s" href="tel:{{ \App\Models\Setting::get('header_phone', '+1 (234) 567-8901') }}">
                 <i class="fas fa-phone-alt me-2"></i> {{ \App\Models\Setting::get('header_phone', '00 000 000 000') }}
@@ -71,9 +71,9 @@
                     </form>
                 </div>
                 <div class="social-links mt-3 d-flex">
-                    <a href="#"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#"><i class="fab fa-twitter"></i></a>
-                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
                 </div>
             </div>
         @else

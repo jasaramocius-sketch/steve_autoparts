@@ -263,7 +263,9 @@ if (!function_exists('imgTag')) {
             }
         }
 
-        $html = '<img src="' . asset($assetSrc) . '" alt="' . e($alt) . '"' . $classAttr . ' loading="lazy" decoding="async" onerror="' . $onerror . '"' . $extraAttr . '>';
+        $loadingAttr = str_contains($extra, 'loading=') ? '' : ' loading="lazy"';
+        $decodingAttr = str_contains($extra, 'decoding=') ? '' : ' decoding="async"';
+        $html = '<img src="' . asset($assetSrc) . '" alt="' . e($alt) . '"' . $classAttr . $loadingAttr . $decodingAttr . ' onerror="' . $onerror . '"' . $extraAttr . '>';
 
         static $webpFrontend = null;
         if ($webpFrontend === null) {
