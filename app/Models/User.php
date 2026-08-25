@@ -19,9 +19,8 @@ use App\Traits\Revisable;
     'name', 'email', 'password', 'role', 'user_type',
     'phone', 'address', 'city', 'country', 'state', 'postal_code',
     'status', 'banned', 'is_deleted',
-    'referred_by', 'provider', 'provider_id', 'refresh_token', 'access_token',
-    'verification_code', 'new_email_verificiation_code',
-    'device_token', 'avatar', 'avatar_original',
+    'referred_by', 'provider', 'provider_id',
+    'avatar', 'avatar_original',
     'balance', 'referral_code', 'customer_package_id', 'remaining_uploads',
 ])]
 #[Hidden(['password', 'remember_token'])]

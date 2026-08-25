@@ -36,7 +36,7 @@
                     @endif
                     <input type="hidden" name="image_from_manager" id="image_from_manager_brand_image">
                     <div id="impPreview_brand_image" class="d-none mt-2"></div>
-                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="impOpen_brand_image()">
+                    <button type="button" class="btn btn-sm btn-outline-primary mt-10" onclick="impOpen_brand_image()">
                         <i class="fas fa-images me-1"></i> Browse Image Manager
                     </button>
                 </div>
@@ -56,9 +56,9 @@
                 </div>
             </div>
 
-            <div class="mt-4">
+            <div class="mt-4 d-flex gap-1">
                 <button class="btn btn-primary steve-btn"><i class="fas fa-save"></i> Update</button>
-                <a href="{{ route('admin.brands.index') }}" class="btn btn-secondary">Cancel</a>
+                <a href="{{ route('admin.brands.index') }}" class="btn btn-secondary align-items-center">Cancel</a>
             </div>
         </form>
     </div>

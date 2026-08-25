@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 class ShopController extends Controller
 {
-    private function filterProducts(Request $request, $query)
+    private function filterProducts(Request $request, $query, bool $applyPriceFilter = true)
     {
         $search = $request->get('search', '');
         $sort = $request->get('sort', 'default');
@@ -33,12 +33,16 @@ class ShopController extends Controller
         $currency = session('currency', 'USD');
         $rate = config('currencies.' . $currency . '.rate', 1);
 
-        if ($minPrice !== '') {
-            $query->where('price', '>=', (float)$minPrice / $rate);
-        }
+        if ($applyPriceFilter) {
+            if ($minPrice !== '') {
+                $query->where('price', '>=', (float)$minPrice / $rate);
+            }
 
-        if ($maxPrice !== '') {
-            $query->where('price', '<=', (float)$maxPrice / $rate);
+            if ($maxPrice !== '') {
+                // Add 0.999999 to cover decimal prices up to the selected max integer (e.g. max_price = 4 covers 4.42)
+                $effectiveMax = (float)$maxPrice + 0.999999;
+                $query->where('price', '<=', $effectiveMax / $rate);
+            }
         }
 
         if ($brand !== '') {
@@ -125,7 +129,7 @@ class ShopController extends Controller
         return compact('selectedVehicle', 'vehicleMatchCount');
     }
 
-    private function getSharedData()
+    private function getSharedData($productsQuery = null)
     {
         $categoryTree = Category::topLevel()
             ->where('status', true)
@@ -143,6 +147,8 @@ class ShopController extends Controller
 
         $currency = session('currency', 'USD');
 
+        $priceScopedQuery = $productsQuery ? (clone $productsQuery) : Product::where('status', true);
+
         return [
             'categoryTree' => $categoryTree,
             'brands' => Brand::where('status', true)->whereHas('products')->orderBy('name')->get(['id', 'name', 'slug']),
@@ -156,8 +162,8 @@ class ShopController extends Controller
                 ->select('year', 'make', 'model')
                 ->distinct()
                 ->get(),
-            'maxProductPrice' => Product::where('status', true)->max('price') ?? 1000,
-            'minProductPrice' => Product::where('status', true)->min('price') ?? 0,
+            'maxProductPrice' => (clone $priceScopedQuery)->max('price') ?? 1000,
+            'minProductPrice' => (clone $priceScopedQuery)->min('price') ?? 0,
             'currencySymbol' => config('currencies.' . $currency . '.symbol', '$'),
         ];
     }
@@ -178,13 +184,16 @@ class ShopController extends Controller
         $productsQuery = Product::where('status', true);
         $vehicleData = $this->applyVehicleFilter($request, $productsQuery, true);
 
-        $this->filterProducts($request, $productsQuery);
+        $baseQuery = clone $productsQuery;
+        $this->filterProducts($request, $baseQuery, false);
+
+        $this->filterProducts($request, $productsQuery, true);
         $products = $productsQuery->paginate(24)->onEachSide(1)->withQueryString();
 
         return view('shop.index', array_merge(
             $vehicleData,
             compact('products'),
-            $this->getSharedData(),
+            $this->getSharedData($baseQuery),
             ['page' => \App\Models\Page::where('slug', 'shop')->where('status', true)->first()]
         ));
     }
@@ -208,13 +217,17 @@ class ShopController extends Controller
     public function customerProducts(Request $request)
     {
         $productsQuery = Product::where('status', true);
-        $this->filterProducts($request, $productsQuery);
+
+        $baseQuery = clone $productsQuery;
+        $this->filterProducts($request, $baseQuery, false);
+
+        $this->filterProducts($request, $productsQuery, true);
         $products = $productsQuery->paginate(24)->onEachSide(1)->withQueryString();
         $pageTitle = 'Classified Products';
 
         return view('shop.index', array_merge(
             compact('products', 'pageTitle'),
-            $this->getSharedData()
+            $this->getSharedData($baseQuery)
         ));
     }
 
@@ -251,14 +264,17 @@ class ShopController extends Controller
         $productsQuery = Product::whereIn('category_id', $categoryIds)->where('status', true);
         $vehicleData = $this->applyVehicleFilter($request, $productsQuery);
 
-        $this->filterProducts($request, $productsQuery);
+        $baseQuery = clone $productsQuery;
+        $this->filterProducts($request, $baseQuery, false);
+
+        $this->filterProducts($request, $productsQuery, true);
         $products = $productsQuery->paginate(24)->onEachSide(1)->withQueryString();
 
         return view('shop.index', array_merge(
             compact('products', 'currentCategory'),
             $vehicleData,
             array_filter(compact('currentSubcategory', 'currentChildcategory')),
-            $this->getSharedData()
+            $this->getSharedData($baseQuery)
         ));
     }
 
@@ -282,13 +298,16 @@ class ShopController extends Controller
         $productsQuery = Product::whereIn('category_id', $categoryIds)->where('status', true);
         $vehicleData = $this->applyVehicleFilter($request, $productsQuery);
 
-        $this->filterProducts($request, $productsQuery);
+        $baseQuery = clone $productsQuery;
+        $this->filterProducts($request, $baseQuery, false);
+
+        $this->filterProducts($request, $productsQuery, true);
         $products = $productsQuery->paginate(24)->onEachSide(1)->withQueryString();
 
         return view('shop.index', array_merge(
             compact('products', 'currentCategory', 'currentSubcategory', 'currentChildcategory'),
             $vehicleData,
-            $this->getSharedData()
+            $this->getSharedData($baseQuery)
         ));
     }
 

@@ -342,8 +342,8 @@ $(document).ready((function() {
     ]
   })
 })), document.addEventListener("DOMContentLoaded", (function() {
-  [...document.querySelectorAll('[data-bs-toggle="tooltip"]')].map((e => new bootstrap.Tooltip(e))), document.querySelectorAll('.action-btn[title]:not([data-bs-toggle="tooltip"])').forEach((function(e) {
-    new bootstrap.Tooltip(e)
+  [...document.querySelectorAll('[data-bs-toggle="tooltip"]')].map((e => new bootstrap.Tooltip(e, { trigger: "hover" }))), document.querySelectorAll('.action-btn[title]:not([data-bs-toggle="tooltip"])').forEach((function(e) {
+    new bootstrap.Tooltip(e, { trigger: "hover" })
   })), document.addEventListener("contextmenu", (function(e) {
     var t = e.target.closest('[data-bs-toggle="tooltip"], .action-btn[title]');
     if (t) {
@@ -354,7 +354,11 @@ $(document).ready((function() {
     "Escape" === e.key && document.querySelectorAll(".tooltip.show").forEach((function(e) {
       e.classList.remove("show"), e.style.display = ""
     }))
-  }))
+  })), document.addEventListener("scroll", (function() {
+    document.querySelectorAll(".tooltip.show").forEach((function(e) {
+      e.classList.remove("show"), e.style.display = ""
+    }))
+  }), !0)
 })), $(document).ready((function() {
   var e = null,
     t = $("#searchInput"),

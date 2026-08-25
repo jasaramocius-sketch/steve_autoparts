@@ -52,7 +52,7 @@
 
                 @if($product->galleryImages->count())
                     <hr>
-                    <h6 class="text-muted mb-2">Gallery Images</h6>
+                    <h6 class="mb-2">Gallery Images</h6>
                     <div class="d-flex flex-wrap gap-2">
                         @foreach($product->galleryImages as $img)
                             <img src="{{ $img->thumb_url }}" alt="Gallery" class="rounded" style="width:80px;height:80px;object-fit:cover;">

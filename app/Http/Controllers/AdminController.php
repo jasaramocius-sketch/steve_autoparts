@@ -217,7 +217,13 @@ class AdminController extends Controller
     {
         $settings = Setting::getAllAsArray();
         $categories = \App\Models\Category::with('children')->orderBy('name')->get();
-        return view('admin.settings.header', compact('settings', 'categories'));
+        $pages = \App\Models\Page::where('status', true)
+            ->select('id', 'title', 'slug')
+            ->orderBy('title')->get();
+        $posts = \App\Models\Blog::where('status', 'published')
+            ->select('id', 'title', 'slug')
+            ->orderBy('title')->get();
+        return view('admin.settings.header', compact('settings', 'categories', 'pages', 'posts'));
     }
 
     public function logs(Request $request)
@@ -386,12 +392,21 @@ class AdminController extends Controller
                 if (!is_array($link)) {
                     continue;
                 }
-                $label = trim((string) ($link['label'] ?? ''));
-                $url = trim((string) ($link['url'] ?? ''));
-                if ($label === '' && $url === '') {
-                    continue;
+                if ($type === 'newsletter') {
+                    $platform = trim((string) ($link['platform'] ?? ''));
+                    $url = trim((string) ($link['url'] ?? ''));
+                    if ($url === '') {
+                        continue;
+                    }
+                    $links[] = ['platform' => $platform, 'url' => $url];
+                } else {
+                    $label = trim((string) ($link['label'] ?? ''));
+                    $url = trim((string) ($link['url'] ?? ''));
+                    if ($label === '' && $url === '') {
+                        continue;
+                    }
+                    $links[] = ['label' => $label, 'url' => $url];
                 }
-                $links[] = ['label' => $label, 'url' => $url];
             }
 
             $columns[] = [

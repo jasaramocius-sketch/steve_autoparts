@@ -146,7 +146,7 @@ Route::delete('/compare/{id}', [CompareController::class, 'remove'])->name('comp
 */
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1')->name('login.submit');
 Route::match(['get', 'post'], '/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/register', [AuthController::class, 'registerForm'])->name('register');
@@ -169,7 +169,7 @@ Route::post('/register', [AuthController::class, 'register'])->name('register.po
 Route::prefix('admin')->group(function () {
 
     Route::get('/login', [AdminAuthController::class, 'showLogin'])->name('admin.login');
-    Route::post('/login', [AdminAuthController::class, 'login'])->name('admin.login.submit');
+    Route::post('/login', [AdminAuthController::class, 'login'])->middleware('throttle:5,1')->name('admin.login.submit');
     Route::match(['get', 'post'], '/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
     
 
@@ -625,7 +625,7 @@ Route::get('/admin/clear-cache', function () {
     Artisan::call('view:clear');
 
     return back()->with('success', 'Cache cleared successfully!');
-})->middleware(['auth', 'nocache'])->name('admin.clear.cache');
+})->middleware(['auth', 'nocache', 'role:master_admin,admin,staff'])->name('admin.clear.cache');
 
 Route::middleware(['auth', 'nocache'])->group(function () {
 

@@ -45,7 +45,7 @@
           <div class="flex-grow-1">
             <input type="text" class="form-control form-control-sm" id="impSearch_{{ $pickerId }}" placeholder="Search images..." autocomplete="off">
           </div>
-          <label class="btn btn-sm btn-outline-primary mb-0" style="cursor:pointer;">
+          <label class="btn btn-sm btn-outline-primary mb-0" style="cursor:pointer;align-content: center;">
             <i class="fas fa-upload me-1"></i> Upload New
             <input type="file" id="impFileInput_{{ $pickerId }}" class="d-none" multiple accept="image/*">
           </label>
@@ -91,8 +91,8 @@
         @endif
       </div>
       <div class="modal-footer py-2">
-        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary btn-sm" id="impSelectBtn_{{ $pickerId }}" disabled onclick="impConfirm_{{ $pickerId }}()">
+        <button type="button" class="btn btn-secondary steve-btn" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary steve-btn" id="impSelectBtn_{{ $pickerId }}" disabled onclick="impConfirm_{{ $pickerId }}()">
           <i class="fas fa-check me-1"></i> {{ $multiple ? 'Add Selected' : 'Select Image' }}
         </button>
       </div>

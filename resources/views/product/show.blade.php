@@ -861,7 +861,7 @@
               <button class="nav-link template-btn steve-btn" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews-tab-pane" type="button" role="tab" aria-controls="reviews-tab-pane" aria-selected="false">Reviews ({{ collect($product['reviews_data'] ?? [])->where('deleted', false)->count() }})</button>
             </li>
           </ul>
-          <div class="tab-content" id="myTabContent">
+          <div class="tab-content border px-4 " id="myTabContent">
             <div class="tab-pane fade show active py-4" id="description-tab-pane" role="tabpanel" aria-labelledby="description-tab" tabindex="0">
               <div style="line-height: 1.8; color: #4c3533;">{!! $product['description'] ?? 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.' !!}</div>
               @if(!empty($product['features']))
@@ -879,7 +879,7 @@
                 </div>
             </div>
             <div class="tab-pane fade py-4" id="reviews-tab-pane" role="tabpanel" aria-labelledby="reviews-tab" tabindex="0">
-              <div class="review-tab-content-wrapper bg-white p-4 rounded border">
+              <div class="review-tab-content-wrapper bg-white">
 
                 <!-- Review Form (always visible, server validates eligibility) -->
                 <div class="write-review-form mb-4 pb-4 border-bottom" id="writeReviewForm">

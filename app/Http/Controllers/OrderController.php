@@ -33,29 +33,19 @@ class OrderController extends Controller
     }
     public function show($idOrNumber)
     {
-        // 1. Check if the order exists at a raw database level (ignoring models/scopes)
         $isNumeric = is_numeric($idOrNumber);
-        $rawQuery = $isNumeric
-            ? \DB::table('orders')->where('id', $idOrNumber)->first()
-            : \DB::table('orders')->where('order_number', $idOrNumber)->first();
-
-        if (!$rawQuery) {
-            dd("Database Error: There is absolutely NO row with id/order_number = {$idOrNumber} in your orders table.");
-        }
-
-        // 2. If it exists, let's check if it's soft-deleted or hidden by a scope
         try {
             $orderQuery = Order::with(['items.product', 'user']);
             $order = $isNumeric
                 ? $orderQuery->findOrFail($idOrNumber)
                 : $orderQuery->where('order_number', $idOrNumber)->firstOrFail();
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            dd([
-                "Message" => "Eloquent cannot find this order. It is likely soft-deleted or restricted by a Model Scope.",
-                "Database Row Data Found" => $rawQuery
-            ]);
-        } catch (\Exception $e) {
-            dd("Other Error: " . $e->getMessage());
+            abort(404);
+        }
+
+        $user = auth()->user();
+        if ($order->user_id !== $user->id && ! in_array($user->role, ['master_admin', 'admin', 'staff'])) {
+            abort(403);
         }
 
         // 3. If it passes everything, let's see if it successfully loads the view
@@ -106,6 +96,11 @@ class OrderController extends Controller
     {
         // Fetch the order along with its item lines
         $order = Order::with('items.product')->findOrFail($id);
+
+        $user = auth()->user();
+        if ($order->user_id !== $user->id && ! in_array($user->role, ['master_admin', 'admin', 'staff'])) {
+            abort(403);
+        }
 
         // 1. Load the blade view file and pass the order data to it
         $pdf = Pdf::loadView('user.orders.invoice', compact('order'));

@@ -296,7 +296,7 @@
                 @php
                     $rate = config('currencies.' . session('currency', 'USD') . '.rate', 1);
                     $sliderMin = (int) floor(($minProductPrice ?? 0) * $rate);
-                    $sliderMax = (int) floor($maxProductPrice * $rate);
+                    $sliderMax = (int) ceil(($maxProductPrice ?? 1000) * $rate);
                     $hasAppliedPrice = request()->filled('min_price') || request()->filled('max_price');
                 @endphp
                 <div class="d-flex justify-content-between align-items-center mb-3">

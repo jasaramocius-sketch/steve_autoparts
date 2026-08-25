@@ -270,7 +270,7 @@
 - `resources/views/admin/products/edit.blade.php` — added seller dropdown support in the edit product form
 - `resources/views/product/show.blade.php` — changed gallery display to use `storedImageUrl($gi->path)` so stored gallery paths render correctly
 
-## 25. Bulk Product Import System
+## 219. Bulk Product Import System
 
 **Files changed/created:**
 - `app/Http/Controllers/ProductController.php` — added `importForm()`, `import()`, `downloadSampleCsv()` methods
@@ -974,7 +974,7 @@ if ($request->filled('image_from_manager')) {
 **Files changed:**
 - `app/Providers/AppServiceProvider.php` — registered helper via `require_once`
 
-## 75. Notification Triggers — Controller Integration
+## 220. Notification Triggers — Controller Integration
 
 **Problem:** Helper existed but no controllers called it.
 
@@ -1983,112 +1983,6 @@ echo 1825 > .opencode/skills/.last_sync
 
 ---
 
-## 48. Grid/List View Tooltips — Bootstrap Tooltip with Touch Disable
-**Issue:** Bootstrap tooltip on grid/list buttons stayed visible on click; native `title` had different design.
-
-**Fix:** Restored `data-bs-toggle="tooltip" data-bs-trigger="hover"` (Bootstrap styling, hover-only trigger) + `bootstrap.Tooltip.getInstance(this)?.hide()` in click handlers. On touch devices (`ontouchstart`), tooltips are completely disabled via `tip.disable()`.
-
-**Files:** `resources/views/shop.blade.php`, `resources/views/categories.blade.php`
-
----
-
-## 49. Grid/List Toggle — Extracted to Partial
-Created `resources/views/partials/grid-list-toggle.blade.php` (buttons only, no wrapper). Used in shop sidebar, shop header, and categories page.
-
----
-
-## 50. Force Grid View on Small Screens (≤580px)
-Both shop and categories pages force grid layout when `window.innerWidth <= 580`, regardless of localStorage preference (on load and resize).
-
----
-
-## 51. Form-Select-Wrapper — Single Outside Click to Close
-**Issue:** Native `<select>` dropdown closes on outside click/blur, but `focused` class stayed until a second outside click (blur doesn't always fire).
-
-**Fix:** Added document `click` handler — if click target is outside `.form-select-wrapper`, remove `.focused` from all wrappers immediately.
-
-**Files:** `resources/views/layouts/app.blade.php`
-
----
-
-## 52. Nice-Select — Reverted Unnecessary Handlers
-Scroll and document-level Esc handlers added to `nice-select.js` were removed (click-only behavior preferred).
-
----
-
-## 53. Tooltips — Hidden on Touch/No-Hover Devices Only (CSS Approach)
-**Decision:** Tooltips stay on desktop/laptop (hover-capable devices); hidden on mobile/tablet where there is no hover. Implemented purely via CSS to cover both Bootstrap `.tooltip` and jQuery-UI `.ui-tooltip`.
-
-**Files changed:**
-- `public/assets/front/css/style.css:5730-5736` — added `@media (hover: none) { .tooltip, .ui-tooltip { display: none !important } }`
-- `resources/views/layouts/app.blade.php:354-369` — restored `title` attributes on mobile header auth buttons (Login/Register)
-- Shop + categories grid/list buttons keep `data-bs-trigger="hover"` and `tip.disable()` on `(hover: none)` devices (see #48)
-
----
-
-## 54. Wishlist Pagination
-**Files changed:**
-- `app/Http/Controllers/DashboardController.php:210` — `wishlist()` now uses `paginate(9)->withQueryString()` instead of `get()`
-- `resources/views/user/wishlist.blade.php` — added `.pagination-wrapper` block with `$wishlist->links()` behind `@if(method_exists($wishlist,'links') && $wishlist->hasPages())`
-
----
-
-## 55. Footer Settings — Admin Manager (Like Header Settings)
-Storefront footer columns are now configurable from Admin. Columns stored as JSON in the `footer_columns` setting; empty/invalid setting falls back to the original static footer design (verified byte-for-byte).
-
-**Files changed/created:**
-- `routes/web.php:373-376` — `admin.settings.footer` (GET) + `admin.settings.footer.update` (POST)
-- `app/Http/Controllers/AdminController.php:340` `footerSettings()` + `:346` `updateFooterSettings()` — validates/sanitizes column types (`links`, `newsletter`, `contact`), spans (`2,3,4,6,12`), stores JSON via `Setting::set('footer_columns', ...)`
-- `resources/views/admin/settings/footer.blade.php` — **NEW** column editor: add/remove/reorder columns (Sortable), per-column type/heading/span/links
-- `resources/views/admin/partials/sidebar.blade.php` — "Footer Settings" link under Settings
-- `resources/views/partials/footer-columns.blade.php` — **NEW** footer renderer with default fallback
-- `resources/views/layouts/app.blade.php` — footer row now `@include('partials.footer-columns')`
-- `public/assets/front/css/style.css` — `.footer-link-col` 50% width on mobile rule
-
----
-
-## 56. Categories List-View — Subcategory Names Fix
-**Root cause:** JS toggled class `categories-list-view` on `#categoryContainer` but CSS rules targeted `#categoryContainer.list-view`, so subcategory names never showed in list view.
-
-**Files changed:**
-- `public/assets/front/css/style.css:16244-16274` — replaced `#categoryContainer.list-view` → `#categoryContainer.categories-list-view` (and `:not(.list-view)` → `:not(.categories-list-view)`)
-
----
-
-## 57. Categories Page — Product Preview in List View (3 Products with Image + Price)
-Category cards in list view now show up to 3 product thumbnails with name + price (strikethrough old price) on the right side.
-
-**Files changed:**
-- `app/Http/Controllers/CategoryController.php:104-108` — `preview_products` = latest 3 active products across all descendant category IDs per category
-- `resources/views/categories.blade.php` — card restructured into 3 divs: `.category-image`, `.category-content`, `.category-products`; preview block uses `imgTag()` + `currency_format()`, links to `route('product', $slug)`
-- `public/assets/front/css/style.css` — `.category-products` flex column (270px, left border) shown only under `#categoryContainer.categories-list-view`, hidden in grid; product item/image/name/price styles
-
-Verified: 14 categories × 3 products = 42 preview items render on `/categories` (HTTP 200); card = 3 top-level divs.
-
----
-
-## 58. Shop Page — Active Filter Chips with Clear Icons
-When a sort or brand filter is active, a chip row ("Active filters:") appears below the toolbar showing each active filter with an ✕ clear icon.
-
-**Files changed:**
-- `resources/views/shop.blade.php` — added `@php` label maps + chips markup after `.product-nav-wrapper`; chip ✕ uses `request()->fullUrlWithQuery(['sort' => null])` / `['brand' => null]` so clearing one filter preserves all other params; `.filter-chip` styles added to the page `<style>` block
-
-**Behavior (verified):**
-- `?sort=price_asc&brand=bosch&year=2020` → chips "Sort by: Price: Low to High ✕" + "Brand: Bosch ✕"
-- Sort ✕ → `/shop?brand=bosch&year=2020`; Brand ✕ → `/shop?sort=price_asc&year=2020`
-- No chips on plain `/shop`; `sort=default` never shows a chip
-
----
-
-## 59. Categories Page — Force Grid View Below 767px
-**Update to #50:** Categories page now forces grid view when `window.innerWidth <= 767` (was 580) — on load and resize — even if list view is saved in localStorage. View toggle buttons are hidden below 767px too.
-
-**Files changed:**
-- `resources/views/categories.blade.php:196` — `forceGridOnMobile()` breakpoint 580 → 767
-- `resources/views/categories.blade.php` — `.category-toolbar .view-btn` hidden under `@media (max-width: 767px)`
-
----
-
 ## 139. UI/UX QA Report — Full Fix Pass (source: `UIUX_QA_REPORT.html`)
 
 All Section 2–5 defects from `UIUX_QA_REPORT.html` were applied (04 Aug 2026) without introducing design/function regressions. Verified via `php artisan view:cache` + rendered-page checks (home, shop, product, cart, about-us, login, admin). Remaining items are Low-priority cleanups only: #3 dead badge CSS, #14 wishlist pill styling, #17 select chevron touch, #24 dead `.gs-cart-section` CSS.
@@ -2932,3 +2826,260 @@ Likely stale browser cache — hard refresh advised. Test scripts kept at `/tmp/
 - Based on real user dashboard data: stats from `DashboardController::userDashboard()` (total_spent/pending/completed/wishlist), sidebar sections (orders, reviews, tracking, wishlist, followed sellers, vehicles, addresses, notifications)
 
 **Verified (puppeteer):** both load 200; no JS errors (only favicon.ico 404); no horizontal overflow at 1440px & 390px; ud1 charts render (860x280 line, 190x190 doughnut); screenshots at `/tmp/opencode/ud1-{desktop,mobile}.png`, `/tmp/opencode/ud2-{desktop,mobile}.png`
+
+---
+
+## 194. Home Categories Slider — Square Images + 5th Slide Cut Fix (24 Aug 2026)
+
+**Files changed:**
+- `public/assets/front/css/style.css`:
+  - `.gs-cate-section .category-image`: fixed 300×300 → responsive `width:100%; max-width:300px; aspect-ratio:1/1`
+  - Added `.gs-cate-section .category-image img { width/height:100%; object-fit:cover }` (img had NO sizing before — root cause of distorted/unset images)
+  - **Removed `.gs-cate-section .swiper-wrapper { gap:10px }`** — duplicated Swiper JS `spaceBetween:20`, making 5-slide total width exceed container → 5th category cut off
+
+**Verified (puppeteer):** 1440px & 1280px → slidesPerView=5, translate=0, **5/5 slides fully visible**; boxes ratio 1.00 with object-fit cover; mobile 300×300 square. Categories page styles untouched.
+
+**Incident:** accidentally overwrote `all.min.css` with csso(style.css) output — restored exact HEAD version (99KB FA+Bootstrap bundle). Note: site loads `style.css` directly (`layouts/app.blade.php:23`) + custom.css + all.min.css bundle.
+
+## 195. Wishlist tooltip stuck after click (fixed)
+
+**Issue:** `.single-product` wishlist icon ka tooltip click ke baad cursor hatane/scroll par bhi chipka rehta tha. Root cause: Bootstrap tooltip default trigger `hover focus` — click par button ko FOCUS mil jata tha (wishlist-btn me `data-bs-trigger` missing tha, jabki compare/quick-view/remove me tha).
+
+**Fix:**
+- `public/assets/front/js/script.js` — dono `new bootstrap.Tooltip(...)` init me `{trigger:"hover"}` + scroll par stuck tooltips hide karne wala safety net (admin layout pattern jaisa)
+- `resources/views/partials/product-card.blade.php:33` — explicit `data-bs-trigger="hover"` add
+
+**Verified (puppeteer):** hover→tooltip shows (1); click+cursor away→0; scroll→0. Header icons bhi covered (global init fix). Admin layout me ye pattern pehle se tha.
+
+---
+
+## 196. Deal of Day right image cut (user fixed manually)
+
+User ne `object-fit-cover` class khud hata di (`home/index.blade.php:273`). Note: image ab bhi left:52% + 960px width se <1920 viewports par right-cut + vertically squashed hai, par user ne bola "sab sahi he" — no further action. "!! Special Offer !!" heading = deal_of_day section (NOT gs-offer-section). BG image: user said no change. HomePageSection json-cast bug researched & explained to user, fix skipped per user ("no changes").
+
+## 197. Security audit + critical fixes
+
+**Audit findings:** No backdoors/SQLi/eval patterns found. Uploads validated, CSRF intact, .env not in git.
+
+**Fixed (CRITICAL):**
+- Deleted public/info.php + public/phpinfo.php (phpinfo exposure)
+- .env: APP_ENV=production, APP_DEBUG=false (+ config:clear)
+- IDOR: OrderController::show() + invoice() me user_id ownership check (admins/staff bypass)
+- Removed leftover dd() debug from OrderController::show() (ab proper 404)
+
+**Fixed (MEDIUM):**
+- Login routes par throttle:5,1 (customer + admin dono)
+- /admin/clear-cache par role:master_admin,admin middleware
+- Admin navbar Clear Cache button staff ke liye hidden
+
+**Verified:** php -l sab clean; home 200; info.php 404; artisan about = production/debug OFF.
+**Pending (user approval pending tha):** User $fillable hardening, SSRF URL validation (image_url), SVG upload policy, public/ dev-junk cleanup, root-level stoparts.sql/scripts hygiene.
+
+## 198. Security hardening (optional items done)
+
+- SSRF guard in saveImageFromUrlWithWebp (app/Helpers/image.php): sirf public http(s) URLs, localhost/.local/.internal + private/reserved IP ranges blocked, 15s timeout, 10MB size cap. Verified: localhost/private-IP/file:// sab null return karte hain
+- SVG removed from Image Manager upload validation (ImageController:53,158) — existing uploads me 0 svg files the, zero impact. (SVG script-embedding XSS risk tha)
+- User $fillable trimmed: access_token, refresh_token, device_token, verification_code, new_email_verificiation_code removed (codebase me inka koi use nahi). role/status/balance rakhe kyunki admin flows intentionally set karte hain
+- Dev junk moved public/ -> _dev-archive/ (dashboard suggestions, QA reports, buttons.html, desktop/mobile HTML dumps, PageSpeedTest) — ab web se accessible nahi
+- stoparts.sql -> backup/ moved (root clean)
+- Verified: php -l clean, home 200, user model fetch OK
+
+## 199. Clear Cache staff ke liye wapas enabled
+
+User feedback: staff bhi page/blog/product create karta hai, har baar admin se cache clear karwana practical nahi. 
+- Route middleware: role:master_admin,admin -> role:master_admin,admin,staff (customers ab bhi blocked)
+- Navbar @if hiding removed — button sab admin-panel roles ko dikhta hai
+- Cache clear mechanism verified working (database cache store, view/route caches, www-data writable). Staff ke liye pehle 403 aata tha isliye "kaam nahi karta" lag raha tha.
+
+## 200. Summary tables me pehli row ke upar hairline
+
+User request: order-confirmed jaise pages ki summary tables me first row ke upar bhi line chahiye.
+- `checkout/order-confirmed.blade.php`: dono tables ko `summary-table` class + first-row tds se border-top-0 hataya (baaki rows waise hi)
+- `checkout/payment.blade.php`: thead ths se border-top-0 hataya + table ko summary-table class
+- style.css: `table.summary-table tbody tr:first-child > td, table.summary-table thead tr:first-child > th { border-top: 1px solid #e6e8ec }`
+- Verified: firstRowTop=1px rgb(230,232,236) (#e6e8ec), dusri rows 0 (unchanged)
+
+## 201. Subtotal row top border + all.min.css restore (FA icons fix)
+
+**Subtotal border:** Order Details section ke neeche wali summary table (Subtotal/Shipping/Tax/Coupon/Total) pehle cover nahi hui thi. `order-confirmed.blade.php`: us table ko `summary-table` class + Subtotal row (th+td) se border-top-0 hataya. Ab Subtotal ke upar 1px #e6e8ec line (Shipping/Tax/Coupon rows unchanged).
+
+**all.min.css CRITICAL FIX:** File me SAARE Font Awesome content values corrupt the (`content:"0"`, `"1"`... — `\f` escape sequences kabhi galat tarike se process ho gaye the; git HEAD me bhi corrupted tha, commit 318c1b68 "21-aug End of day" se). Site-wide FA icons broken the.
+- Restore: cdnjs se official **Font Awesome Free 6.4.0 all.min.css** download karke replace kiya (102025 bytes, 1856 content values, 1424 \f glyphs)
+- Verified live: `.fas fa-chevron-down` ka ::before content = proper glyph + fontFamily "Font Awesome 6 Free"
+
+NOTE: agar future me is file ko kabhi shell/echo se write karna ho to backslash escapes ka dhyan rakhna (printf '%s' ya base64 route use karo).
+
+## 202. Font Awesome Icons Blank — Webfont Path Fix (24 Aug 2026)
+
+**Problem:** #201 ke all.min.css restore ke baad bhi FA icons (`.fa-chevron-down` → `content:"\f078"`, etc.) site-wide blank the.
+
+**Root cause:** CSS content values sahi the, lekin cdnjs wali official FA 6.4.0 file fonts `../webfonts/` relative path se maangti hai (`public/assets/front/webfonts/` — folder exist hi nahi karta). Project ke saare font files `public/assets/front/fonts/` me hain (HEAD wali purani CSS wahin point karti thi). Font files 404 → glyphs render nahi hote.
+
+**Fix:** Python byte-safe replace — `../webfonts/` → `../fonts/` (20 URL refs). Shell sed isliye nahi use kiya kyunki file me `\f` escapes hain (#201 note).
+
+**Verified:** fa-solid-900 / fa-brands-400 / fa-regular-400 `.woff2` sab HTTP 200 full size; served CSS me 8 unique `url()` ab sab `../fonts/` par; chevron rule intact — `fa-chevron-down:before{content:"\f078"}`.
+
+**Files changed:** `public/assets/front/css/all.min.css` (URL paths only)
+
+## 203. Brands — Products Top-Up to 13 Each (24 Aug 2026)
+
+**Problem:** 54 brands had fewer than 13 products (28 brands with just 1 product).
+
+**Data added:** **592 new auto-parts products** (total 216 → 808). Every brand now has exactly 13 products; each product matched to its brand's specialty (Mobil 1 → oils, CSF/Mishimoto/Behr → cooling, Magnaflow/Bosal/Walker → exhaust, Garrett/BorgWarner → turbo, KYB/Sachs/Monroe → shocks, Philips/Osram/Hella → lighting, SKF/Timken/GKN → bearings/axles, Optima → batteries, etc.).
+
+**Category assignment:** products assigned by type to available leaf categories — top: Air and Fuel Delivery (74), Cooling (60), Engine Parts (52), Electrical (39), Exhaust (37), Shocks & Struts (35). Name→id matched case-insensitively from DB.
+
+**Product fields:** realistic USD pricing (+ old_price ~60%), stock 15–90, badge on ~25%, featured ~15%, year/make/model cycling the standard 10 vehicle combos, unique slugs (0 duplicates), status=1.
+
+**Images:** reused existing product images of the SAME category per product (category→image pool) so listings look correct — replaceable anytime via Image Manager.
+
+**Verified:** shop / shop?brand=... / brands all HTTP 200; `Brands below 13: 0`.
+
+## 204. Admin Products List — `$p` Typo 500 Fix (24 Aug 2026)
+
+**Problem:** `/admin/products` → 500 `Undefined variable $p` — product name link used `$p->slug` instead of `$product->slug`.
+
+**Fix:** `resources/views/admin/products/index.blade.php:92` — `$p->slug` → `$product->slug` (only occurrence in file).
+
+**Verified:** blade compiles clean; page loads (302 = auth redirect for guest curl).
+
+## 205. New Products — Unique Images (Repeat Fix) (24 Aug 2026)
+
+**Problem:** Task #203 wale 592 naye products same-category pool se image reuse kar rahe the → listings me images repeat ho rahi thi.
+
+**Fix:** Storage inventory scan — `uploads/2026/*` me 1,685 base originals the, jinme se **1,267 kisi product par use nahi ho rahi**. Keyword buckets (`brake`, `radiator`, `steering-wheel`, `engine-oil-filter`, etc.) banakar har naye product ko **ek unique unused image** assign ki (`updateQuietly`).
+
+**Verified:** 592/592 products with image, **592 distinct images, 0 duplicate assignments**, sab files disk par exist; `/shop` 200.
+
+**Note:** Zyada tar unused images uuid-style filenames (`173086523535Ifn9IA.jpg`) aur DB me title/alt null hai — isliye exact content-based matching offline possible nahi thi; keyword-match jahan mila wahan, warna generic pool se unique assignment. Per-product relevance ke liye Image Manager me manual tagging/replace karna hoga.
+
+## 206. Products — Minimum 5 Gallery Images (24 Aug 2026)
+
+**Problem:** 650 products (incl. #203 wale 592) me 0 gallery images the, 52 me 1–4 — "Gallery Images" section khaali/kuchha dikhta tha.
+
+**Fix:** Script (`/tmp/opencode/fill_galleries.php`):
+- Orphan cleanup: 472 disk files jinke DB me Image rows nahi the → rows create kin (2 same-named duplicates skip; `images_filename_unique` constraint). Library: **1,732 Image rows**.
+- Har product jisme <5 gallery: pehle globally-unused pool (862 ids) se distinct images attach kiye `image_product` pivot via; pool khatam hone par full library cycling with per-product offset (7 stagger) taaki padosi products ko same sets na milein.
+- Guards: apna hi main image gallery me nahi, ek gallery ke andar 5 sab distinct.
+
+**Verified:** 702 products topped-up, 3,427 attachments added → **0 products with <5 gallery, 0 empty galleries, 0 duplicate-image galleries**; random product ke saari 5 files disk par OK; product page 200 + gallery markup render.
+
+## 207. Grid/List View Tooltips — Bootstrap Tooltip with Touch Disable
+
+**Issue:** Bootstrap tooltip on grid/list buttons stayed visible on click; native `title` had different design.
+
+**Fix:** Restored `data-bs-toggle="tooltip" data-bs-trigger="hover"` (Bootstrap styling, hover-only trigger) + `bootstrap.Tooltip.getInstance(this)?.hide()` in click handlers. On touch devices (`ontouchstart`), tooltips are completely disabled via `tip.disable()`.
+
+**Files:** `resources/views/shop.blade.php`, `resources/views/categories.blade.php`
+
+## 208. Grid/List Toggle — Extracted to Partial
+
+Created `resources/views/partials/grid-list-toggle.blade.php` (buttons only, no wrapper). Used in shop sidebar, shop header, and categories page.
+
+## 209. Force Grid View on Small Screens (≤580px)
+
+Both shop and categories pages force grid layout when `window.innerWidth <= 580`, regardless of localStorage preference (on load and resize).
+
+## 210. Form-Select-Wrapper — Single Outside Click to Close
+
+**Issue:** Native `<select>` dropdown closes on outside click/blur, but `focused` class stayed until a second outside click (blur doesn't always fire).
+
+**Fix:** Added document `click` handler — if click target is outside `.form-select-wrapper`, remove `.focused` from all wrappers immediately.
+
+**Files:** `resources/views/layouts/app.blade.php`
+
+## 211. Nice-Select — Reverted Unnecessary Handlers
+
+Scroll and document-level Esc handlers added to `nice-select.js` were removed (click-only behavior preferred).
+
+## 212. Tooltips — Hidden on Touch/No-Hover Devices Only (CSS Approach)
+
+**Decision:** Tooltips stay on desktop/laptop (hover-capable devices); hidden on mobile/tablet where there is no hover. Implemented purely via CSS to cover both Bootstrap `.tooltip` and jQuery-UI `.ui-tooltip`.
+
+**Files changed:**
+- `public/assets/front/css/style.css:5730-5736` — added `@media (hover: none) { .tooltip, .ui-tooltip { display: none !important } }`
+- `resources/views/layouts/app.blade.php:354-369` — restored `title` attributes on mobile header auth buttons (Login/Register)
+- Shop + categories grid/list buttons keep `data-bs-trigger="hover"` and `tip.disable()` on `(hover: none)` devices (see #207)
+
+## 213. Wishlist Pagination
+
+**Files changed:**
+- `app/Http/Controllers/DashboardController.php:210` — `wishlist()` now uses `paginate(9)->withQueryString()` instead of `get()`
+- `resources/views/user/wishlist.blade.php` — added `.pagination-wrapper` block with `$wishlist->links()` behind `@if(method_exists($wishlist,'links') && $wishlist->hasPages())`
+
+## 214. Footer Settings — Admin Manager (Like Header Settings)
+
+Storefront footer columns are now configurable from Admin. Columns stored as JSON in the `footer_columns` setting; empty/invalid setting falls back to the original static footer design (verified byte-for-byte).
+
+**Files changed/created:**
+- `routes/web.php:373-376` — `admin.settings.footer` (GET) + `admin.settings.footer.update` (POST)
+- `app/Http/Controllers/AdminController.php:340` `footerSettings()` + `:346` `updateFooterSettings()` — validates/sanitizes column types (`links`, `newsletter`, `contact`), spans (`2,3,4,6,12`), stores JSON via `Setting::set('footer_columns', ...)`
+- `resources/views/admin/settings/footer.blade.php` — **NEW** column editor: add/remove/reorder columns (Sortable), per-column type/heading/span/links
+- `resources/views/admin/partials/sidebar.blade.php` — "Footer Settings" link under Settings
+- `resources/views/partials/footer-columns.blade.php` — **NEW** footer renderer with default fallback
+- `resources/views/layouts/app.blade.php` — footer row now `@include('partials.footer-columns')`
+- `public/assets/front/css/style.css` — `.footer-link-col` 50% width on mobile rule
+
+## 215. Categories List-View — Subcategory Names Fix
+
+**Root cause:** JS toggled class `categories-list-view` on `#categoryContainer` but CSS rules targeted `#categoryContainer.list-view`, so subcategory names never showed in list view.
+
+**Files changed:**
+- `public/assets/front/css/style.css:16244-16274` — replaced `#categoryContainer.list-view` → `#categoryContainer.categories-list-view` (and `:not(.list-view)` → `:not(.categories-list-view)`)
+
+## 216. Categories Page — Product Preview in List View (3 Products with Image + Price)
+
+Category cards in list view now show up to 3 product thumbnails with name + price (strikethrough old price) on the right side.
+
+**Files changed:**
+- `app/Http/Controllers/CategoryController.php:104-108` — `preview_products` = latest 3 active products across all descendant category IDs per category
+- `resources/views/categories.blade.php` — card restructured into 3 divs: `.category-image`, `.category-content`, `.category-products`; preview block uses `imgTag()` + `currency_format()`, links to `route('product', $slug)`
+- `public/assets/front/css/style.css` — `.category-products` flex column (270px, left border) shown only under `#categoryContainer.categories-list-view`, hidden in grid; product item/image/name/price styles
+
+Verified: 14 categories × 3 products = 42 preview items render on `/categories` (HTTP 200); card = 3 top-level divs.
+
+## 217. Shop Page — Active Filter Chips with Clear Icons
+
+When a sort or brand filter is active, a chip row ("Active filters:") appears below the toolbar showing each active filter with an ✕ clear icon.
+
+**Files changed:**
+- `resources/views/shop.blade.php` — added `@php` label maps + chips markup after `.product-nav-wrapper`; chip ✕ uses `request()->fullUrlWithQuery(['sort' => null])` / `['brand' => null]` so clearing one filter preserves all other params; `.filter-chip` styles added to the page `<style>` block
+
+**Behavior (verified):**
+- `?sort=price_asc&brand=bosch&year=2020` → chips "Sort by: Price: Low to High ✕" + "Brand: Bosch ✕"
+- Sort ✕ → `/shop?brand=bosch&year=2020`; Brand ✕ → `/shop?sort=price_asc&year=2020`
+- No chips on plain `/shop`; `sort=default` never shows a chip
+
+## 218. Categories Page — Force Grid View Below 767px
+
+**Update to #209:** Categories page now forces grid view when `window.innerWidth <= 767` (was 580) — on load and resize — even if list view is saved in localStorage. View toggle buttons are hidden below 767px too.
+
+**Files changed:**
+- `resources/views/categories.blade.php:196` — `forceGridOnMobile()` breakpoint 580 → 767
+- `resources/views/categories.blade.php` — `.category-toolbar .view-btn` hidden under `@media (max-width: 767px)`
+
+## 221. Header Settings — Pages/Posts Nav Link Management (25 Aug 2026)
+
+Header Settings admin page now loads published Pages and Blog Posts as nav link targets. The `headerSettings()` controller method passes `$pages` (active `Page` records) and `$posts` (published `Blog` records) to the view, enabling admins to link header navigation items to any internal page or blog post.
+
+**Files changed:**
+- `app/Http/Controllers/AdminController.php:220-228` — `headerSettings()` loads `Page::where('status', true)` and `Blog::where('status', 'published')`, passes both as `$pages` and `$posts` to view
+- `resources/views/admin/settings/header.blade.php` — nav link editor now has dropdowns for selecting pages/posts as link targets; JS `wp-setting-url` getter falls back to `.wp-setting-url-locked` text when input is empty
+
+## 222. Shop & Category Pages — Dynamic Scoped Price Range & Fractional Rounding Fix (25 Aug 2026)
+
+Price range slider bounds (`sliderMin` and `sliderMax`) are now calculated dynamically per category, subcategory, childcategory, brand, vehicle, or search scope. Furthermore, decimal price handling was fixed so upper rounding doesn't filter out products.
+
+**Files changed:**
+- `app/Http/Controllers/ShopController.php`:
+  - Updated `getSharedData($productsQuery = null)` to calculate `minProductPrice` and `maxProductPrice` dynamically based on the passed base scoped query (excluding price filter parameters).
+  - Updated `index()`, `customerProducts()`, `category()`, and `subcategory()` action methods to pass the cloned base query to `getSharedData()`.
+  - Added optional `bool $applyPriceFilter = true` parameter to `filterProducts()` helper.
+  - Adjusted `max_price` query filter with an `effectiveMax` calculation (`(float)$maxPrice + 0.999999`) to ensure integer slider limits (e.g. `4`) correctly include float prices up to that ceiling (e.g. `4.42`).
+- `resources/views/shop/index.blade.php`:
+  - Updated `$sliderMax` calculation to `(int) ceil(($maxProductPrice ?? 1000) * $rate)` so upper bound includes fractional prices without hiding matching items.
+
+## 223. Footer Settings Page Redesign — Match Header Menu Manager Theme (25 Aug 2026)
+
+Footer Settings page redesigned to match Header Menu Manager theme — same card styles, action buttons (circular SVG), color scheme, drag handles, and form styling. Applied to footer columns (links/newsletter/contact types).
+

@@ -89,7 +89,7 @@
                         <td>
                             <img src="{{ storedImageUrl($product->image, 'assets/images/thumbnails') }}" width="50" height="50" style="object-fit:cover; border-radius:4px;">
                         </td>
-                        <td>{{ $product->name }}</td>
+                        <td><a href="{{ route('product', $product->slug) }}" target="_blank">{{ $product->name }}</a></td>
                         <td>{{ $product->category->name ??  'N/A' }}</td>
                         <td>{{ currency_format($product->price) }}</td>
                         <td>@if($product->old_price) {{ currency_format($product->old_price) }} @else - @endif</td>

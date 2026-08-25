@@ -115,11 +115,11 @@
               </div>
 
               <div class="card-body">
-                <table class="table">
+                <table class="table summary-table">
                   <thead>
                     <tr>
-                      <th class="product-name border-top-0 border-bottom-1 pl-0 fs-12 fw-400 opacity-60">Product</th>
-                      <th class="product-total text-right border-top-0 border-bottom-1 pr-0 fs-12 fw-400 opacity-60">Total</th>
+                      <th class="product-name border-bottom-1 pl-0 fs-12 fw-400 opacity-60">Product</th>
+                      <th class="product-total text-right border-bottom-1 pr-0 fs-12 fw-400 opacity-60">Total</th>
                     </tr>
                   </thead>
                   <tbody>

@@ -270,7 +270,7 @@
                 {!! imgTag($dealRelPath, 'deal of the day', 'img-fluid') !!}
             </div>
             <div class="deal-of-day-img h-100">
-                {!! imgTag($dealRelPath, 'deal of the day', 'wow-replaced h-100 object-fit-cover') !!}
+                {!! imgTag($dealRelPath, 'deal of the day', 'wow-replaced h-100') !!}
             </div>
             @endif
         </div>

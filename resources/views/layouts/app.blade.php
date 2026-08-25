@@ -174,6 +174,7 @@
                                 </p>
                                 <ul class="dropdown-menu">
                                     <li><a class="dropdown-item" href="{{ route('user.dashboard') }}">Dashboard</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('user.profile') }}">My Profile</a></li>
                                     <li><a class="dropdown-item" href="{{ route('logout') }}">Logout</a></li>
                                 </ul>
                             </li>

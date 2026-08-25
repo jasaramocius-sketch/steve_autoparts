@@ -50,7 +50,7 @@ class ImageController extends Controller
     {
         $request->validate([
             'images' => 'required|array|max:10',
-            'images.*' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:10240',
+            'images.*' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
         ]);
 
         $uploaded = [];
@@ -155,7 +155,7 @@ class ImageController extends Controller
     {
         $request->validate([
             'images' => 'required|array',
-            'images.*' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:10240',
+            'images.*' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
         ]);
 
         $uploaded = 0;

@@ -70,8 +70,26 @@ if (!function_exists('saveImageWithWebp')) {
 if (!function_exists('saveImageFromUrlWithWebp')) {
     function saveImageFromUrlWithWebp(string $url, string $dir = 'uploads'): ?string
     {
-        $response = \Illuminate\Support\Facades\Http::get($url);
+        // SSRF guard: sirf public http(s) URLs allow karo
+        $parts = parse_url($url);
+        if (! $parts || ! in_array($parts['scheme'] ?? '', ['http', 'https'], true) || empty($parts['host'])) {
+            return null;
+        }
+        $host = strtolower($parts['host']);
+        if ($host === 'localhost' || str_ends_with($host, '.local') || str_ends_with($host, '.internal')) {
+            return null;
+        }
+        $ip = gethostbyname($host);
+        if ($ip === $host || ! filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+            return null;
+        }
+
+        $response = \Illuminate\Support\Facades\Http::timeout(15)->get($url);
         if ($response->failed()) {
+            return null;
+        }
+
+        if (strlen($response->body()) > 10 * 1024 * 1024) {
             return null;
         }
 

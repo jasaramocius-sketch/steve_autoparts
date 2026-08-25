@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="{{ asset('assets/front/css/nice-select.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-bs5.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('assets/front/css/toastr.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/front/css/style.css') }}?v={{ filemtime(public_path('assets/front/css/style.css')) }}">
 
     {{-- Admin-wide layout styles (.admin-sidebar, .main-content, .admin-navbar,
          .admin-content, media queries) live in backend.css --}}

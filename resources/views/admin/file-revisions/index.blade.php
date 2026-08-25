@@ -72,11 +72,11 @@
                         </td>
                         <td class="table-action-col">
                             <div class="d-flex gap-1 action-buttons revision-action-buttons">
-                                <a href="{{ route('admin.file-revisions.diff', $rev->id) }}" class="btn btn-sm btn-outline-info steve-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="View Diff">
+                                <a href="{{ route('admin.file-revisions.diff', $rev->id) }}" class="btn btn-outline-info steve-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="View Diff">
                                     <i class="fas fa-code-branch"></i>
                                 </a>
                                 @if($rev->backup_path)
-                                    <a href="{{ route('admin.file-revisions.download', $rev->id) }}" class="btn btn-sm btn-outline-secondary steve-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Download backup">
+                                    <a href="{{ route('admin.file-revisions.download', $rev->id) }}" class="btn btn-outline-secondary steve-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Download backup">
                                         <i class="fas fa-download"></i>
                                     </a>
                                 @endif

@@ -39,11 +39,11 @@
           <h5 class="fw-600 mb-3 fs-16 text-soft-dark pb-2 border-bottom">Order Summary</h5>
           <div class="row">
             <div class="col-md-6">
-              <table class="table fs-14 text-soft-dark mb-0">
+              <table class="table summary-table fs-14 text-soft-dark mb-0">
                 <tbody>
                   <tr>
-                    <td class="w-50 fw-600 border-top-0 pl-0 py-2">Order date:</td>
-                    <td class="border-top-0 py-2">{{ $order['date'] ?? now()->format('d M, Y') }}</td>
+                    <td class="w-50 fw-600 pl-0 py-2">Order date:</td>
+                    <td class="py-2">{{ $order['date'] ?? now()->format('d M, Y') }}</td>
                   </tr>
                   <tr>
                     <td class="w-50 fw-600 border-top-0 pl-0 py-2">Name:</td>
@@ -61,11 +61,11 @@
               </table>
             </div>
             <div class="col-md-6">
-              <table class="table fs-14 text-soft-dark mb-0">
+              <table class="table summary-table fs-14 text-soft-dark mb-0">
                 <tbody>
                   <tr>
-                    <td class="w-50 fw-600 border-top-0 py-2">Order status:</td>
-                    <td class="border-top-0 pr-0 py-2">{{ $order['status'] ?? 'Pending' }}</td>
+                    <td class="w-50 fw-600 py-2">Order status:</td>
+                    <td class="pr-0 py-2">{{ $order['status'] ?? 'Pending' }}</td>
                   </tr>
                   <tr>
                     <td class="w-50 fw-600 border-top-0 py-2">Total order amount:</td>
@@ -124,11 +124,11 @@
 
               <div class="row">
                 <div class="col-xl-5 col-md-6 ml-auto mr-0">
-                  <table class="table mb-0">
+                  <table class="table summary-table mb-0">
                     <tbody>
                       <tr>
-                        <th class="border-top-0 py-2">Subtotal</th>
-                        <td class="text-right border-top-0 pr-0 py-2">
+                        <th class="py-2">Subtotal</th>
+                        <td class="text-right pr-0 py-2">
                           <span class="fw-600">{{ currency_format($subtotal) }}</span>
                         </td>
                       </tr>
@@ -160,7 +160,7 @@
                   </table>
                 </div>
               </div><div class="text-center mt-4">
-          <a href="{{ route('home') }}" class="btn btn-primary fs-14 fw-700 rounded-0 px-4">
+          <a href="{{ route('home') }}" class="btn btn-primary steve-btn fs-14 fw-700 px-4">
             Continue Shopping <i class="las la-arrow-right"></i>
           </a>
         </div>

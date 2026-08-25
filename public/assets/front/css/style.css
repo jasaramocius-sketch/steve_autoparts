@@ -165,7 +165,9 @@ button {
   align-items: center;
   justify-content: center
 }
-
+.featured-status-btn .steve-btn {
+    min-height: auto;
+}
 button#searchIcon {
   min-width: 40px;
   min-height: 4px;
@@ -2622,9 +2624,10 @@ p.text-lg {
 }
 
 .gs-deal-of-day .deal-of-day-img {
-  position: absolute;
+  /* position: absolute; */
   left: 52%;
-  bottom: 0
+  bottom: 0;
+  width: 50%;
 }
 
 .gs-deal-of-day .deal-of-day-img img {
@@ -11181,16 +11184,16 @@ ul.tagit li.tagit-choice .tagit-close {
 .max-w-480 {
   max-width: 480px !important
 }
-
+@media (max-width:991.98px) {
+.gs-deal-of-day div .row {
+    flex-direction: column-reverse
+  }
+}
 @media (max-width:767.98px) {
   .succss-icon {
     width: 60px;
     height: 60px
-  }
-
-  .gs-deal-of-day div .row {
-    flex-direction: column-reverse
-  }
+  }  
 }
 
 .color-show-btn {
@@ -11401,7 +11404,8 @@ ul.tagit li.tagit-choice .tagit-close {
 .slider-nav .steve-btn i {
   border-radius: 8px;
   border: 1px solid var(--primary);
-  color: var(--primary)
+  background-color: var(--primary);
+  color:#fff;
 }
 
 .brands-section-row-first a {
@@ -13057,9 +13061,11 @@ input.page-title-input {
   -ms-flex-align: start;
   align-items: flex-start;
   gap: 24px;
-  margin-bottom: 40px
+  margin-bottom: 20px
 }
-
+div#myTabContent {
+    border-radius: 8px;
+}
 .wish-compare-report-wrapper i::before {
   color: #000
 }
@@ -15558,7 +15564,7 @@ button.action-btn.border-0 {
 }
 
 .category-card:hover .category-content a.text-dark {
-  color: var(--primary) !important
+  color: var(--primary) !important;
 }
 
 .category-image {
@@ -15568,9 +15574,31 @@ button.action-btn.border-0 {
   align-items: center;
   text-align: center;
   height: 300px;
-  width: 300px
+  width: 300px;
+}
+.gs-cate-section .category-image {
+  height: auto;
+  width: 100%;
+  max-width: 300px;
+  aspect-ratio: 1/1;
+  margin-bottom:20px;
 }
 
+.gs-cate-section .category-image picture {
+  background: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  height: 100%;
+  width: 100%
+}
+
+.gs-cate-section .category-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover
+}
 .category-content h5 {
   font-weight: 700;
   margin-bottom: 10px
@@ -17460,8 +17488,8 @@ span.product-badge.product-cat {
   }
 }
 .steve-btn.swiper-button-disabled i{
-background-color: var(--primary);  
-color: #fff; 
+background-color: transparent;  
+color: var(--primary); 
 }
 .swiper-slide .single-product .product-title {
   display: -webkit-box;
@@ -17472,4 +17500,10 @@ color: #fff;
 
 .swiper-slide .single-product .ratings-wrapper svg path {
   fill: #9a909045;
+}
+/* Summary tables: pehli row ke upar hairline (order-confirmed, checkout payment) */
+table.summary-table tbody tr:first-child > th,
+table.summary-table tbody tr:first-child > td,
+table.summary-table thead tr:first-child > th {
+  border-top: 1px solid #e6e8ec
 }

@@ -70,10 +70,17 @@
                         <button class="newsletter-btn steve-btn steve-btn-hover" type="submit">Subscribe</button>
                     </form>
                 </div>
+                @php
+                    $socialIcons = ['facebook' => 'fab fa-facebook-f', 'instagram' => 'fab fa-instagram', 'twitter' => 'fab fa-twitter', 'linkedin' => 'fab fa-linkedin-in', 'youtube' => 'fab fa-youtube', 'whatsapp' => 'fab fa-whatsapp', 'pinterest' => 'fab fa-pinterest-p', 'tiktok' => 'fab fa-tiktok', 'telegram' => 'fab fa-telegram-plane'];
+                @endphp
                 <div class="social-links mt-3 d-flex">
-                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-                    <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    @foreach($footerLinks as $social)
+                        @if(!empty($social['url']))
+                            <a href="{{ $social['url'] }}" target="_blank" rel="noopener noreferrer" aria-label="{{ ucfirst($social['platform'] ?? '') }}">
+                                <i class="{{ $socialIcons[$social['platform'] ?? ''] ?? 'fas fa-link' }}"></i>
+                            </a>
+                        @endif
+                    @endforeach
                 </div>
             </div>
         @else
