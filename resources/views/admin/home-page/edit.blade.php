@@ -131,7 +131,7 @@
                                                         $previewImg = storedImageUrl($banner['image'], 'assets/images/home');
                                                     @endphp
                                                     <div class="mb-1 banner-image-current-{{ $i }}">
-                                                        <img src="{{ $previewImg }}" width="100" style="border-radius:4px;border:1px solid #ddd;" onerror="this.onerror=null;this.src='{{ asset('assets/images/placeholder.png') }}'">
+                                                        <img src="{{ $previewImg }}" width="100" class="admin-image-thumb-bordered" onerror="this.onerror=null;this.src='{{ asset('assets/images/placeholder.png') }}'">
                                                     </div>
                                                 @endif
                                                 <input type="hidden" name="banners[{{ $i }}][image_from_manager]" id="banners_image_from_manager_{{ $i }}">
@@ -218,7 +218,7 @@
                                 @if($section->image)
                                     <div class="mb-2 deal-image-current">
                                         <img src="{{ storedImageUrl($section->image, 'assets/images/home') }}" alt="Current image"
-                                             style="max-width: 300px; height: auto; border-radius: 4px; border: 1px solid #ddd;">
+                                             class="admin-image-preview">
                                     </div>
                                 @endif
                             </div>
@@ -243,7 +243,7 @@
         @if($dealBgImage)
             <div class="mb-2 home-image-current">
                 <img src="{{ storedImageUrl($dealBgImage, 'assets/images/home') }}" alt="Current background image"
-                     style="max-width: 300px; height: auto; border-radius: 4px; border: 1px solid #ddd;">
+                     class="admin-image-preview">
             </div>
         @endif
     </div>
@@ -398,7 +398,7 @@
         @if($section->image)
             <div class="mb-2 home-image-current">
                 <img src="{{ storedImageUrl($section->image, 'assets/images/home') }}" alt="Current image"
-                     style="max-width: 300px; height: auto; border-radius: 4px; border: 1px solid #ddd;">
+                     class="admin-image-preview">
             </div>
         @endif
     </div>

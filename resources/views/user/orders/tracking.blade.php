@@ -335,8 +335,8 @@
 .gs-order-track-section .track-products-table thead th {
     padding: 12px 16px;
     border: 0;
-    background: #fff1ed;
-    color: #374151;
+    background: var(--primary);
+    color: #fff;
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;

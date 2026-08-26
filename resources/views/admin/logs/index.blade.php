@@ -22,7 +22,7 @@
             @if(empty($contents))
                 <div class="alert alert-info mb-0">No entries found in this log file.</div>
             @else
-                <pre class="bg-dark text-light p-3 rounded mb-0" style="white-space: pre-wrap; word-break: break-word; max-height: 70vh; overflow:auto;">{{ implode("\n", $contents) }}</pre>
+                <pre class="bg-dark text-light p-3 rounded mb-0 admin-code-block">{{ implode("\n", $contents) }}</pre>
             @endif
         @else
             <div class="alert alert-warning mb-0">No log files found yet.</div>

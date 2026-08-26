@@ -4,6 +4,7 @@
     $clearRoute = $clearRoute ?? $route;
 @endphp
 <form action="{{ $route }}" method="GET" class="d-flex gap-2 align-items-center">
+    <input type="hidden" name="page" value="">
     <div class="input-group <!--{{ $size ? ' input-group-' . $size : '' }}-->">
         <button type="submit" class="input-group-text bg-white">
             <i class="fas fa-search"></i>

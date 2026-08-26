@@ -42,9 +42,9 @@
                 <select class="form-select w-auto" onchange="window.location.href=this.value">
                     @php $currentPerPage = request('per_page', '10'); @endphp
                     @foreach([10, 20, 50, 100] as $n)
-                        <option value="{{ request()->fullUrlWithQuery(['per_page' => $n]) }}" {{ $currentPerPage == $n ? 'selected' : '' }}>{{ $n }}</option>
+                        <option value="{{ request()->fullUrlWithQuery(['per_page' => $n, 'page' => null]) }}" {{ $currentPerPage == $n ? 'selected' : '' }}>{{ $n }}</option>
                     @endforeach
-                    <option value="{{ request()->fullUrlWithQuery(['per_page' => 'all']) }}" {{ $currentPerPage === 'all' ? 'selected' : '' }}>All</option>
+                    <option value="{{ request()->fullUrlWithQuery(['per_page' => 'all', 'page' => null]) }}" {{ $currentPerPage === 'all' ? 'selected' : '' }}>All</option>
                 </select>
                 <span class="text-muted small">per page</span>
             </div>
@@ -87,7 +87,7 @@
                     <tr>
                         <td class="ps-3">{{ $product->id }}</td>
                         <td>
-                            <img src="{{ storedImageUrl($product->image, 'assets/images/thumbnails') }}" width="50" height="50" style="object-fit:cover; border-radius:4px;">
+                            <img src="{{ storedImageUrl($product->image, 'assets/images/thumbnails') }}" width="50" height="50" class="admin-image-thumb">
                         </td>
                         <td><a href="{{ route('product', $product->slug) }}" target="_blank">{{ $product->name }}</a></td>
                         <td>{{ $product->category->name ??  'N/A' }}</td>
@@ -101,7 +101,7 @@
                                 <form action="{{ route('admin.products.toggle-featured', $product->id) }}" method="POST" class="d-inline featured-status-btn">
                                     @csrf
                                     <button type="submit" class="btn btn-sm border-0 p-0 steve-btn">
-                                        <span class="badge {{ $product->featured ? 'bg-warning' : 'bg-secondary' }}" style="cursor:pointer;">
+                                        <span class="badge admin-clickable {{ $product->featured ? 'bg-warning' : 'bg-secondary' }}">
                                             {{ $product->featured ? 'Yes' : 'No' }}
                                         </span>
                                     </button>
@@ -117,7 +117,7 @@
                                 <form action="{{ route('admin.products.toggle-status', $product->id) }}" method="POST" class="d-inline featured-status-btn">
                                     @csrf
                                     <button type="submit" class="btn btn-sm border-0 p-0 steve-btn">
-                                        <span class="badge {{ $product->status ? 'bg-success' : 'bg-danger' }}" style="cursor:pointer;">
+                                        <span class="badge admin-clickable {{ $product->status ? 'bg-success' : 'bg-danger' }}">
                                             {{  $product->status ? 'Active' : 'Inactive' }}
                                         </span>
                                     </button>

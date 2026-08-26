@@ -26,8 +26,8 @@
                     @endif
                 </div>
                 <div>
-                    <div class="login-user-labels text-transform-capitalize" style="font-size:14px;font-weight:500;line-height:1.2;">{{ Auth::user()->name }}</div>
-                    <div style="font-size:11px;color:#6c757d;">
+                    <div class="login-user-labels text-transform-capitalize admin-navbar-user-name">{{ Auth::user()->name }}</div>
+                    <div class="admin-navbar-user-role">
                         @php
                             $roleLabel = match(Auth::user()->role) {
                                 'master_admin' => 'Admin',
@@ -42,7 +42,7 @@
                                 default => 'success',
                             };
                         @endphp
-                        <span class="badge bg-light border border-{{ $roleBadge }}-subtle text-{{ $roleBadge }}" style="font-size:10px;">{{ $roleLabel }}</span>
+                        <span class="badge bg-light border border-{{ $roleBadge }}-subtle text-{{ $roleBadge }} admin-navbar-role-badge">{{ $roleLabel }}</span>
                     </div>
                 </div>
             </a>

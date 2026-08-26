@@ -37,6 +37,7 @@
                     <span class="sort-label">Sort by:</span>
                     <form method="GET">
                         <input type="hidden" name="search" value="{{ $search }}">
+                        <input type="hidden" name="page" value="">
                         <select class="form-select sort-select"
                                 name="sort"
                                 onchange="this.form.submit()">

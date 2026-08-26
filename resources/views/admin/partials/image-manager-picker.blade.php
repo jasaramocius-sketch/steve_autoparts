@@ -45,7 +45,7 @@
           <div class="flex-grow-1">
             <input type="text" class="form-control form-control-sm" id="impSearch_{{ $pickerId }}" placeholder="Search images..." autocomplete="off">
           </div>
-          <label class="btn btn-sm btn-outline-primary mb-0" style="cursor:pointer;align-content: center;">
+          <label class="btn btn-sm btn-outline-primary mb-0 admin-picker-label">
             <i class="fas fa-upload me-1"></i> Upload New
             <input type="file" id="impFileInput_{{ $pickerId }}" class="d-none" multiple accept="image/*">
           </label>
@@ -64,7 +64,7 @@
 
         <!-- Upload Progress -->
         <div id="impUploadProgress_{{ $pickerId }}" class="d-none mb-3">
-          <div class="progress" style="height: 6px;">
+          <div class="progress admin-progress">
             <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
           </div>
           <small class="text-muted">Uploading...</small>
@@ -180,7 +180,7 @@
             if (preview) {
                 var html = '<div class="d-flex flex-wrap gap-2">';
                 state.chosen.forEach(function(img) {
-                    html += '<img src="' + img.thumb_url + '" width="60" style="border-radius:4px;border:2px solid #198754;">';
+                    html += '<img src="' + img.thumb_url + '" width="60" class="admin-picker-thumb">';
                 });
                 html += '</div>';
                 preview.innerHTML = html;
@@ -191,7 +191,7 @@
             if (input) input.value = state.selected.path;
             var preview = document.getElementById('impPreview_' + pid);
             if (preview) {
-                preview.innerHTML = '<img src="' + state.selected.thumb_url + '" width="80" style="border-radius:4px;"> <small class="text-muted ms-2">' + state.selected.original_name + '</small>';
+                preview.innerHTML = '<img src="' + state.selected.thumb_url + '" width="80" class="admin-picker-preview-thumb"> <small class="text-muted ms-2">' + state.selected.original_name + '</small>';
                 preview.classList.remove('d-none');
             }
         }

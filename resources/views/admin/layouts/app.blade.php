@@ -18,7 +18,9 @@
     @stack('page-builder-css')
 </head>
 
-<body id="@yield('page-id', 'default-page-id')" class="@yield('page-class', 'default-body-class')">
+<body id="@yield('page-id', 'default-page-id')" class="@yield('page-class', 'default-body-class')"
+    data-success="{{ session('success') }}" data-error="{{ session('error') }}"
+    data-warning="{{ session('warning') }}" data-info="{{ session('info') }}">
 
 @include('admin.partials.sidebar')
 <div class="admin-sidebar-overlay"></div>
@@ -43,7 +45,10 @@
 <script src="{{ asset('assets/front/js/toastr.min.js') }}"></script>
 <script src="{{ asset('assets/front/js/nice-select.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="{{ asset('assets/front/js/backend.js') }}?v={{ filemtime(public_path('assets/front/js/backend.js')) }}"></script>
 
+{{-- Common admin behavior lives in backend.js. --}}
+{{--
 <script>
 $(document).ready(function() {
     toastr.options = { positionClass: 'toast-top-right', timeOut: 3000, progressBar: true };
@@ -58,7 +63,7 @@ $(document).ready(function() {
         new bootstrap.Tooltip(el, { trigger: 'hover' });
     });
     // For elements with title that can't have data-bs-toggle="tooltip" (e.g. modal triggers)
-    document.querySelectorAll('.action-btn[title]:not([data-bs-toggle="tooltip"])').forEach(function(el) {
+    document.querySelectorAll('.action-btn[title]:not([data-bs-toggle="tooltip"]), .footer-remove-btn[title]:not([data-bs-toggle="tooltip"])').forEach(function(el) {
         new bootstrap.Tooltip(el, { trigger: 'hover' });
     });
 
@@ -197,6 +202,7 @@ document.addEventListener('click', function(e) {
     }
 });
 </script>
+--}}
 @stack('page-builder-js')
 @stack('scripts')
 

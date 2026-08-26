@@ -4,7 +4,8 @@
 @section('page-title', 'Product Details — ' . $product->name)
 @section('content')
 
-<style>
+{{-- Product tabs use shared backend.css styles. --}}
+<!--
     #productTabs .nav-link {
         border: 1px solid #e9ecef !important;
         border-bottom: none !important;
@@ -30,7 +31,7 @@
     #productTabs .tab-pane {
         padding: 1rem 0;
     }
-</style>
+-->
 
 <div class="d-flex justify-content-between align-items-center mb-3">    
     <!-- <a href="{{ route('admin.products.index') }}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left"></i> Back</a> -->
@@ -45,7 +46,7 @@
             </div>
             <div class="card-body">
                 @if($product->image)
-                    <img src="{{ storedImageUrl($product->image, 'assets/images/thumbnails') }}" alt="{{ $product->name }}" class="img-fluid rounded" style="max-height:350px;">
+                    <img src="{{ storedImageUrl($product->image, 'assets/images/thumbnails') }}" alt="{{ $product->name }}" class="img-fluid rounded admin-product-image">
                 @else
                     <div class="text-muted text-center py-5"><i class="fas fa-image fa-3x mb-2"></i><br>No image uploaded</div>
                 @endif
@@ -55,7 +56,7 @@
                     <h6 class="mb-2">Gallery Images</h6>
                     <div class="d-flex flex-wrap gap-2">
                         @foreach($product->galleryImages as $img)
-                            <img src="{{ $img->thumb_url }}" alt="Gallery" class="rounded" style="width:80px;height:80px;object-fit:cover;">
+                            <img src="{{ $img->thumb_url }}" alt="Gallery" class="rounded admin-gallery-image">
                         @endforeach
                     </div>
                 @endif
@@ -64,7 +65,7 @@
 
         <div class="card border-0 shadow-sm mb-3">
             <div class="card-header bg-white py-3">
-                <ul class="nav nav-tabs card-header-tabs" id="productTabs">
+                <ul class="nav nav-tabs card-header-tabs admin-product-tabs" id="productTabs">
                     <li class="nav-item">
                         <a class="nav-link active" id="desc-tab" data-bs-toggle="tab" href="#desc" role="tab">
                             <i class="fas fa-file-alt me-1"></i> {{ $product->tab_label_1 ?: 'Description' }}
@@ -119,7 +120,7 @@
                 <div class="table-responsive">
                 <table class="table table-sm mb-0">
                     <tr>
-                        <th class="text-muted" style="width:45%">Name</th>
+                        <th class="text-muted admin-table-value">Name</th>
                         <td>{{ $product->name }}</td>
                     </tr>
                     <tr>
@@ -197,7 +198,7 @@
                 <div class="table-responsive">
                 <table class="table table-sm mb-0">
                     <tr>
-                        <th class="text-muted" style="width:45%">Year</th>
+                        <th class="text-muted admin-table-value">Year</th>
                         <td>{{ $product->year ?? '—' }}</td>
                     </tr>
                     <tr>
@@ -221,7 +222,7 @@
                 <div class="table-responsive">
                 <table class="table table-sm mb-0">
                     <tr>
-                        <th class="text-muted" style="width:45%">ID</th>
+                        <th class="text-muted admin-table-value">ID</th>
                         <td>#{{ $product->id }}</td>
                     </tr>
                     <tr>

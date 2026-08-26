@@ -31,7 +31,7 @@
                         <td class="ps-3">{{ $follow->id }}</td>
                         <td>
                             <div class="d-flex align-items-center gap-2">
-                                <span class="avatar avatar-sm bg-light d-inline-flex align-items-center justify-content-center rounded-circle" style="width:32px;height:32px;font-size:13px;">
+                                <span class="avatar avatar-sm bg-light d-inline-flex align-items-center justify-content-center rounded-circle admin-avatar-32">
                                     {{ strtoupper(substr($follow->user->name ?? '?', 0, 1)) }}
                                 </span>
                                 {{ $follow->user->name ?? 'Deleted user' }}

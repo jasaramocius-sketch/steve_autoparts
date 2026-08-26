@@ -56,6 +56,7 @@
                         <h5 class="mb-0 small fw-medium">Sort by</h5>
                         <form method="GET">
                             <input type="hidden" name="search" value="{{ request('search') }}">
+                            <input type="hidden" name="page" value="">
                             <select class="form-select" name="sort" onchange="this.form.submit()">
                                 <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Latest</option>
                                 <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Oldest</option>

@@ -38,12 +38,12 @@
     <div class="alert alert-info text-center" id="compare-empty-msg" style="display:none;">
         No items to compare.
     </div>
-    <div class="table-responsive rounded bg-white compare-table-wrapper" id="compare-table-wrapper">
+    <div class="table-responsive bg-white compare-table-wrapper" id="compare-table-wrapper">
         <table class="table compare-table align-middle text-center mb-0">
             <tr>
-                <th width="180">Product Name</th>
+                <th class="border-top" width="180">Product Name</th>
                 @foreach($compareItems as $item)
-                <td class="compare-col" data-compare-id="{{ $item->id }}">
+                <td class="compare-col border-top" data-compare-id="{{ $item->id }}">
                     <div>
                         <a href="{{ route('product',$item->product->slug) }}">
                     {!! imgTag(storedPath($item->product->image, 'assets/images/thumbnails'), '', 'img-fluid mb-3', 'style="height:170px; object-fit:contain;"') !!}
@@ -70,7 +70,7 @@
             <tr>
                 <th>Old Price</th>
                 @foreach($compareItems as $item)
-                    <td class="compare-col" data-compare-id="{{ $item->id }}">
+                    <td class="compare-col border-top-1" data-compare-id="{{ $item->id }}">
                         @if($item->product->old_price)
                             <del>{{ currency_format($item->product->old_price) }}</del>
                         @else

@@ -142,6 +142,13 @@
     var closeSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
     var gripSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg>';
 
+    function initFooterTooltips() {
+        document.querySelectorAll('.footer-remove-btn[title]:not([data-bs-tooltip-init])').forEach(function(el) {
+            el.setAttribute('data-bs-tooltip-init', '1');
+            new bootstrap.Tooltip(el, { trigger: 'hover' });
+        });
+    }
+
     function footerLinkRowHtml(link) {
         link = link || {};
         return '<div class="footer-link-row">' +
@@ -170,7 +177,7 @@
             platformOpts += '<option value="' + p.id + '"' + (link.platform === p.id ? ' selected' : '') + '>' + p.label + '</option>';
         }
         return '<div class="footer-link-row">' +
-            '<select class="form-select form-select-sm footer-social-platform" style="max-width:140px;">' + platformOpts + '</select>' +
+            '<select class="form-select form-select-sm footer-social-platform admin-footer-social-platform">' + platformOpts + '</select>' +
             '<input type="text" class="form-control footer-link-url footer-social-url" placeholder="URL" value="' + (link.url || '').replace(/"/g, '&quot;') + '">' +
             '<button type="button" class="footer-remove-btn footer-remove-social" title="Remove">' + closeSvg + '</button>' +
             '</div>';
@@ -275,6 +282,8 @@
             }, 0));
         }
 
+        initFooterTooltips();
+
         if ($.fn && $.fn.sortable) {
             $('#footerColsContainer').sortable({
                 handle: '.footer-drag-handle',
@@ -293,6 +302,7 @@
             $('#footerColsContainer').append(renderFooterColumn({
                 type: 'links', heading: '', span: 3, links: []
             }, index));
+            initFooterTooltips();
         });
 
         $(document).on('click', '.footer-remove-col', function() {
@@ -327,10 +337,12 @@
             if (type === 'links') {
                 $note.addClass('d-none');
                 $body.append(footerLinksBlock({links: []}));
+                initFooterTooltips();
             } else if (type === 'newsletter') {
                 $note.removeClass('d-none');
                 $note.text('Add your social media links below. They will show under the newsletter form.');
                 $body.append(footerSocialBlock({links: []}));
+                initFooterTooltips();
             } else {
                 $note.removeClass('d-none');
                 $note.text('This column shows the footer logo plus the phone, email and address from Header Settings.');

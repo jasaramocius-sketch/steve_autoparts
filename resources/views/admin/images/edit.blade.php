@@ -9,7 +9,7 @@
         <div class="col-md-5">
             <div class="card border-0 shadow-sm">
                 <div class="card-body text-center">
-                    <img src="{{ $image->thumb_url }}" alt="{{ $image->alt_text ?? $image->original_name }}" class="img-fluid" style="max-height:400px;" onerror="this.onerror=null;this.src='{{ asset("assets/images/placeholder.png") }}'">
+                    <img src="{{ $image->thumb_url }}" alt="{{ $image->alt_text ?? $image->original_name }}" class="img-fluid admin-image-preview-large" onerror="this.onerror=null;this.src='{{ asset("assets/images/placeholder.png") }}'">
                     <hr>
                     <div class="table-responsive">
                     <table class="table table-sm table-borderless text-start small mb-0">

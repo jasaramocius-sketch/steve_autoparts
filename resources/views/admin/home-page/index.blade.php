@@ -28,7 +28,7 @@
                                 <span class="text-muted small">Show</span>
                                 <select class="form-select w-auto" onchange="window.location.href=this.value">
                                     @foreach([10, 20, 50, 100] as $n)
-                                        <option value="{{ request()->fullUrlWithQuery(['per_page' => $n]) }}" {{ (int)request('per_page', 10) === $n ? 'selected' : '' }}>{{ $n }}</option>
+                                        <option value="{{ request()->fullUrlWithQuery(['per_page' => $n, 'page' => null]) }}" {{ (int)request('per_page', 10) === $n ? 'selected' : '' }}>{{ $n }}</option>
                                     @endforeach
                                 </select>
                                 <span class="text-muted small">per page</span>
@@ -59,7 +59,7 @@
                                                 <form action="{{ route('admin.home-page.toggle-status', $section->id) }}" method="POST" class="d-inline featured-status-btn">
                                                     @csrf
                                                     <button type="submit" class="btn btn-sm border-0 p-0 steve-btn">
-                                                        <span class="badge {{ $section->status ? 'bg-success' : 'bg-danger' }}" style="cursor:pointer;">
+                                                        <span class="badge admin-clickable {{ $section->status ? 'bg-success' : 'bg-danger' }}">
                                                             {{ $section->status ? 'Active' : 'Inactive' }}
                                                         </span>
                                                     </button>
@@ -95,16 +95,6 @@
         </div>
     </div>
 </div>
-
-<style>
-    .table-hover tbody tr:hover {
-        background-color: #f5f5f5;
-    }
-    .btn-sm {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.875rem;
-    }
-</style>
 
 @endsection
 

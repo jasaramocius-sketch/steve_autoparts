@@ -3083,3 +3083,50 @@ Price range slider bounds (`sliderMin` and `sliderMax`) are now calculated dynam
 
 Footer Settings page redesigned to match Header Menu Manager theme — same card styles, action buttons (circular SVG), color scheme, drag handles, and form styling. Applied to footer columns (links/newsletter/contact types).
 
+## 224. Footer Settings — Social Icons for Newsletter Column Type (25 Aug 2026)
+
+Added Social Icons to Newsletter column type — admin can now add social platform dropdown (Facebook, Instagram, Twitter, LinkedIn, YouTube, WhatsApp, Pinterest, TikTok, Telegram) + URL rows under newsletter column. Frontend renders social icons under newsletter form.
+
+**Files changed:**
+- `resources/views/admin/settings/footer.blade.php` — added social platform/url repeater fields for newsletter column type
+- `resources/views/partials/footer-columns.blade.php` — renders social icons under newsletter form using platform-specific SVG icons
+- `app/Http/Controllers/AdminController.php` — updated validation and save logic for social icons
+
+## 225. Footer Settings — Controller Save Logic Fix (25 Aug 2026)
+
+Fixed Controller save logic — added 'social' type to allowedTypes and proper platform+url saving for newsletter type links.
+
+**Files changed:**
+- `app/Http/Controllers/AdminController.php` — `updateFooterSettings()` added 'social' to allowedTypes array; newsletter column now saves social array with platform+url pairs
+
+## 226. Footer Settings — Admin JS Fixes (25 Aug 2026)
+
+Fixed Footer Settings admin JavaScript:
+
+**Files changed:**
+- `resources/views/admin/settings/footer.blade.php`:
+  - `rebuildFooterJson()` now correctly reads `.footer-social-platform` + `.footer-social-url` for newsletter type
+  - Type change handler properly rebuilds card content (removes old blocks, adds correct new blocks)
+  - `initFooterTooltips()` helper added for dynamically created `.footer-remove-btn` elements
+
+## 227. Admin Layout — Tooltip Fallback Selector Fix (25 Aug 2026)
+
+Added `.footer-remove-btn[title]` to fallback selector in admin layout for tooltip initialization on dynamically created elements.
+
+**Files changed:**
+- `resources/views/admin/layouts/app.blade.php` — updated tooltip initialization selector
+
+## 228. Backend CSS — Tooltip Custom Theme (25 Aug 2026)
+
+Added tooltip custom theme to backend.css with `--bs-tooltip-*` CSS variables for consistent dark theme (#1f0300) across admin.
+
+**Files changed:**
+- `public/assets/front/css/backend.css` — added `--bs-tooltip-bg`, `--bs-tooltip-color`, `--bs-tooltip-opacity`, `--bs-tooltip-arrow-color` variables for dark theme tooltips
+
+## 229. Fixed Per_Page Dropdown Bug Across All 17 Admin Pages (26 Aug 2026)
+
+Fixed per_page dropdown bug across all 17 admin pages — when changing items per page, the 'page' query parameter was not reset, causing empty pages when on the last page with a different per_page value. Added 'page => null' to fullUrlWithQuery() in all per_page dropdowns.
+
+**Files changed:**
+- Admin index views: orders, products, categories, brands, users, customers, staff, sellers, coupons, faqs, pages, blogs, blog-categories, contacts, home-page, revisions, file-revisions
+

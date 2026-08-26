@@ -195,7 +195,7 @@
                             <div class="card p-3 border-dashed h-100">
                                 @if($product->image)
                                     <div class="mb-3 d-flex align-items-center bg-light p-2 rounded">
-                                        <img src="{{ storedImageUrl($product->image, 'assets/images/thumbnails') }}" width="60" height="60" style="object-fit:cover; border-radius:4px; border:1px solid #ddd;">
+                                        <img src="{{ storedImageUrl($product->image, 'assets/images/thumbnails') }}" width="60" height="60" class="admin-image-thumb-bordered">
                                         <div class="ms-3">
                                             <small class="text-muted d-block fw-bold">Current Primary Image</small>
                                             <small class="text-muted">Upload a new one below or choose from image manager to replace.</small>
@@ -209,7 +209,7 @@
                                 <input type="hidden" name="image_from_manager" id="image_from_manager_product_image" value="{{ $selectedImageFromManager }}">
                                 <div id="impPreview_product_image" class="{{ $selectedImageFromManager ? '' : 'd-none' }} my-2">
                                     @if($selectedImageFromManager)
-                                        <img src="{{ asset('storage/' . $selectedImageFromManager) }}" width="80" style="border-radius:4px;">
+                                        <img src="{{ asset('storage/' . $selectedImageFromManager) }}" width="80" class="admin-image-thumb">
                                         <small class="text-muted d-block">Selected from image manager</small>
                                     @endif
                                 </div>
@@ -230,10 +230,10 @@
                                         <div class="row g-2" id="existing-gallery">
                                             @foreach($product->galleryImages as $img)
                                                 <div class="col-auto position-relative text-center">
-                                                       <img src="{{ $img->thumb_url }}" width="60" height="60" style="object-fit:cover; border-radius:4px; border:1px solid #ddd;">
+                                                       <img src="{{ $img->thumb_url }}" width="60" height="60" class="admin-image-thumb-bordered">
                                                     <div class="form-check mt-1 d-flex justify-content-center">
                                                         <input type="checkbox" name="delete_gallery_ids[]" value="{{ $img->id }}" class="form-check-input me-1" id="del_img_{{ $img->id }}">
-                                                        <label class="form-check-label text-danger small" style="cursor:pointer;" for="del_img_{{ $img->id }}">Remove</label>
+                                                        <label class="form-check-label text-danger small admin-clickable" for="del_img_{{ $img->id }}">Remove</label>
                                                     </div>
                                                 </div>
                                             @endforeach

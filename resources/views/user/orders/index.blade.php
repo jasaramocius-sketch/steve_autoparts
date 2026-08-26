@@ -23,7 +23,7 @@
 
 <div class="dashboard-filter">
     @foreach($statuses as $s)
-        <a href="{{ $s ? route('user.orders', ['status' => $s]) : route('user.orders') }}"
+        <a href="{{ $s ? route('user.orders', ['status' => $s, 'page' => null]) : route('user.orders', ['page' => null]) }}"
            class="dashboard-filter__link{{ $currentStatus === $s ? ' active' : '' }}">
             {{ $statusLabels[$s] }}
         </a>

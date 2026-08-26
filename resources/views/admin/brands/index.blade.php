@@ -16,7 +16,7 @@
                 <span class="text-muted small">Show</span>
                 <select class="form-select w-auto" onchange="window.location.href=this.value">
                     @foreach([10, 20, 50, 100] as $n)
-                        <option value="{{ request()->fullUrlWithQuery(['per_page' => $n]) }}" {{ (int)request('per_page', 10) === $n ? 'selected' : '' }}>{{ $n }}</option>
+                        <option value="{{ request()->fullUrlWithQuery(['per_page' => $n, 'page' => null]) }}" {{ (int)request('per_page', 10) === $n ? 'selected' : '' }}>{{ $n }}</option>
                     @endforeach
                 </select>
                 <span class="text-muted small">per page</span>
@@ -43,7 +43,7 @@
                         <td class="ps-3">{{ $brand->id }}</td>
                         <td>
                             @if($brand->image)
-                                <img src="{{ storedImageUrl($brand->image, 'assets/images/brands') }}" width="50" height="50" style="object-fit:cover; border-radius:4px;" onerror="this.onerror=null;this.src='{{ asset('assets/images/placeholder.png') }}'">
+                                <img src="{{ storedImageUrl($brand->image, 'assets/images/brands') }}" width="50" height="50" class="admin-image-thumb" onerror="this.onerror=null;this.src='{{ asset('assets/images/placeholder.png') }}'">
                             @else
                                 <span class="text-muted">—</span>
                             @endif
@@ -60,7 +60,7 @@
                             <form action="{{ route('admin.brands.toggle-status', $brand->id) }}" method="POST" class="d-inline featured-status-btn">
                                 @csrf
                                 <button type="submit" class="btn btn-sm border-0 p-0 steve-btn">
-                                    <span class="badge {{ $brand->status ? 'bg-success' : 'bg-danger' }}" style="cursor:pointer;">
+                                    <span class="badge admin-clickable {{ $brand->status ? 'bg-success' : 'bg-danger' }}">
                                         {{  $brand->status ? 'Active' : 'Inactive' }}
                                     </span>
                                 </button>

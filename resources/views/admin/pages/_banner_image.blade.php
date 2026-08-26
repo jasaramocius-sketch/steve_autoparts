@@ -4,7 +4,7 @@
     @if (isset($page) && $page->image)
         <div class="mb-2 page-image-current">
             <img src="{{ storedImageUrl($page->image, 'assets/images/pages') }}" alt="Current banner image"
-                 style="max-width: 300px; height: auto; border-radius: 4px; border: 1px solid #ddd;">
+                 class="admin-image-preview">
         </div>
     @endif
 

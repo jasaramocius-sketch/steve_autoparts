@@ -753,7 +753,10 @@ $(document).ready(function() {
 
     // Brand Filter Auto-Submit
     $('#brand-filter-form select[name="brand"]').on('change', function() {
-        $('#brand-filter-form').submit();
+        var url = new URL(window.location.href);
+        url.searchParams.set('brand', this.value);
+        url.searchParams.delete('page');
+        window.location.href = url.toString();
     });
 
     // Vehicle Nav Filter (My Vehicles)

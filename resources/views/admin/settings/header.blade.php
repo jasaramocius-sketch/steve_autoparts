@@ -19,7 +19,7 @@
                                     <label class="form-label"><strong>Header Logo</strong></label>
                                     <div class="mb-2">
                                     <img src="{{ storedImageUrl($settings['header_logo'] ?? 'BwSkuSZ7ZYGWPc4Zk3CfeFzcn49dHpx3143n4WKS.png', 'assets/images') }}"
-                                             alt="Header Logo" style="max-height:60px;border-radius:4px;border:1px solid #ddd;">
+                                             alt="Header Logo" class="admin-logo-preview">
                                     </div>
                                     <input type="hidden" name="image_from_manager_header_logo" id="image_from_manager_header_logo">
                                     <div id="impPreview_header_logo" class="d-none mt-2"></div>
@@ -33,7 +33,7 @@
                                     <label class="form-label"><strong>Favicon</strong></label>
                                     <div class="mb-2">
                                         <img src="{{ storedImageUrl($settings['header_favicon'] ?? '1730880696Fabpng.png', 'assets/images') }}"
-                                             alt="Favicon" style="max-height:40px;border-radius:4px;border:1px solid #ddd;">
+                                             alt="Favicon" class="admin-favicon-preview">
                                     </div>
                                     <input type="hidden" name="image_from_manager_header_favicon" id="image_from_manager_header_favicon">
                                     <div id="impPreview_header_favicon" class="d-none mt-2"></div>
@@ -50,7 +50,7 @@
                                     <label class="form-label"><strong>Mobile Menu Logo</strong></label>
                                     <div class="mb-2">
                                         <img src="{{ storedImageUrl($settings['mobile_logo'] ?? '1730281141Whitepng.png', 'assets/images') }}"
-                                             alt="Mobile Logo" style="max-height:50px;border-radius:4px;border:1px solid #ddd;">
+                                             alt="Mobile Logo" class="admin-logo-preview admin-logo-preview-small">
                                     </div>
                                     <input type="hidden" name="image_from_manager_mobile_logo" id="image_from_manager_mobile_logo">
                                     <div id="impPreview_mobile_logo" class="d-none mt-2"></div>
@@ -64,7 +64,7 @@
                                     <label class="form-label"><strong>Footer Logo</strong></label>
                                     <div class="mb-2">
                                         <img src="{{ storedImageUrl($settings['footer_logo'] ?? '1730281141Whitepng.png', 'assets/images') }}"
-                                             alt="Footer Logo" style="max-height:50px;border-radius:4px;border:1px solid #ddd;">
+                                             alt="Footer Logo" class="admin-logo-preview admin-logo-preview-small">
                                     </div>
                                     <input type="hidden" name="image_from_manager_footer_logo" id="image_from_manager_footer_logo">
                                     <div id="impPreview_footer_logo" class="d-none mt-2"></div>
@@ -83,7 +83,7 @@
                                     @if (!empty($settings['admin_header_bg']))
                                         <div class="mb-2 admin-header-bg-current">
                                             <img src="{{ storedImageUrl($settings['admin_header_bg'], 'assets/images') }}" alt="Admin Header Background"
-                                                 style="max-width:300px;max-height:80px;border-radius:4px;border:1px solid #ddd;object-fit:cover;">
+                                                 class="admin-bg-preview">
                                         </div>
                                     @endif
                                     <input type="hidden" name="image_from_manager_admin_header_bg" id="image_from_manager_admin_header_bg">

@@ -12,8 +12,8 @@
     </div>
 @endif
 <!-- Account Details Panel -->
-<div class="acc-info-wrapper rounded p-4 mb-3" style="background-color: #fcfbfb; border: 1px solid #eee;">
-    <h4 style="color: #1f0300; font-weight: 600;" class="mb-3">Account Details</h4>
+<div class="acc-info-wrapper rounded p-4 mb-3 admin-profile-info">
+    <h4 class="mb-3 admin-profile-heading">Account Details</h4>
     <div class="list-wrapper">
     <div class="row w-100">
         <div class="col-md-3">
@@ -29,18 +29,18 @@
         </div>
         <div class="col-md-3">        
         <ul class="list-unstyled d-flex flex-column gap-2">            
-            <li><strong class="text-secondary" style="font-size: 14px;">Name:</strong> <span class="user-name text-transform-capitalize" style="font-weight: 500;">{{ $user['name'] }}</span></li>
-            <li><strong class="text-secondary" style="font-size: 14px;">Email Address:</strong> <span class="user-email text-transform-capitalize" style="font-weight: 500;">{{ $user['email'] }}</span></li>
-            <li><strong class="text-secondary" style="font-size: 14px;">Phone:</strong> <span class="user-phone text-transform-capitalize" style="font-weight: 500;">{{ $user['phone'] }}</span></li>
+            <li><strong class="text-secondary admin-profile-label">Name:</strong> <span class="user-name text-transform-capitalize admin-profile-value">{{ $user['name'] }}</span></li>
+            <li><strong class="text-secondary admin-profile-label">Email Address:</strong> <span class="user-email text-transform-capitalize admin-profile-value">{{ $user['email'] }}</span></li>
+            <li><strong class="text-secondary admin-profile-label">Phone:</strong> <span class="user-phone text-transform-capitalize admin-profile-value">{{ $user['phone'] }}</span></li>
         </ul>
         </div>
         <div class="col-md-6">
         <ul class="list-unstyled d-flex flex-column gap-2">
-            <li><strong class="text-secondary" style="font-size: 14px;">Address:</strong> <span class="user-address text-transform-capitalize" style="font-weight: 500;">{!! $user['address'] !!}</span></li>
-            <li><strong class="text-secondary" style="font-size: 14px;">City:</strong> <span class="user-city text-transform-capitalize" style="font-weight: 500;">{{ $user['city'] }}</span></li>
-            <li><strong class="text-secondary" style="font-size: 14px;">State:</strong> <span class="user-state text-transform-capitalize" style="font-weight: 500;">{{ $user['state'] }}</span></li>
-            <li><strong class="text-secondary" style="font-size: 14px;">Country:</strong> <span class="user-country text-transform-capitalize" style="font-weight: 500;">{{ $user['country'] }}</span></li>
-            <li><strong class="text-secondary" style="font-size: 14px;">Zip:</strong> <span class="user-postal text-transform-capitalize" style="font-weight: 500;">{{ $user['postal_code'] }}</span></li>
+            <li><strong class="text-secondary admin-profile-label">Address:</strong> <span class="user-address text-transform-capitalize admin-profile-value">{!! $user['address'] !!}</span></li>
+            <li><strong class="text-secondary admin-profile-label">City:</strong> <span class="user-city text-transform-capitalize admin-profile-value">{{ $user['city'] }}</span></li>
+            <li><strong class="text-secondary admin-profile-label">State:</strong> <span class="user-state text-transform-capitalize admin-profile-value">{{ $user['state'] }}</span></li>
+            <li><strong class="text-secondary admin-profile-label">Country:</strong> <span class="user-country text-transform-capitalize admin-profile-value">{{ $user['country'] }}</span></li>
+            <li><strong class="text-secondary admin-profile-label">Zip:</strong> <span class="user-postal text-transform-capitalize admin-profile-value">{{ $user['postal_code'] }}</span></li>
         </ul>
         </div>
     </div>
@@ -60,11 +60,11 @@
                         <label class="form-label">Profile Photo</label>
                         <input type="hidden" name="image_from_manager" id="image_from_manager_avatar">
                         <div class="d-flex align-items-center gap-3">
-                            <div id="impPreview_avatar" style="width:80px;height:80px;border-radius:50%;overflow:hidden;border:2px solid #eee;background:#f0f0f0;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <div id="impPreview_avatar" class="rounded-circle overflow-hidden admin-avatar-80">
                                 @if(Auth::user()->avatar)
-                                    <img src="{{ storedImageUrl(Auth::user()->avatar) }}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;">
+                                    <img src="{{ storedImageUrl(Auth::user()->avatar) }}" alt="Avatar">
                                 @else
-                                    <span style="font-size:32px;font-weight:600;color:#999;">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</span>
+                                    <span class="admin-avatar-initial">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</span>
                                 @endif
                             </div>
                             <div>

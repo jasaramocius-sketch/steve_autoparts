@@ -3,7 +3,7 @@
 @include('partials.page-attributes', ['pageId' => 'admin-login-page', 'pageClass' => 'admin-login-page'])
 @section('content')
 
-<div class="container pt-5" style="margin: 100px auto; ">
+<div class="container pt-5 admin-login-container">
     <div class="row justify-content-center">
         <div class="col-md-4">
 
@@ -23,13 +23,13 @@
                                    class="form-control">
                         </div>
 
-                        <div class="mb-3" style="position:relative">
+                        <div class="mb-3 admin-password-field">
                             <label>Password</label>
                             <input type="password"
                                    name="password"
                                    id="admin-password"
                                    class="form-control">
-                            <span style="position:absolute;right:12px;top:38px;cursor:pointer;z-index:5" onclick="togglePassword('admin-password',this)">
+                            <span class="admin-password-toggle" onclick="togglePassword('admin-password',this)">
                               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                             </span>
                         </div>

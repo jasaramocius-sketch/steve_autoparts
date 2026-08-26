@@ -4,10 +4,6 @@
 @section('page-title', 'File Revisions')
 @section('content')
 
-<style>
-    .file-path-cell { max-width: 400px; word-break: break-all; }
-</style>
-
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap flex-md-nowrap">
     <!-- <h4 class="fw-bold mb-0">File Revisions</h4> -->
     <div>
@@ -23,7 +19,7 @@
                 <span class="text-muted small">Show</span>
                 <select class="form-select w-auto" onchange="window.location.href=this.value">
                     @foreach([10, 20, 50, 100] as $n)
-                        <option value="{{ request()->fullUrlWithQuery(['per_page' => $n]) }}" {{ (int)request('per_page', 20) === $n ? 'selected' : '' }}>{{ $n }}</option>
+                        <option value="{{ request()->fullUrlWithQuery(['per_page' => $n, 'page' => null]) }}" {{ (int)request('per_page', 20) === $n ? 'selected' : '' }}>{{ $n }}</option>
                     @endforeach
                 </select>
                 <span class="text-muted small">per page</span>

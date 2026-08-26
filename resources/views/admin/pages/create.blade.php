@@ -4,7 +4,7 @@
 @section('page-title', 'Add Page')
 @section('content')
 
-<style>
+<!--
 .page-builder-nav {
     width: 180px;
     flex-shrink: 0;
@@ -67,7 +67,7 @@
 .serp-url { font-size: 13px; color: #4d5156; }
 .serp-title { font-size: 18px; color: #1a0dab; line-height: 1.3; margin: 2px 0; }
 .serp-desc { font-size: 13px; color: #4d5156; line-height: 1.4; }
-</style>
+-->
 
 <form action="{{ route('admin.pages.store') }}" method="POST" id="pageForm">
     @csrf
@@ -90,7 +90,7 @@
             {{-- Header bar: title + status + save --}}
             <div class="d-flex align-items-center gap-2 pb-3 mb-4 border-bottom page-header-bar">
                 <input type="text" name="title" id="titleInput" class="page-title-input form-control form-control-lg border-0 fw-semibold flex-grow-1 @error('title') is-invalid @enderror"
-                       placeholder="Untitled page" value="{{ old('title') }}" maxlength="255" required style="font-size:1.25rem; box-shadow:none; padding-left:15px;">
+                       placeholder="Untitled page" value="{{ old('title') }}" maxlength="255" required>
                 @error('title') <div class="invalid-feedback">{{ $message }}</div> @enderror
 
                 <button type="button" id="statusPill" class="status-pill {{ old('status', true) ? 'is-active' : '' }}" data-active="{{ old('status', 1) ? '1' : '0' }}">

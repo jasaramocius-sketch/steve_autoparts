@@ -11,6 +11,7 @@
 @endphp
 @if($filterRoute)
 <form method="GET" action="{{ route($filterRoute) }}" class="d-flex align-items-center gap-2 flex-wrap date-range-filter-form">
+    <input type="hidden" name="page" value="">
     @if(request()->has('per_page'))
         <input type="hidden" name="per_page" value="{{ request('per_page') }}">
     @endif

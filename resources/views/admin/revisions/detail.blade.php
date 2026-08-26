@@ -4,7 +4,7 @@
 @section('page-title', 'Revision #' . $rev->id)
 @section('content')
 
-<style>
+<!--
     .rev-header { background: #f8f9fa; border-bottom: 1px solid #dee2e6; }
     .diff-table { font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 13px; width: 100%; border-collapse: collapse; }
     .diff-table th { text-align: left; padding: 10px 12px; border-bottom: 2px solid #dee2e6; font-weight: 600; }
@@ -17,7 +17,7 @@
     .val-same { color: #6a737d; }
     .meta-icon { width: 20px; text-align: center; display: inline-block; }
     .empty-diff { color: #999; padding: 20px; text-align: center; }
-</style>
+-->
 <div class="revision-page">
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="fw-bold mb-0">
@@ -80,7 +80,7 @@
         @if($rev->action === 'created' && $rev->new_values)
             <div class="table-responsive">
             <table class="diff-table">
-                <thead><tr><th style="width:150px">Field</th><th>Value (New)</th></tr></thead>
+                <thead><tr><th class="admin-table-field">Field</th><th>Value (New)</th></tr></thead>
                 <tbody>
                     @foreach($rev->new_values as $field => $val)
                         @php $valStr = is_scalar($val) ? (string)$val : (is_null($val) ? 'null' : json_encode($val, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)); @endphp
@@ -95,7 +95,7 @@
         @elseif($rev->action === 'deleted' && $rev->old_values)
             <div class="table-responsive">
             <table class="diff-table">
-                <thead><tr><th style="width:150px">Field</th><th>Value (Old)</th></tr></thead>
+                <thead><tr><th class="admin-table-field">Field</th><th>Value (Old)</th></tr></thead>
                 <tbody>
                     @foreach($rev->old_values as $field => $val)
                         @php $valStr = is_scalar($val) ? (string)$val : (is_null($val) ? 'null' : json_encode($val, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)); @endphp
@@ -110,7 +110,7 @@
         @elseif($rev->action === 'updated' && $rev->old_values && $rev->new_values)
             <div class="table-responsive">
             <table class="diff-table">
-                <thead><tr><th style="width:150px">Field</th><th>Old Value</th><th>New Value</th></tr></thead>
+                <thead><tr><th class="admin-table-field">Field</th><th>Old Value</th><th>New Value</th></tr></thead>
                 <tbody>
                     @php $hasChanges = false; @endphp
                     @foreach($rev->new_values as $field => $newVal)

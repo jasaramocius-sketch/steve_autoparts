@@ -1,11 +1,11 @@
 <?php
 
 if (!function_exists('sortUrl')) {
-    function sortUrl($column, $currentSortBy, $currentSortDir): string
-    {
-        $newDir = $currentSortBy === $column && $currentSortDir === 'asc' ? 'desc' : 'asc';
-        return request()->fullUrlWithQuery(['sort_by' => $column, 'sort_dir' => $newDir]);
-    }
+function sortUrl($column, $currentSortBy, $currentSortDir): string
+{
+    $newDir = $currentSortBy === $column && $currentSortDir === 'asc' ? 'desc' : 'asc';
+    return request()->fullUrlWithQuery(['sort_by' => $column, 'sort_dir' => $newDir, 'page' => null]);
+}
 }
 
 if (!function_exists('sortIndicator')) {

@@ -30,7 +30,7 @@
                     <label class="form-label">Image</label>
                     @if($seller->image)
                         <div class="mb-2">
-                            <img src="{{ storedImageUrl($seller->image, 'assets/images') }}" width="60" height="60" style="object-fit:cover; border-radius:4px; border:1px solid #ddd;">
+                            <img src="{{ storedImageUrl($seller->image, 'assets/images') }}" width="60" height="60" class="admin-image-thumb-bordered">
                         </div>
                     @endif
                     <input type="hidden" name="image_from_manager" id="image_from_manager_seller_image">

@@ -5511,7 +5511,7 @@ footer .footer-row .footer-col-title {
 
 .gs-footer-section .footer-row .left-info img {
   margin-bottom: 40px;
-  width: 100px;
+  /* width: 100px; */
   -o-object-fit: contain;
   object-fit: contain
 }
@@ -5966,7 +5966,11 @@ footer .footer-row .footer-col-title {
   border-color: var(--hov-primary) !important;
   color: #fff !important
 }
-
+.btn:focus-visible{
+  box-shadow: unset !important;
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
 .card .btn-outline-primary:hover {
   background-color: var(--primary);
   color: #fff;
@@ -17490,6 +17494,11 @@ span.product-badge.product-cat {
 .steve-btn.swiper-button-disabled i{
 background-color: transparent;  
 color: var(--primary); 
+cursor: text;
+}
+.steve-btn.swiper-button-disabled i:hover{
+  background-color: transparent; 
+  color: var(--primary); 
 }
 .swiper-slide .single-product .product-title {
   display: -webkit-box;

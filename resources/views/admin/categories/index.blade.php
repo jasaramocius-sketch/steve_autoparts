@@ -2,25 +2,6 @@
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'admin-categories-index-page', 'pageClass' => 'admin-categories-index-page'])
 @section('page-title', 'All Categories')
-@push('page-builder-css')
-<style>
-    @media (max-width:575px) {
-        .cat-topbar { flex-wrap:wrap; gap:8px; }
-        .cat-topbar form { flex:1; min-width:0; }
-        .cat-topbar form .form-control { width:100% !important; }
-        .cat-topbar .btn-primary { flex-shrink:0; }
-        .cat-controls { flex-wrap:wrap; gap:4px; }
-        .cat-controls .text-muted { white-space:nowrap; }
-    }
-    @media (max-width:360px) {
-        .cat-topbar { flex-direction:column; }
-        .cat-topbar form { width:100%; }
-        .cat-topbar .btn-primary { width:100%; justify-content:center; }
-        .cat-topbar .btn-primary i { display:none; }
-        .cat-controls { flex-direction:column; gap:4px; }
-    }
-</style>
-@endpush
 @section('content')
 
 @php $trashedCount = \App\Models\Category::onlyTrashed()->count(); @endphp
@@ -57,7 +38,7 @@
                 <span class="text-muted small">Show</span>
                 <select class="form-select w-auto" onchange="window.location.href=this.value">
                     @foreach([10, 20, 50, 100] as $n)
-                        <option value="{{ request()->fullUrlWithQuery(['per_page' => $n]) }}" {{ (int)request('per_page', 10) === $n ? 'selected' : '' }}>{{ $n }}</option>
+                        <option value="{{ request()->fullUrlWithQuery(['per_page' => $n, 'page' => null]) }}" {{ (int)request('per_page', 10) === $n ? 'selected' : '' }}>{{ $n }}</option>
                     @endforeach
                 </select>
                 <span class="text-muted small">per page</span>
@@ -119,7 +100,7 @@
                         <form action="{{ route('admin.categories.toggle-status', $category->id) }}" method="POST" class="d-inline featured-status-btn">
                             @csrf
                             <button type="submit" class="btn btn-sm border-0 p-0 steve-btn">
-                                <span class="badge {{ $category->status ? 'bg-success' : 'bg-danger' }}" style="cursor:pointer;">
+                                <span class="badge admin-clickable {{ $category->status ? 'bg-success' : 'bg-danger' }}">
                                     {{  $category->status ? 'Active' : 'Inactive' }}
                                 </span>
                             </button>

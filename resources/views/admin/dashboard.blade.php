@@ -5,66 +5,66 @@
 @section('content')
 <div class="row g-3 mb-4">
     <div class="col-md">
-        <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #0d6efd !important;">
+        <div class="card border-0 shadow-sm h-100 admin-dashboard-card-blue">
             <div class="card-body d-flex align-items-center justify-content-between">
                 <div>
                     <p class="text-muted mb-1 small text-uppercase fw-semibold">Total Orders</p>
                     <h3 class="mb-0 fw-bold">{{ $totalOrders }}</h3>
                 </div>
-                <div class="rounded-3 p-3" style="background: #0d6efd15;">
-                    <i class="fas fa-shopping-cart fa-2x" style="color: #0d6efd;"></i>
+                <div class="rounded-3 p-3 admin-dashboard-icon-blue">
+                    <i class="fas fa-shopping-cart fa-2x"></i>
                 </div>
             </div>
         </div>
     </div>
     <div class="col-md">
-        <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #198754 !important;">
+        <div class="card border-0 shadow-sm h-100 admin-dashboard-card-green">
             <div class="card-body d-flex align-items-center justify-content-between">
                 <div>
                     <p class="text-muted mb-1 small text-uppercase fw-semibold">Total Revenue</p>
                     <h3 class="mb-0 fw-bold">{{ currency_format($totalRevenue) }}</h3>
                 </div>
-                <div class="rounded-3 p-3" style="background: #19875415;">
-                    <i class="fas fa-dollar-sign fa-2x" style="color: #198754;"></i>
+                <div class="rounded-3 p-3 admin-dashboard-icon-green">
+                    <i class="fas fa-dollar-sign fa-2x"></i>
                 </div>
             </div>
         </div>
     </div>
     <div class="col-md">
-        <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #fd7e14 !important;">
+        <div class="card border-0 shadow-sm h-100 admin-dashboard-card-orange">
             <div class="card-body d-flex align-items-center justify-content-between">
                 <div>
                     <p class="text-muted mb-1 small text-uppercase fw-semibold">Total Products</p>
                     <h3 class="mb-0 fw-bold">{{ $totalProducts }}</h3>
                 </div>
-                <div class="rounded-3 p-3" style="background: #fd7e1415;">
-                    <i class="fas fa-box fa-2x" style="color: #fd7e14;"></i>
+                <div class="rounded-3 p-3 admin-dashboard-icon-orange">
+                    <i class="fas fa-box fa-2x"></i>
                 </div>
             </div>
         </div>
     </div>
     <div class="col-md">
-        <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #0dcaf0 !important;">
+        <div class="card border-0 shadow-sm h-100 admin-dashboard-card-cyan">
             <div class="card-body d-flex align-items-center justify-content-between">
                 <div>
                     <p class="text-muted mb-1 small text-uppercase fw-semibold">Total Customers</p>
                     <h3 class="mb-0 fw-bold">{{ $totalCustomers }}</h3>
                 </div>
-                <div class="rounded-3 p-3" style="background: #0dcaf015;">
-                    <i class="fas fa-users fa-2x" style="color: #0dcaf0;"></i>
+                <div class="rounded-3 p-3 admin-dashboard-icon-cyan">
+                    <i class="fas fa-users fa-2x"></i>
                 </div>
             </div>
         </div>
     </div>
     <div class="col-md">
-        <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #dc3545 !important;">
+        <div class="card border-0 shadow-sm h-100 admin-dashboard-card-red">
             <div class="card-body d-flex align-items-center justify-content-between">
                 <div>
                     <p class="text-muted mb-1 small text-uppercase fw-semibold">Pending Orders</p>
                     <h3 class="mb-0 fw-bold">{{ $pendingOrders }}</h3>
                 </div>
-                <div class="rounded-3 p-3" style="background: #dc354515;">
-                    <i class="fas fa-clock fa-2x" style="color: #dc3545;"></i>
+                <div class="rounded-3 p-3 admin-dashboard-icon-red">
+                    <i class="fas fa-clock fa-2x"></i>
                 </div>
             </div>
         </div>
@@ -130,11 +130,11 @@
             <div class="card-header bg-white border-bottom py-3">
                 <h5 class="mb-0 fw-bold"><i class="fas fa-chart-pie me-2"></i>Orders by Status</h5>
             </div>
-            <div class="card-body d-flex align-items-center justify-content-center" style="min-height: 300px;">
+            <div class="card-body d-flex align-items-center justify-content-center admin-dashboard-chart-card">
                 @if($ordersByStatus->isEmpty())
                     <p class="text-muted mb-0">No orders found</p>
                 @else
-                    <div style="position: relative; width: 100%; max-width: 280px;">
+                    <div class="admin-dashboard-chart-wrap">
                         <canvas id="ordersByStatusChart"></canvas>
                     </div>
                 @endif
@@ -153,8 +153,8 @@
                     <button type="button" class="btn btn-outline-primary" data-view="5min">5 min</button>
                 </div>
             </div>
-            <div class="card-body" style="min-height: 300px;">
-                <canvas id="monthlyRevenueChart" style="width: 100%;"></canvas>
+            <div class="card-body admin-dashboard-chart-card">
+                <canvas id="monthlyRevenueChart" class="admin-dashboard-chart"></canvas>
             </div>
         </div>
     </div>

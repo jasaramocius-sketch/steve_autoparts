@@ -22,7 +22,7 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-semibold text-muted small">Message</label>
-                    <div class="p-3 bg-light rounded" style="white-space: pre-wrap; line-height: 1.8;">{{ $contact->message }}</div>
+                    <div class="p-3 bg-light rounded admin-preserve-whitespace">{{ $contact->message }}</div>
                 </div>
             </div>
         </div>
@@ -69,7 +69,7 @@
             <div class="card-body">
                 <div class="d-flex align-items-center gap-3">
                     @if($contact->product->image)
-                        <img src="{{ storedImageUrl($contact->product->image, 'assets/images/thumbnails') }}" alt="" style="width:60px;height:60px;object-fit:cover;border-radius:8px;">
+                        <img src="{{ storedImageUrl($contact->product->image, 'assets/images/thumbnails') }}" alt="" class="admin-contact-product-image">
                     @endif
                     <div>
                         <a href="{{ route('product', $contact->product->slug) }}" target="_blank" class="fw-semibold text-dark text-decoration-none">{{ $contact->product->name }}</a>

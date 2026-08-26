@@ -47,7 +47,7 @@
                 <span class="text-muted small">Show</span>
                 <select class="form-select w-auto" onchange="window.location.href=this.value">
                     @foreach([10, 20, 50, 100] as $n)
-                        <option value="{{ request()->fullUrlWithQuery(['per_page' => $n]) }}" {{ (int)request('per_page', 10) === $n ? 'selected' : '' }}>{{ $n }}</option>
+                        <option value="{{ request()->fullUrlWithQuery(['per_page' => $n, 'page' => null]) }}" {{ (int)request('per_page', 10) === $n ? 'selected' : '' }}>{{ $n }}</option>
                     @endforeach
                 </select>
                 <span class="text-muted small">per page</span>
@@ -77,7 +77,7 @@
                         <td class="ps-3">{{ $user->id }}</td>
                         <td>
                             <div class="d-flex align-items-center gap-2">
-                                <div style="width:32px;height:32px;border-radius:50%;background:var(--bs-primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">
+                                <div class="admin-user-avatar">
                                     {{ strtoupper(substr($user->name, 0, 1)) }}
                                 </div>
                                 <span class="user-name text-transform-capitalize">{{ $user->name }}</span>
@@ -98,7 +98,7 @@
                             <form action="{{ route('admin.users.toggle-status', $user->id) }}" method="POST" class="d-inline featured-status-btn">
                                 @csrf
                                 <button type="submit" class="btn btn-sm border-0 p-0 steve-btn">
-                                    <span class="badge {{ $user->status === 'active' ? 'bg-success' : 'bg-danger' }}" style="cursor:pointer;">
+                                    <span class="badge admin-clickable {{ $user->status === 'active' ? 'bg-success' : 'bg-danger' }}">
                                         {{ $user->status === 'active' ? 'Active' : 'Inactive' }}
                                     </span>
                                 </button>

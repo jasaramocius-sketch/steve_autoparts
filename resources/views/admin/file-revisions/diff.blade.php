@@ -4,17 +4,6 @@
 @section('page-title', 'File Diff #' . $rev->id)
 @section('content')
 
-<style>
-    .diff-header { background: #f8f9fa; border-bottom: 1px solid #dee2e6; }
-    .diff-content { font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 13px; line-height: 1.5; overflow-x: auto; }
-    .diff-content pre { margin: 0; padding: 8px 12px; white-space: pre-wrap; word-break: break-all; }
-    .diff-line-add { background: #e6ffed; }
-    .diff-line-del { background: #ffeef0; }
-    .diff-line-info { background: #f6f8fa; color: #6a737d; }
-    .diff-line-hunk { background: #f0f0f0; color: #0366d6; font-weight: 500; }
-    .diff-empty { color: #999; font-style: italic; padding: 20px; text-align: center; }
-</style>
-
 <!-- <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="fw-bold mb-0">
         File Diff

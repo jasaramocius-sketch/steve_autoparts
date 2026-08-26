@@ -156,7 +156,7 @@
 }
 
 .shop_details_text .category {
-    color: #0A69D8;
+    color:var(--secondary);
     font-size: 14px;
     font-weight: 500;
     text-transform: capitalize;
@@ -542,6 +542,7 @@
     margin-top: -1px;
     position: absolute;
     left: 0;
+    stroke:var(--primary);
 }
 
 .shop_details_sidebar_info h5 {
@@ -604,10 +605,10 @@
 .shop_details_sidebar_store ul li p::after {
     position: absolute;
     content: "";
-    width: 6px;
-    height: 6px;
-    background: #7d7b7b;
-    top: 6px;
+    width: 10px;
+    height: 2px;
+    background: var(--primary);
+    top: 10px;
     left: -13px;
     border-radius: 50%;
 }
@@ -759,7 +760,7 @@
 
               @if($product->year && $product->make && $product->model)
                 <div class="d-flex flex-wrap align-items-center mb-2" style="gap: 8px;">
-                  <span class="badge" style="background: #e3f2fd; color: #1565c0; font-size: 13px; font-weight: 500; padding: 6px 12px; border-radius: 6px; margin-top:10px;">
+                  <span class="badge" style="background: #e3f2fd; color: var(--secondary); font-size: 13px; font-weight: 500; padding: 6px 12px; border-radius: 6px; margin-top:10px;">
                     <i class="las la-car mr-1"></i> Fits: {{ $product->year }} {{ $product->make }} {{ $product->model }}
                   </span>
                 </div>

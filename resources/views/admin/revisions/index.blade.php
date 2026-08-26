@@ -15,7 +15,7 @@
                 <span class="text-muted small">Show</span>
                 <select class="form-select w-auto" onchange="window.location.href=this.value">
                     @foreach([10, 20, 50, 100] as $n)
-                        <option value="{{ request()->fullUrlWithQuery(['per_page' => $n]) }}" {{ (int)request('per_page', 20) === $n ? 'selected' : '' }}>{{ $n }}</option>
+                        <option value="{{ request()->fullUrlWithQuery(['per_page' => $n, 'page' => null]) }}" {{ (int)request('per_page', 20) === $n ? 'selected' : '' }}>{{ $n }}</option>
                     @endforeach
                 </select>
                 <span class="text-muted small">per page</span>
@@ -84,7 +84,7 @@
                                 <span class="badge bg-secondary">{{ $rev->action }}</span>
                             @endif
                         </td>
-                        <td style="max-width: 250px;">
+                        <td class="admin-max-width-250">
                             @if($rev->url)
                                 <span class="small text-muted" title="{{ $rev->url }}">{{ \Illuminate\Support\Str::limit($rev->url, 40) }}</span>
                             @else

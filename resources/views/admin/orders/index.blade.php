@@ -17,7 +17,7 @@
                     <span class="text-muted small">Show</span>
                     <select class="form-select w-auto" onchange="window.location.href=this.value">
                         @foreach([10, 20, 50, 100] as $n)
-                            <option value="{{ request()->fullUrlWithQuery(['per_page' => $n]) }}" {{ (int)request('per_page', 10) === $n ? 'selected' : '' }}>{{ $n }}</option>
+                            <option value="{{ request()->fullUrlWithQuery(['per_page' => $n, 'page' => null]) }}" {{ (int)request('per_page', 10) === $n ? 'selected' : '' }}>{{ $n }}</option>
                         @endforeach
                     </select>
                     <span class="text-muted small">per page</span>
@@ -45,7 +45,7 @@
                         <th><a href="{{ sortUrl('total_amount', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Total {!! sortIndicator('total_amount', $sortBy, $sortDir) !!}</a></th>
                         <th><a href="{{ sortUrl('status', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Status {!! sortIndicator('status', $sortBy, $sortDir) !!}</a></th>
                         <th><a href="{{ sortUrl('created_at', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Date {!! sortIndicator('created_at', $sortBy, $sortDir) !!}</a></th>
-                        <th class="pe-3">Action</th>
+                        <th class="d-flex justify-content-end pe-3">Action</th>
                     </tr>
                 </thead>
                 <tbody>

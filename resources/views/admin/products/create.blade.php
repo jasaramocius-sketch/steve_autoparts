@@ -196,7 +196,7 @@
                                     <input type="hidden" name="image_from_manager" id="image_from_manager_product_image" value="{{ $selectedImageFromManager }}">
                                     <div id="impPreview_product_image" class="{{ $selectedImageFromManager ? '' : 'd-none' }} my-2">
                                         @if($selectedImageFromManager)
-                                            <img src="{{ asset('storage/' . $selectedImageFromManager) }}" width="80" style="border-radius:4px;">
+                                            <img src="{{ asset('storage/' . $selectedImageFromManager) }}" width="80" class="admin-image-thumb">
                                             <small class="text-muted d-block">Selected from image manager</small>
                                         @endif
                                     </div>
