@@ -2,6 +2,12 @@
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'admin-edit-blog-category-page', 'pageClass' => 'admin-edit-blog-category-page'])
 @section('page-title', 'Edit Blog Category')
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'Edit Blog Category - Admin Panel',
+        'robots' => 'noindex, nofollow',
+    ])
+@endsection
 @section('content')
 
 <div class="card border-0 shadow-sm">

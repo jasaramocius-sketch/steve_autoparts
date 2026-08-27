@@ -1,6 +1,12 @@
 @extends('admin.layouts.app')
 @include('partials.page-attributes', ['pageId' => 'admin-images-index-page', 'pageClass' => 'admin-images-index-page'])
 @section('page-title', 'Image Manager')
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'Image Manager - Admin Panel',
+        'robots' => 'noindex, nofollow',
+    ])
+@endsection
 @section('content')
 <style>
     .image-card { cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s, opacity 0.2s ease; position: relative; }

@@ -1,6 +1,12 @@
 @extends('admin.layouts.app')
 @include('partials.page-attributes', ['pageId' => 'admin-settings-footer-page', 'pageClass' => 'admin-settings-footer-page'])
 @section('page-title', 'Footer Settings')
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'Footer Settings - Admin Panel',
+        'robots' => 'noindex, nofollow',
+    ])
+@endsection
 @section('content')
 <div class="container-fluid admin-settings-footer">
     <div class="row">

@@ -1,9 +1,13 @@
 @extends('layouts.app')
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'user-contact-page', 'pageClass' => 'user-contact-page'])
-@section('title', $page->meta_title ?? (($page->title ?? 'Contact') . ' - ' . config('app.name', 'StAutoparts')))
-@section('meta_title', $page->meta_title ?? null)
-@section('meta_description', $page->meta_description ?? null)
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => $page->meta_title ?? (($page->title ?? 'Contact') . ' - ' . config('app.name', 'StAutoparts')),
+        'metaTitle' => $page->meta_title ?? null,
+        'metaDescription' => $page->meta_description ?? null,
+    ])
+@endsection
 
 @section('content')
 

@@ -1,7 +1,13 @@
 @extends('layouts.app')
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'not-found-page', 'pageClass' => 'not-found-page'])
-@section('title', '404 - Page Not Found - ' . config('app.name', 'StAutoparts'))
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => '404 - Page Not Found - ' . config('app.name', 'StAutoparts'),
+        'metaTitle' => '404 - Page Not Found | ' . config('app.name', 'StAutoparts'),
+        'metaDescription' => 'The page you are looking for could not be found.',
+    ])
+@endsection
 @section('content')
 
 <section class="gs-breadcrumb-section" style="background-image: url('{{ asset('assets/images/1724480495Imagexxxxxpng.png') }}'); background-size: cover; background-position: center;">

@@ -1,8 +1,40 @@
-{{-- Registers the page-id/page-class sections, merging the current CMS page attributes ($page) with the static values passed from each view. Include in every view: @include('partials.page-attributes', ['pageId' => 'my-page', 'pageClass' => 'my-page']) --}}
+{{-- Registers the page-id/page-class sections. Auto-resolves from DB if not passed. --}}
 @php
+    $routeName = request()->route()->getName() ?? '';
+    $baseSlug = $routeName ? explode('.', $routeName)[0] : '';
+
+    // Auto-resolve $page from DB if not passed by controller
+    if (!isset($page) || !$page) {
+        if ($baseSlug) {
+            $page = \App\Models\Page::where('slug', $baseSlug)->where('status', true)->first();
+        }
+        if (!$page) {
+            $fallback = request()->segment(1);
+            if ($fallback) {
+                $page = \App\Models\Page::where('slug', $fallback)->where('status', true)->first();
+            }
+        }
+    }
+
+    // For content detail pages (blog, product), use the model's own ID
+    $contentId = null;
+    $contentType = null;
+    $detailClass = '';
+    if ($baseSlug === 'blog' && isset($blog) && $blog) {
+        $contentId = $blog->id;
+        $contentType = 'blog';
+        $detailClass = 'post-detail';
+    } elseif ($baseSlug === 'product' && isset($product) && $product) {
+        $contentId = $product->id ?? $product['id'] ?? null;
+        $contentType = 'product';
+        $detailClass = 'product-detail';
+    }
+
     $pageModel = $page ?? null;
-    $pageIdValue = trim(($pageModel ? 'page-' . $pageModel->id : '') . ' ' . trim($pageId ?? ''));
-    $pageClassValue = trim(($pageModel ? ' page-' . Str::slug($pageModel->title) : '') . ' ' . trim($pageClass ?? ''));
+    $idPrefix = $contentType ? $contentType . '-' : 'page-';
+    $idNumber = $contentType ? $contentId : ($pageModel->id ?? '');
+    $pageIdValue = trim(($idNumber ? $idPrefix . $idNumber : '') . ' ' . trim($pageId ?? ''));
+    $pageClassValue = trim(($pageModel ? ' page-' . Str::slug($pageModel->title) : '') . ' ' . trim($pageClass ?? '') . ' ' . $detailClass);
 @endphp
 @section('page-id', $pageIdValue !== '' ? $pageIdValue : 'default-page-id')
 @section('page-class', $pageClassValue !== '' ? $pageClassValue : 'default-body-class')

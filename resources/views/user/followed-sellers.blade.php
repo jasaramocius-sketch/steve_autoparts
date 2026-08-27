@@ -1,6 +1,13 @@
 @extends('user.layouts.dashboard')
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'user-followed-sellers-page', 'pageClass' => 'user-followed-sellers-page'])
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'Followed Sellers - StAutoparts',
+        'metaTitle' => 'Followed Sellers | StAutoparts',
+        'metaDescription' => 'Manage the sellers you follow at StAutoparts.',
+    ])
+@endsection
 @section('dashboard-content')
 
 <section class="followed-sellers-section">

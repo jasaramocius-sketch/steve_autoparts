@@ -1,7 +1,13 @@
 @extends('layouts.app')
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'compare-page', 'pageClass' => 'compare-page'])
-@section('title', 'Compare Products' . ' - ' . config('app.name', 'StAutoparts'))
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'Compare Products - ' . config('app.name', 'StAutoparts'),
+        'metaTitle' => 'Compare Products | ' . config('app.name', 'StAutoparts'),
+        'metaDescription' => 'Compare auto parts and accessories at ' . config('app.name', 'StAutoparts') . '.',
+    ])
+@endsection
 
 @section('content')
 

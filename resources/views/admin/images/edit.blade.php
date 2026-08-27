@@ -2,6 +2,12 @@
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'admin-images-edit-page', 'pageClass' => 'admin-images-edit-page'])
 @section('page-title', 'Edit Image - ' . $image->original_name)
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'Edit Image - Admin Panel',
+        'robots' => 'noindex, nofollow',
+    ])
+@endsection
 @section('content')
 <div class="container-fluid px-0">
     <div class="row g-4">

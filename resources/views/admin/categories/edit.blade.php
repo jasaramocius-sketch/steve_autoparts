@@ -2,6 +2,12 @@
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'admin-edit-category-page', 'pageClass' => 'admin-edit-category-page'])
 @section('page-title', 'Edit Category')
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'Edit Category - Admin Panel',
+        'robots' => 'noindex, nofollow',
+    ])
+@endsection
 @section('content')
 
 <div class="category-edit-page">

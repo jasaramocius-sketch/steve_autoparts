@@ -2,6 +2,12 @@
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'admin-pages-create-page', 'pageClass' => 'admin-pages-create-page'])
 @section('page-title', 'Add Page')
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'Add Page - Admin Panel',
+        'robots' => 'noindex, nofollow',
+    ])
+@endsection
 @section('content')
 
 <!--

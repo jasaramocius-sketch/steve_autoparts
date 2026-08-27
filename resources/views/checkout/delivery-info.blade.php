@@ -1,7 +1,13 @@
 @extends('layouts.app')
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'checkout-delivery-info', 'pageClass' => 'checkout-page delivery-step-body bg-light'])
-@section('title', 'Delivery Info' . ' - ' . config('app.name', 'StAutoparts'))
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'Delivery Info - ' . config('app.name', 'StAutoparts'),
+        'metaTitle' => 'Delivery Info | ' . config('app.name', 'StAutoparts'),
+        'metaDescription' => 'Enter your delivery information at ' . config('app.name', 'StAutoparts') . '.',
+    ])
+@endsection
 @section('content')
 
 @include('partials.checkout-steps', ['activeStep' => 3])

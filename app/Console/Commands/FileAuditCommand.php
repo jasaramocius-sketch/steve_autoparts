@@ -14,7 +14,10 @@ class FileAuditCommand extends Command
         {--init : Initialize the mirror and state file}
         {--watch : Keep watching in a loop}
         {--interval=60 : Polling interval in seconds (default 60)}
-        {--max-archive-days=90 : Delete archives older than this many days}';
+        {--max-archive-days=90 : Delete archives older than this many days}
+        {--truncate-diffs : Truncate old diff data to save DB space}
+        {--truncate-diffs-days=90 : Truncate diffs older than this many days}
+        {--per-file-limit=50 : Keep only last N revisions per file, truncate the rest}';
 
     protected $description = 'Track file changes with backup snapshots';
 
@@ -52,6 +55,14 @@ class FileAuditCommand extends Command
 
         if ($this->option('max-archive-days')) {
             $this->purgeOldArchives((int)$this->option('max-archive-days'));
+        }
+
+        if ($this->option('truncate-diffs')) {
+            $this->truncateOldDiffs((int)$this->option('truncate-diffs-days'));
+        }
+
+        if ($this->option('per-file-limit')) {
+            $this->truncatePerFileLimit((int)$this->option('per-file-limit'));
         }
 
         if ($this->option('watch')) {
@@ -394,6 +405,21 @@ class FileAuditCommand extends Command
             }
         }
         return $output;
+    }
+
+    protected function truncateOldDiffs(int $olderThanDays): void
+    {
+        $count = FileRevision::truncateDiffs($olderThanDays);
+
+        if ($count > 0) {
+            $this->line("[truncated] {$count} old diff(s) saved to summary");
+        }
+    }
+
+    protected function truncatePerFileLimit(int $keepPerFile): void
+    {
+        FileRevision::truncatePerFileLimit($keepPerFile);
+        $this->line("[per-file-limit] Kept last {$keepPerFile} revisions per file, truncated older diffs");
     }
 
     protected function purgeOldArchives(int $maxDays): void

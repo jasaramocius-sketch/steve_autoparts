@@ -1,6 +1,13 @@
 @extends('user.layouts.dashboard')
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'user-reviews-page', 'pageClass' => 'user-reviews-page'])
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'My Reviews - StAutoparts',
+        'metaTitle' => 'My Reviews | StAutoparts',
+        'metaDescription' => 'View and manage your product reviews at StAutoparts.',
+    ])
+@endsection
 @section('dashboard-content')
 
 <div class="user-reviews-page">

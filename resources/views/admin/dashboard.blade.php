@@ -1,6 +1,13 @@
 @extends('admin.layouts.app')
+@include('partials.page-attributes', ['pageId' => 'admin-dashboard-page', 'pageClass' => 'admin-dashboard-page'])
 
 @section('page-title', 'Dashboard')
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'Dashboard - Admin Panel',
+        'robots' => 'noindex, nofollow',
+    ])
+@endsection
 
 @section('content')
 <div class="row g-3 mb-4">

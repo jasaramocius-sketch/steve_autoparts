@@ -2,6 +2,12 @@
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'admin-profile-page', 'pageClass' => 'admin-profile-page'])
 @section('page-title', 'My Profile')
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'My Profile - Admin Panel',
+        'robots' => 'noindex, nofollow',
+    ])
+@endsection
 @section('content')
 
 @if($errors->any())

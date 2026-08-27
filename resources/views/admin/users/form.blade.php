@@ -1,5 +1,12 @@
 @extends('admin.layouts.app')
+@include('partials.page-attributes', ['pageId' => 'admin-users-form-page', 'pageClass' => 'admin-users-form-page'])
 @section('page-title', isset($user) ? 'Edit User' : 'Add User')
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'User Form - Admin Panel',
+        'robots' => 'noindex, nofollow',
+    ])
+@endsection
 @section('content')
 
 <div class="card border-0 shadow-sm">

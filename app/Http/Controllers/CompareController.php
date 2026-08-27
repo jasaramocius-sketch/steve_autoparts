@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Compare;
+use App\Models\Page;
 use App\Models\Product;
 
 class CompareController extends Controller
 {
     public function index()
     {
+        $page = Page::where('slug', 'compare')->first();
         $compareItems = collect();
 
         if (session('user_logged_in') && session('user_profile.id')) {
@@ -30,7 +32,7 @@ class CompareController extends Controller
             }
         }
 
-        return view('compare.index', compact('compareItems'));
+        return view('compare.index', compact('compareItems', 'page'));
     }
 
     public function add(Request $request)

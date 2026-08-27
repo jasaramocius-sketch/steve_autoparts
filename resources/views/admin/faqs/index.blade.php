@@ -2,6 +2,12 @@
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'admin-faqs-index-page', 'pageClass' => 'admin-faqs-index-page'])
 @section('page-title', 'All FAQs')
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'All FAQs - Admin Panel',
+        'robots' => 'noindex, nofollow',
+    ])
+@endsection
 @section('content')
 
 @php $trashedCount = \App\Models\Faq::onlyTrashed()->count(); @endphp

@@ -2,6 +2,12 @@
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'admin-coupons-create-page', 'pageClass' => 'admin-coupons-create-page'])
 @section('page-title', 'Add Coupon')
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'Add Coupon - Admin Panel',
+        'robots' => 'noindex, nofollow',
+    ])
+@endsection
 @section('content')
 
 <div class="card border-0 shadow-sm">

@@ -2,6 +2,12 @@
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'admin-categories-index-page', 'pageClass' => 'admin-categories-index-page'])
 @section('page-title', 'All Categories')
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'All Categories - Admin Panel',
+        'robots' => 'noindex, nofollow',
+    ])
+@endsection
 @section('content')
 
 @php $trashedCount = \App\Models\Category::onlyTrashed()->count(); @endphp

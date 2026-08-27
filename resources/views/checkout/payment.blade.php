@@ -1,7 +1,13 @@
 @extends('layouts.app')
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'checkout-payment', 'pageClass' => 'checkout-page payment-step-body bg-light'])
-@section('title', 'Payment' . ' - ' . config('app.name', 'StAutoparts'))
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'Payment - ' . config('app.name', 'StAutoparts'),
+        'metaTitle' => 'Payment | ' . config('app.name', 'StAutoparts'),
+        'metaDescription' => 'Complete your payment at ' . config('app.name', 'StAutoparts') . '.',
+    ])
+@endsection
 
 @section('content')
 

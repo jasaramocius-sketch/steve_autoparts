@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@include('partials.page-attributes', ['pageId' => 'user-dashboard-layout', 'pageClass' => 'user-dashboard-layout'])
 
 @section('content')
 <section class="gs-dashboard-section py-5">

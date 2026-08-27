@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Brand;
+use App\Models\Page;
 use Illuminate\Http\Request;
 
 class BrandController extends Controller
 {
     public function brands(Request $request)
     {
+        $page = Page::where('slug', 'brands')->first();
         $search = $request->get('search', '');
         $sort = $request->get('sort', 'latest');
 
@@ -29,6 +31,6 @@ class BrandController extends Controller
 
         $brands = $brandsQuery->paginate(12)->appends($request->only(['search', 'sort']));
 
-        return view('brands.index', compact('brands', 'search', 'sort'));
+        return view('brands.index', compact('brands', 'search', 'sort', 'page'));
     }
 }

@@ -1,7 +1,13 @@
 @extends('layouts.app')
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'auth-login-page', 'pageClass' => 'auth-login-page'])
-@section('page-title', 'Login - StAutoparts')
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'Login - StAutoparts',
+        'metaTitle' => 'Login | StAutoparts',
+        'metaDescription' => 'Sign in to your StAutoparts account.',
+    ])
+@endsection
 @section('content')
 
 <!-- Banner Hero Section -->

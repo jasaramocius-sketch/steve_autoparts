@@ -5322,7 +5322,7 @@ tbody tr:last-child {
 }
 
 .copyright-hyperlink-text:hover {
-  color: var(--light)
+  color: var(--light) !important;
 }
 
 @media (max-width:767.98px) {

@@ -1,6 +1,12 @@
 @extends('admin.layouts.app')
 @include('partials.page-attributes', ['pageId' => 'admin-settings-header-page', 'pageClass' => 'admin-settings-header-page'])
 @section('page-title', 'Header Settings')
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'Header Settings - Admin Panel',
+        'robots' => 'noindex, nofollow',
+    ])
+@endsection
 @section('content')
 <div class="container-fluid admin-settings-header">
     <div class="row">
@@ -12,148 +18,152 @@
                 <div class="card-body">
                     <form action="{{ route('admin.settings.header.update') }}" method="POST" enctype="multipart/form-data">
                         @csrf
-                        <div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label class="form-label"><strong>Header Logo</strong></label>
-                                    <div class="mb-2">
-                                    <img src="{{ storedImageUrl($settings['header_logo'] ?? 'BwSkuSZ7ZYGWPc4Zk3CfeFzcn49dHpx3143n4WKS.png', 'assets/images') }}"
-                                             alt="Header Logo" class="admin-logo-preview">
-                                    </div>
-                                    <input type="hidden" name="image_from_manager_header_logo" id="image_from_manager_header_logo">
-                                    <div id="impPreview_header_logo" class="d-none mt-2"></div>
-                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="impOpen_header_logo()">
-                                        <i class="fas fa-images me-1"></i> Browse Image Manager
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label class="form-label"><strong>Favicon</strong></label>
-                                    <div class="mb-2">
-                                        <img src="{{ storedImageUrl($settings['header_favicon'] ?? '1730880696Fabpng.png', 'assets/images') }}"
-                                             alt="Favicon" class="admin-favicon-preview">
-                                    </div>
-                                    <input type="hidden" name="image_from_manager_header_favicon" id="image_from_manager_header_favicon">
-                                    <div id="impPreview_header_favicon" class="d-none mt-2"></div>
-                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="impOpen_header_favicon()">
-                                        <i class="fas fa-images me-1"></i> Browse Image Manager
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label class="form-label"><strong>Mobile Menu Logo</strong></label>
-                                    <div class="mb-2">
-                                        <img src="{{ storedImageUrl($settings['mobile_logo'] ?? '1730281141Whitepng.png', 'assets/images') }}"
-                                             alt="Mobile Logo" class="admin-logo-preview admin-logo-preview-small">
-                                    </div>
-                                    <input type="hidden" name="image_from_manager_mobile_logo" id="image_from_manager_mobile_logo">
-                                    <div id="impPreview_mobile_logo" class="d-none mt-2"></div>
-                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="impOpen_mobile_logo()">
-                                        <i class="fas fa-images me-1"></i> Browse Image Manager
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label class="form-label"><strong>Footer Logo</strong></label>
-                                    <div class="mb-2">
-                                        <img src="{{ storedImageUrl($settings['footer_logo'] ?? '1730281141Whitepng.png', 'assets/images') }}"
-                                             alt="Footer Logo" class="admin-logo-preview admin-logo-preview-small">
-                                    </div>
-                                    <input type="hidden" name="image_from_manager_footer_logo" id="image_from_manager_footer_logo">
-                                    <div id="impPreview_footer_logo" class="d-none mt-2"></div>
-                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="impOpen_footer_logo()">
-                                        <i class="fas fa-images me-1"></i> Browse Image Manager
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label class="form-label"><strong>Admin Header Background Image</strong></label>
-                                    <small class="text-muted d-block mb-2">Background image of the admin top bar (the container that holds the page title).</small>
-                                    @if (!empty($settings['admin_header_bg']))
-                                        <div class="mb-2 admin-header-bg-current">
-                                            <img src="{{ storedImageUrl($settings['admin_header_bg'], 'assets/images') }}" alt="Admin Header Background"
-                                                 class="admin-bg-preview">
+                        <div class="row header-settings-row">
+                        <div class="header-settings-col col-lg-6 border-right-lg border-none-sm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label"><strong>Header Logo</strong></label>
+                                        <div class="mb-2">
+                                        <img src="{{ storedImageUrl($settings['header_logo'] ?? 'BwSkuSZ7ZYGWPc4Zk3CfeFzcn49dHpx3143n4WKS.png', 'assets/images') }}"
+                                                alt="Header Logo" class="admin-logo-preview">
                                         </div>
-                                    @endif
-                                    <input type="hidden" name="image_from_manager_admin_header_bg" id="image_from_manager_admin_header_bg">
-                                    <input type="hidden" name="remove_admin_header_bg" id="remove_admin_header_bg" value="0">
-                                    <div id="impPreview_admin_header_bg" class="d-none mt-2"></div>
-                                    <div class="d-flex gap-2 mt-1">
-                                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="document.getElementById('remove_admin_header_bg').value='0'; impOpen_admin_header_bg()">
+                                        <input type="hidden" name="image_from_manager_header_logo" id="image_from_manager_header_logo">
+                                        <div id="impPreview_header_logo" class="d-none mt-2"></div>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="impOpen_header_logo()">
                                             <i class="fas fa-images me-1"></i> Browse Image Manager
                                         </button>
-                                        <button type="button" id="clear_btn_admin_header_bg" data-preview="impPreview_admin_header_bg" data-current=".admin-header-bg-current" class="btn btn-sm btn-outline-danger {{ !empty($settings['admin_header_bg']) ? '' : 'd-none' }}" onclick="clearPickerImage('image_from_manager_admin_header_bg','impPreview_admin_header_bg','.admin-header-bg-current','remove_admin_header_bg')">
-                                            <i class="fas fa-times me-1"></i> Clear Image
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label"><strong>Favicon</strong></label>
+                                        <div class="mb-2">
+                                            <img src="{{ storedImageUrl($settings['header_favicon'] ?? '1730880696Fabpng.png', 'assets/images') }}"
+                                                alt="Favicon" class="admin-favicon-preview">
+                                        </div>
+                                        <input type="hidden" name="image_from_manager_header_favicon" id="image_from_manager_header_favicon">
+                                        <div id="impPreview_header_favicon" class="d-none mt-2"></div>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="impOpen_header_favicon()">
+                                            <i class="fas fa-images me-1"></i> Browse Image Manager
                                         </button>
                                     </div>
                                 </div>
                             </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label"><strong>Mobile Menu Logo</strong></label>
+                                        <div class="mb-2">
+                                            <img src="{{ storedImageUrl($settings['mobile_logo'] ?? '1730281141Whitepng.png', 'assets/images') }}"
+                                                alt="Mobile Logo" class="admin-logo-preview admin-logo-preview-small">
+                                        </div>
+                                        <input type="hidden" name="image_from_manager_mobile_logo" id="image_from_manager_mobile_logo">
+                                        <div id="impPreview_mobile_logo" class="d-none mt-2"></div>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="impOpen_mobile_logo()">
+                                            <i class="fas fa-images me-1"></i> Browse Image Manager
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label"><strong>Footer Logo</strong></label>
+                                        <div class="mb-2">
+                                            <img src="{{ storedImageUrl($settings['footer_logo'] ?? '1730281141Whitepng.png', 'assets/images') }}"
+                                                alt="Footer Logo" class="admin-logo-preview admin-logo-preview-small">
+                                        </div>
+                                        <input type="hidden" name="image_from_manager_footer_logo" id="image_from_manager_footer_logo">
+                                        <div id="impPreview_footer_logo" class="d-none mt-2"></div>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="impOpen_footer_logo()">
+                                            <i class="fas fa-images me-1"></i> Browse Image Manager
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label"><strong>Admin Header Background Image</strong></label>
+                                        <small class="text-muted d-block mb-2">Background image of the admin top bar (the container that holds the page title).</small>
+                                        @if (!empty($settings['admin_header_bg']))
+                                            <div class="mb-2 admin-header-bg-current">
+                                                <img src="{{ storedImageUrl($settings['admin_header_bg'], 'assets/images') }}" alt="Admin Header Background"
+                                                    class="admin-bg-preview">
+                                            </div>
+                                        @endif
+                                        <input type="hidden" name="image_from_manager_admin_header_bg" id="image_from_manager_admin_header_bg">
+                                        <input type="hidden" name="remove_admin_header_bg" id="remove_admin_header_bg" value="0">
+                                        <div id="impPreview_admin_header_bg" class="d-none mt-2"></div>
+                                        <div class="d-flex gap-2 mt-1">
+                                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="document.getElementById('remove_admin_header_bg').value='0'; impOpen_admin_header_bg()">
+                                                <i class="fas fa-images me-1"></i> Browse Image Manager
+                                            </button>
+                                            <button type="button" id="clear_btn_admin_header_bg" data-preview="impPreview_admin_header_bg" data-current=".admin-header-bg-current" class="btn btn-sm btn-outline-danger {{ !empty($settings['admin_header_bg']) ? '' : 'd-none' }}" onclick="clearPickerImage('image_from_manager_admin_header_bg','impPreview_admin_header_bg','.admin-header-bg-current','remove_admin_header_bg')">
+                                                <i class="fas fa-times me-1"></i> Clear Image
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="header-settings-col col-lg-6">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label"><strong>Phone Number</strong></label>
+                                        <input type="text" name="header_phone" class="form-control"
+                                            value="{{ $settings['header_phone'] ?? '+1 (234) 567-8901' }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label"><strong>Support Text</strong></label>
+                                        <input type="text" name="header_support_text" class="form-control"
+                                            value="{{ $settings['header_support_text'] ?? 'Contact & Support: 00 000 000 000' }}">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label"><strong>Email Address</strong></label>
+                                        <input type="email" name="header_email" class="form-control"
+                                            value="{{ $settings['header_email'] ?? 'admin@geniusocean.com' }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label"><strong>Address</strong></label>
+                                        <input type="text" name="header_address" class="form-control"
+                                            value="{{ $settings['header_address'] ?? '3584 Hickory Heights Drive , USA' }}">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label class="form-label"><strong>Footer Copyright Text</strong></label>
+                                <input type="text" name="footer_copyright" class="form-control"
+                                    value="{{ $settings['footer_copyright'] ?? 'COPYRIGHT &copy; :year. All Rights Reserved By STautoparts' }}">
+                            </div>
+                        </div>
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label class="form-label"><strong>Phone Number</strong></label>
-                                    <input type="text" name="header_phone" class="form-control"
-                                           value="{{ $settings['header_phone'] ?? '+1 (234) 567-8901' }}">
+                            <hr>
+                            <div class="form-group mb-3">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <label class="form-label fw-bold mb-0">Serve WebP Images on Frontend</label>
+                                        <small class="text-muted d-block">When enabled, browsers that support WebP will automatically receive optimized WebP images instead of JPG/PNG. Uses &lt;picture&gt; tag with fallback for older browsers.</small>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="webp_frontend" value="1" id="webpFrontendToggle"
+                                            {{ ($settings['webp_frontend'] ?? '1') === '1' ? 'checked' : '' }}>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label class="form-label"><strong>Support Text</strong></label>
-                                    <input type="text" name="header_support_text" class="form-control"
-                                           value="{{ $settings['header_support_text'] ?? 'Contact & Support: 00 000 000 000' }}">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label class="form-label"><strong>Email Address</strong></label>
-                                    <input type="email" name="header_email" class="form-control"
-                                           value="{{ $settings['header_email'] ?? 'admin@geniusocean.com' }}">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label class="form-label"><strong>Address</strong></label>
-                                    <input type="text" name="header_address" class="form-control"
-                                           value="{{ $settings['header_address'] ?? '3584 Hickory Heights Drive , USA' }}">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label class="form-label"><strong>Footer Copyright Text</strong></label>
-                            <input type="text" name="footer_copyright" class="form-control"
-                                   value="{{ $settings['footer_copyright'] ?? 'COPYRIGHT &copy; :year. All Rights Reserved By STautoparts' }}">
-                        </div>
-
-                        <hr>
-                        <div class="form-group mb-3">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div>
-                                    <label class="form-label fw-bold mb-0">Serve WebP Images on Frontend</label>
-                                    <small class="text-muted d-block">When enabled, browsers that support WebP will automatically receive optimized WebP images instead of JPG/PNG. Uses &lt;picture&gt; tag with fallback for older browsers.</small>
-                                </div>
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" name="webp_frontend" value="1" id="webpFrontendToggle"
-                                        {{ ($settings['webp_frontend'] ?? '1') === '1' ? 'checked' : '' }}>
-                                </div>
-                            </div>
-                        </div>
 
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary steve-btn">
@@ -446,7 +456,7 @@
         .fmm-nested-list {
             margin-left: 1.5rem;
             margin-top: 0;
-            padding: 0.25rem;
+            padding: 0.25rem 0;
             /* padding-bottom: 0.75rem; */
             border-left: 2px dotted var(--fmm-border);
             min-height: 2.5rem;

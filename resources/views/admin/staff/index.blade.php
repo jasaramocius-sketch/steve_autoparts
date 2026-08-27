@@ -2,6 +2,12 @@
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'admin-staff-index-page', 'pageClass' => 'admin-staff-index-page'])
 @section('page-title', 'Staff')
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'Staff - Admin Panel',
+        'robots' => 'noindex, nofollow',
+    ])
+@endsection
 @section('content')
 
 <div class="container-fluid">

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Page;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -71,6 +72,7 @@ class CategoryController extends Controller
 
     public function showCategories(Request $request)
     {
+        $page = Page::where('slug', 'categories')->first();
         $search = $request->get('search', '');
         $sort = $request->get('sort', 'latest');
 
@@ -117,7 +119,7 @@ class CategoryController extends Controller
             $categories = $categories->sortByDesc('created_at')->values();
         }
 
-        return view('categories.index', compact('categories'));
+        return view('categories.index', compact('categories', 'page'));
     }
     // Create Form
     public function create()

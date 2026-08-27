@@ -1,7 +1,13 @@
 @extends('layouts.app')
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'categories-page', 'pageClass' => 'categories-page'])
-@section('title', 'All Categories' . ' - ' . config('app.name', 'StAutoparts'))
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'All Categories - ' . config('app.name', 'StAutoparts'),
+        'metaTitle' => 'All Categories | ' . config('app.name', 'StAutoparts'),
+        'metaDescription' => 'Browse all auto parts categories at ' . config('app.name', 'StAutoparts') . '.',
+    ])
+@endsection
 
 @section('content')
 <style>

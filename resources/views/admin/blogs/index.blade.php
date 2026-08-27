@@ -2,6 +2,12 @@
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'admin-blogs-index-page', 'pageClass' => 'admin-blogs-index-page'])
 @section('page-title', 'All Blogs')
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'All Blogs - Admin Panel',
+        'robots' => 'noindex, nofollow',
+    ])
+@endsection
 @section('content')
 
 @php $trashedCount = \App\Models\Blog::onlyTrashed()->count(); @endphp

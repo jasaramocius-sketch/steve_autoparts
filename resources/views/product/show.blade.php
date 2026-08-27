@@ -2,9 +2,13 @@
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'product-page', 'pageClass' => 'product-page'])
 @php $prodName = $product['name'] ?? 'Product'; $prodDesc = trim(strip_tags(html_entity_decode($product['description'] ?? ''))); $prodDesc = mb_strlen($prodDesc) > 160 ? mb_substr($prodDesc, 0, 157) . '...' : $prodDesc; @endphp
-@section('title', $prodName . ' - ' . config('app.name', 'StAutoparts'))
-@section('meta_title', $prodName . ' | ' . config('app.name', 'StAutoparts'))
-@section('meta_description', $prodDesc ?: ('Buy ' . $prodName . ' at ' . config('app.name', 'StAutoparts')))
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => $prodName . ' - ' . config('app.name', 'StAutoparts'),
+        'metaTitle' => $prodName . ' | ' . config('app.name', 'StAutoparts'),
+        'metaDescription' => $prodDesc ?: ('Buy ' . $prodName . ' at ' . config('app.name', 'StAutoparts')),
+    ])
+@endsection
 
 @section('style')
 <style>

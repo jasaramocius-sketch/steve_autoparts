@@ -1,6 +1,13 @@
 @extends('user.layouts.dashboard')
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'user-vehicles-page', 'pageClass' => 'user-vehicles-page'])
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'My Vehicles - StAutoparts',
+        'metaTitle' => 'My Vehicles | StAutoparts',
+        'metaDescription' => 'Manage your vehicles at StAutoparts.',
+    ])
+@endsection
 @section('dashboard-content')
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
     <h4 class="h4-style mb-0">My Vehicles</h4>

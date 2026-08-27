@@ -1,5 +1,12 @@
 @extends('admin.layouts.app')
+@include('partials.page-attributes', ['pageId' => 'admin-users-index-page', 'pageClass' => 'admin-users-index-page'])
 @section('page-title', 'User Management')
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'User Management - Admin Panel',
+        'robots' => 'noindex, nofollow',
+    ])
+@endsection
 @section('content')
 <div class="user-management-page">
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap flex-md-nowrap">

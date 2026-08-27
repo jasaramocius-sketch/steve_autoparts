@@ -8,9 +8,13 @@
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'shop-page', 'pageClass' => 'shop-page'])
 @php $shopTitle = isset($pageTitle) ? $pageTitle : (isset($currentChildcategory) ? $currentChildcategory->name : (isset($currentSubcategory) ? $currentSubcategory->name : (isset($currentCategory) ? $currentCategory->name : 'Shop'))); $shopMeta = (isset($page) && $page->meta_title) ? $page->meta_title : null; $shopDesc = (isset($page) && $page->meta_description) ? $page->meta_description : null; @endphp
-@section('title', $shopMeta ?: ($shopTitle . ' - StAutoparts'))
-@section('meta_title', $shopMeta ?: ($shopTitle . ' | StAutoparts'))
-@section('meta_description', $shopDesc ?: ($shopTitle . ' — browse auto spare parts and accessories at StAutoparts.'))
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => $shopMeta ?: ($shopTitle . ' - StAutoparts'),
+        'metaTitle' => $shopMeta ?: ($shopTitle . ' | StAutoparts'),
+        'metaDescription' => $shopDesc ?: ($shopTitle . ' — browse auto spare parts and accessories at StAutoparts.'),
+    ])
+@endsection
 
 @section('content')
 <style>

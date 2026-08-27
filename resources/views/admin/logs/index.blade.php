@@ -2,6 +2,12 @@
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'admin-logs-index-page', 'pageClass' => 'admin-logs-index-page'])
 @section('page-title', 'Logs')
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'Logs - Admin Panel',
+        'robots' => 'noindex, nofollow',
+    ])
+@endsection
 
 @section('content')
 <div class="card border-0 shadow-sm">

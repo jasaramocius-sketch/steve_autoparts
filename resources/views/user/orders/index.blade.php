@@ -1,6 +1,13 @@
 @extends('user.layouts.dashboard')
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'user-orders-page', 'pageClass' => 'user-orders-page'])
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'My Orders - StAutoparts',
+        'metaTitle' => 'My Orders | StAutoparts',
+        'metaDescription' => 'View and manage your orders at StAutoparts.',
+    ])
+@endsection
 @section('dashboard-content')
 
 @php

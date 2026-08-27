@@ -2,6 +2,12 @@
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'admin-products-import-page', 'pageClass' => 'admin-products-import-page'])
 @section('page-title', 'Import Products')
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'Import Products - Admin Panel',
+        'robots' => 'noindex, nofollow',
+    ])
+@endsection
 @section('content')
 
 <div class="card border-0 shadow-sm">

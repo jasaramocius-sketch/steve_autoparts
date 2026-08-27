@@ -1,9 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
+    @hasSection('meta_tags')
+    @yield('meta_tags')
+    @else
     <title>@yield('page-title', 'Dashboard') - Admin Panel</title>
+    @endif
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="robots" content="noindex, nofollow">
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -18,7 +23,7 @@
     @stack('page-builder-css')
 </head>
 
-<body id="@yield('page-id', 'default-page-id')" class="@yield('page-class', 'default-body-class')"
+<body id="@yield('page-id', 'default-page-id')" class="site-root @yield('page-class', 'default-body-class')"
     data-success="{{ session('success') }}" data-error="{{ session('error') }}"
     data-warning="{{ session('warning') }}" data-info="{{ session('info') }}">
 

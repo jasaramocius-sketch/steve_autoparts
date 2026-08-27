@@ -2,6 +2,12 @@
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'admin-sellers-index-page', 'pageClass' => 'admin-sellers-index-page'])
 @section('page-title', 'All Sellers')
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'All Sellers - Admin Panel',
+        'robots' => 'noindex, nofollow',
+    ])
+@endsection
 @section('content')
 
  <div class="d-flex justify-content-between align-items-center mb-3">

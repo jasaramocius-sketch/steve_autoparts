@@ -3130,3 +3130,39 @@ Fixed per_page dropdown bug across all 17 admin pages — when changing items pe
 **Files changed:**
 - Admin index views: orders, products, categories, brands, users, customers, staff, sellers, coupons, faqs, pages, blogs, blog-categories, contacts, home-page, revisions, file-revisions
 
+## 230. File Revisions Truncation System (26 Aug 2026)
+
+File Revisions truncation system — added truncateDiffs() to FileRevision model (compresses old diffs to 200 chars), --truncate-diffs flag to FileAuditCommand, daily scheduled truncate at 3 AM via routes/console.php, POST route + controller method for admin manual truncate, collapsible Maintenance panel in admin file-revisions UI. No rows or backups deleted — only diff text compressed to save ~270 MB DB space.
+
+## 231. File Revisions per-file limit truncate (26 Aug 2026)
+
+Added truncatePerFileLimit() to FileRevision model using ROW_NUMBER() window function, --per-file-limit CLI option, admin UI dual-panel Maintenance (per-file limit + age-based), per-file-limit route + controller. Fixed routes/console.php (Artisan::command → Schedule::command). Ran immediately: DB 342 MiB → 94 MiB (72% reduction). Rows preserved (12,185), backups preserved, only diff text compressed.
+
+## 232. Meta-tags partial (26 Aug 2026)
+
+Created partials/meta-tags.blade.php with title, meta_title, meta_description, OG tags, robots support. Updated layouts/app.blade.php and admin/layouts/app.blade.php head sections to use @yield('meta_tags'). Updated all 35 frontend views and 55 admin views to use the new partial. Added page-attributes to 4 missing files (dashboard layout, admin dashboard, admin users index/form). All 88+ views now have proper body IDs, classes, and meta tags.
+
+## 233. CSS page-ID audit (26 Aug 2026)
+
+Verified all CSS selectors using page IDs/classes. Found 1 body-level rule (body.user-reviews-page.modal-open), 0 body ID selectors, 3 dead CSS selectors (.cart-page-qty, .product-page-bg, .product-page-product-nav-slider), 1 naming inconsistency (.user-order-page singular vs user-orders-page plural body class). All component-level CSS selectors already work correctly with the body ID/class system.
+
+
+## 234. Page-ID consistency across all pages (26 Aug 2026)
+
+Created DB page entries for Categories (id=29), Brands (id=30), Cart (id=31), Compare (id=32) in pages table. Updated CategoryController, BrandController, CartController, CompareController to fetch Page model and pass $page to views. All frontend pages now get page-{id} prefix in body tag (e.g. page-29 categories-page, page-30 brands-page, etc.). Verified 13 CMS pages + 4 new non-CMS pages all show proper page IDs.
+
+## 235. Auto page-ID resolution (26 Aug 2026)
+
+Updated page-attributes.blade.php to auto-resolve $page from DB by route slug (route name first segment or URL segment 1). New pages/posts automatically get page-{id} in body tag when added to pages table with matching slug. Existing controller $page passed for meta tags. Verified all 15+ pages get page-{id} including blog show pages (blog.show route -> blog page id=23).
+
+## 236. Content-specific page IDs for blog posts and products (26 Aug 2026)
+
+Updated page-attributes.blade.php to use model-specific IDs for detail pages: blog posts get blog-{id} (e.g. blog-1), products get product-{id} (e.g. product-63). Blog index keeps page-23 (CMS page). Auto-resolution works via route name detection (blog.show -> blog model, product.show -> product model). All pages verified: blog index page-23, blog posts blog-1/blog-2, product product-63.
+
+## 237. Global site-root class + detail page classes (27 Aug 2026)
+
+Added site-root class to body tag in both frontend and admin layouts. Added detail-post class to blog post detail pages and product-detail class to product detail pages via page-attributes partial.
+
+## 238. Canonical redirects for /page/{slug} (27 Aug 2026)
+
+Added blog, categories, brands, cart, compare to page-builder.php live_url_map config. /page/blog now 301 redirects to /blog, etc. Fixed config cache issue.

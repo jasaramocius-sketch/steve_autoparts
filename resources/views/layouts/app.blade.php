@@ -4,14 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', config('app.name', 'Steve Auto Parts'))</title>
-    @hasSection('meta_title')
-    <meta name="title" content="@yield('meta_title')">
-    @endif
-    @hasSection('meta_description')
-    <meta name="description" content="@yield('meta_description')">
-    @endif
+    @hasSection('meta_tags')
+    @yield('meta_tags')
+    @else
+    <title>{{ config('app.name', 'Steve Auto Parts') }}</title>
     <meta name="robots" content="noindex, nofollow">
+    @endif
     
     <!-- Preconnect for external origins -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -87,7 +85,7 @@
     @yield('style')
     @stack('page-builder-css')
 </head>
-<body id="@yield('page-id', 'default-page-id')" class="@yield('page-class', 'default-body-class')">
+<body id="@yield('page-id', 'default-page-id')" class="site-root @yield('page-class', 'default-body-class')">
 
     <!-- header area -->
     <header class="header-section position-relative z-3 header-stikcy">

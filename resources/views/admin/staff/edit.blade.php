@@ -2,6 +2,12 @@
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'admin-staff-edit-page', 'pageClass' => 'admin-staff-edit-page'])
 @section('page-title', 'Edit Staff')
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'Edit Staff - Admin Panel',
+        'robots' => 'noindex, nofollow',
+    ])
+@endsection
 @section('content')
 
 <div class="card border-0 shadow-sm">

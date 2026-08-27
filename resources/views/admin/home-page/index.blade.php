@@ -2,6 +2,12 @@
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'admin-home-index-page', 'pageClass' => 'admin-home-index-page'])
 @section('page-title', 'Manage Home Page')
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'Manage Home Page - Admin Panel',
+        'robots' => 'noindex, nofollow',
+    ])
+@endsection
 
 @section('content')
 <div class="container-fluid">

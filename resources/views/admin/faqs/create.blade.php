@@ -2,6 +2,12 @@
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'admin-faqs-create-page', 'pageClass' => 'admin-faqs-create-page'])
 @section('page-title', 'Add FAQ')
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'Add FAQ - Admin Panel',
+        'robots' => 'noindex, nofollow',
+    ])
+@endsection
 @section('content')
 
 <div class="card border-0 shadow-sm">

@@ -2,6 +2,12 @@
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'admin-customers-create-page', 'pageClass' => 'admin-customers-create-page'])
 @section('page-title', isset($user) ? 'Edit User' : 'Add Customer')
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'Add Customer - Admin Panel',
+        'robots' => 'noindex, nofollow',
+    ])
+@endsection
 @section('content')
 
 <div class="container-fluid">

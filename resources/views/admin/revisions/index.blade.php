@@ -2,6 +2,12 @@
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'admin-revisions-index-page', 'pageClass' => 'admin-revisions-index-page'])
 @section('page-title', 'Revisions')
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'Revisions - Admin Panel',
+        'robots' => 'noindex, nofollow',
+    ])
+@endsection
 @section('content')
 
 <!-- <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap flex-md-nowrap">

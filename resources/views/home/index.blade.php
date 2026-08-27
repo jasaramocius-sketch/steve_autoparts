@@ -1,9 +1,13 @@
 @extends('layouts.app')
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'home-page', 'pageClass' => 'home-page'])
-@section('title', $page->meta_title ?? config('app.name', 'StAutoparts'))
-@section('meta_title', $page->meta_title ?? (config('app.name', 'StAutoparts') . ' | Spare Parts & Accessories'))
-@section('meta_description', $page->meta_description ?? ('Shop genuine auto spare parts and accessories at ' . config('app.name', 'StAutoparts') . '. Best prices, fast shipping and quality assurance.'))
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => $page->meta_title ?? config('app.name', 'StAutoparts'),
+        'metaTitle' => $page->meta_title ?? (config('app.name', 'StAutoparts') . ' | Spare Parts & Accessories'),
+        'metaDescription' => $page->meta_description ?? ('Shop genuine auto spare parts and accessories at ' . config('app.name', 'StAutoparts') . '. Best prices, fast shipping and quality assurance.'),
+    ])
+@endsection
 @section('content')
 
 <!-- hero section start -->
@@ -229,7 +233,7 @@
 <section class="gs-deal-of-day gs-deal-of-day-home2" {!! $sections->get('deal_of_day')?->dealBgStyle() !!}>
     <div class="container section-with-padding">
         <div class="row">
-            <div class="col-lg-6 col-md-12">
+            <div class="col-lg-6 col-md-12 d-flex align-items-center">
                 <div class="deal-of-day-wrapper">
                     <div class="deal-of-day-content">
                         @php $deal = $sections->get('deal_of_day'); @endphp

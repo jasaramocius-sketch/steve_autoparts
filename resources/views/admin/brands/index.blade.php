@@ -2,6 +2,12 @@
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'admin-all-brands-page', 'pageClass' => 'admin-all-brands-page'])
 @section('page-title', 'All Brands')
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'All Brands - Admin Panel',
+        'robots' => 'noindex, nofollow',
+    ])
+@endsection
 @section('content')
 
  <div class="d-flex justify-content-between align-items-center mb-3">

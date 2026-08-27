@@ -2,9 +2,13 @@
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'blog-show-page', 'pageClass' => 'blog-show-page'])
 @php $blogDesc = trim(strip_tags(html_entity_decode($blog->details ?? ''))); $blogDesc = mb_strlen($blogDesc) > 160 ? mb_substr($blogDesc, 0, 157) . '...' : $blogDesc; @endphp
-@section('title', $blog->title . ' - ' . config('app.name', 'StAutoparts'))
-@section('meta_title', $blog->title . ' | ' . config('app.name', 'StAutoparts'))
-@section('meta_description', $blogDesc ?: null)
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => $blog->title . ' - ' . config('app.name', 'StAutoparts'),
+        'metaTitle' => $blog->title . ' | ' . config('app.name', 'StAutoparts'),
+        'metaDescription' => $blogDesc ?: null,
+    ])
+@endsection
 
 @section('content')
 

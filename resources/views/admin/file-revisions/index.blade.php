@@ -2,6 +2,12 @@
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'admin-file-revisions-page', 'pageClass' => 'admin-file-revisions-page'])
 @section('page-title', 'File Revisions')
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'File Revisions - Admin Panel',
+        'robots' => 'noindex, nofollow',
+    ])
+@endsection
 @section('content')
 
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap flex-md-nowrap">
@@ -9,6 +15,53 @@
     <div>
         <span class="text-muted small me-2">Next scan: via cron</span>
         <a href="{{ route('admin.file-revisions.index') }}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-sync"></i> Refresh</a>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm mb-3">
+    <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#maintenancePanel" style="cursor:pointer;">
+        <span class="small fw-semibold"><i class="fas fa-broom me-1"></i> Maintenance</span>
+        <i class="fas fa-chevron-down small text-muted"></i>
+    </div>
+    <div id="maintenancePanel" class="collapse">
+        <div class="card-body">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card border bg-light h-100">
+                        <div class="card-body">
+                            <h6 class="card-title fw-semibold small"><i class="fas fa-compress-alt me-1"></i> Per-File Limit</h6>
+                            <p class="text-muted small mb-2">Keep only the last N revisions per file. Older diffs are truncated to 200 chars. Rows and backup files are preserved.</p>
+                            <form action="{{ route('admin.file-revisions.truncate-per-file') }}" method="POST" class="d-flex gap-2 align-items-end"
+                                  onsubmit="return confirm('This will truncate diff text beyond the per-file limit. Revisions and backups are preserved. Continue?')">
+                                @csrf
+                                <div>
+                                    <label class="form-label small">Keep last (per file)</label>
+                                    <input type="number" name="keep_per_file" value="50" min="5" max="500" class="form-control form-control-sm" style="width:120px;">
+                                </div>
+                                <button type="submit" class="btn btn-warning btn-sm"><i class="fas fa-filter me-1"></i> Apply Limit</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border bg-light h-100">
+                        <div class="card-body">
+                            <h6 class="card-title fw-semibold small"><i class="fas fa-clock me-1"></i> Age-Based Truncate</h6>
+                            <p class="text-muted small mb-2">Replace large diff text on rows older than N days with a 200-char summary. Revisions and backup files are preserved.</p>
+                            <form action="{{ route('admin.file-revisions.truncate-diffs') }}" method="POST" class="d-flex gap-2 align-items-end"
+                                  onsubmit="return confirm('This will truncate diff text on rows older than N days. Revisions and backups are preserved. Continue?')">
+                                @csrf
+                                <div>
+                                    <label class="form-label small">Older than (days)</label>
+                                    <input type="number" name="older_than_days" value="90" min="1" max="3650" class="form-control form-control-sm" style="width:120px;">
+                                </div>
+                                <button type="submit" class="btn btn-warning btn-sm"><i class="fas fa-compress-alt me-1"></i> Truncate Diffs</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 

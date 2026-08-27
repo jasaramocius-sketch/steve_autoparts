@@ -1,9 +1,13 @@
 @extends('layouts.app')
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'user-return-policy-page', 'pageClass' => 'user-return-policy-page'])
-@section('title', $page->meta_title ?? ('Return Policy' . ' - ' . config('app.name', 'StAutoparts')))
-@section('meta_title', $page->meta_title ?? 'Return Policy | ' . config('app.name', 'StAutoparts'))
-@section('meta_description', $page->meta_description ?? null)
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => $page->meta_title ?? ('Return Policy - ' . config('app.name', 'StAutoparts')),
+        'metaTitle' => $page->meta_title ?? ('Return Policy | ' . config('app.name', 'StAutoparts')),
+        'metaDescription' => $page->meta_description ?? null,
+    ])
+@endsection
 @section('content')
 
 <div class="container py-5">

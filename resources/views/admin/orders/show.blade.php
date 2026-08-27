@@ -2,6 +2,12 @@
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'admin-orders-show-page', 'pageClass' => 'admin-orders-show-page'])
 @section('page-title', 'Order Number' . ' #' . $order->order_number)
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'Order Detail - Admin Panel',
+        'robots' => 'noindex, nofollow',
+    ])
+@endsection
 
 @section('content')
 

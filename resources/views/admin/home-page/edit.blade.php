@@ -2,6 +2,12 @@
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'admin-home-edit-page', 'pageClass' => 'admin-home-edit-page'])
 @section('page-title', 'Edit' . ' ' . ucfirst(str_replace('_', ' ', $section->section_name)))
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'Edit Home Page - Admin Panel',
+        'robots' => 'noindex, nofollow',
+    ])
+@endsection
 
 @section('content')
 <div class="container-fluid">

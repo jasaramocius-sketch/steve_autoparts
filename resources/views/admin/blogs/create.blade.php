@@ -2,6 +2,12 @@
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'admin-blog-create-page', 'pageClass' => 'admin-blog-create-page'])
 @section('page-title', 'Add Blog')
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'Add Blog - Admin Panel',
+        'robots' => 'noindex, nofollow',
+    ])
+@endsection
 @section('content')
 
 <div class="card border-0 shadow-sm">

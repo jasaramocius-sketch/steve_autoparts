@@ -2,6 +2,12 @@
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'admin-products-show-page', 'pageClass' => 'admin-products-show-page'])
 @section('page-title', 'Product Details — ' . $product->name)
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'Product Details - Admin Panel',
+        'robots' => 'noindex, nofollow',
+    ])
+@endsection
 @section('content')
 
 {{-- Product tabs use shared backend.css styles. --}}

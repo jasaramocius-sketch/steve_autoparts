@@ -409,6 +409,10 @@ Route::prefix('admin')
             ->name('admin.file-revisions.download');
         Route::get('/file-revisions/diff/{id}', [AdminController::class, 'fileRevisionDiff'])
             ->name('admin.file-revisions.diff');
+        Route::post('/file-revisions/truncate-diffs', [AdminController::class, 'fileRevisionTruncateDiffs'])
+            ->name('admin.file-revisions.truncate-diffs');
+        Route::post('/file-revisions/truncate-per-file', [AdminController::class, 'fileRevisionTruncatePerFile'])
+            ->name('admin.file-revisions.truncate-per-file');
 
         // Image Manager
         Route::get('/images', [ImageController::class, 'index'])

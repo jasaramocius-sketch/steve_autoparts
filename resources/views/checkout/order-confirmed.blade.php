@@ -1,7 +1,13 @@
 @extends('layouts.app')
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'order-confirmed-page', 'pageClass' => 'order-confirmed-page'])
-@section('title', 'Order Confirmed' . ' - ' . config('app.name', 'StAutoparts'))
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'Order Confirmed - ' . config('app.name', 'StAutoparts'),
+        'metaTitle' => 'Order Confirmed | ' . config('app.name', 'StAutoparts'),
+        'metaDescription' => 'Your order has been confirmed at ' . config('app.name', 'StAutoparts') . '.',
+    ])
+@endsection
 @section('content')
 
 @php

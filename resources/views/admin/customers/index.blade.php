@@ -2,6 +2,12 @@
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'admin-customers-index-page', 'pageClass' => 'admin-customers-index-page'])
 @section('page-title', 'All Customers')
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'All Customers - Admin Panel',
+        'robots' => 'noindex, nofollow',
+    ])
+@endsection
 @section('content')
 
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap flex-md-nowrap">

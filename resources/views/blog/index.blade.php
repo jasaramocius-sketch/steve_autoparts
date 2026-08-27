@@ -2,9 +2,13 @@
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'blog-page', 'pageClass' => 'blog-page'])
 @php $blogTitle = isset($category) ? $category->name : 'Blogs'; @endphp
-@section('title', $blogTitle . ' - ' . config('app.name', 'StAutoparts'))
-@section('meta_title', $blogTitle . ' | ' . config('app.name', 'StAutoparts'))
-@section('meta_description', isset($category) ? ($category->description ?? 'Blogs about ' . $category->name) : 'Latest blogs, auto parts guides and tips from ' . config('app.name', 'StAutoparts') . '.')
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => $blogTitle . ' - ' . config('app.name', 'StAutoparts'),
+        'metaTitle' => $blogTitle . ' | ' . config('app.name', 'StAutoparts'),
+        'metaDescription' => isset($category) ? ($category->description ?? 'Blogs about ' . $category->name) : 'Latest blogs, auto parts guides and tips from ' . config('app.name', 'StAutoparts') . '.',
+    ])
+@endsection
 
 @section('content')
 

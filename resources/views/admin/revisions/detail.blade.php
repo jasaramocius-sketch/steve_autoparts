@@ -2,6 +2,12 @@
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'admin-revisions-detail-page', 'pageClass' => 'admin-revisions-detail-page'])
 @section('page-title', 'Revision #' . $rev->id)
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'Revision Detail - Admin Panel',
+        'robots' => 'noindex, nofollow',
+    ])
+@endsection
 @section('content')
 
 <!--

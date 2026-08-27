@@ -2,6 +2,12 @@
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'admin-orders-index-page', 'pageClass' => 'admin-orders-index-page'])
 @section('page-title', 'Orders')
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'Orders - Admin Panel',
+        'robots' => 'noindex, nofollow',
+    ])
+@endsection
 
 @section('content')
 

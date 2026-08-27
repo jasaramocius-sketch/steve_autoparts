@@ -2,6 +2,12 @@
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'admin-brands-create-page', 'pageClass' => 'admin-brands-create-page'])
 @section('page-title', 'Add Brand')
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'Add Brand - Admin Panel',
+        'robots' => 'noindex, nofollow',
+    ])
+@endsection
 @section('content')
 
 <div class="card border-0 shadow-sm">

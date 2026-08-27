@@ -421,4 +421,22 @@ class AdminController extends Controller
 
         return redirect()->route('admin.settings.footer')->with('success', 'Footer settings updated successfully.');
     }
+
+    public function fileRevisionTruncateDiffs(Request $request)
+    {
+        $olderThanDays = (int) $request->input('older_than_days', 90);
+        $trimmed = \App\Models\FileRevision::truncateDiffs($olderThanDays);
+
+        return redirect()->route('admin.file-revisions.index')
+            ->with('success', "Truncated diff data on {$trimmed} old revision(s).");
+    }
+
+    public function fileRevisionTruncatePerFile(Request $request)
+    {
+        $keepPerFile = (int) $request->input('keep_per_file', 50);
+        \App\Models\FileRevision::truncatePerFileLimit($keepPerFile);
+
+        return redirect()->route('admin.file-revisions.index')
+            ->with('success', "Per-file limit applied: kept last {$keepPerFile} revisions per file. Older diffs truncated.");
+    }
 }

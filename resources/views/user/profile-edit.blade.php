@@ -1,6 +1,13 @@
 @extends('user.layouts.dashboard')
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'user-profile-edit-page', 'pageClass' => 'user-profile-edit-page'])
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'Edit Profile - StAutoparts',
+        'metaTitle' => 'Edit Profile | StAutoparts',
+        'metaDescription' => 'Update your profile information at StAutoparts.',
+    ])
+@endsection
 @section('dashboard-content')
 
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 mb-4">

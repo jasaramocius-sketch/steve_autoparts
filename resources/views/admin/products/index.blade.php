@@ -2,6 +2,12 @@
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'admin-products-index-page', 'pageClass' => 'admin-products-index-page'])
 @section('page-title', 'All Products')
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'All Products - Admin Panel',
+        'robots' => 'noindex, nofollow',
+    ])
+@endsection
 @section('content')
 
 @php $trashedCount = \App\Models\Product::onlyTrashed()->count(); @endphp

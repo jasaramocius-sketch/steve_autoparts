@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Cart;
+use App\Models\Page;
 use App\Models\Product;
 use App\Models\Vehicle;
 use Illuminate\Support\Facades\Auth;
@@ -11,10 +12,11 @@ class CartController extends Controller
 {
     public function index()
     {
+        $page = \App\Models\Page::where('slug', 'cart')->first();
         $cart = session('cart', []);
         $total = array_sum(array_map(fn($item) => $item['price'] * $item['qty'], $cart));
         $cartItems = session()->get('cart', []);
-        return view('cart.index', compact('cart', 'total','cartItems'));
+        return view('cart.index', compact('cart', 'total','cartItems', 'page'));
     }
 
     public function add(Request $request)

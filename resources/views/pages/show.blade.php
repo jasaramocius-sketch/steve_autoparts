@@ -1,9 +1,13 @@
 @extends('layouts.app')
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'user-show-page', 'pageClass' => 'user-show-page'])
-@section('title', $page->meta_title ?: $page->title)
-@section('meta_title', $page->meta_title)
-@section('meta_description', $page->meta_description)
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => $page->meta_title ?: $page->title,
+        'metaTitle' => $page->meta_title,
+        'metaDescription' => $page->meta_description,
+    ])
+@endsection
 @section('content')
 
 @if($page->image)

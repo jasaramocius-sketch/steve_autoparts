@@ -1,6 +1,13 @@
 @extends('user.layouts.dashboard')
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'user-wishlist-page', 'pageClass' => 'user-wishlist-page'])
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'My Wishlist - StAutoparts',
+        'metaTitle' => 'My Wishlist | StAutoparts',
+        'metaDescription' => 'View your wishlist at StAutoparts.',
+    ])
+@endsection
 @section('dashboard-content')
 
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
