@@ -434,11 +434,11 @@
                             <small class="text-muted d-block">Check this to display this section on the home page</small>
                         </div>
 
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-primary steve-btn">
+                        <div class="form-group d-flex action-buttons">
+                            <button type="submit" class="btn btn-primary steve-btn" style="display: flex; align-items: center; gap: 10px;">
                                 <i class="fa fa-save"></i> Save Changes
                             </button>
-                            <a href="{{ route('admin.home-page.index') }}" class="btn btn-secondary">
+                            <a href="{{ route('admin.home-page.index') }}" class="btn btn-secondary" style="display: flex; align-items: center; gap: 10px;">
                                 <i class="fa fa-times"></i> Cancel
                             </a>
                         </div>

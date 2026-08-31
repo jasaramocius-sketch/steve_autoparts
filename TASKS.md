@@ -3166,3 +3166,7 @@ Added site-root class to body tag in both frontend and admin layouts. Added deta
 ## 238. Canonical redirects for /page/{slug} (27 Aug 2026)
 
 Added blog, categories, brands, cart, compare to page-builder.php live_url_map config. /page/blog now 301 redirects to /blog, etc. Fixed config cache issue.
+
+## 239. Category detail IDs and classes (27 Aug 2026)
+
+Added category-{id} ID and detail-category class for both product categories (route: category/{slug}, variable: $currentCategory) and blog categories (route: blog/category/{slug}, variable: $category) in page-attributes partial. Verified: product category gets category-57 + detail-category, blog category gets category-2 + detail-category.

@@ -23,11 +23,19 @@
     if ($baseSlug === 'blog' && isset($blog) && $blog) {
         $contentId = $blog->id;
         $contentType = 'blog';
-        $detailClass = 'post-detail';
+        $detailClass = 'detail-post';
     } elseif ($baseSlug === 'product' && isset($product) && $product) {
         $contentId = $product->id ?? $product['id'] ?? null;
         $contentType = 'product';
         $detailClass = 'product-detail';
+    } elseif ($baseSlug === 'category' && isset($currentCategory) && $currentCategory) {
+        $contentId = $currentCategory->id;
+        $contentType = 'category';
+        $detailClass = 'detail-category';
+    } elseif ($baseSlug === 'blog' && isset($category) && $category) {
+        $contentId = $category->id;
+        $contentType = 'category';
+        $detailClass = 'detail-category';
     }
 
     $pageModel = $page ?? null;

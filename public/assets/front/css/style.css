@@ -273,7 +273,8 @@ button.add-to-cart {
   .shop_details_sidebar {
     display: grid;
     gap: 20px;
-    grid-template-columns: 1fr 1fr
+    grid-template-columns: 1fr 1fr;
+    padding-top: 20px;
   }
 
   .shop_details_sidebar_info {
@@ -10244,7 +10245,7 @@ div.dt-container .dt-paging .dt-paging-button.previous {
 
 .form-group .form-control {
   width: 100%;
-  padding: 12px 20px;
+  padding: 8px 20px;
   color: #796866
 }
 
