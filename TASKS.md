@@ -3234,3 +3234,34 @@ Fixed several product detail page (resources/views/product/show.blade.php) issue
 
 ### 5. Admin profile — avatar initial fallback
 - `resources/views/admin/profile.blade.php` — empty-avatar placeholder wrapped in `admin-avatar-80` / `admin-avatar-initial` div for better sizing.
+
+## 247. MySQL No-Password Recovery — App DB Connection Fixed (1 Sep 2026)
+
+Fixed the app failing to connect to MySQL (originally `SQLSTATE[HY000] [1698] Access denied for user 'root'@'localhost' (using password: NO)` on the `cache` query). Final working state: **MySQL root uses `mysql_native_password` with an empty password and the app connects over TCP with no password.**
+
+- **Root cause of the original error**: MySQL root was set to `auth_socket` (passwordless, OS-socket-only login). The app connects over `127.0.0.1:3306` as the Apache `www-data` user, which `auth_socket` rejects → the `1698` "Access denied (using password: NO)".
+- **Recovery blockers encountered**: a stray `--skip-grant-tables --skip-networking` mysqld (PID stuck) held the InnoDB `ibdata1` lock; AppArmor's mysqld profile (`signal=kill ... peer="snap.code.code"`) blocked all process signals/kills from the snap-confined shell, and the AppArmor profile itself couldn't be switched to complain mode from the confined context (`aa-complain`/`apparmor_parser -r -C` unavailable/denied). The `/var/run/mysqld` socket dir kept disappearing → `2002 Connection refused` during recovery.
+- **Fix**: once a fresh mysqld came up on 3306, set `root`→`mysql_native_password` with empty hash (verified via TCP login with no password). Cleared `DB_PASSWORD=Jasa@123` from `.env` down to `DB_PASSWORD=` (empty). Ran `php artisan config:clear`.
+- **Verification**: the previously-failing `cache` query via `php artisan tinker` returns `1`; `curl -s -o /dev/null -w "%{http_code}" http://localhost/stautoparts/login` → **HTTP 200**; no SQLSTATE/exception markers in the login page output.
+- **Note**: a dedicated non-root `stautoparts` MySQL user (empty password) from a prepared `init.sql` was never persisted because the safe-mode `--skip-grant-tables`/`--init-file` attempts couldn't apply cleanly amid the restart chaos. Root-with-no-password is the current, working config.
+
+## 248. Order/Product Status Badges — Soft Pill Unification (Admin + User) (31–1 Sep 2026)
+
+Converted hard flat status badges to soft pill badges across admin and user views for a consistent look, matching the Orders list style.
+
+- **User order detail** (`resources/views/user/orders/show.blade.php`): header + payment badges → `badge badge--*` soft pills; view cache passed.
+- **Admin orders** (`admin/orders/index.blade.php`, `admin/orders/show.blade.php`): status badges → soft `bg-light text-* border border-*-subtle` pills; `php artisan view:cache` passed.
+- **Admin product detail** (`admin/products/show.blade.php`): Status/Badge/Featured → soft pills.
+- **Revision + file-revisions** (`admin/revisions/detail.blade.php`, `admin/file-revisions/diff.blade.php`, `admin/revisions/index.blade.php`, `admin/file-revisions/index.blade.php`): fallback badges → soft pills.
+- **Rejected**: clickable/cycle status badge for orders (user wanted simple). A controller `cycleStatus()` and route `admin.orders.cycle-status` were added then fully reverted/cleaned.
+
+## 249. User Inquiries — Edit/Delete + Reply Card Redesign (31–1 Sep 2026)
+
+- `app/Http/Controllers/DashboardController.php` — new `updateInquiry()` / `destroyInquiry()` (edit on pending inquiries only, reply null; message-body-only edit preserving Product/Product URL prefix).
+- `routes/web.php` (line 591, group prefix `user.`): `user.inquiries.update` / `user.inquiries.destroy`. (The `RouteNotFoundException` bug was fixed — view originally used `inquiries.*` links but the group is named `user.`.)
+- `resources/views/user/inquiries.blade.php` — Edit + Delete buttons (pending only), inline toggle form + `toggleInquiryEdit()` JS, quill-style soft reply card redesign (gradient card + avatar circle).
+
+## 250. Product Description — Markdown Rendering (31–1 Sep 2026)
+
+- `resources/views/product/show.blade.php` + `resources/views/layouts/app.blade.php` + new local `public/assets/front/js/marked.min.js` (v9.1.6, 36KB) — description wrapped in `.product-description-body`; DOMContentLoaded script runs `marked.setOptions({breaks:true,gfm:true})`, converts `•`→`- `, renders `el.innerHTML = marked.parse(raw)`.
+- Duplicate Key Features `<ul>` hidden when description already contains "Key Features"/bullets (`$hasFeaturesInDesc`); scoped CSS added; Node-verified `**bold**`→`<strong>` and `•`→`<ul><li>`.
