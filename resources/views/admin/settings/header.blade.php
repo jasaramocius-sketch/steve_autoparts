@@ -166,7 +166,7 @@
                             </div>
 
                         <div class="form-group">
-                            <button type="submit" class="btn btn-primary steve-btn">
+                            <button type="submit" class="btn btn-primary steve-btn gap-1">
                                 <i class="fas fa-save"></i> Save
                             </button>
                         </div>
@@ -715,7 +715,7 @@
                                     </div>
                                 </div>
                                 <div style="padding:0.75rem 0 0;display:flex;justify-content:flex-end;">
-                                    <button type="submit" class="btn btn-primary btn-sm">
+                                    <button type="submit" class="btn btn-primary steve-btn gap-1">
                                         <i class="fas fa-save me-1"></i> Save Menu
                                     </button>
                                 </div>

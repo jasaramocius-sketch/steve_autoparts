@@ -82,8 +82,8 @@
             </div>
 
             <div class="mt-4 d-flex gap-1">
-                <button class="btn btn-primary steve-btn"><i class="fas fa-save"></i> {{  isset($user) ? 'Update' : 'Save' }}</button>
-                <a href="{{ route('admin.users.index') }}" class="btn btn-secondary">Cancel</a>
+                <button class="btn btn-primary steve-btn gap-1"><i class="fas fa-save"></i> {{  isset($user) ? 'Update' : 'Save' }}</button>
+                <a href="{{ route('admin.users.index') }}" class="btn btn-secondary gap-1">Cancel</a>
             </div>
         </form>
     </div>

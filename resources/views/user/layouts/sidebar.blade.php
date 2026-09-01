@@ -49,11 +49,9 @@
             <li><a class="nav-link {{ request()->routeIs('user.addresses') ? 'active' : '' }}" href="{{ route('user.addresses') }}"><i class="fas fa-map-marker-alt me-2"></i>My Addresses</a></li>
 
             <li><a class="nav-link {{ request()->routeIs('user.notifications') ? 'active' : '' }}" href="{{ route('user.notifications') }}"><i class="fas fa-bell me-2"></i>Notifications</a></li>
-            <li class="nav-item mb-2">
-            <a class="nav-link {{ request()->routeIs('user.profile') ? 'active' : '' }}" href="{{ route('user.profile') }}">
-                <i class="fas fa-user-cog"></i>
-                My Profile
-            </a>
+            <li><a class="nav-link {{ request()->routeIs('user.inquiries') ? 'active' : '' }}" href="{{ route('user.inquiries') }}"><i class="fas fa-question-circle me-2"></i>My Inquiries</a></li>
+            <li class="nav-item mb-2 user-sidebar-my-profile">
+                <a class="nav-link {{ request()->routeIs('user.profile') ? 'active' : '' }}" href="{{ route('user.profile') }}"><i class="fas fa-user-cog"></i>My Profile</a>
             </li>
             @if(($profile['role'] ?? '') === 'master_admin')
             <li class="nav-item mb-2">

@@ -46,6 +46,7 @@
                         <th>Email</th>
                         <th>Page</th>
                         <th><a href="{{ sortUrl('created_at', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Date {!! sortIndicator('created_at', $sortBy, $sortDir) !!}</a></th>
+                        <th>Status</th>
                         <th class="pe-3">Action</th>
                     </tr>
                 </thead>
@@ -70,6 +71,13 @@
                             @endif
                         </td>
                         <td><small>{{ $contact->created_at->format('M d, Y') }}</small></td>
+                        <td>
+                            @if($contact->replied_at)
+                                <span class="badge bg-light text-success border border-success-subtle">Replied</span>
+                            @else
+                                <span class="badge bg-light text-warning border border-warning-subtle">Pending</span>
+                            @endif
+                        </td>
                         <td class="pe-3 table-action-col">
                             <div class="action-buttons">
                                 <a href="{{ route('admin.contacts.show', $contact->id) }}" class="action-btn btn-view" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="View"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></a>

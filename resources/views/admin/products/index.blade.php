@@ -70,6 +70,7 @@
                             Name {!! sortIndicator('name', $sortBy, $sortDir) !!}
                         </a></th>
                         <th>Category</th>
+                        <th>Seller</th>
                         <th><a href="{{ sortUrl('price', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">
                             Price {!! sortIndicator('price', $sortBy, $sortDir) !!}
                         </a></th>
@@ -95,8 +96,9 @@
                         <td>
                             <img src="{{ storedImageUrl($product->image, 'assets/images/thumbnails') }}" width="50" height="50" class="admin-image-thumb">
                         </td>
-                        <td><a href="{{ route('product', $product->slug) }}" target="_blank">{{ $product->name }}</a></td>
+                        <td class="admin-product-name"><a href="{{ route('product', $product->slug) }}" target="_blank">{{ Str::words($product->name, 3, '...') }}</a></td>
                         <td>{{ $product->category->name ??  'N/A' }}</td>
+                        <td>{{ $product->seller->name ?? 'N/A' }}</td>
                         <td>{{ currency_format($product->price) }}</td>
                         <td>@if($product->old_price) {{ currency_format($product->old_price) }} @else - @endif</td>
                         <td>{{ $product->stock ?? 0 }}</td>
@@ -154,7 +156,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="12" class="text-center py-4 text-muted">{{ request()->has('trashed') ? 'Trash is empty.' : 'No products found.' }}</td>
+                        <td colspan="13" class="text-center py-4 text-muted">{{ request()->has('trashed') ? 'Trash is empty.' : 'No products found.' }}</td>
                     </tr>
                     @endforelse
                 </tbody>

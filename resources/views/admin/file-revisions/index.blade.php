@@ -109,7 +109,7 @@
                             @elseif($rev->event === 'deleted')
                                 <span class="badge bg-light text-danger border border-danger-subtle">Deleted</span>
                             @else
-                                <span class="badge bg-secondary">{{ $rev->event }}</span>
+                                <span class="badge bg-light text-secondary border border-secondary-subtle">{{ $rev->event }}</span>
                             @endif
                         </td>
                         <td>

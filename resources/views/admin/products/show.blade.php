@@ -160,7 +160,7 @@
                     @if($product->badge)
                     <tr>
                         <th class="text-muted">Badge</th>
-                        <td><span class="badge bg-warning text-dark">{{ $product->badge }}</span></td>
+                        <td><span class="badge bg-light text-warning border border-warning-subtle">{{ $product->badge }}</span></td>
                     </tr>
                     @endif
                     <tr>
@@ -171,9 +171,9 @@
                         <th class="text-muted">Status</th>
                         <td>
                             @if($product->status)
-                                <span class="badge bg-success">Active</span>
+                                <span class="badge bg-light text-success border border-success-subtle">Active</span>
                             @else
-                                <span class="badge bg-secondary">Inactive</span>
+                                <span class="badge bg-light text-secondary border border-secondary-subtle">Inactive</span>
                             @endif
                         </td>
                     </tr>
@@ -181,9 +181,9 @@
                         <th class="text-muted">Featured</th>
                         <td>
                             @if($product->featured)
-                                <span class="badge bg-primary">Yes</span>
+                                <span class="badge bg-light text-success border border-success-subtle">Yes</span>
                             @else
-                                <span class="badge bg-light text-dark">No</span>
+                                <span class="badge bg-light text-secondary border border-secondary-subtle">No</span>
                             @endif
                         </td>
                     </tr>

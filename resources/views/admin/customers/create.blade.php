@@ -67,10 +67,10 @@
                     'required' => [],
                 ])
             </div>
-
-            <button class="btn btn-success steve-btn">Save</button>
-            <a href="{{ route('admin.customers.index') }}" class="btn btn-secondary">Back</a>
-
+            <div class="d-flex gap-1">
+                <button class="btn btn-primary steve-btn gap-1">Save</button>
+                <a href="{{ route('admin.customers.index') }}" class="btn btn-secondary gap-1">Back</a>
+            </div>
         </form>
 
     </div>

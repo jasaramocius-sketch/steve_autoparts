@@ -99,13 +99,13 @@
                        placeholder="Untitled page" value="{{ old('title') }}" maxlength="255" required>
                 @error('title') <div class="invalid-feedback">{{ $message }}</div> @enderror
 
-                <button type="button" id="statusPill" class="status-pill {{ old('status', true) ? 'is-active' : '' }}" data-active="{{ old('status', 1) ? '1' : '0' }}">
+                <button type="button" id="statusPill" class="status-pill {{ old('status', true) ? 'is-active' : '' }}" data-active="{{ old('status', 1) ? '1' : '0' }}" style="height: 40px; font-size: 1rem; line-height: 1.2;">
                     {{ old('status', true) ? 'Active' : 'Inactive' }}
                 </button>
                 <input type="hidden" name="status" id="statusInput" value="{{ old('status', 1) }}">
 
                 <button type="submit" class="btn btn-primary steve-btn text-nowrap"><i class="fas fa-save me-1"></i> Save page</button>
-                <a href="{{ route('admin.pages.index') }}" class="btn btn-outline-secondary text-nowrap"><i class="fas fa-times me-1"></i> Cancel</a>
+                <a href="{{ route('admin.pages.index') }}" class="btn btn-outline-secondary text-nowrap steve-btn gap-1"><i class="fas fa-times me-1"></i> Cancel</a>
             </div>
 
             {{-- Page Details --}}

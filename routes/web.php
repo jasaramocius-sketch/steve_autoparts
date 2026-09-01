@@ -362,6 +362,8 @@ Route::prefix('admin')
             ->name('admin.contacts.index');
         Route::get('/contacts/{id}', [\App\Http\Controllers\Admin\ContactController::class, 'show'])
             ->name('admin.contacts.show');
+        Route::post('/contacts/{id}/reply', [\App\Http\Controllers\Admin\ContactController::class, 'reply'])
+            ->name('admin.contacts.reply');
         Route::delete('/contacts/{id}', [\App\Http\Controllers\Admin\ContactController::class, 'destroy'])
             ->name('admin.contacts.destroy');
 
@@ -612,6 +614,9 @@ Route::middleware(['auth', 'nocache'])->prefix('user')->name('user.')->group(fun
     Route::get('/notifications', [DashboardController::class,'notifications'])->name('notifications');
     Route::post('/notifications/{id}/read', [DashboardController::class,'markNotificationRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [DashboardController::class,'markAllNotificationsRead'])->name('notifications.read-all');
+    Route::get('/inquiries', [DashboardController::class,'inquiries'])->name('inquiries');
+    Route::put('/inquiries/{id}', [DashboardController::class,'updateInquiry'])->name('inquiries.update');
+    Route::delete('/inquiries/{id}', [DashboardController::class,'destroyInquiry'])->name('inquiries.destroy');
     Route::get('/profile', [UserController::class, 'profile'])->name('profile');
     Route::get('/profile/edit', [UserController::class, 'editProfile'])->name('profile.edit');
     Route::post('/profile/update', [UserController::class, 'updateProfile'])->name('profile.update');

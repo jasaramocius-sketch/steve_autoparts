@@ -27,13 +27,13 @@
             <div class="col-md-3">
                 <strong>Event:</strong>
                 @if($rev->event === 'created')
-                    <span class="badge bg-success ms-1">Created</span>
+                    <span class="badge bg-light text-success border border-success-subtle ms-1">Created</span>
                 @elseif($rev->event === 'updated')
-                    <span class="badge bg-primary ms-1">Updated</span>
+                    <span class="badge bg-light text-primary border border-primary-subtle ms-1">Updated</span>
                 @elseif($rev->event === 'deleted')
-                    <span class="badge bg-danger ms-1">Deleted</span>
+                    <span class="badge bg-light text-danger border border-danger-subtle ms-1">Deleted</span>
                 @else
-                    <span class="badge bg-secondary ms-1">{{ $rev->event }}</span>
+                    <span class="badge bg-light text-secondary border border-secondary-subtle ms-1">{{ $rev->event }}</span>
                 @endif
             </div>
             <div class="col-md-3">

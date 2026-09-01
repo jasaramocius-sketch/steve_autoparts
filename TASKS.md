@@ -3170,3 +3170,67 @@ Added blog, categories, brands, cart, compare to page-builder.php live_url_map c
 ## 239. Category detail IDs and classes (27 Aug 2026)
 
 Added category-{id} ID and detail-category class for both product categories (route: category/{slug}, variable: $currentCategory) and blog categories (route: blog/category/{slug}, variable: $category) in page-attributes partial. Verified: product category gets category-57 + detail-category, blog category gets category-2 + detail-category.
+
+## 240. Product Page — Seller Sidebar SVG Icons Redesign (31 Aug 2026)
+
+Redesigned the product page seller sidebar (.shop_details_sidebar_store) metrics list in resources/views/product/show.blade.php. Replaced plain text bullets with inline SVG icons (Positive Seller Ratings star-badge, Ship on Time box, Chat Response Rate chat-bubble). Updated the list-item CSS: padding-left, flex-wrap, gap, capitalized text, white-space wrap, and svg positioning (absolute left, stroke: var(--primary)). Also added .shop_details_sidebar_store ul li spinner-bullet ::after removal.
+
+## 241. Product Gallery — Swiper Navigation Arrows (31 Aug 2026)
+
+Added prev/next navigation buttons to the product detail gallery thumbnail slider (.details_slider_nav) in resources/views/product/show.blade.php. Styled .details_slider_nav button (40x40, white bg, shadow, primary color arrow, primary hover with white arrow). Wired navigation via Swiper config: nextEl '#productGalleryNav .swiper-button-next', prevEl '#productGalleryNav .swiper-button-prev'.
+
+## 242. Admin Home Page Edit — Action Buttons Alignment (31 Aug 2026)
+
+Updated resources/views/admin/home-page/edit.blade.php Save/Cancel button row: changed .form-group wrapper to d-flex action-buttons, and set buttons to display:flex with 10px gap (icon + text inline centered) for consistent alignment.
+
+## 243. Admin Layout — Removed noindex (31 Aug 2026) + CSS Tweak
+
+Removed the <meta name="robots" content="noindex, nofollow"> tag from resources/views/admin/layouts/app.blade.php. In public/assets/front/css/style.css adjusted .form-group .form-control padding (12px 20px -> 8px 20px) and added padding-top to .shop_details_sidebar at the 1399px breakpoint.
+
+## 244. Product Page Bug Fixes — Fake Data Removal (31 Aug 2026)
+
+Fixed several product detail page (resources/views/product/show.blade.php) issues:
+- **Seller sidebar hardcoded/fake data removed**: replaced hardcoded "Genius Store" + fake metrics (4.5 (320), Ship on Time 100%, Chat Response Rate 90%) with real seller data (name, location, followers_count, products_count). Seller box now hides entirely if no seller. ProductController::show now eager-loads the seller relation with product count (->with(['seller' => fn($q) => $q->withCount('products')])).
+- **Fake SKU removed**: hardcoded "SKU: WB44721Fdq{{id}}" line removed (no real SKU field existed); Category li wrapped in isset guard.
+- **Share links fixed**: icons pointed to generic facebook.com/twitter.com/etc. homepages; now use real share URLs (Facebook sharer, Twitter intent, LinkedIn share-offsite, WhatsApp send) with the current product URL + name.
+- **Lorem ipsum fallback removed**: empty description previously rendered fake Latin text; now shows clean "No description available" message.
+- **Admin noindex restored**: re-added <meta name="robots" content="noindex, nofollow"> to admin layout to prevent admin pages being indexed.
+
+## 245. Admin Products — Seller Column + Import/Export Support (31 Aug 2026)
+
+- **Admin products list**: added a "Seller" column (header + row cell `$product->seller->name ?? 'N/A'`) after Category in resources/views/admin/products/index.blade.php. Controller `index()` now eager-loads the `seller` relation for both active and trashed queries. Empty-state colspan updated 12 -> 13.
+- **Import**: added `seller` to the recognized CSV columns in ProductController::import. Seller is matched by name and auto-created if missing (with unique slug), tracked via `$sellersCreated` counter and reported in the success message. `seller_id` added to insert/update data.
+- **Export**: added `seller` column to exportCsv (header + per-row `$p->seller->name`), eager-loading the seller relation.
+- **Sample CSV**: added `seller` column header + sample values (e.g. "AutoZone Seller").
+- **Import view docs**: added `seller` (auto-created if missing) to the supported-columns help text.
+
+## 246. Uncommitted changes — Contact replies, product import, admin UI (31 Aug 2026)
+
+### 1. Contact Inquiry — Admin Reply System + User "My Inquiries" Page
+- `database/migrations/2026_08_31_000000_add_reply_to_contacts_table.php` — **new** migration: adds `reply` (text), `replied_by` (nullable bigint), `replied_at` (nullable timestamp) to `contacts`.
+- `app/Models/Contact.php` — added `reply`, `replied_by`, `replied_at` to `$fillable`; `replied_at` cast to `datetime`; new `replier()` belongsTo(User, 'replied_by') relation.
+- `app/Http/Controllers/Admin/ContactController.php` — new `reply()` method (validates `reply`, saves reply + `replied_by` + `replied_at`, redirects back with success); `show()` now eager-loads `replier`.
+- `routes/web.php` — `POST /admin/contacts/{id}/reply` → `admin.contacts.reply`; `GET /user/inquiries` → `user.inquiries`.
+- `resources/views/admin/contacts/index.blade.php` — added "Status" column with Replied (green) / Pending (amber) badges.
+- `resources/views/admin/contacts/show.blade.php` — new "Reply to Inquiry" card: shows current reply + replier name/date, textarea (Send/Update Reply), Email button.
+- `app/Http/Controllers/DashboardController.php` — new `inquiries()` method (user's own contacts, eager-loads product + replier, paginate 20).
+- `resources/views/user/inquiries.blade.php` — **new** "My Inquiries" user page (subject, date, status badge, linked product, message, green reply box with replier/date, pagination).
+- `resources/views/user/layouts/sidebar.blade.php` — "My Inquiries" nav link with active state via `user.inquiries`.
+
+### 2. Product CSV Import — policy/features/reviews support
+- `app/Http/Controllers/ProductController.php` — new static `normalizeImportedProductData()`: normalizes `policy_text`/`buy_return_policy`/`return_policy`, `features`/`feature_list` (newline or `||` split), `reviews`/`reviews_data` (JSON array or `name::rating::text` pipe format; clamps rating 1-5; defaults `deleted`/`rating`/`name`).
+- `import()` — added the new columns to `$expected`; `seller` matched by name and auto-created if missing; stores `policy_text`, `features`, `reviews_data` on insert/update.
+- `exportCsv()` / `downloadSampleCsv()` — headers updated; sample rows include policy + reviews JSON data.
+- `resources/views/admin/products/import.blade.php` — supported-columns help doc for policy/features/reviews columns; button row cleanup.
+
+### 3. Admin button alignment fixes
+- `resources/views/admin/coupons/edit.blade.php`, `admin/customers/edit.blade.php`, `admin/sellers/edit.blade.php` — action row `.mt-4` → `d-flex gap-*`; Cancel buttons now `steve-btn`.
+- `resources/views/admin/home-page/edit.blade.php` — Cancel button gets `steve-btn`; removed hard line-breaks from section detail labels (Section Name / Order / Status / Joined / Last Updated).
+
+### 4. Admin orders + products list tweaks
+- `resources/views/admin/orders/index.blade.php` — Action header `d-flex justify-content-end` class removed.
+- `resources/views/admin/products/index.blade.php` — product name truncated via `Str::words($product->name, 3, '...')` with `admin-product-name` cell class.
+- `public/assets/front/css/style.css` — added `.gs-dashboard-user-sidebar-wrapper li a i` sizing (15px) and `td.admin-product-name a` line-clamp; `.table-action-col .action-buttons` justify changed `flex-end` → `flex-start`.
+
+### 5. Admin profile — avatar initial fallback
+- `resources/views/admin/profile.blade.php` — empty-avatar placeholder wrapped in `admin-avatar-80` / `admin-avatar-initial` div for better sizing.

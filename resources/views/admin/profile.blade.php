@@ -28,7 +28,9 @@
                 @if(Auth::user()->avatar)
                     <img src="{{ storedImageUrl(Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}" width="100%" class="border">
                 @else
-                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                    <div class="text-dark w-100 h-100 d-flex align-items-center justify-content-center admin-avatar-80 admin-avatar-initial">
+                        {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                    </div>
                 @endif
             </li>
         </ul>

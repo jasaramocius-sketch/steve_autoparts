@@ -15,6 +15,64 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
+    public static function normalizeImportedProductData(array $data): array
+    {
+        $rawPolicy = trim((string) ($data['policy_text'] ?? $data['buy_return_policy'] ?? $data['return_policy'] ?? ''));
+        $rawFeatures = trim((string) ($data['features'] ?? $data['feature_list'] ?? ''));
+        $rawReviews = $data['reviews_data'] ?? $data['reviews'] ?? null;
+
+        $features = [];
+        if ($rawFeatures !== '') {
+            $features = array_values(array_filter(array_map('trim', preg_split('/\r\n|\n|\|\|/', $rawFeatures))));
+        }
+
+        $reviews = [];
+        if (is_string($rawReviews) && trim($rawReviews) !== '') {
+            $decoded = json_decode($rawReviews, true);
+            if (is_array($decoded)) {
+                $reviews = $decoded;
+            } elseif (str_contains($rawReviews, '|')) {
+                foreach (explode('|', $rawReviews) as $chunk) {
+                    $chunk = trim($chunk);
+                    if ($chunk === '') continue;
+                    $parts = explode('::', $chunk, 3);
+                    if (count($parts) === 3) {
+                        $reviews[] = [
+                            'name' => $parts[0],
+                            'rating' => max(1, min(5, (int) $parts[1])),
+                            'text' => $parts[2],
+                            'deleted' => false,
+                        ];
+                    }
+                }
+            }
+        } elseif (is_array($rawReviews)) {
+            $reviews = $rawReviews;
+        }
+
+        foreach ($reviews as $key => $review) {
+            if (!is_array($review)) {
+                unset($reviews[$key]);
+                continue;
+            }
+            $reviews[$key]['deleted'] = (bool) ($review['deleted'] ?? false);
+            if (!isset($reviews[$key]['rating'])) {
+                $reviews[$key]['rating'] = 5;
+            }
+            $reviews[$key]['rating'] = max(1, min(5, (int) $reviews[$key]['rating']));
+            if (!isset($reviews[$key]['name'])) {
+                $reviews[$key]['name'] = 'Customer';
+            }
+        }
+
+        return [
+            'description' => (string) ($data['description'] ?? ''),
+            'policy_text' => $rawPolicy !== '' ? $rawPolicy : null,
+            'features' => $features ?: null,
+            'reviews_data' => $reviews ?: null,
+        ];
+    }
+
     public function index(Request $request)
     {
         $sortBy = $request->query('sort_by', 'created_at');
@@ -36,9 +94,9 @@ class ProductController extends Controller
         }
 
         if ($request->has('trashed')) {
-            $query = Product::onlyTrashed()->with('category');
+            $query = Product::onlyTrashed()->with(['category', 'seller']);
         } else {
-            $query = Product::with('category');
+            $query = Product::with(['category', 'seller']);
         }
 
         if ($search = $request->query('search')) {
@@ -66,7 +124,7 @@ class ProductController extends Controller
 
     public function show($slug)
     {
-        $product = Product::with(['galleryImages', 'category.parent'])->where('slug', $slug)->where('status', true)->firstOrFail();
+        $product = Product::with(['galleryImages', 'category.parent', 'seller' => fn($q) => $q->withCount('products')])->where('slug', $slug)->where('status', true)->firstOrFail();
         $related = Product::with('category')->where('status', true)->where('id', '!=', $product->id)->take(4)->get();
 
         $activeCategoryUrls = [];
@@ -366,7 +424,7 @@ class ProductController extends Controller
         $header = fgetcsv($handle, 0, ',');
 
         $header = array_map('trim', $header);
-        $expected = ['id', 'name', 'price', 'old_price', 'category', 'stock', 'description', 'badge', 'product_type', 'status', 'featured', 'image', 'brand', 'year', 'make', 'model', 'gallery_images'];
+        $expected = ['id', 'name', 'price', 'old_price', 'category', 'stock', 'description', 'badge', 'product_type', 'status', 'featured', 'image', 'brand', 'seller', 'year', 'make', 'model', 'gallery_images', 'policy_text', 'buy_return_policy', 'return_policy', 'features', 'feature_list', 'reviews', 'reviews_data'];
 
         $colMap = [];
         foreach ($header as $i => $col) {
@@ -389,9 +447,14 @@ class ProductController extends Controller
             return strtolower(trim($brand->name));
         });
 
+        $sellers = Seller::all()->keyBy(function ($seller) {
+            return strtolower(trim($seller->name));
+        });
+
         $imported = 0;
         $categoriesCreated = 0;
         $brandsCreated = 0;
+        $sellersCreated = 0;
         $galleryImported = 0;
         $errors = [];
         $rowNum = 1;
@@ -453,21 +516,44 @@ class ProductController extends Controller
                 }
             }
 
+            $sellerId = null;
+            if (!empty($data['seller'])) {
+                $sellerKey = strtolower(trim($data['seller']));
+                if (isset($sellers[$sellerKey])) {
+                    $sellerId = $sellers[$sellerKey]->id;
+                } else {
+                    $newSeller = Seller::create([
+                        'name' => trim($data['seller']),
+                        'slug' => Str::slug(trim($data['seller'])) . '-' . uniqid(),
+                        'status' => true,
+                    ]);
+                    $sellers[$sellerKey] = $newSeller;
+                    $sellerId = $newSeller->id;
+                    $sellersCreated++;
+                }
+            }
+
+            $normalized = self::normalizeImportedProductData($data);
+
             $insertData = [
                 'name' => $data['name'],
                 'price' => $data['price'],
                 'old_price' => (!empty($data['old_price']) && is_numeric($data['old_price'])) ? $data['old_price'] : null,
                 'category_id' => $categoryId,
                 'brand_id' => $brandId,
+                'seller_id' => $sellerId,
                 'year' => (!empty($data['year']) && is_numeric($data['year'])) ? (int)$data['year'] : null,
                 'make' => $data['make'] ?? null,
                 'model' => $data['model'] ?? null,
                 'stock' => (!empty($data['stock']) && is_numeric($data['stock'])) ? (int)$data['stock'] : 0,
-                'description' => $data['description'] ?? '',
+                'description' => $normalized['description'] ?: ($data['description'] ?? ''),
                 'badge' => $data['badge'] ?? null,
                 'product_type' => in_array($data['product_type'] ?? '', ['physical', 'digital']) ? $data['product_type'] : 'none',
                 'status' => in_array(($data['status'] ?? ''), ['1', 'yes', 'active', 'true'], true) ? true : false,
                 'featured' => in_array(($data['featured'] ?? ''), ['1', 'yes', 'active', 'true'], true) ? true : false,
+                'policy_text' => $normalized['policy_text'],
+                'features' => $normalized['features'],
+                'reviews_data' => $normalized['reviews_data'],
             ];
 
             if ($existingProduct) {
@@ -545,6 +631,9 @@ class ProductController extends Controller
         if ($brandsCreated > 0) {
             $extras[] = "{$brandsCreated} new brand(s) created";
         }
+        if ($sellersCreated > 0) {
+            $extras[] = "{$sellersCreated} new seller(s) created";
+        }
         if ($galleryImported > 0) {
             $extras[] = "{$galleryImported} gallery image(s) imported";
         }
@@ -563,11 +652,11 @@ class ProductController extends Controller
 
     public function downloadSampleCsv()
     {
-        $headers = ['id', 'name', 'price', 'old_price', 'category', 'stock', 'description', 'badge', 'product_type', 'status', 'featured', 'image', 'brand', 'year', 'make', 'model', 'gallery_images'];
+        $headers = ['id', 'name', 'price', 'old_price', 'category', 'stock', 'description', 'badge', 'product_type', 'status', 'featured', 'image', 'brand', 'seller', 'year', 'make', 'model', 'gallery_images', 'policy_text', 'reviews_data'];
         $rows = [
-            ['', 'Brake Pads Set', '49.99', '69.99', 'Brakes', '100', 'High quality ceramic brake pads', 'New', 'physical', '1', '1', 'https://example.com/images/brake-pads.jpg', 'Duralast', '2020', 'Toyota', 'Camry', 'https://example.com/images/brake-pads-2.jpg|https://example.com/images/brake-pads-3.jpg'],
-            ['', 'Oil Filter', '12.99', '', 'Engine', '250', '', 'Sale', 'physical', '1', '0', '', 'Apex Gasket', '2019', 'Honda', 'Civic', ''],
-            ['', 'LED Headlight Bulb', '29.99', '39.99', 'Lighting', '75', 'Bright 12000LM LED bulbs', '', 'physical', '1', '1', '', '', '', '', '', ''],
+            ['', 'Brake Pads Set', '49.99', '69.99', 'Brakes', '100', 'High quality ceramic brake pads', 'New', 'physical', '1', '1', 'https://example.com/images/brake-pads.jpg', 'Duralast', 'AutoZone Seller', '2020', 'Toyota', 'Camry', 'https://example.com/images/brake-pads-2.jpg|https://example.com/images/brake-pads-3.jpg', '<p>We offer a 30-day return policy for unused items in original packaging.</p>', '[{"name":"Ava","rating":5,"text":"Perfect fit and fast delivery.","deleted":false}]'],
+            ['', 'Oil Filter', '12.99', '', 'Engine', '250', '', 'Sale', 'physical', '1', '0', '', 'Apex Gasket', 'AutoZone Seller', '2019', 'Honda', 'Civic', '', '<p>Items can be returned within 14 days if they are not installed or damaged.</p>', '[{"name":"Noah","rating":4,"text":"Works well and shipped quickly.","deleted":false}]'],
+            ['', 'LED Headlight Bulb', '29.99', '39.99', 'Lighting', '75', 'Bright 12000LM LED bulbs', '', 'physical', '1', '1', '', '', '', '', '', '', '<p>All purchases include a 12-month warranty and a simple return process.</p>', '[{"name":"Mila","rating":5,"text":"Great brightness and easy install.","deleted":false}]'],
         ];
 
         $callback = function () use ($headers, $rows) {
@@ -587,9 +676,9 @@ class ProductController extends Controller
 
     public function exportCsv()
     {
-        $headers = ['id', 'name', 'price', 'old_price', 'category', 'stock', 'description', 'badge', 'product_type', 'status', 'featured', 'image', 'brand', 'year', 'make', 'model', 'gallery_images'];
+        $headers = ['id', 'name', 'price', 'old_price', 'category', 'stock', 'description', 'badge', 'product_type', 'status', 'featured', 'image', 'brand', 'seller', 'year', 'make', 'model', 'gallery_images'];
 
-        $products = Product::with('category', 'brand', 'galleryImages')->get();
+        $products = Product::with('category', 'brand', 'seller', 'galleryImages')->get();
 
         $callback = function () use ($headers, $products) {
             $handle = fopen('php://output', 'w');
@@ -614,6 +703,7 @@ class ProductController extends Controller
                     $p->featured ? '1' : '0',
                     $p->image ? url(storedPath($p->image, 'assets/images/thumbnails')) : '',
                     $p->brand->name ?? '',
+                    $p->seller->name ?? '',
                     $p->year ?? '',
                     $p->make ?? '',
                     $p->model ?? '',

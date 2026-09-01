@@ -636,6 +636,7 @@
     @stack('jquery-ui-js')
     <script src="{{ asset('assets/front/js/nice-select.js') }}?v={{ filemtime(public_path('assets/front/js/nice-select.js')) }}" defer></script>
     <script src="{{ asset('assets/front/js/wow.js') }}" defer></script>
+    <script src="{{ asset('assets/front/js/marked.min.js') }}" defer></script>
     <script src="{{ asset('assets/front/js/bootstrap.bundle.min.js') }}" defer></script>
     <script src="{{ asset('assets/front/js/toastr.min.js') }}" defer></script>
     <script src="{{ asset('assets/front/js/script.js') }}?v={{ filemtime(public_path('assets/front/js/script.js')) }}" defer></script>

@@ -9,6 +9,7 @@ use App\Models\Vehicle;
 use App\Models\Address;
 use App\Models\User;
 use App\Models\Notification;
+use App\Models\Contact;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -416,6 +417,54 @@ class DashboardController extends Controller
     {
         Notification::where('user_id', Auth::id())->unread()->update(['is_read' => true]);
         return back()->with('success', 'All notifications marked as read.');
+    }
+
+    public function inquiries()
+    {
+        $inquiries = Contact::with(['product', 'replier'])
+            ->where('user_id', Auth::id())
+            ->latest()
+            ->paginate(20);
+
+        return view('user.inquiries', compact('inquiries'));
+    }
+
+    public function updateInquiry(Request $request, $id)
+    {
+        $inquiry = Contact::where('user_id', Auth::id())
+            ->whereNull('replied_at')
+            ->findOrFail($id);
+
+        $validated = $request->validate([
+            'subject' => 'required|string|max:255',
+            'message' => 'required|string|max:2000',
+        ]);
+
+        $existing = $inquiry->message;
+        $body = null;
+        $prefix = '';
+        if (preg_match('/^\s*(Product:\s*.+?Product URL:\s*\S+)(?:\n\n|\n)(.*)$/is', $existing, $m)) {
+            $prefix = trim($m[1]);
+            $body = trim($m[2]);
+        }
+
+        $newBody = trim($validated['message']);
+        $inquiry->message = $prefix !== '' ? "{$prefix}\n\n{$newBody}" : $newBody;
+        $inquiry->subject = $validated['subject'];
+        $inquiry->save();
+
+        return back()->with('success', 'Inquiry updated successfully.');
+    }
+
+    public function destroyInquiry($id)
+    {
+        $inquiry = Contact::where('user_id', Auth::id())
+            ->whereNull('replied_at')
+            ->findOrFail($id);
+
+        $inquiry->delete();
+
+        return back()->with('success', 'Inquiry deleted successfully.');
     }
 
     // -------------------------------------------------------------

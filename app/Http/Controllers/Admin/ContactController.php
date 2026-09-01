@@ -32,8 +32,26 @@ class ContactController extends Controller
 
     public function show($id)
     {
-        $contact = Contact::with('product', 'user')->findOrFail($id);
+        $contact = Contact::with('product', 'user', 'replier')->findOrFail($id);
         return view('admin.contacts.show', compact('contact'));
+    }
+
+    public function reply(Request $request, $id)
+    {
+        $request->validate([
+            'reply' => 'required|string|max:5000',
+        ]);
+
+        $contact = Contact::findOrFail($id);
+
+        $contact->update([
+            'reply' => trim($request->reply),
+            'replied_by' => auth()->id(),
+            'replied_at' => now(),
+        ]);
+
+        return redirect()->route('admin.contacts.show', $contact->id)
+            ->with('success', 'Reply saved successfully.');
     }
 
     public function destroy($id)

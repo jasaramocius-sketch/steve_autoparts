@@ -103,16 +103,16 @@
                 </select>
 
             </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-primary steve-btn">
+                    Update
+                </button>
 
-            <button class="btn btn-primary steve-btn">
-                Update
-            </button>
-
-            <a href="{{ route('admin.categories.index') }}"
-               class="btn btn-secondary">
-                Back
-            </a>
-
+                <a href="{{ route('admin.categories.index') }}"
+                class="btn btn-secondary">
+                    Back
+                </a>
+            </div>
         </form>
 
     </div>

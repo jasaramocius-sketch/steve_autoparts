@@ -87,7 +87,7 @@
                             @elseif($rev->action === 'deleted')
                                 <span class="badge bg-light text-danger border border-danger-subtle">Deleted</span>
                             @else
-                                <span class="badge bg-secondary">{{ $rev->action }}</span>
+                                <span class="badge bg-light text-secondary border border-secondary-subtle">{{ $rev->action }}</span>
                             @endif
                         </td>
                         <td class="admin-max-width-250">

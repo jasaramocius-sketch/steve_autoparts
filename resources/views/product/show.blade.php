@@ -602,7 +602,7 @@
     margin-bottom: 0;
 }
 .shop_details_sidebar_store ul li {
-      font-size: 13px;
+    font-size: 13px;
     display: flex;
     flex-wrap: wrap;
     align-items: flex-start;
@@ -658,10 +658,10 @@
     padding: 0;
     box-shadow: 0px 0px 10px #000;
 }
-.details_slider_nav button:after{
+/* .details_slider_nav button:after{
     font-size: 20px;
     color: var(--primary);
-}
+} */
 .details_slider_nav button:hover{
   background-color: var(--primary);
 }
@@ -703,6 +703,47 @@
       /* height: 108px;  */
     }
 }
+
+.product-description-body > *:first-child { margin-top: 0; }
+.product-description-body > *:last-child { margin-bottom: 0; }
+.product-description-body h1,
+.product-description-body h2,
+.product-description-body h3,
+.product-description-body h4,
+.product-description-body h5 {
+    font-weight: 600;
+    color: #2f211f;
+    margin: 1.4em 0 .6em;
+    line-height: 1.3;
+}
+.product-description-body h1 { font-size: 1.6rem; }
+.product-description-body h2 { font-size: 1.4rem; }
+.product-description-body h3 { font-size: 1.25rem; }
+.product-description-body h4 { font-size: 1.1rem; }
+.product-description-body p { margin: 0 0 1em; }
+.product-description-body ul,
+.product-description-body ol {
+    margin: 0 0 1em;
+    padding-left: 22px;
+}
+.product-description-body ul { list-style: disc; }
+.product-description-body ol { list-style: decimal; }
+.product-description-body li { margin: 0 0 .4em; }
+.product-description-body strong, .product-description-body b { font-weight: 700; }
+.product-description-body em, .product-description-body i { font-style: italic; }
+.product-description-body a { color: var(--primary); text-decoration: underline; }
+.product-description-body a:hover { text-decoration: none; }
+.product-description-body hr {
+    border: 0;
+    border-top: 1px solid rgba(0,0,0,.1);
+    margin: 1.4em 0;
+}
+.product-description-body blockquote {
+    border-left: 3px solid var(--primary);
+    padding-left: 14px;
+    margin: 0 0 1em;
+    color: #6d5c5a;
+}
 </style>
 @endsection
 
@@ -740,7 +781,7 @@
                 </div>
                 <div class="zoom-result" id="zoomResult"></div>
               </div>
-              <div class="swiper details_slider_nav" id="productGalleryNav">
+              <div class="swiper details_slider_nav position-relative" id="productGalleryNav">
                 <div class="swiper-wrapper">
                 @if($product['image'])
                   <div class="swiper-slide details_slider_nav_item">
@@ -753,8 +794,15 @@
                   </div>
                 @endforeach
                 </div>
-                <button class="swiper-button-prev" aria-label="Previous"></button>
-                <button class="swiper-button-next" aria-label="Next"></button>
+                <div class="product-detail-blade-img-gallery-nav w-100 slider-nav d-flex position-absolute top-0 justify-content-between align-items-center mt-4 z-1 px-1">
+                  <button class="swiper-btn-prev steve-btn">
+                      <i class="fas fa-chevron-left"></i>
+                  </button>
+
+                  <button class="swiper-btn-next steve-btn">
+                      <i class="fas fa-chevron-right"></i>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -860,7 +908,6 @@
               </ul>
 
               <ul class="details_tags_sku">
-                <li><span>SKU:</span> WB44721Fdq{{ $product['id'] }}</li>
                 @if(isset($product['category']) && $product['category'])
                 <li><span>Category:</span> {{ $product['category']['name'] ?? $product['category']->name }}</li>
                 @endif
@@ -868,10 +915,11 @@
 
               <ul class="shop_details_shate">
                 <li>Share:</li>
-                <li><a href="https://facebook.com" target="_blank"><i class="fab fa-facebook-f"></i></a></li>
-                <li><a href="https://twitter.com" target="_blank"><i class="fab fa-twitter"></i></a></li>
-                <li><a href="https://linkedin.com" target="_blank"><i class="fab fa-linkedin-in"></i></a></li>
-                <li><a href="https://whatsapp.com" target="_blank"><i class="fab fa-whatsapp"></i></a></li>
+                @php $shareUrl = url()->current(); $shareText = ($product['name'] ?? 'Check this product'); @endphp
+                <li><a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode($shareUrl) }}" target="_blank" rel="noopener" aria-label="Share on Facebook"><i class="fab fa-facebook-f"></i></a></li>
+                <li><a href="https://twitter.com/intent/tweet?url={{ urlencode($shareUrl) }}&text={{ urlencode($shareText) }}" target="_blank" rel="noopener" aria-label="Share on Twitter"><i class="fab fa-twitter"></i></a></li>
+                <li><a href="https://www.linkedin.com/sharing/share-offsite/?url={{ urlencode($shareUrl) }}" target="_blank" rel="noopener" aria-label="Share on LinkedIn"><i class="fab fa-linkedin-in"></i></a></li>
+                <li><a href="https://api.whatsapp.com/send?text={{ urlencode($shareText . ' ' . $shareUrl) }}" target="_blank" rel="noopener" aria-label="Share on WhatsApp"><i class="fab fa-whatsapp"></i></a></li>
               </ul>
             </div>
           </div>
@@ -892,8 +940,17 @@
           </ul>
           <div class="tab-content border px-4 " id="myTabContent">
             <div class="tab-pane fade show active py-4" id="description-tab-pane" role="tabpanel" aria-labelledby="description-tab" tabindex="0">
-              <div style="line-height: 1.8; color: #4c3533;">{!! $product['description'] ?? 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.' !!}</div>
-              @if(!empty($product['features']))
+              @php
+                  $descText  = $product['description'] ?? '';
+                  $descLower = strtolower(strip_tags($descText));
+                  $hasFeaturesInDesc = str_contains($descLower, 'key features') || preg_match('/^\s*[•\-*]\s/m', $descText);
+              @endphp
+              @if(!empty($descText))
+              <div class="product-description-body" style="line-height: 1.8; color: #4c3533;">{!! $descText !!}</div>
+              @else
+              <p class="text-muted mb-0">No description available for this product yet.</p>
+              @endif
+              @if(!empty($product['features']) && !$hasFeaturesInDesc)
                 <h5 class="mt-4 mb-3" style="font-weight: 600;">Key Features:</h5>
                 <ul style="line-height: 1.8; color: #4c3533; padding-left: 20px;">
                   @foreach($product['features'] ?? [] as $feature)
@@ -1041,127 +1098,42 @@
           </div>
 
           <div class="shop_details_sidebar_store">
+            @php $seller = $product->seller ?? null; @endphp
+            @if($seller)
             <p class="sold_by">Sold by</p>
-            <h4 class="store_name">Genius Store</h4>
-            <ul>
-              <li>
-                  <svg width="24" height="24" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_iconCarrier"> <path d="M20.5144 27.5569C20.5144 25.51 22.1738 23.8506 24.2208 23.8506H96.2817C98.3286 23.8506 99.988 25.51 99.988 27.5569V70.8851C99.988 72.932 98.3286 74.5914 96.2817 74.5914H24.2208C22.1738 74.5914 20.5144 72.932 20.5144 70.8851V27.5569Z" fill="var(--primary)"></path> <path d="M16.1722 23.2146C16.1722 21.1677 17.8315 19.5083 19.8785 19.5083H91.9394C93.9864 19.5083 95.6457 21.1677 95.6457 23.2146V66.5428C95.6457 68.5898 93.9864 70.2491 91.9394 70.2491H19.8785C17.8315 70.2491 16.1722 68.5898 16.1722 66.5428V23.2146Z" fill="white"></path> <path fill-rule="evenodd" clip-rule="evenodd" d="M19.8785 17.6552H91.9394C95.0098 17.6552 97.4989 20.1442 97.4989 23.2146V66.5428C97.4989 69.6132 95.0098 72.1023 91.9394 72.1023H19.8785C16.8081 72.1023 14.319 69.6132 14.319 66.5428V23.2146C14.319 20.1442 16.8081 17.6552 19.8785 17.6552ZM19.8785 19.5083C17.8315 19.5083 16.1722 21.1677 16.1722 23.2146V66.5428C16.1722 68.5898 17.8315 70.2491 19.8785 70.2491H91.9394C93.9864 70.2491 95.6457 68.5898 95.6457 66.5428V23.2146C95.6457 21.1677 93.9864 19.5083 91.9394 19.5083H19.8785Z" fill="var(--primary)"></path> <path fill-rule="evenodd" clip-rule="evenodd" d="M31.3161 37.5104C31.991 36.116 33.9773 36.116 34.6522 37.5104L36.06 40.4192L38.9974 40.7527C40.5499 40.9289 41.2008 42.8294 40.0823 43.9205L37.619 46.3235L38.2094 48.7445C38.5994 50.3438 36.8662 51.6197 35.4549 50.7722L32.9841 49.2885L30.5133 50.7722C29.1021 51.6197 27.3689 50.3438 27.7589 48.7445L28.3492 46.3235L25.8859 43.9205C24.7674 42.8294 25.4183 40.9289 26.9709 40.7527L29.9082 40.4192L31.3161 37.5104ZM34.392 41.2265L32.9841 38.3178L31.5763 41.2265C31.2994 41.7986 30.7487 42.1888 30.1172 42.2605L27.1799 42.594L29.6433 44.997C30.1124 45.4546 30.3049 46.1259 30.1496 46.7626L29.5593 49.1835L32.0301 47.6998C32.6172 47.3472 33.351 47.3472 33.9382 47.6998L36.409 49.1835L35.8186 46.7626C35.6633 46.1259 35.8559 45.4546 36.325 44.997L38.7883 42.594L35.851 42.2605C35.2195 42.1888 34.6689 41.7986 34.392 41.2265Z" fill="var(--primary)"></path> <path fill-rule="evenodd" clip-rule="evenodd" d="M53.7391 37.5104C54.414 36.116 56.4003 36.116 57.0752 37.5104L58.483 40.4192L61.4203 40.7527C62.9729 40.9289 63.6238 42.8294 62.5053 43.9205L60.042 46.3235L60.6324 48.7445C61.0224 50.3438 59.2892 51.6197 57.8779 50.7722L55.4071 49.2885L52.9363 50.7722C51.5251 51.6197 49.7919 50.3438 50.1819 48.7445L50.7722 46.3235L48.3089 43.9205C47.1904 42.8294 47.8413 40.9289 49.3939 40.7527L52.3312 40.4192L53.7391 37.5104ZM56.815 41.2265L55.4071 38.3178L53.9992 41.2265C53.7224 41.7986 53.1717 42.1888 52.5402 42.2605L49.6029 42.594L52.0663 44.997C52.5354 45.4546 52.7279 46.1259 52.5726 46.7626L51.9823 49.1835L54.4531 47.6998C55.0402 47.3472 55.774 47.3472 56.3612 47.6998L58.832 49.1835L58.2416 46.7626C58.0863 46.1259 58.2789 45.4546 58.748 44.997L61.2113 42.594L58.274 42.2605C57.6425 42.1888 57.0919 41.7986 56.815 41.2265Z" fill="var(--primary)"></path> <path fill-rule="evenodd" clip-rule="evenodd" d="M76.162 37.5104C76.8369 36.116 78.8232 36.116 79.4981 37.5104L80.906 40.4192L83.8433 40.7527C85.3959 40.9289 86.0468 42.8294 84.9283 43.9205L82.465 46.3235L83.0553 48.7445C83.4454 50.3438 81.7121 51.6197 80.3009 50.7722L77.8301 49.2885L75.3593 50.7722C73.948 51.6197 72.2148 50.3438 72.6048 48.7445L73.1952 46.3235L70.7319 43.9205C69.6134 42.8294 70.2643 40.9289 71.8169 40.7527L74.7542 40.4192L76.162 37.5104ZM79.238 41.2265L77.8301 38.3178L76.4222 41.2265C76.1454 41.7986 75.5947 42.1888 74.9632 42.2605L72.0259 42.594L74.4892 44.997C74.9583 45.4546 75.1509 46.1259 74.9956 46.7626L74.4052 49.1835L76.876 47.6998C77.4632 47.3472 78.197 47.3472 78.7841 47.6998L81.2549 49.1835L80.6646 46.7626C80.5093 46.1259 80.7018 45.4546 81.1709 44.997L83.6343 42.5943L80.697 42.2605C80.0655 42.1888 79.5148 41.7986 79.238 41.2265Z" fill="var(--primary)"></path> <path d="M81.3273 106.517V103.831C81.3273 101.548 83.3787 99.8274 85.6607 99.8819C93.0903 100.059 98.8905 97.4997 102.559 94.9111C104.512 93.5336 107.416 93.6359 108.854 95.5442L110.006 97.0737C111.062 98.4746 111.004 100.441 109.747 101.665C100.438 110.727 90.0525 110.966 84.0301 109.916C82.4077 109.633 81.3273 108.164 81.3273 106.517Z" fill="var(--primary)"></path> <path d="M76.2206 96.4476C82.0715 102.638 90.3617 101.09 95.0305 99.6788C104.368 96.8564 110.101 90.5379 105.021 73.7306C104.074 70.5984 100.326 68.3131 96.7088 70.5465C95.9242 71.0311 94.913 71.0725 94.0951 70.6464C91.0283 69.0487 88.6768 70.7226 87.3684 72.1581C86.8414 72.7363 85.7675 72.6394 85.4743 71.9141L84.0794 68.4624L82.0569 62.571C80.9986 59.0694 77.6059 56.2735 74.1043 57.3319C70.6028 58.3903 70.8468 63.4118 72.1806 67.8252L77.714 84.5319L73.1543 82.0887C71.6344 81.2743 67.9645 80.0908 65.4455 81.8712C62.9266 83.6516 63.0025 86.4311 64.8753 88.4126C66.748 90.3941 72.4751 92.4845 76.2206 96.4476Z" fill="white"></path> <path fill-rule="evenodd" clip-rule="evenodd" d="M74.0296 80.4553L74.4941 80.7042L70.4214 68.4079C70.4163 68.3925 70.4114 68.3769 70.4067 68.3614C69.7059 66.0425 69.2389 63.4115 69.4868 61.121C69.7371 58.8098 70.8083 56.3923 73.5682 55.558C75.965 54.8336 78.2742 55.4589 80.0679 56.7292C81.8312 57.978 83.1744 59.8909 83.8203 62.0002L85.8161 67.8139L86.7614 70.153C87.4662 69.523 88.3681 68.8989 89.4587 68.5162C91.0665 67.952 92.9538 67.9623 94.9513 69.0029C95.1839 69.1241 95.5001 69.115 95.7352 68.9698C98.0819 67.5207 100.576 67.5068 102.631 68.4388C104.629 69.3449 106.168 71.1214 106.794 73.1944C109.392 81.7895 109.361 88.1175 107.098 92.7609C104.811 97.454 100.473 99.9697 95.5667 101.453C90.8609 102.875 81.5362 104.77 74.8738 97.7206C73.1918 95.941 71.0186 94.5373 68.9003 93.281C68.5602 93.0793 68.214 92.877 67.871 92.6766C67.1872 92.2771 66.5159 91.8848 65.9294 91.5184C65.0565 90.9731 64.1716 90.3661 63.5285 89.6856C62.3106 88.3971 61.5695 86.7302 61.6629 84.9684C61.7585 83.1671 62.7136 81.5329 64.3759 80.358C66.1542 79.101 68.2301 78.9619 69.901 79.1677C71.5805 79.3745 73.0964 79.9554 74.0296 80.4553ZM84.0794 68.4624L85.4743 71.9141C85.7674 72.6395 86.8414 72.7364 87.3684 72.1582C88.6768 70.7227 91.0283 69.0487 94.0951 70.6464C94.913 71.0725 95.9241 71.0312 96.7088 70.5466C100.326 68.3131 104.074 70.5984 105.021 73.7306C110.101 90.538 104.368 96.8565 95.0305 99.6789C90.3617 101.09 82.0715 102.638 76.2206 96.4477C74.0265 94.1261 71.1524 92.4472 68.7715 91.0563C67.0879 90.0728 65.651 89.2334 64.8753 88.4127C63.0025 86.4312 62.9266 83.6517 65.4455 81.8713C67.9645 80.0908 71.6344 81.2744 73.1543 82.0888L77.714 84.532L72.1806 67.8253C70.8468 63.4118 70.6028 58.3903 74.1043 57.3319C77.6059 56.2736 80.9986 59.0695 82.0569 62.571L84.0794 68.4624Z" fill="var(--primary)"></path> <path fill-rule="evenodd" clip-rule="evenodd" d="M87.2497 77.7961C87.7469 77.6749 88.2482 77.9796 88.3695 78.4768L90.662 87.876C90.7832 88.3732 90.4785 88.8745 89.9813 88.9958C89.4842 89.1171 88.9828 88.8123 88.8616 88.3152L86.5691 78.9159C86.4478 78.4187 86.7525 77.9174 87.2497 77.7961Z" fill="var(--primary)"></path> <path fill-rule="evenodd" clip-rule="evenodd" d="M96.4918 76.6615C97.0021 76.6222 97.4475 77.004 97.4867 77.5143L97.9452 83.4748C97.9845 83.985 97.6027 84.4304 97.0925 84.4697C96.5822 84.5089 96.1368 84.1271 96.0975 83.6169L95.639 77.6564C95.5998 77.1462 95.9816 76.7007 96.4918 76.6615Z" fill="var(--primary)"></path> </g></svg>
-                  <p>Positive Seller Ratings</p>          
-                <span>4.5 (320)</span>
-              </li>
-              <li>
-                <svg width="24" height="24" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-
-                <path d="M1.15 8.2H3.55"
-                      stroke="var(--primary)"
-                      stroke-width="0.85"
-                      stroke-linecap="round"/>
-
-                <path d="M0.55 10H3.55"
-                      stroke="var(--primary)"
-                      stroke-width="0.85"
-                      stroke-linecap="round"/>
-
-                <path d="M1.55 11.75H3.55"
-                      stroke="var(--primary)"
-                      stroke-width="0.85"
-                      stroke-linecap="round"/>
-
-                <path d="M4.55 5.92L10.5 2.95L17.05 5.98L11.02 8.98L4.55 5.92Z"
-                      stroke="var(--primary)"
-                      stroke-width="0.85"
-                      stroke-linejoin="round"/>
-
-                <path d="M4.55 5.92V13.78L11.02 16.75V8.98"
-                      stroke="var(--primary)"
-                      stroke-width="0.85"
-                      stroke-linejoin="round"/>
-
-                <path d="M11.02 8.98V16.75L17.05 13.78V5.98"
-                      stroke="var(--primary)"
-                      stroke-width="0.85"
-                      stroke-linejoin="round"/>
-
-                <path d="M7.68 7.4V9.55"
-                      stroke="var(--primary)"
-                      stroke-width="0.85"
-                      stroke-linecap="round"/>
-
-                <path d="M14.05 7.45V9.55"
-                      stroke="var(--primary)"
-                      stroke-width="0.85"
-                      stroke-linecap="round"/>
-
-                <path d="M7.5 13.25V14.75"
-                      stroke="var(--primary)"
-                      stroke-width="0.85"
-                      stroke-linecap="round"/>
-
-                <circle cx="17.05" cy="13.55" r="2.45"
-                        fill="white"
-                        stroke="var(--primary)"
-                        stroke-width="0.85"/>
-
-                <path d="M17.05 11.35V11.65M17.05 15.45V15.75M14.85 13.55H15.15M18.95 13.55H19.25"
-                      stroke="var(--primary)"
-                      stroke-width="0.65"
-                      stroke-linecap="round"/>
-
-                <path d="M15.5 12L15.72 12.22M18.38 14.88L18.6 15.1M18.6 12L18.38 12.22M15.72 14.88L15.5 15.1"
-                      stroke="var(--primary)"
-                      stroke-width="0.65"
-                      stroke-linecap="round"/>
-
-                <path d="M17.05 12.65V13.55L17.48 13.98"
-                      stroke="var(--primary)"
-                      stroke-width="0.75"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"/>
-
-                <circle cx="17.05" cy="13.55" r="0.4"
-                        fill="var(--primary)"/>
-            </svg>
-            <p>Ship on Time</p>
-            <span>100%</span>
-          </li>
-          <li>
-                <svg width="24" height="24" viewBox="0 0 20 20" fill="none"
-     xmlns="http://www.w3.org/2000/svg">
-
-    <!-- Chat bubble -->
-    <path d="M3.2 3.4H16.8C17.46 3.4 18 3.94 18 4.6V12.2C18 12.86 17.46 13.4 16.8 13.4H9L5.1 16V13.4H3.2C2.54 13.4 2 12.86 2 12.2V4.6C2 3.94 2.54 3.4 3.2 3.4Z"
-          stroke="var(--primary)"
-          stroke-width="0.9"
-          stroke-linejoin="round"/>
-
-    <!-- Chat lines -->
-    <path d="M5.2 6.5H14.8"
-          stroke="var(--primary)"
-          stroke-width="0.8"
-          stroke-linecap="round"/>
-
-    <path d="M5.2 9H12"
-          stroke="var(--primary)"
-          stroke-width="0.8"
-          stroke-linecap="round"/>
-
-    <!-- Response check -->
-    <path d="M11.8 10.8L13.1 12.1L15.8 9.4"
-          stroke="var(--primary)"
-          stroke-width="0.85"
-          stroke-linecap="round"
-          stroke-linejoin="round"/>
-</svg>
-                <p>Chat Response Rate</p>
-                <span>90%</span>
-              </li>
-            </ul>
-            <!-- <a class="chat" href="javascript:void(0)" id="contact-seller-btn-sidebar" style="position:absolute;top:18px;right:25px;display:flex;align-items:center;gap:5px;color:#0A69D8;font-size:13px;font-weight:600;text-decoration:none;cursor:pointer;">
-              <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
-              </svg>
-              Chat Now
-            </a> -->
+            <h4 class="store_name">{{ $seller->name }}</h4>
+              <ul>
+                @if($seller->location)
+                <li>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 21s-6-5.35-6-10a6 6 0 1 1 12 0c0 4.65-6 10-6 10Z" stroke="var(--primary)" stroke-width="1.5" stroke-linejoin="round"/>
+                      <circle cx="12" cy="11" r="2.25" stroke="var(--primary)" stroke-width="1.5"/>
+                    </svg>
+                  <p>Location</p>
+                  <span>{{ $seller->location }}</span>
+                </li>
+                @endif
+                <li>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="var(--primary)" stroke-width="1.5" stroke-linecap="round"/>
+                      <circle cx="9" cy="7" r="4" stroke="var(--primary)" stroke-width="1.5"/>
+                      <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="var(--primary)" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                  <p>Followers</p>
+                  <span>({{ $seller->followers_count }})</span>
+                </li>
+                @if(!empty($seller->products_count))
+                <li>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" stroke="var(--primary)" stroke-width="1.5" stroke-linejoin="round"/>
+                      <path d="M3.27 6.96 12 12.01l8.73-5.05M12 22.08V12" stroke="var(--primary)" stroke-width="1.5" stroke-linejoin="round"/>
+                    </svg>
+                  <p>Products</p>
+                  <span>({{ $seller->products_count }})</span>
+                </li>
+                @endif
+              </ul>
+            @endif
           </div>
         </div>
       </div>
@@ -1237,6 +1209,16 @@
 
 @section('scripts')
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof marked !== 'undefined') {
+    marked.setOptions({ breaks: true, gfm: true });
+    document.querySelectorAll('.product-description-body').forEach(function(el) {
+      var raw = el.textContent;
+      raw = raw.replace(/^[ \t]*\u2022[ \t]+/gm, '- ');
+      el.innerHTML = marked.parse(raw);
+    });
+  }
+});
 document.getElementById('contact-seller-btn')?.addEventListener('click', function(e) {
   e.preventDefault();
   var modal = new bootstrap.Modal(document.getElementById('contactSellerModal'));
@@ -1585,8 +1567,8 @@ $(document).ready(function() {
       768: { slidesPerView: 2 },
     },
     navigation: {
-        nextEl: '#productGalleryNav .swiper-button-next',
-        prevEl: '#productGalleryNav .swiper-button-prev',
+        nextEl: '#productGalleryNav .swiper-btn-next',
+        prevEl: '#productGalleryNav .swiper-btn-prev',
     },
   });
 

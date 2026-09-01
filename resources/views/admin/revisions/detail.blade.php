@@ -46,13 +46,13 @@
             <div class="col-md-2">
                 <strong>Action:</strong>
                 @if($rev->action === 'created')
-                    <span class="badge bg-success ms-1">Created</span>
+                    <span class="badge bg-light text-success border border-success-subtle ms-1">Created</span>
                 @elseif($rev->action === 'updated')
-                    <span class="badge bg-primary ms-1">Updated</span>
+                    <span class="badge bg-light text-primary border border-primary-subtle ms-1">Updated</span>
                 @elseif($rev->action === 'deleted')
-                    <span class="badge bg-danger ms-1">Deleted</span>
+                    <span class="badge bg-light text-danger border border-danger-subtle ms-1">Deleted</span>
                 @else
-                    <span class="badge bg-secondary ms-1">{{ $rev->action }}</span>
+                    <span class="badge bg-light text-secondary border border-secondary-subtle ms-1">{{ $rev->action }}</span>
                 @endif
             </div>
             <div class="col-md-3">

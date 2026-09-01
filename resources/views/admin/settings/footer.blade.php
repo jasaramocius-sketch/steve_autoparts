@@ -22,13 +22,13 @@
 
                         <div id="footerColsContainer"></div>
 
-                        <button type="button" class="btn btn-primary btn-sm mt-2" id="addFooterColumn">
+                        <button type="button" class="btn btn-primary steve-btn gap-1 mt-2" id="addFooterColumn">
                             <i class="fas fa-plus me-1"></i> Add Column
                         </button>
 
                         <hr>
                         <div class="d-flex justify-content-end">
-                            <button type="submit" class="btn btn-primary btn-sm">
+                            <button type="submit" class="btn btn-primary steve-btn gap-1">
                                 <i class="fas fa-save me-1"></i> Save Columns
                             </button>
                         </div>

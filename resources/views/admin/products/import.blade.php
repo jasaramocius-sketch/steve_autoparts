@@ -42,17 +42,22 @@
                 <code>status</code> (<code>1/0</code> or <code>yes/no</code> or <code>active/inactive</code>),
                 <code>featured</code> (<code>1/0</code> or <code>yes/no</code>),
                 <code>brand</code> (matched by name — <strong>auto-created if missing</strong>),
+                <code>seller</code> (matched by name — <strong>auto-created if missing</strong>),
                 <code>year</code>,
                 <code>make</code>,
                 <code>model</code>,
                 <code>image</code> (URL — will be downloaded and converted to WebP),
-                <code>gallery_images</code> (pipe-separated URLs — e.g. <code>url1.jpg|url2.jpg|url3.jpg</code>)
+                <code>gallery_images</code> (pipe-separated URLs — e.g. <code>url1.jpg|url2.jpg|url3.jpg</code>),
+                <code>policy_text</code> or <code>buy_return_policy</code> or <code>return_policy</code> (HTML accepted for the product policy tab),
+                <code>features</code> or <code>feature_list</code> (newline or pipe-separated list),
+                <code>reviews</code> or <code>reviews_data</code> (JSON array or <code>name::rating::text|name::rating::text</code>)
             </div>
-
-            <button type="submit" class="btn btn-primary steve-btn">
-                <i class="fas fa-upload"></i> Import Products
-            </button>
-            <a href="{{ route('admin.products.index') }}" class="btn btn-secondary">Cancel</a>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary steve-btn gap-1">
+                    <i class="fas fa-upload"></i> Import Products
+                </button>
+                <a href="{{ route('admin.products.index') }}" class="btn btn-secondary">Cancel</a>
+            </div>
         </form>
     </div>
 </div>

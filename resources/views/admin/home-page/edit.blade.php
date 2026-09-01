@@ -438,7 +438,7 @@
                             <button type="submit" class="btn btn-primary steve-btn" style="display: flex; align-items: center; gap: 10px;">
                                 <i class="fa fa-save"></i> Save Changes
                             </button>
-                            <a href="{{ route('admin.home-page.index') }}" class="btn btn-secondary" style="display: flex; align-items: center; gap: 10px;">
+                            <a href="{{ route('admin.home-page.index') }}" class="btn btn-secondary steve-btn" style="display: flex; align-items: center; gap: 10px;">
                                 <i class="fa fa-times"></i> Cancel
                             </a>
                         </div>
@@ -454,25 +454,25 @@
                 </div>
                 <div class="card-body">
                     <p>
-                        <strong>Section Name:</strong><br>
+                        <strong>Section Name:</strong>
                         {{ ucfirst(str_replace('_', ' ', $section->section_name)) }}
                     </p>
                     <p>
-                        <strong>Order:</strong><br>
+                        <strong>Order:</strong>
                         {{ $section->order }}
                     </p>
                     <p>
-                        <strong>Status:</strong><br>
+                        <strong>Status:</strong>
                         <span class="badge {{ $section->status ? 'bg-light text-success border border-success-subtle' : 'bg-light text-danger border border-danger-subtle' }}">
                             {{  $section->status ? 'Active' : 'Inactive' }}
                         </span>
                     </p>
                     <p>
-                        <strong>Joined:</strong><br>
+                        <strong>Joined:</strong>
                         {{ $section->created_at->format('M d, Y H:i') }}
                     </p>
                     <p>
-                        <strong>Last Updated:</strong><br>
+                        <strong>Last Updated:</strong>
                         {{ $section->updated_at->format('M d, Y H:i') }}
                     </p>
                 </div>

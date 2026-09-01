@@ -119,7 +119,7 @@
 <div class="container-fluid px-0">
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap flex-md-nowrap">
         <div></div>
-        <button type="button" class="btn btn-primary steve-btn" data-bs-toggle="modal" data-bs-target="#uploadModal">
+        <button type="button" class="btn btn-primary steve-btn gap-1" data-bs-toggle="modal" data-bs-target="#uploadModal">
             <i class="fas fa-upload"></i> Upload Images
         </button>
     </div>
@@ -195,9 +195,9 @@
                     </select>
                 </div>
                 <div class="col-lg-3 col-md-3 col-sm-6">
-                    <button type="submit" class="btn btn-primary w-100 steve-btn"><i class="fas fa-search"></i> Filter</button>
+                    <button type="submit" class="btn btn-primary w-100 steve-btn gap-1"><i class="fas fa-search"></i> Filter</button>
                     @if(request()->hasAny(['search', 'filter', 'sort', 'order']))
-                        <a href="{{ route('admin.images.index') }}" class="btn btn-outline-secondary w-100 mt-1 steve-btn"><i class="fas fa-times"></i> Clear Filters</a>
+                        <a href="{{ route('admin.images.index') }}" class="btn btn-outline-secondary w-100 mt-1 steve-btn gap-1"><i class="fas fa-times"></i> Clear Filters</a>
                     @endif
                 </div>
             </form>
@@ -383,8 +383,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary steve-btn" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary steve-btn"><i class="fas fa-upload"></i> Upload</button>
+                    <button type="button" class="btn btn-secondary steve-btn gap-1" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary steve-btn gap-1"><i class="fas fa-upload"></i> Upload</button>
                 </div>
             </form>
         </div>

@@ -1424,7 +1424,16 @@ p.text-lg {
   color: #fff;
   border-radius: 0 8px 8px 0 !important
 }
-
+.newsletter-btn{
+      padding: 8px !important;
+}
+.product-detail-blade-img-gallery-nav .fas:hover{
+  color: #fff !important;
+  border: 1px solid var(--primary) !important;
+}
+.product-detail-blade-img-gallery-nav button{
+  border: 1px solid var(--primary) !important;
+}
 @media (max-width:1199.97px) {
   .newsletter-btn {
     font-size: 16px
@@ -7930,7 +7939,14 @@ ul.mobile-nav-menu {
   -o-transition: all .3s ease-in;
   transition: all .3s ease-in
 }
-
+.gs-dashboard-user-sidebar-wrapper li a i{
+  width: 15px;
+  height: 15px;
+}
+.user-sidebar-my-profile a i {
+    width: 22px !important;
+    height: 22px !important;
+}
 .gs-dashboard-user-sidebar-wrapper li a svg.has-fill path {
   fill: #1f0300;
   -webkit-transition: all .3s ease-in;
@@ -8997,7 +9013,7 @@ form .form-rows {
 
 .table-action-col .action-buttons {
   display: flex !important;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: 5px
 }
 
@@ -17504,6 +17520,7 @@ cursor: text;
 .swiper-slide .single-product .product-title {
   display: -webkit-box;
   -webkit-line-clamp: 1;
+  line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -17516,4 +17533,11 @@ table.summary-table tbody tr:first-child > th,
 table.summary-table tbody tr:first-child > td,
 table.summary-table thead tr:first-child > th {
   border-top: 1px solid #e6e8ec
+}
+td.admin-product-name a {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }

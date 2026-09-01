@@ -86,9 +86,9 @@
                 </div>
             </div>
 
-            <div class="mt-4">
-                <button class="btn btn-primary steve-btn"><i class="fas fa-save"></i> Update</button>
-                <a href="{{ route('admin.blogs.index') }}" class="btn btn-secondary">Cancel</a>
+            <div class="mt-4 d-flex gap-2">
+                <button class="btn btn-primary steve-btn gap-1"><i class="fas fa-save"></i> Update</button>
+                <a href="{{ route('admin.blogs.index') }}" class="btn btn-secondary gap-1">Cancel</a>
             </div>
         </form>
     </div>

@@ -76,8 +76,8 @@
                     <tr>
                         <th class="text-muted">Status</th>
                         <td>
-                            @php $badge = match($order->status) { 'pending' => 'warning', 'processing' => 'info', 'shipped' => 'primary', 'delivered' => 'success', 'cancelled' => 'danger', default => 'secondary' }; @endphp
-                            <span class="badge bg-{{ $badge }}">{{ ucfirst($order->status) }}</span>
+                            @php $badge = match($order->status) { 'pending' => 'bg-light text-warning border border-warning-subtle', 'processing' => 'bg-light text-info border border-info-subtle', 'shipped' => 'bg-light text-primary border border-primary-subtle', 'delivered' => 'bg-light text-success border border-success-subtle', 'cancelled' => 'bg-light text-danger border border-danger-subtle', default => 'bg-light text-secondary border border-secondary-subtle' }; @endphp
+                            <span class="badge {{ $badge }}">{{ ucfirst($order->status) }}</span>
                         </td>
                     </tr>
                     <tr>
@@ -112,7 +112,7 @@
                             <option value="cancelled" {{ $order->status === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
                         </select>
                     </div>
-                    <button class="btn btn-primary w-100 steve-btn"><i class="fas fa-sync"></i> Update Status</button>
+                    <button class="btn btn-primary w-100 steve-btn gap-1"><i class="fas fa-sync"></i> Update Status</button>
                 </form>
             </div>
         </div>

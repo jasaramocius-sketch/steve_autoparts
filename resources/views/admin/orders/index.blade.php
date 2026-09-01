@@ -51,7 +51,7 @@
                         <th><a href="{{ sortUrl('total_amount', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Total {!! sortIndicator('total_amount', $sortBy, $sortDir) !!}</a></th>
                         <th><a href="{{ sortUrl('status', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Status {!! sortIndicator('status', $sortBy, $sortDir) !!}</a></th>
                         <th><a href="{{ sortUrl('created_at', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Date {!! sortIndicator('created_at', $sortBy, $sortDir) !!}</a></th>
-                        <th class="d-flex justify-content-end pe-3">Action</th>
+                        <th class="">Action</th>
                     </tr>
                 </thead>
                 <tbody>

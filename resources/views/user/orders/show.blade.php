@@ -566,6 +566,15 @@
         'cancelled' => -1,
     ];
     $currentStep = $statusMap[$currentStatus] ?? 0;
+    $deliveryBadges = [
+        'pending' => 'badge--warning',
+        'processing' => 'badge--info',
+        'shipped' => 'badge--primary',
+        'delivered' => 'badge--success',
+        'cancelled' => 'badge--danger',
+    ];
+    $statusBadgeClass = $deliveryBadges[$currentStatus] ?? 'badge--secondary';
+    $statusBadgeIcon = $currentStatus === 'cancelled' ? 'fa-times-circle' : ($currentStatus === 'delivered' ? 'fa-check-circle' : 'fa-clock');
 @endphp
 <div class="order-page-header d-flex align-items-center gap-3">
     <a href="{{ route('user.orders') }}" class="order-back-btn" aria-label="Back to orders">
@@ -578,8 +587,8 @@
     <div>
         <h3 class="order-number">
             Order #{{ $order->order_number ?? $order->id }}
-            <span class="order-status-badge {{ $currentStatus === 'cancelled' ? 'is-cancelled' : '' }}">
-                <i class="fas {{ $currentStatus === 'cancelled' ? 'fa-times-circle' : 'fa-check-circle' }}"></i>
+            <span class="badge {{ $statusBadgeClass }}">
+                <i class="fas {{ $statusBadgeIcon }} me-1"></i>
                 {{ ucfirst($currentStatus) }}
             </span>
         </h3>
@@ -733,11 +742,11 @@
                 <div class="order-payment-row">
                     <span>Payment Status</span>
                     @if($currentStatus == 'delivered')
-                        <span class="order-paid-badge"><i class="fas fa-check"></i> Paid</span>
+                        <span class="badge badge--success"><i class="fas fa-check me-1"></i> Paid</span>
                     @elseif($currentStatus == 'cancelled')
-                        <span class="order-paid-badge order-cancelled-badge"><i class="fas fa-times"></i> Cancelled</span>
+                        <span class="badge badge--danger"><i class="fas fa-times me-1"></i> Cancelled</span>
                     @else
-                        <span class="order-paid-badge order-unpaid-badge"><i class="fas fa-clock"></i> Unpaid</span>
+                        <span class="badge badge--warning"><i class="fas fa-clock me-1"></i> Unpaid</span>
                     @endif
                 </div>
 
