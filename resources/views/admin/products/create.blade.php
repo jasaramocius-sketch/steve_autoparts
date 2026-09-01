@@ -229,7 +229,7 @@
             <!-- Form Actions -->
             <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-primary steve-btn px-4"><i class="fas fa-save me-1"></i> Save Product</button>
-                <a href="{{ route('admin.products.index') }}" class="btn btn-secondary steve-btn px-4">Cancel</a>
+                <a href="{{ route('admin.products.index') }}" class="btn btn-primary steve-btn px-4">Cancel</a>
             </div>
             
         </form>

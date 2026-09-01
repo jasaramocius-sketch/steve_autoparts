@@ -75,7 +75,7 @@
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-primary steve-btn">Save Changes</button>
-                    <button class="btn btn-secondary steve-btn" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-primary steve-btn" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </form>
@@ -116,7 +116,7 @@
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-primary steve-btn">Save</button>
-                    <button class="btn btn-secondary steve-btn" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-primary steve-btn" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </form>

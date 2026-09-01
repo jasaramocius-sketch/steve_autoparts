@@ -18,15 +18,15 @@
                     <img src="{{ $image->thumb_url }}" alt="{{ $image->alt_text ?? $image->original_name }}" class="img-fluid admin-image-preview-large" onerror="this.onerror=null;this.src='{{ asset("assets/images/placeholder.png") }}'">
                     <hr>
                     <div class="table-responsive">
-                    <table class="table table-sm table-borderless text-start small mb-0">
-                        <tr><th class="text-muted">Filename</th><td>{{ $image->original_name }}</td></tr>
-                        <tr><th class="text-muted">URL</th><td class="text-break"><a href="{{ $image->thumb_url }}" target="_blank"><code>{{ $image->thumb_url }}</code></a></td></tr>
-                        <tr><th class="text-muted">MIME Type</th><td>{{ $image->mime_type }}</td></tr>
-                        <tr><th class="text-muted">Size</th><td>{{ $image->size_in_kb }}</td></tr>
-                        <tr><th class="text-muted">Dimensions</th><td>{{ $image->width }} x {{ $image->height }} px</td></tr>
+                    <table class="table table-sm table-borderless text-start small mb-0 responsive-table">
+                        <tr><th class="text-muted">Filename</th><td data-label="Filename">{{ $image->original_name }}</td></tr>
+                        <tr><th class="text-muted">URL</th><td class="text-break" data-label="URL"><a href="{{ $image->thumb_url }}" target="_blank"><code>{{ $image->thumb_url }}</code></a></td></tr>
+                        <tr><th class="text-muted">MIME Type</th><td data-label="MIME Type">{{ $image->mime_type }}</td></tr>
+                        <tr><th class="text-muted">Size</th><td data-label="Size">{{ $image->size_in_kb }}</td></tr>
+                        <tr><th class="text-muted">Dimensions</th><td data-label="Dimensions">{{ $image->width }} x {{ $image->height }} px</td></tr>
                         <tr>
                             <th class="text-muted align-top">Attached To</th>
-                            <td>
+                            <td data-label="Attached To">
                                 @forelse($usageLocations as $loc)
                                     <div class="mb-1">
                                         @if(!empty($loc['route']))
@@ -108,7 +108,7 @@
                             <textarea name="caption" class="form-control texteditor" rows="3" placeholder="Optional caption">{{ old('caption', $image->caption) }}</textarea>
                         </div>
 
-                        <button type="submit" class="btn btn-primary steve-btn">
+                        <button type="submit" class="btn btn-primary steve-btn gap-1">
                             <i class="fas fa-save"></i> Update Details
                         </button>
                     </form>

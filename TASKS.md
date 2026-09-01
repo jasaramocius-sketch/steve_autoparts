@@ -3266,3 +3266,68 @@ Fixed the app failing to connect to MySQL (originally `SQLSTATE[HY000] [1698] Ac
 - **Fix**: once a fresh mysqld came up on 3306, set `root`→`mysql_native_password` with empty hash (verified via TCP login with no password). Cleared `DB_PASSWORD=Jasa@123` from `.env` down to `DB_PASSWORD=` (empty). Ran `php artisan config:clear`.
 - **Verification**: the previously-failing `cache` query via `php artisan tinker` returns `1`; `curl -s -o /dev/null -w "%{http_code}" http://localhost/stautoparts/login` → **HTTP 200**; no SQLSTATE/exception markers in the login page output.
 - **Note**: a dedicated non-root `stautoparts` MySQL user (empty password) from a prepared `init.sql` was never persisted because the safe-mode `--skip-grant-tables`/`--init-file` attempts couldn't apply cleanly amid the restart chaos. Root-with-no-password is the current, working config.
+
+## 251. Product Description Cleanup — HTML→Markdown Conversion (1 Sep 2026)
+
+Converted the only 2 products that stored HTML in `description` to clean Markdown. All 808 products now have pure Markdown (no HTML tags).
+
+**Products fixed:**
+- ID 115 — "Cast Iron Exhaust Manifold" — had inline `<strong>`, `<i>`, `<a>` tags → converted to `**`, `*`, `[text](url)`
+- ID 790 — "ACDelco Professional Serpentine Belt" — had `<p>`, `<br>`, `<span style="...">` block tags → converted to plain text with line breaks, styles removed
+
+**Files changed:**
+- `clean_desc.php` (temp script) — dry-run HTML→Markdown conversion using DOMDocument + regex rules (`<p>/<br>`→newlines, `<strong>/<b>`→`**`, `<i>/<em>`→`*`, `<a>`→`[text](url)`, `<span style>` stripped, `•`→`- `)
+- `apply_desc.php` (temp script) — applied conversions to DB, verified via `node` + `marked@9.1.6` render before/after
+- Both temp scripts deleted after verification
+
+**Verification:**
+- `grep -r '<p><br>' storage/app/public/` — 0 matches in description body
+- `grep -r '<span' storage/app/public/` — 0 matches
+- All 808 products: `description` column contains zero HTML tags
+
+## 252. Admin Sidebar — Revisions Link Active State Fix (1 Sep 2026)
+
+Fixed "Revisions" sidebar link not highlighting on the Revision Detail page.
+
+**Root cause:** `resources/views/admin/partials/sidebar.blade.php:74` used `request()->routeIs('admin.revisions.index')` — only matched the index route, not `admin.revisions.detail`.
+
+**Fix:** Changed to `request()->routeIs('admin.revisions.*')` — now highlights on both index and detail pages.
+
+**Files changed:**
+- `resources/views/admin/partials/sidebar.blade.php:74` — wildcard route match
+
+**Audit note:** Full sidebar audit found 1 other bug — `admin/customers` link at line 85 uses `request()->is('admin/customers*')` which fails under `/stautoparts` subdirectory. Not fixed per user decision ("rahane do").
+
+## 253. Admin Edit User Pages — Email Address Read-Only (1 Sep 2026)
+
+Made Email Address field readonly in all 3 admin Edit User pages to prevent accidental/direct email changes.
+
+**Pages affected:**
+1. `admin/users/form.blade.php` (shared create+edit) — edit mode only: `{{ isset($user) ? 'readonly' : '' }}`
+2. `admin/customers/edit.blade.php` — always readonly (dedicated edit page)
+3. `admin/staff/edit.blade.php` — always readonly (dedicated edit page)
+
+**Behavior:** Field still submits current email value (readonly, not disabled) so validation passes. Controllers unchanged — email remains same unless future OTP/confirmation flow is added.
+
+**Files changed:**
+- `resources/views/admin/users/form.blade.php:29`
+- `resources/views/admin/customers/edit.blade.php:29`
+- `resources/views/admin/staff/edit.blade.php:29`
+- `php artisan view:cache` — compiled
+
+## 254. View Cache — Permission Fix for Compiled Views (1 Sep 2026)
+
+Fixed `touch(): Utime failed: Operation not permitted` 500 error on category pages.
+
+**Root cause:** `php artisan view:cache` was run as `jasaram` user, creating compiled Blade files owned by `jasaram:www-data`. Apache (running as `www-data`) couldn't `touch()` mtime during runtime recompile → `Operation not permitted`.
+
+**Fix:**
+```bash
+php artisan view:clear
+chown -R www-data:www-data storage/framework/views
+sudo -u www-data php artisan view:cache
+```
+
+**Result:** All compiled views now owned by `www-data:www-data`. Runtime recompile works; category page (`/stautoparts/category/belts-and-cooling`) and login page both return **HTTP 200**.
+
+**Note for future:** Always run `view:cache` as the web server user (`sudo -u www-data php artisan view:cache`) to avoid ownership mismatch.

@@ -155,7 +155,7 @@
         </div>
 
         @if($categories->hasPages())
-            <div class="d-flex justify-content-center py-3">{{ $categories->links() }}</div>
+            <div class="d-flex justify-content-center py-3">{{ $categories->links('vendor.pagination.gs-pagination') }}</div>
         @endif
 
     </div>

@@ -16,7 +16,7 @@
           ])
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary fs-14 fw-600 steve-btn" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary fs-14 fw-600 steve-btn" data-bs-dismiss="modal">Cancel</button>
           <button type="submit" class="btn btn-primary fs-14 fw-600 steve-btn" id="addressFormSubmit">Save Address</button>
         </div>
       </form>

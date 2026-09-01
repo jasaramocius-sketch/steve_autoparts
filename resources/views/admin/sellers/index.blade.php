@@ -98,7 +98,7 @@
             </table>
         </div>
         @if($sellers->hasPages())
-            <div class="d-flex justify-content-center py-3">{{ $sellers->links() }}</div>
+            <div class="d-flex justify-content-center py-3">{{ $sellers->links('vendor.pagination.gs-pagination') }}</div>
         @endif
     </div>
 </div>

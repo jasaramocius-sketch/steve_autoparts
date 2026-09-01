@@ -13,10 +13,10 @@
 <div class="row g-3 mb-4">
     <div class="col-md">
         <div class="card border-0 shadow-sm h-100 admin-dashboard-card-blue">
-            <div class="card-body d-flex align-items-center justify-content-between">
-                <div>
+            <div class="card-body d-flex align-items-center justify-content-between gap-2">
+                <div class="d-flax gap-2">
                     <p class="text-muted mb-1 small text-uppercase fw-semibold">Total Orders</p>
-                    <h3 class="mb-0 fw-bold">{{ $totalOrders }}</h3>
+                    <h3 class="mb-0 fw-bold font-vw">{{ $totalOrders }}</h3>
                 </div>
                 <div class="rounded-3 p-3 admin-dashboard-icon-blue">
                     <i class="fas fa-shopping-cart fa-2x"></i>
@@ -26,10 +26,10 @@
     </div>
     <div class="col-md">
         <div class="card border-0 shadow-sm h-100 admin-dashboard-card-green">
-            <div class="card-body d-flex align-items-center justify-content-between">
-                <div>
+            <div class="card-body d-flex align-items-center justify-content-between gap-2">
+                <div class="d-flax gap-2">
                     <p class="text-muted mb-1 small text-uppercase fw-semibold">Total Revenue</p>
-                    <h3 class="mb-0 fw-bold">{{ currency_format($totalRevenue) }}</h3>
+                    <h3 class="mb-0 fw-bold font-vw">{{ currency_format($totalRevenue) }}</h3>
                 </div>
                 <div class="rounded-3 p-3 admin-dashboard-icon-green">
                     <i class="fas fa-dollar-sign fa-2x"></i>
@@ -39,10 +39,10 @@
     </div>
     <div class="col-md">
         <div class="card border-0 shadow-sm h-100 admin-dashboard-card-orange">
-            <div class="card-body d-flex align-items-center justify-content-between">
-                <div>
+            <div class="card-body d-flex align-items-center justify-content-between gap-2">
+                <div class="d-flax gap-2">
                     <p class="text-muted mb-1 small text-uppercase fw-semibold">Total Products</p>
-                    <h3 class="mb-0 fw-bold">{{ $totalProducts }}</h3>
+                    <h3 class="mb-0 fw-bold font-vw">{{ $totalProducts }}</h3>
                 </div>
                 <div class="rounded-3 p-3 admin-dashboard-icon-orange">
                     <i class="fas fa-box fa-2x"></i>
@@ -52,10 +52,10 @@
     </div>
     <div class="col-md">
         <div class="card border-0 shadow-sm h-100 admin-dashboard-card-cyan">
-            <div class="card-body d-flex align-items-center justify-content-between">
-                <div>
+            <div class="card-body d-flex align-items-center justify-content-between gap-2">
+                <div class="d-flax gap-2">
                     <p class="text-muted mb-1 small text-uppercase fw-semibold">Total Customers</p>
-                    <h3 class="mb-0 fw-bold">{{ $totalCustomers }}</h3>
+                    <h3 class="mb-0 fw-bold font-vw">{{ $totalCustomers }}</h3>
                 </div>
                 <div class="rounded-3 p-3 admin-dashboard-icon-cyan">
                     <i class="fas fa-users fa-2x"></i>
@@ -65,8 +65,8 @@
     </div>
     <div class="col-md">
         <div class="card border-0 shadow-sm h-100 admin-dashboard-card-red">
-            <div class="card-body d-flex align-items-center justify-content-between">
-                <div>
+            <div class="card-body d-flex align-items-center justify-content-between gap-2">
+                <div class="d-flax gap-2">
                     <p class="text-muted mb-1 small text-uppercase fw-semibold">Pending Orders</p>
                     <h3 class="mb-0 fw-bold">{{ $pendingOrders }}</h3>
                 </div>
@@ -212,7 +212,7 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: true,
+                maintainAspectRatio: false,
                 cutout: '60%',
                 plugins: {
                     legend: {
@@ -241,18 +241,28 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             plugins: [{
                 id: 'centerText',
-                beforeDraw: function(chart) {
-                    var width = chart.width, height = chart.height, ctx = chart.ctx;
-                    ctx.restore();
-                    ctx.font = '700 28px Inter, sans-serif';
-                    ctx.textBaseline = 'middle';
-                    ctx.textAlign = 'center';
-                    ctx.fillStyle = '#1e1e2d';
-                    ctx.fillText(total, width / 2, height / 2 - 8);
-                    ctx.font = '500 12px Inter, sans-serif';
-                    ctx.fillStyle = '#6c757d';
-                    ctx.fillText('Total Orders', width / 2, height / 2 + 16);
+                afterDatasetsDraw: function(chart) {
+                    var width = chart.chartArea.width, height = chart.chartArea.height;
+                    var ctx = chart.ctx;
+                    var centerX = chart.chartArea.left + width / 2;
+                    var centerY = chart.chartArea.top + height / 2;
+                    
+                    // Responsive font sizes based on chart width
+                    var fontSize = width > 280 ? 28 : (width > 220 ? 22 : 16);
+                    var labelSize = width > 280 ? 12 : (width > 220 ? 10 : 9);
+                    var spacing = width > 280 ? 16 : (width > 220 ? 12 : 10);
+                    
                     ctx.save();
+                    ctx.font = 'bold ' + fontSize + 'px Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+                    ctx.fillStyle = '#1e1e2d';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(total, centerX, centerY - 6);
+                    
+                    ctx.font = '500 ' + labelSize + 'px Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+                    ctx.fillStyle = '#6c757d';
+                    ctx.fillText('Total Orders', centerX, centerY + spacing - 2);
+                    ctx.restore();
                 }
             }]
         });

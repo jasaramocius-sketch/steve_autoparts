@@ -33,6 +33,8 @@ class OrderController extends Controller
     }
     public function show($idOrNumber)
     {
+        $user = auth()->user();
+
         $isNumeric = is_numeric($idOrNumber);
         try {
             $orderQuery = Order::with(['items.product', 'user']);
@@ -43,12 +45,12 @@ class OrderController extends Controller
             abort(404);
         }
 
-        $user = auth()->user();
-        if ($order->user_id !== $user->id && ! in_array($user->role, ['master_admin', 'admin', 'staff'])) {
-            abort(403);
+        // Users can only view their own orders
+        if ($order->user_id !== $user->id) {
+            abort(403, 'You are not authorized to view this order.');
         }
 
-        // 3. If it passes everything, let's see if it successfully loads the view
+        // If it passes everything, let's see if it successfully loads the view
         $userId = auth()->id();
         $reviewedSlugs = [];
         foreach ($order->items as $item) {
@@ -67,6 +69,7 @@ class OrderController extends Controller
     }
     public function destroy($id)
     {
+        $user = auth()->user();
         $order = Order::where('user_id', Auth::id())->findOrFail($id);
         $order->update(['status' => 'cancelled']);
         return redirect()->back()->with('success', 'Order cancelled successfully.');
@@ -75,6 +78,7 @@ class OrderController extends Controller
     public function tracking(Request $request)
     {
         $order = null;
+        $user = auth()->user();
 
         if ($request->isMethod('post')) {
             $request->validate([
@@ -87,6 +91,11 @@ class OrderController extends Controller
                       ->orWhere('id', $request->order_number);
                 })
                 ->first();
+
+            // Users can only track their own orders
+            if ($order && $order->user_id !== $user->id) {
+                abort(403, 'You are not authorized to view this order.');
+            }
         }
 
         return view('user.orders.tracking', compact('order'));
@@ -94,21 +103,23 @@ class OrderController extends Controller
 
     public function invoice($id)
     {
+        $user = auth()->user();
+
         // Fetch the order along with its item lines
         $order = Order::with('items.product')->findOrFail($id);
 
-        $user = auth()->user();
-        if ($order->user_id !== $user->id && ! in_array($user->role, ['master_admin', 'admin', 'staff'])) {
-            abort(403);
+        // Users can only download invoices for their own orders
+        if ($order->user_id !== $user->id) {
+            abort(403, 'You are not authorized to view this order.');
         }
 
-        // 1. Load the blade view file and pass the order data to it
+        // Load the blade view file and pass the order data to it
         $pdf = Pdf::loadView('user.orders.invoice', compact('order'));
         
-        // 2. Set the paper size to A4 (optional but recommended for invoices)
+        // Set the paper size to A4 (optional but recommended for invoices)
         $pdf->setPaper('a4', 'portrait');
 
-        // 3. Force the browser to directly download the PDF file
+        // Force the browser to directly download the PDF file
         return $pdf->stream('Invoice-' . ($order->order_number ?? $order->id) . '.pdf');
     }
 }

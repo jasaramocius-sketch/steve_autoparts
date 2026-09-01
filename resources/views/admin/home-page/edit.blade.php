@@ -15,7 +15,7 @@
         <div class="col-md-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2>Edit {{ ucfirst(str_replace('_', ' ', $section->section_name)) }}</h2>
-                <a href="{{ route('admin.home-page.index') }}" class="btn btn-secondary">Back</a>
+                <a href="{{ route('admin.home-page.index') }}" class="btn btn-primary">Back</a>
             </div>
         </div>
     </div> -->
@@ -438,7 +438,7 @@
                             <button type="submit" class="btn btn-primary steve-btn" style="display: flex; align-items: center; gap: 10px;">
                                 <i class="fa fa-save"></i> Save Changes
                             </button>
-                            <a href="{{ route('admin.home-page.index') }}" class="btn btn-secondary steve-btn" style="display: flex; align-items: center; gap: 10px;">
+                            <a href="{{ route('admin.home-page.index') }}" class="btn btn-primary steve-btn" style="display: flex; align-items: center; gap: 10px;">
                                 <i class="fa fa-times"></i> Cancel
                             </a>
                         </div>

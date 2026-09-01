@@ -795,11 +795,11 @@
                 @endforeach
                 </div>
                 <div class="product-detail-blade-img-gallery-nav w-100 slider-nav d-flex position-absolute top-0 justify-content-between align-items-center mt-4 z-1 px-1">
-                  <button class="swiper-btn-prev steve-btn">
+                  <button class="swiper-btn-prev steve-btn position-absolute top-0">
                       <i class="fas fa-chevron-left"></i>
                   </button>
 
-                  <button class="swiper-btn-next steve-btn">
+                  <button class="swiper-btn-next steve-btn position-absolute top-0 right-0">
                       <i class="fas fa-chevron-right"></i>
                   </button>
                 </div>
@@ -1192,7 +1192,7 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
           <button type="submit" class="btn btn-primary" id="contactSellerSubmitBtn">
             <span id="contactSellerBtnText">Send Message</span>
             <span id="contactSellerBtnSpinner" class="d-none">
@@ -1213,6 +1213,9 @@ document.addEventListener('DOMContentLoaded', function() {
   if (typeof marked !== 'undefined') {
     marked.setOptions({ breaks: true, gfm: true });
     document.querySelectorAll('.product-description-body').forEach(function(el) {
+      var html = el.innerHTML;
+      // Already rich HTML (e.g. saved by the WYSIWYG editor) -> render as-is, skip markdown
+      if (/<[a-z][^>]*>/i.test(html)) return;
       var raw = el.textContent;
       raw = raw.replace(/^[ \t]*\u2022[ \t]+/gm, '- ');
       el.innerHTML = marked.parse(raw);

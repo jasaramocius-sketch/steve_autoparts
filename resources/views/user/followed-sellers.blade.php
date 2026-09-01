@@ -124,7 +124,7 @@
                     @endif
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary steve-btn" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary steve-btn" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary steve-btn" id="addSellerSubmitBtn" {{ $availableSellers->count() ? '' : 'disabled' }}>Follow Seller</button>
                 </div>
             </form>

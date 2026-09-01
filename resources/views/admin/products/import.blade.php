@@ -56,7 +56,7 @@
                 <button type="submit" class="btn btn-primary steve-btn gap-1">
                     <i class="fas fa-upload"></i> Import Products
                 </button>
-                <a href="{{ route('admin.products.index') }}" class="btn btn-secondary">Cancel</a>
+                <a href="{{ route('admin.products.index') }}" class="btn btn-primary">Cancel</a>
             </div>
         </form>
     </div>

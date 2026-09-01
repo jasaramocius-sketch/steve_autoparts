@@ -212,10 +212,10 @@
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white d-flex justify-content-between align-items-center admin-min-height-48">
                 <div class="bulk-header-normal">
-                    <span>{{ $images->total() }} images found</span>
                     <button type="button" class="btn btn-outline-primary steve-btn" id="bulk-select-btn">
                         Bulk Select
                     </button>
+                    <span>{{ $images->total() }} images found</span>
                     @if(request('filter') === 'convertible')
                         <button type="button" class="btn btn-success steve-btn" onclick="convertAllUnconverted('{{ route('admin.images.bulk-convert') }}')">
                             <i class="fas fa-bolt"></i> Convert All to WebP
@@ -343,7 +343,7 @@
     </form>
 
     <div class="mt-3 d-flex justify-content-center">
-        {{ $images->links() }}
+        {{ $images->links('vendor.pagination.gs-pagination') }}
     </div>
     @else
     <div class="card border-0 shadow-sm">
@@ -383,7 +383,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary steve-btn gap-1" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary steve-btn gap-1" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary steve-btn gap-1"><i class="fas fa-upload"></i> Upload</button>
                 </div>
             </form>

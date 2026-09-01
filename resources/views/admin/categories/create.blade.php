@@ -88,15 +88,16 @@
 
             </div>
             </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-primary steve-btn">
+                    Save
+                </button>
 
-            <button class="btn btn-success steve-btn">
-                Save
-            </button>
-
-            <a href="{{ route('admin.categories.index') }}"
-               class="btn btn-secondary steve-btn">
-                Back
-            </a>
+                <a href="{{ route('admin.categories.index') }}"
+                class="btn btn-primary steve-btn">
+                    Back
+                </a>
+            </div>
 
         </form>
 

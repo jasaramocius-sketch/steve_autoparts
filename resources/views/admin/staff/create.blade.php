@@ -53,7 +53,7 @@
 
             <div class="mt-4">
                 <button class="btn btn-primary steve-btn"><i class="fas fa-save"></i> Save</button>
-                <a href="{{ route('admin.staff.index') }}" class="btn btn-secondary">Cancel</a>
+                <a href="{{ route('admin.staff.index') }}" class="btn btn-primary">Cancel</a>
             </div>
         </form>
     </div>

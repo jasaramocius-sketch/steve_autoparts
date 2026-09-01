@@ -164,7 +164,7 @@
         </div>
         @if($products->hasPages())
             <div class="d-flex justify-content-center py-3">
-                {{ $products->links() }}
+                {{ $products->links('vendor.pagination.gs-pagination') }}
             </div>
         @endif
     </div>

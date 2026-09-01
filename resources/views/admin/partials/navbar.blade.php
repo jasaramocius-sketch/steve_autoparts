@@ -48,7 +48,7 @@
             </a>
             <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                 <li><a class="dropdown-item" href="{{ route('admin.profile') }}"><i class="fas fa-user-cog fa-fw me-2"></i>My Profile</a></li>
-                <li><hr class="dropdown-divider"></li>
+                <!-- <li><hr class="dropdown-divider"></li> -->
                 <li>
                     <form action="{{ route('admin.logout') }}" method="POST">
                         @csrf

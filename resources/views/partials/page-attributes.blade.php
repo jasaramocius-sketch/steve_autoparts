@@ -1,6 +1,6 @@
 {{-- Registers the page-id/page-class sections. Auto-resolves from DB if not passed. --}}
 @php
-    $routeName = request()->route()->getName() ?? '';
+    $routeName = request()->route()?->getName() ?? '';
     $baseSlug = $routeName ? explode('.', $routeName)[0] : '';
 
     // Auto-resolve $page from DB if not passed by controller

@@ -144,7 +144,7 @@
             </table>
         </div>
         @if($fileRevisions->hasPages())
-            <div class="d-flex justify-content-center py-3">{{ $fileRevisions->links() }}</div>
+            <div class="d-flex justify-content-center py-3">{{ $fileRevisions->links('vendor.pagination.gs-pagination') }}</div>
         @endif
     </div>
 </div>

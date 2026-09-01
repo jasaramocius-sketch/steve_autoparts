@@ -109,7 +109,7 @@
                 </button>
 
                 <a href="{{ route('admin.categories.index') }}"
-                class="btn btn-secondary">
+                class="btn btn-primary steve-btn">
                     Back
                 </a>
             </div>

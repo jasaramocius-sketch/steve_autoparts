@@ -117,7 +117,7 @@
             </table>
         </div>
         @if($blogs->hasPages())
-            <div class="d-flex justify-content-center py-3">{{ $blogs->links() }}</div>
+            <div class="d-flex justify-content-center py-3">{{ $blogs->links('vendor.pagination.gs-pagination') }}</div>
         @endif
     </div>
 </div>

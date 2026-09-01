@@ -76,7 +76,7 @@
 
             <div class="mt-4 d-flex gap-2">
                 <button class="btn btn-primary steve-btn gap-1"><i class="fas fa-save"></i> Update</button>
-                <a href="{{ route('admin.coupons.index') }}" class="btn btn-secondary steve-btn gap-1">Cancel</a>
+                <a href="{{ route('admin.coupons.index') }}" class="btn btn-primary steve-btn steve-btn gap-1">Cancel</a>
             </div>
         </form>
     </div>

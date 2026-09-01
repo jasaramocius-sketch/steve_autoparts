@@ -71,7 +71,7 @@
         <a href="{{ route('admin.logs.index') }}" class="nav-item {{ request()->routeIs('admin.logs.index') ? 'active' : '' }}">
             <i class="fas fa-file-alt"></i> Logs
         </a>
-        <a href="{{ route('admin.revisions.index') }}" class="nav-item {{ request()->routeIs('admin.revisions.index') ? 'active' : '' }}">
+        <a href="{{ route('admin.revisions.index') }}" class="nav-item {{ request()->routeIs('admin.revisions.*') ? 'active' : '' }}">
             <i class="fas fa-history"></i> Revisions
         </a>
         <a href="{{ route('admin.file-revisions.index') }}" class="nav-item {{ request()->routeIs('admin.file-revisions.*') ? 'active' : '' }}">

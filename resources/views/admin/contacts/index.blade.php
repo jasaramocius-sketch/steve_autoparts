@@ -97,7 +97,7 @@
             </table>
         </div>
         <div class="px-3 py-3">
-            {{ $contacts->links() }}
+            {{ $contacts->links('vendor.pagination.gs-pagination') }}
         </div>
     </div>
 </div>

@@ -15,6 +15,7 @@
    Order Details UI/UX
    ========================= */
 .user-order-details-page {
+
     --order-primary: var(--primary, #ef2b05);
     --order-text: #111827;
     --order-muted: #6b7280;
@@ -560,8 +561,8 @@
     $currentStatus = $order->status ?? 'pending';
     $statusMap = [
         'pending' => 0,
-        'processing' => 0,
-        'shipped' => 1,
+        'processing' => 1,
+        'shipped' => 2,
         'delivered' => 3,
         'cancelled' => -1,
     ];
@@ -614,36 +615,46 @@
 <div class="order-status-card">
     <h4 class="order-status-title">Order Tracking</h4>
 
-    <div class="order-status-track">
-        @php
-            $statusProgress = $currentStep > 0
-                ? min(100, ($currentStep / (count($statusSteps) - 1)) * 100)
-                : 0;
-        @endphp
-
-        <span class="order-status-progress" style="width:{{ $statusProgress * 0.75 }}%;"></span>
-
-        @foreach($statusSteps as $index => $step)
+    @if($currentStatus === 'cancelled')
+        <div style="text-align: center; padding: 20px;">
+            <div style="font-size: 40px; color: var(--order-danger); margin-bottom: 10px;">
+                <i class="fas fa-times-circle"></i>
+            </div>
+            <h5 style="color: var(--order-danger); font-weight: 700; margin-bottom: 5px;">Order Cancelled</h5>
+            <p style="color: var(--order-muted); margin: 0;">This order has been cancelled and will not be delivered.</p>
+        </div>
+    @else
+        <div class="order-status-track">
             @php
-                $isComplete = $index < $currentStep || ($currentStatus === 'delivered' && $index === 3);
-                $isCurrent = $index === $currentStep;
+                $statusProgress = $currentStep > 0
+                    ? min(100, ($currentStep / (count($statusSteps) - 1)) * 100)
+                    : 0;
             @endphp
 
-            <div class="order-status-step {{ $isComplete ? 'is-complete' : '' }} {{ $isCurrent ? 'is-current' : '' }}">
-                <div class="order-status-dot">
-                    @if($isComplete)
-                        <i class="fas fa-check"></i>
-                    @else
-                        {{ $index + 1 }}
+            <span class="order-status-progress" style="width:{{ $statusProgress * 0.75 }}%;"></span>
+
+            @foreach($statusSteps as $index => $step)
+                @php
+                    $isComplete = $index < $currentStep || ($currentStatus === 'delivered' && $index === 3);
+                    $isCurrent = $index === $currentStep;
+                @endphp
+
+                <div class="order-status-step {{ $isComplete ? 'is-complete' : '' }} {{ $isCurrent ? 'is-current' : '' }}">
+                    <div class="order-status-dot">
+                        @if($isComplete)
+                            <i class="fas fa-check"></i>
+                        @else
+                            {{ $index + 1 }}
+                        @endif
+                    </div>
+                    <div class="order-status-label">{{ $step }}</div>
+                    @if($isCurrent)
+                        <span class="order-status-current">Current</span>
                     @endif
                 </div>
-                <div class="order-status-label">{{ $step }}</div>
-                @if($isCurrent)
-                    <span class="order-status-current">Current</span>
-                @endif
-            </div>
-        @endforeach
-    </div>
+            @endforeach
+        </div>
+    @endif
 </div>
 
 <div class="row g-4 mt-0">
@@ -920,7 +931,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary fw-600 steve-btn" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary fw-600 steve-btn" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-primary fw-600 steve-btn" id="orderSubmitReviewBtn">Submit Review</button>
             </div>
         </div>

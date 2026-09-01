@@ -13,8 +13,8 @@ if (!function_exists('sortIndicator')) {
     {
         if ($currentSortBy !== $column) return '';
         return $currentSortDir === 'asc'
-            ? '<small class="text-muted">&nbsp;⋏</small>'
-            : '<small class="text-muted">&nbsp;</small>';
+            ? '<small class="text-muted ms-1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="display:inline"><polyline points="18 15 12 9 6 15"></polyline></svg></small>'
+            : '<small class="text-muted ms-1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="display:inline"><polyline points="6 9 12 15 18 9"></polyline></svg></small>';
     }
 }
 

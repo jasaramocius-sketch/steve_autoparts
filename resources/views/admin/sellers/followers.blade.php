@@ -57,7 +57,7 @@
             </table>
         </div>
         @if($followers->hasPages())
-            <div class="d-flex justify-content-center py-3">{{ $followers->links() }}</div>
+            <div class="d-flex justify-content-center py-3">{{ $followers->links('vendor.pagination.gs-pagination') }}</div>
         @endif
     </div>
 </div>

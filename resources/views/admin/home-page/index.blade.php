@@ -15,7 +15,7 @@
         <div class="col-md-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h4 class="fw-bold mb-0">Home Page Sections</h4>
-                <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+                <a href="{{ route('admin.dashboard') }}" class="btn btn-primary">Back to Dashboard</a>
             </div>
 
         </div>
@@ -87,7 +87,7 @@
                             </table>
                         </div>
                         @if($sections->hasPages())
-                            <div class="d-flex justify-content-center py-3">{{ $sections->links() }}</div>
+                            <div class="d-flex justify-content-center py-3">{{ $sections->links('vendor.pagination.gs-pagination') }}</div>
                         @endif
                     @else
                         <div class="alert alert-info">

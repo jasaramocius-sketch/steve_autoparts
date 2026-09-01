@@ -1,5 +1,13 @@
 @extends('user.layouts.dashboard')
-
+{{-- Add your custom page ID and classes right here --}}
+@include('partials.page-attributes', ['pageId' => 'user-order-tracking-page', 'pageClass' => 'user-order-tracking-page'])
+@section('meta_tags')
+    @include('partials.meta-tags', [
+        'pageTitle' => 'Order Tracking - StAutoparts',
+        'metaTitle' => 'Order Tracking | StAutoparts',
+        'metaDescription' => 'Track your orders and view their status at StAutoparts.',
+    ])
+@endsection
 @section('dashboard-content')
 
 <style>
@@ -463,7 +471,7 @@
                         id="order_number"
                         class="form-control"
                         value="{{ old('order_number', request('order_number')) }}"
-                        placeholder="e.g. ORD6A4B3FD08A462"
+                        placeholder="e.g. ORD6********A462"
                         autocomplete="off"
                     >
                 </div>
@@ -487,8 +495,8 @@
 
                 $statusMap = [
                     'pending' => 0,
-                    'processing' => 0,
-                    'shipped' => 1,
+                    'processing' => 1,
+                    'shipped' => 2,
                     'delivered' => 3,
                     'cancelled' => -1,
                 ];
@@ -521,35 +529,45 @@
                 <div class="track-status-box">
                     <h4 class="track-status-heading">Order Progress</h4>
 
-                    <div class="track-status-track">
-                        <span
-                            class="track-status-progress"
-                            style="width:{{ $statusProgress * 0.75 }}%;"
-                        ></span>
+                    @if($order->status === 'cancelled')
+                        <div style="text-align: center; padding: 20px;">
+                            <div style="font-size: 40px; color: #dc2626; margin-bottom: 10px;">
+                                <i class="fas fa-times-circle"></i>
+                            </div>
+                            <h5 style="color: #dc2626; font-weight: 700; margin-bottom: 5px;">Order Cancelled</h5>
+                            <p style="color: #6b7280; margin: 0;">This order has been cancelled and will not be delivered.</p>
+                        </div>
+                    @else
+                        <div class="track-status-track">
+                            <span
+                                class="track-status-progress"
+                                style="width:{{ $statusProgress * 0.75 }}%;"
+                            ></span>
 
-                        @foreach($statusSteps as $i => $step)
-                            @php
-                                $isComplete = $i < $currentStep || ($order->status === 'delivered' && $i === 3);
-                                $isCurrent = $i === $currentStep;
-                            @endphp
+                            @foreach($statusSteps as $i => $step)
+                                @php
+                                    $isComplete = $i < $currentStep || ($order->status === 'delivered' && $i === 3);
+                                    $isCurrent = $i === $currentStep;
+                                @endphp
 
-                            <div class="track-status-step {{ $isComplete ? 'complete' : '' }} {{ $isCurrent ? 'current' : '' }}">
-                                <div class="track-status-dot">
-                                    @if($isComplete)
-                                        <i class="fas fa-check"></i>
-                                    @else
-                                        {{ $i + 1 }}
+                                <div class="track-status-step {{ $isComplete ? 'complete' : '' }} {{ $isCurrent ? 'current' : '' }}">
+                                    <div class="track-status-dot">
+                                        @if($isComplete)
+                                            <i class="fas fa-check"></i>
+                                        @else
+                                            {{ $i + 1 }}
+                                        @endif
+                                    </div>
+
+                                    <div class="track-status-label">{{ $step }}</div>
+
+                                    @if($isCurrent)
+                                        <span class="track-current-label">Current</span>
                                     @endif
                                 </div>
-
-                                <div class="track-status-label">{{ $step }}</div>
-
-                                @if($isCurrent)
-                                    <span class="track-current-label">Current</span>
-                                @endif
-                            </div>
-                        @endforeach
-                    </div>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
 
                 <div class="track-summary-grid">
@@ -599,8 +617,8 @@
                                 @foreach($order->items as $item)
                                     <tr>
                                         <td>
-                                            <span class="track-product-name">
-                                                {{ $item->product->name ?? 'Product Unavailable' }}
+                                            <span class="track-product-name"><a href="/stautoparts/product/{{ $item->product->slug }}">
+                                                {{ $item->product->name ?? 'Product Unavailable' }}</a>
                                             </span>
                                         </td>
                                         <td>{{ $item->variation ?? '—' }}</td>

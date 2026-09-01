@@ -42,19 +42,24 @@
                 @error('password') <div class="invalid-feedback">{{ $message }}</div> @enderror
             </div>
 
-            <div class="mb-3">
-                <label>Phone</label>
-                <input type="tel" name="phone" class="form-control @error('phone') is-invalid @enderror" inputmode="numeric" value="{{ old('phone') }}">
-                @error('phone') <div class="invalid-feedback">{{ $message }}</div> @enderror
+            <div class="mb-3 d-flex gap-2">
+                <div class="">
+                    <label>Phone</label>
+                    <input type="tel" name="phone" class="form-control @error('phone') is-invalid @enderror" inputmode="numeric" value="{{ old('phone') }}">
+                    @error('phone') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
+                <div class="">
+                    <label>Status</label>
+                    <select name="status" class="form-select @error('status') is-invalid @enderror">
+                        <option value="active" {{ old('status', 'active') === 'active' ? 'selected' : '' }}>Active</option>
+                        <option value="inactive" {{ old('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
+                    </select>
+                    @error('status') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
             </div>
 
             <div class="mb-3">
-                <label>Status</label>
-                <select name="status" class="form-select @error('status') is-invalid @enderror">
-                    <option value="active" {{ old('status', 'active') === 'active' ? 'selected' : '' }}>Active</option>
-                    <option value="inactive" {{ old('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
-                </select>
-                @error('status') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                
             </div>
 
             <div class="mb-3">
@@ -69,7 +74,7 @@
             </div>
             <div class="d-flex gap-1">
                 <button class="btn btn-primary steve-btn gap-1">Save</button>
-                <a href="{{ route('admin.customers.index') }}" class="btn btn-secondary gap-1">Back</a>
+                <a href="{{ route('admin.customers.index') }}" class="btn btn-primary steve-btn gap-1">Back</a>
             </div>
         </form>
 

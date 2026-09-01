@@ -26,7 +26,7 @@
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Email Address <span class="text-danger">*</span></label>
-                    <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $customer->email) }}" required>
+                    <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $customer->email) }}" required readonly>
                     @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
                 <div class="col-md-6">
@@ -56,7 +56,7 @@
 
             <div class="mt-4 d-flex gap-2">
                 <button class="btn btn-primary steve-btn gap-1"><i class="fas fa-save"></i> Update</button>
-                <a href="{{ route('admin.customers.index') }}" class="btn btn-secondary steve-btn">Cancel</a>
+                <a href="{{ route('admin.customers.index') }}" class="btn btn-primary steve-btn">Cancel</a>
             </div>
         </form>
     </div>

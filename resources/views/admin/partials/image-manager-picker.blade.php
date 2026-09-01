@@ -91,7 +91,7 @@
         @endif
       </div>
       <div class="modal-footer py-2">
-        <button type="button" class="btn btn-secondary steve-btn" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary steve-btn" data-bs-dismiss="modal">Cancel</button>
         <button type="button" class="btn btn-primary steve-btn" id="impSelectBtn_{{ $pickerId }}" disabled onclick="impConfirm_{{ $pickerId }}()">
           <i class="fas fa-check me-1"></i> {{ $multiple ? 'Add Selected' : 'Select Image' }}
         </button>

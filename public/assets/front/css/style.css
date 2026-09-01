@@ -177,7 +177,9 @@ button#searchIcon {
   padding: 0;
   background-color: transparent
 }
-
+.right-0 {
+  right: 0 !important
+}
 button#searchIcon:hover {
   background-color: #0000
 }
@@ -1433,6 +1435,17 @@ p.text-lg {
 }
 .product-detail-blade-img-gallery-nav button{
   border: 1px solid var(--primary) !important;
+}
+.product-detail-blade-img-gallery-nav button.swiper-button-disabled{
+  opacity: 0.5 !important;
+  background-color: #fff !important;
+  color: var(--primary) !important;
+}
+.product-detail-blade-img-gallery-nav button.swiper-button-disabled i:hover{
+  color: var(--primary) !important;
+}
+.swiper .product-detail-blade-img-gallery-nav .swiper-btn-next{
+  margin-right: 5px !important;
 }
 @media (max-width:1199.97px) {
   .newsletter-btn {
@@ -6109,7 +6122,8 @@ footer .footer-row .footer-col-title {
   font-size: 18px;
   font-style: normal;
   font-weight: 400;
-  line-height: 120%
+  line-height: 120%;
+  font-family: "Roboto", sans-serif;
 }
 
 .pages_dropdown {
@@ -6219,11 +6233,16 @@ footer .footer-row .footer-col-title {
 .image-manager-stats-card .card:hover .text-danger {
   color: #fff !important
 }
-
+h3.font-vw{
+  font-size: 2vw;
+}
 @media (max-width:1199.97px) {
   .header-top.sticky {
     padding: 16px 0
   }
+  h3.font-vw{
+  font-size: 2.5vw;
+}
 }
 
 @media (max-width:991.97px) {
@@ -6234,8 +6253,15 @@ footer .footer-row .footer-col-title {
   .file-revisions-table td:first-child {
     width: 20% !important
   }
+  h3.font-vw{
+  font-size: 2.5vw;
 }
-
+}
+@media (max-width:767.97px) {
+h3.font-vw{
+  font-size: 2.5vw;
+}
+}
 .header-top .create-navbar {
   -webkit-box-pack: justify;
   -ms-flex-pack: justify;
@@ -8087,7 +8113,7 @@ ul.mobile-nav-menu {
 .gs-dashboard-user-content-wrapper .acc-info-wrapper,
 .gs-vendor-order-invoice .acc-info-wrapper {
   background-color: #f8f7f7;
-  padding: 24px 24px 8px 24px;
+  padding: 24px 24px 24px 24px;
   height: 100%
 }
 
@@ -17535,9 +17561,9 @@ table.summary-table thead tr:first-child > th {
   border-top: 1px solid #e6e8ec
 }
 td.admin-product-name a {
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    line-clamp: 1;
-    -webkit-box-orient: vertical;
+    display: block;
+    max-width: 30ch;
+    white-space: nowrap;
     overflow: hidden;
+    text-overflow: ellipsis;
 }

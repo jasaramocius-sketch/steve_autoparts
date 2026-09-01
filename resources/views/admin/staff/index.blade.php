@@ -118,7 +118,7 @@
             </div>
 
             @if($staffList->hasPages())
-                <div class="d-flex justify-content-center">{{ $staffList->links() }}</div>
+                <div class="d-flex justify-content-center">{{ $staffList->links('vendor.pagination.gs-pagination') }}</div>
             @endif
 
         </div>
