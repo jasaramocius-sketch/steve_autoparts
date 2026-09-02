@@ -25,13 +25,15 @@
 
                         <div class="mb-3 admin-password-field">
                             <label>Password</label>
-                            <input type="password"
-                                   name="password"
-                                   id="admin-password"
-                                   class="form-control">
-                            <span class="admin-password-toggle" onclick="togglePassword('admin-password',this)">
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                            </span>
+                            <div class="admin-password-input-wrap">
+                                <input type="password"
+                                       name="password"
+                                       id="admin-password"
+                                       class="form-control">
+                                <span class="admin-password-toggle" onclick="togglePassword('admin-password',this)">
+                                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                </span>
+                            </div>
                         </div>
 
                         <button class="btn btn-primary w-100 steve-btn">

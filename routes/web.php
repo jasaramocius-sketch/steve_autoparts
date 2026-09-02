@@ -168,10 +168,10 @@ Route::post('/register', [AuthController::class, 'register'])->name('register.po
 
 Route::prefix('admin')->group(function () {
 
-    Route::get('/login', [AdminAuthController::class, 'showLogin'])->name('admin.login');
-    Route::post('/login', [AdminAuthController::class, 'login'])->middleware('throttle:5,1')->name('admin.login.submit');
+    Route::get('/login', function () {
+        return redirect()->route('login');
+    })->name('admin.login');
     Route::match(['get', 'post'], '/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
-    
 
 });
 
@@ -187,7 +187,7 @@ Route::get('/use/login', function () {
 Route::get('/admin', function () {
     return Auth::check()
         ? redirect()->route('admin.dashboard')
-        : redirect()->route('admin.login');
+        : redirect()->route('login');
 });
 
 /*

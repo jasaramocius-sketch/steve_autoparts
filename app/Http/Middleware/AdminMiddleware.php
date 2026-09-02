@@ -11,13 +11,13 @@ class AdminMiddleware
     {
         // 1. Check login
         if (!Auth::check()) {
-            return redirect()->route('admin.login');
+            return redirect()->route('login');
         }
 
         // 2. Check role
         if (!in_array(Auth::user()->role, ['master_admin', 'admin', 'staff'])) {
             Auth::logout();
-            return redirect()->route('admin.login');
+            return redirect()->route('login');
         }
 
         return $next($request);

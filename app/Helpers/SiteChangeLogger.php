@@ -23,6 +23,11 @@ class SiteChangeLogger
 
         $line = json_encode($entry, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . PHP_EOL;
 
-        file_put_contents($filePath, $line, FILE_APPEND | LOCK_EX);
+        try {
+            file_put_contents($filePath, $line, FILE_APPEND | LOCK_EX);
+            @chmod($filePath, 0664);
+        } catch (\Throwable $e) {
+            // Logging must never break a request.
+        }
     }
 }

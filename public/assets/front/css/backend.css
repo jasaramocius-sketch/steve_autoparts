@@ -2,7 +2,7 @@
         .admin-sidebar { width:260px; height:100vh; position:fixed; background:#1e1e2d; color:#fff; z-index:1001; display:flex; flex-direction:column; transition:transform .25s; }
         .admin-sidebar .brand { padding:10px 0px; border-bottom:1px solid rgba(255,255,255,.08); font-size:18px; font-weight:700; letter-spacing:.5px; white-space:nowrap; display:flex; align-items:center; justify-content:space-between; }
         .admin-sidebar .brand a { flex:1; font-size:1rem;}
-        .sidebar-close-btn { display:none; background:none; border:none; color:rgba(255,255,255,.6); font-size:18px; cursor:pointer; padding:4px 8px; border-radius:6px; transition:all .15s; }
+        .sidebar-close-btn { display:none; background:none; border:none; color:rgba(255,255,255,.6); font-size:18px; cursor:pointer; padding:4px 8px; border-radius:6px; transition:all .15s;margin-right: 5px; }
         .sidebar-close-btn:hover { color:#fff; background:rgba(255,255,255,.1); }
         /* .admin-sidebar .brand i { color:#4bc5e7; } */
         .admin-sidebar .nav-wrap { flex:1; overflow-y:auto; padding:12px 0 72px 0; direction: rtl;}
@@ -29,6 +29,7 @@
         .admin-navbar.admin-navbar-bg .page-title,
         .admin-navbar.admin-navbar-bg .user-dropdown { color:#fff; }
         .admin-navbar.admin-navbar-bg .user-dropdown:hover { background:rgba(255,255,255,.12); }
+        .admin-navbar .user-dropdown:hover .user-avatar { background-color: var(--primary); }
         .admin-navbar.admin-navbar-bg .user-avatar { background:#fff; color:#1e1e2d; }
         .admin-navbar.admin-navbar-bg .page-title { text-shadow:0 2px 6px rgba(0,0,0,.4); }
         .admin-content { flex:1; padding:24px; }
@@ -161,7 +162,9 @@
 .admin-no-border-input { font-size: 1.25rem; box-shadow: none; padding-left: 15px; }
 .admin-login-container { margin: 100px auto; }
 .admin-password-field { position: relative; }
-.admin-password-toggle { position: absolute; right: 12px; top: 38px; cursor: pointer; z-index: 5; }
+.admin-password-input-wrap { position: relative; }
+.admin-password-input-wrap .form-control { padding-right: 40px; }
+.admin-password-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; z-index: 5; }
 .admin-table-value { width: 45%; }
 .admin-table-field { width: 150px; }
 .admin-code-block { white-space: pre-wrap; word-break: break-word; max-height: 70vh; overflow: auto; }

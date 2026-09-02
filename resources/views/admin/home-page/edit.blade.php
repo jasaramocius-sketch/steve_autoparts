@@ -435,10 +435,10 @@
                         </div>
 
                         <div class="form-group d-flex action-buttons">
-                            <button type="submit" class="btn btn-primary steve-btn" style="display: flex; align-items: center; gap: 10px;">
+                            <button type="submit" class="btn btn-primary steve-btn gap-1" style="display: flex; align-items: center;">
                                 <i class="fa fa-save"></i> Save Changes
                             </button>
-                            <a href="{{ route('admin.home-page.index') }}" class="btn btn-primary steve-btn" style="display: flex; align-items: center; gap: 10px;">
+                            <a href="{{ route('admin.home-page.index') }}" class="btn btn-primary steve-btn gap-1" style="display: flex; align-items: center;">
                                 <i class="fa fa-times"></i> Cancel
                             </a>
                         </div>

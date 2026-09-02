@@ -245,7 +245,70 @@ class AdminController extends Controller
             $contents = file($directory . DIRECTORY_SEPARATOR . $selectedFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         }
 
-        return view('admin.logs.index', compact('files', 'selectedFile', 'contents'));
+        // Parse each JSON line into a structured entry; skip malformed lines.
+        $entries = [];
+        foreach ($contents as $line) {
+            $decoded = json_decode(trim($line), true);
+            if (!is_array($decoded)) {
+                $entries[] = [
+                    'timestamp' => null,
+                    'type'      => 'info',
+                    'message'   => $line,
+                    'context'   => [],
+                ];
+                continue;
+            }
+            $entries[] = [
+                'timestamp' => $decoded['timestamp'] ?? null,
+                'type'      => $decoded['type'] ?? 'info',
+                'message'   => $decoded['message'] ?? '',
+                'context'   => $decoded['context'] ?? [],
+            ];
+        }
+
+        // Newest first.
+        $entries = array_reverse($entries);
+
+        // Collect available types for the filter dropdown (all, before any filter).
+        $types = array_values(array_unique(array_column($entries, 'type')));
+        sort($types);
+
+        // Search filter.
+        $search = $request->get('search');
+        if ($search) {
+            $entries = array_filter($entries, function ($entry) use ($search) {
+                return stripos($entry['message'], $search) !== false
+                    || stripos((string) $entry['type'], $search) !== false
+                    || stripos($entry['timestamp'] ?? '', $search) !== false;
+            });
+            $entries = array_values($entries);
+        }
+
+        // Filter by type (defaults to 'change' so the logs page shows the audit trail).
+        $typeFilter = $request->get('type') ?: 'change';
+        if ($typeFilter && $typeFilter !== 'all') {
+            $entries = array_filter($entries, fn ($entry) => $entry['type'] === $typeFilter);
+            $entries = array_values($entries);
+        }
+
+        // Paginate.
+        $perPage = 50;
+        $currentPage = \Illuminate\Pagination\Paginator::resolveCurrentPage();
+        $total = count($entries);
+        $pageEntries = array_slice($entries, ($currentPage - 1) * $perPage, $perPage);
+
+        $entries = new \Illuminate\Pagination\LengthAwarePaginator(
+            $pageEntries,
+            $total,
+            $perPage,
+            $currentPage,
+            [
+                'path' => \Illuminate\Pagination\Paginator::resolveCurrentPath(),
+                'query' => $request->query(),
+            ]
+        );
+
+        return view('admin.logs.index', compact('files', 'selectedFile', 'entries', 'search', 'typeFilter', 'types'));
     }
 
     public function revisions(Request $request)

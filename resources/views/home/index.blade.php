@@ -66,7 +66,7 @@
     <div class="container wow-replaced section-with-padding">
 
         <!-- Header -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex justify-content-between align-items-center pb-20">
             <h2>{{ $sections->get('categories_heading')?->title ??  'All Categories' }}</h2>
             <div class="slider-nav">
                 <button class="cate-prev steve-btn">
@@ -113,7 +113,7 @@
 <section class="gs-offer-section" {!! $sections->get('offers')?->bgStyle() !!}>
     <div class="container section-with-padding">
         <!-- title box -->
-        <div class="mb-30 gs-offer-section-row-first">
+        <div class="pb-20 gs-offer-section-row-first">
             <div class="flex" >
                 <div class="gs-title-box flex-column">
                     <h2 class="title wow-replaced">{{ $sections->get('offers')?->title ?? 'Special Offer' }}</h2>
@@ -194,7 +194,7 @@
 <section class="gs-explore-product-section bg-light-white" {!! $sections->get('explore_products')?->bgStyle() !!}>
     <div class="container section-with-padding">
         <!-- title box & nav-tab -->
-        <div class="row mb-36 justify-content-center">
+        <div class="row pb-20 justify-content-center">
             <div class="col-12">
                 <div class="gs-title-box text-center">
                     <h2 class="title wow-replaced">{{ $sections->get('explore_products')?->title ??  'Explore Our Products' }}</h2>
@@ -289,7 +289,7 @@
 <section class="gs-explore-product-section bg-white" {!! $sections->get('featured_products_heading')?->bgStyle() !!}>
     <div class="container section-with-padding">
 
-        <div class="d-flex justify-content-between align-items-center mb-4 featured-title-row-first">
+        <div class="d-flex justify-content-between align-items-center pb-20 featured-title-row-first">
             <div class="gs-title-box">
                 <h2 class="title">{{ $sections->get('featured_products_heading')?->title ??  'Featured Products' }}</h2>
             </div>
@@ -375,7 +375,7 @@
 <!-- Best Selling Section -->
 <section class="gs-explore-product-section" {!! $sections->get('best_selling')?->bgStyle() !!}>
     <div class="container section-with-padding">
-        <div class="row mb-24 best-selling-title-row">
+        <div class="row pb-20 best-selling-title-row">
             <div class="gs-title-box">
                     <h2 class="title wow-replaced">{{ $sections->get('best_selling')?->title ??  'Best Selling' }}</h2>
                 </div>
@@ -414,7 +414,7 @@
         @endphp
 
         <div class="justify-content-center">
-            <div class="col-12 d-flex column flex-lg-row flex-xl-row latest-post-title-row-first pb-4">
+            <div class="col-12 d-flex column flex-lg-row flex-xl-row latest-post-title-row-first pb-20">
                 <div class="gs-title-box">
                     <h2 class="title wow-replaced">{{ $sections->get('latest_post')?->title ??  'Latest Post' }}</h2>
                     <p class="des mb-0 wow-replaced" data-wow-delay=".1s">{{ $sections->get('latest_post')?->description ??  'Stay updated with our latest maintenance guides, tips, and insights from professional automotive mechanics.' }}</p>
@@ -492,7 +492,7 @@
 <!-- Top Brands Section -->
 <section class="gs-brands-section" {!! $sections->get('top_brands_heading')?->bgStyle() !!}>
     <div class="container section-with-padding">
-        <div class="brands-section-row-first mb-30">
+        <div class="brands-section-row-first pb-20">
             <div class="flex">
                 <div class="gs-title-box flex-column">
                     <h2 class="title wow-replaced">{{ $sections->get('top_brands_heading')?->title ??  'Top Brands' }}</h2>
@@ -526,7 +526,7 @@
 <!-- Partner Section -->
 <section class="gs-partner-section" {!! $sections->get('partners_heading')?->bgStyle() !!}>
     <div class="container section-with-padding">
-        <div class="row mb-60 justify-content-center">
+        <div class="row pb-20 justify-content-center">
             <div class="col-lg-7">
                 <div class="gs-title-box text-center">
                     <h2 class="title wow-replaced">{{ $sections->get('partners_heading')?->title ??  'Our Partners' }}</h2>

@@ -21,7 +21,6 @@ class AppServiceProvider extends ServiceProvider
         require_once app_path('Helpers/currency.php');
         require_once app_path('Helpers/image.php');
         require_once app_path('Helpers/date.php');
-        require_once app_path('Helpers/SiteChangeLogger.php');
         require_once app_path('Helpers/NotificationHelper.php');
     }
 
@@ -131,7 +130,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         if (app()->runningInConsole()) {
-            SiteChangeLogger::log('info', 'Application booted in console');
+            // (console boot logging intentionally removed — it was pure noise)
         }
 
         \App\Models\Category::saved(fn () => cache()->forget('front_mobile_category_tree_v1'));
