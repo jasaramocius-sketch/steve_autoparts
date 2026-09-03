@@ -17,7 +17,7 @@
 
 <div class="card border-0 shadow-sm">
     <div class="card-body p-0">
-        <div class="d-flex justify-content-between align-items-center px-3 pt-3 pb-2 flex-wrap flex-md-nowrap">
+        <div class="d-flex justify-content-between align-items-center p-2 flex-wrap flex-md-nowrap">
             <div class="d-flex align-items-center gap-3 flex-wrap">
                 <div class="d-flex align-items-center gap-2">
                     <span class="text-muted small">Show</span>

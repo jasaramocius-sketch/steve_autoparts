@@ -127,6 +127,36 @@ class ProductController extends Controller
         $product = Product::with(['galleryImages', 'category.parent', 'seller' => fn($q) => $q->withCount('products')])->where('slug', $slug)->where('status', true)->firstOrFail();
         $related = Product::with('category')->where('status', true)->where('id', '!=', $product->id)->take(4)->get();
 
+        // "Similar Products To Compare" — same part, other brands (Moglix-style).
+        $similar = collect();
+        $similarLimit = 3;
+        $similarBase = Product::with('brand', 'category')
+            ->where('status', true)
+            ->where('id', '!=', $product->id);
+
+        if (!empty($product->category_id) && !empty($product->year) && !empty($product->make) && !empty($product->model)) {
+            $fitmentMatches = (clone $similarBase)
+                ->where('category_id', $product->category_id)
+                ->where('year', $product->year)
+                ->where('make', $product->make)
+                ->where('model', $product->model)
+                ->orderByRaw('IF(brand_id = ' . (int) $product->brand_id . ', 1, 0) ASC, id ASC')
+                ->limit($similarLimit)
+                ->get();
+            $similar = $fitmentMatches;
+        }
+
+        if ($similar->count() < $similarLimit) {
+            $exclude = $similar->pluck('id')->push($product->id);
+            $categoryCandidates = (clone $similarBase)
+                ->where('category_id', $product->category_id)
+                ->whereNotIn('id', $exclude)
+                ->orderByRaw('IF(brand_id = ' . (int) $product->brand_id . ', 1, 0) ASC, id ASC')
+                ->limit($similarLimit - $similar->count())
+                ->get();
+            $similar = $similar->merge($categoryCandidates)->take($similarLimit);
+        }
+
         $activeCategoryUrls = [];
         if ($product->category) {
             $activeCategoryUrls[] = url('/category/' . $product->category->slug);
@@ -148,7 +178,7 @@ class ProductController extends Controller
 
         $hasPurchased = \App\Http\Controllers\ReviewController::hasPurchased(auth()->id(), $product->id);
 
-        return view('product.show', compact('product', 'related', 'inWishlist', 'wishedProductIds', 'hasPurchased'));
+        return view('product.show', compact('product', 'related', 'inWishlist', 'wishedProductIds', 'hasPurchased', 'similar'));
     }
 
     public function create()
@@ -548,7 +578,7 @@ class ProductController extends Controller
                 'stock' => (!empty($data['stock']) && is_numeric($data['stock'])) ? (int)$data['stock'] : 0,
                 'description' => $normalized['description'] ?: ($data['description'] ?? ''),
                 'badge' => $data['badge'] ?? null,
-                'product_type' => in_array($data['product_type'] ?? '', ['physical', 'digital']) ? $data['product_type'] : 'none',
+                'product_type' => in_array($data['product_type'] ?? '', ['none', 'new_arrival', 'trending', 'best_selling', 'popular']) ? $data['product_type'] : 'none',
                 'status' => in_array(($data['status'] ?? ''), ['1', 'yes', 'active', 'true'], true) ? true : false,
                 'featured' => in_array(($data['featured'] ?? ''), ['1', 'yes', 'active', 'true'], true) ? true : false,
                 'policy_text' => $normalized['policy_text'],
@@ -654,9 +684,9 @@ class ProductController extends Controller
     {
         $headers = ['id', 'name', 'price', 'old_price', 'category', 'stock', 'description', 'badge', 'product_type', 'status', 'featured', 'image', 'brand', 'seller', 'year', 'make', 'model', 'gallery_images', 'policy_text', 'reviews_data'];
         $rows = [
-            ['', 'Brake Pads Set', '49.99', '69.99', 'Brakes', '100', 'High quality ceramic brake pads', 'New', 'physical', '1', '1', 'https://example.com/images/brake-pads.jpg', 'Duralast', 'AutoZone Seller', '2020', 'Toyota', 'Camry', 'https://example.com/images/brake-pads-2.jpg|https://example.com/images/brake-pads-3.jpg', '<p>We offer a 30-day return policy for unused items in original packaging.</p>', '[{"name":"Ava","rating":5,"text":"Perfect fit and fast delivery.","deleted":false}]'],
-            ['', 'Oil Filter', '12.99', '', 'Engine', '250', '', 'Sale', 'physical', '1', '0', '', 'Apex Gasket', 'AutoZone Seller', '2019', 'Honda', 'Civic', '', '<p>Items can be returned within 14 days if they are not installed or damaged.</p>', '[{"name":"Noah","rating":4,"text":"Works well and shipped quickly.","deleted":false}]'],
-            ['', 'LED Headlight Bulb', '29.99', '39.99', 'Lighting', '75', 'Bright 12000LM LED bulbs', '', 'physical', '1', '1', '', '', '', '', '', '', '<p>All purchases include a 12-month warranty and a simple return process.</p>', '[{"name":"Mila","rating":5,"text":"Great brightness and easy install.","deleted":false}]'],
+            ['', 'Brake Pads Set', '49.99', '69.99', 'Brakes', '100', 'High quality ceramic brake pads', 'New', 'none', '1', '1', 'https://example.com/images/brake-pads.jpg', 'Duralast', 'AutoZone Seller', '2020', 'Toyota', 'Camry', 'https://example.com/images/brake-pads-2.jpg|https://example.com/images/brake-pads-3.jpg', '<p>We offer a 30-day return policy for unused items in original packaging.</p>', '[{"name":"Ava","rating":5,"text":"Perfect fit and fast delivery.","deleted":false}]'],
+            ['', 'Oil Filter', '12.99', '', 'Engine', '250', '', 'Sale', 'none', '1', '0', '', 'Apex Gasket', 'AutoZone Seller', '2019', 'Honda', 'Civic', '', '<p>Items can be returned within 14 days if they are not installed or damaged.</p>', '[{"name":"Noah","rating":4,"text":"Works well and shipped quickly.","deleted":false}]'],
+            ['', 'LED Headlight Bulb', '29.99', '39.99', 'Lighting', '75', 'Bright 12000LM LED bulbs', '', 'none', '1', '1', '', '', '', '', '', '', '<p>All purchases include a 12-month warranty and a simple return process.</p>', '[{"name":"Mila","rating":5,"text":"Great brightness and easy install.","deleted":false}]'],
         ];
 
         $callback = function () use ($headers, $rows) {

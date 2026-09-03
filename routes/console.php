@@ -11,3 +11,7 @@ Artisan::command('inspire', function () {
 Schedule::command('file:audit --truncate-diffs --max-archive-days=90')
     ->dailyAt('03:00')
     ->withoutOverlapping();
+
+Schedule::command('trash:purge --days=15')
+    ->dailyAt('03:30')
+    ->withoutOverlapping();

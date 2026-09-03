@@ -84,10 +84,12 @@
         </div>
         @php
             $visibleCardReviews = collect($p->reviews_data ?? [])->where('deleted', false);
-            $displayRating = $p->rating ?? 0;
-            $displayReviews = max($p->reviews ?? 0, $visibleCardReviews->count());
-            if ($displayRating == 0 && $visibleCardReviews->isNotEmpty()) {
+            if ($visibleCardReviews->isEmpty()) {
+                $displayRating = 0;
+                $displayReviews = 0;
+            } else {
                 $displayRating = round($visibleCardReviews->avg('rating'));
+                $displayReviews = $visibleCardReviews->count();
             }
         @endphp
         @if($displayReviews > 0)

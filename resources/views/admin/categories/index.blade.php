@@ -37,9 +37,9 @@
 </ul>
 
 <div class="card border-0 shadow-sm">
-    <div class="card-body">
+    <div class="card-body p-0">
 
-        <div class="d-flex justify-content-between align-items-center pb-2 cat-controls">
+        <div class="d-flex justify-content-between align-items-center p-2 cat-controls">
             <div class="d-flex align-items-center gap-2">
                 <span class="text-muted small">Show</span>
                 <select class="form-select w-auto" onchange="window.location.href=this.value">

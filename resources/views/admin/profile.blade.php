@@ -18,7 +18,7 @@
     </div>
 @endif
 <!-- Account Details Panel -->
-<div class="acc-info-wrapper rounded p-4 mb-3 admin-profile-info">
+<div class="acc-info-wrapper rounded p-3 mb-3 admin-profile-info">
     <h4 class="mb-3 admin-profile-heading">Account Details</h4>
     <div class="list-wrapper">
     <div class="row w-100">

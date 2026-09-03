@@ -179,15 +179,31 @@ class HomeController extends Controller
 
         $result = [];
         foreach ($tabs as $i => $tab) {
+            $label = $tab['label'] ?? ('Tab ' . ($i + 1));
+            $sectionKeys = [
+                'New Arrivals'  => 'new_arrival',
+                'Trending'      => 'trending',
+                'Best Selling'  => 'best_selling',
+                'Popular'       => 'popular',
+            ];
+            $sectionKey = $sectionKeys[$label] ?? null;
             $ids = $tab['product_ids'] ?? [];
-            if (empty($ids)) {
+
+            if (!empty($ids)) {
+                $products = Product::where('status', true)->where('added_by', 'admin')
+                    ->whereIn('id', $ids)
+                    ->latest()
+                    ->take(8)
+                    ->get();
+            } elseif ($sectionKey) {
+                $products = Product::where('status', true)->where('added_by', 'admin')
+                    ->where('product_type', $sectionKey)
+                    ->latest()
+                    ->take(8)
+                    ->get();
+            } else {
                 continue;
             }
-            $products = Product::where('status', true)->where('added_by', 'admin')
-                ->whereIn('id', $ids)
-                ->latest()
-                ->take(8)
-                ->get();
 
             if ($products->isEmpty()) {
                 $products = Product::where('status', true)->where('added_by', 'admin')
@@ -195,7 +211,7 @@ class HomeController extends Controller
             }
 
             $result[] = [
-                'label' => $tab['label'] ?? ('Tab ' . ($i + 1)),
+                'label' => $label,
                 'products' => $products,
             ];
         }

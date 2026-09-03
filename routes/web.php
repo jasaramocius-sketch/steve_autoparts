@@ -405,6 +405,20 @@ Route::prefix('admin')
             ->name('admin.revisions.index');
         Route::get('/revisions/{id}', [AdminController::class, 'revisionDetail'])
             ->name('admin.revisions.detail');
+        Route::delete('/revisions/{id}', [AdminController::class, 'revisionDestroy'])
+            ->name('admin.revisions.destroy');
+        Route::post('/revisions/bulk-delete', [AdminController::class, 'revisionBulkDelete'])
+            ->name('admin.revisions.bulk-delete');
+        Route::post('/revisions/{id}/restore', [AdminController::class, 'revisionRestore'])
+            ->name('admin.revisions.restore');
+        Route::delete('/revisions/{id}/force-delete', [AdminController::class, 'revisionForceDelete'])
+            ->name('admin.revisions.force-delete');
+        Route::post('/revisions/bulk-restore', [AdminController::class, 'revisionBulkRestore'])
+            ->name('admin.revisions.bulk-restore');
+        Route::post('/revisions/bulk-force-delete', [AdminController::class, 'revisionBulkForceDelete'])
+            ->name('admin.revisions.bulk-force-delete');
+        Route::post('/revisions/empty-trash', [AdminController::class, 'revisionEmptyTrash'])
+            ->name('admin.revisions.empty-trash');
         Route::get('/file-revisions', [AdminController::class, 'fileRevisions'])
             ->name('admin.file-revisions.index');
         Route::get('/file-revisions/download/{id}', [AdminController::class, 'fileRevisionDownload'])
@@ -415,6 +429,20 @@ Route::prefix('admin')
             ->name('admin.file-revisions.truncate-diffs');
         Route::post('/file-revisions/truncate-per-file', [AdminController::class, 'fileRevisionTruncatePerFile'])
             ->name('admin.file-revisions.truncate-per-file');
+        Route::delete('/file-revisions/{id}', [AdminController::class, 'fileRevisionDestroy'])
+            ->name('admin.file-revisions.destroy');
+        Route::post('/file-revisions/bulk-delete', [AdminController::class, 'fileRevisionBulkDelete'])
+            ->name('admin.file-revisions.bulk-delete');
+        Route::post('/file-revisions/{id}/restore', [AdminController::class, 'fileRevisionRestore'])
+            ->name('admin.file-revisions.restore');
+        Route::delete('/file-revisions/{id}/force-delete', [AdminController::class, 'fileRevisionForceDelete'])
+            ->name('admin.file-revisions.force-delete');
+        Route::post('/file-revisions/bulk-restore', [AdminController::class, 'fileRevisionBulkRestore'])
+            ->name('admin.file-revisions.bulk-restore');
+        Route::post('/file-revisions/bulk-force-delete', [AdminController::class, 'fileRevisionBulkForceDelete'])
+            ->name('admin.file-revisions.bulk-force-delete');
+        Route::post('/file-revisions/empty-trash', [AdminController::class, 'fileRevisionEmptyTrash'])
+            ->name('admin.file-revisions.empty-trash');
 
         // Image Manager
         Route::get('/images', [ImageController::class, 'index'])
@@ -450,6 +478,17 @@ Route::prefix('admin')
 Route::prefix('admin')
     ->middleware(['auth','nocache','role:master_admin,admin'])
     ->group(function () {
+
+        Route::delete('/logs/{file}', [AdminController::class, 'logClear'])
+            ->name('admin.logs.clear');
+        Route::get('/logs-trash', [AdminController::class, 'logsTrash'])
+            ->name('admin.logs.trash');
+        Route::post('/logs-trash/restore/{file}', [AdminController::class, 'logRestore'])
+            ->name('admin.logs.restore');
+        Route::delete('/logs-trash/force-delete/{file}', [AdminController::class, 'logForceDelete'])
+            ->name('admin.logs.force-delete');
+        Route::post('/logs-trash/empty', [AdminController::class, 'logEmptyTrash'])
+            ->name('admin.logs.empty-trash');
 
         Route::get('/customers/create', [UserController::class, 'createCustomer'])
             ->name('admin.customers.create');

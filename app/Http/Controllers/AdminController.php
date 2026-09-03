@@ -285,7 +285,8 @@ class AdminController extends Controller
         }
 
         // Filter by type (defaults to 'change' so the logs page shows the audit trail).
-        $typeFilter = $request->get('type') ?: 'change';
+        $typeParam = $request->get('type');
+        $typeFilter = $typeParam ?: 'change';
         if ($typeFilter && $typeFilter !== 'all') {
             $entries = array_filter($entries, fn ($entry) => $entry['type'] === $typeFilter);
             $entries = array_values($entries);
@@ -308,7 +309,119 @@ class AdminController extends Controller
             ]
         );
 
-        return view('admin.logs.index', compact('files', 'selectedFile', 'entries', 'search', 'typeFilter', 'types'));
+        return view('admin.logs.index', compact('files', 'selectedFile', 'entries', 'search', 'typeParam', 'typeFilter', 'types'));
+    }
+
+    public function logClear(string $file)
+    {
+        $file = $this->sanitizeLogFile($file);
+        $directory = storage_path('logs/site-changes');
+        $path = $directory . DIRECTORY_SEPARATOR . $file;
+
+        if (! $file || ! is_file($path)) {
+            return back()->with('error', 'Log file not found.');
+        }
+
+        $trashDir = $this->logTrashDir();
+        if (! is_dir($trashDir)) {
+            mkdir($trashDir, 0775, true);
+        }
+
+        $trashPath = $trashDir . DIRECTORY_SEPARATOR . $file;
+
+        $i = 1;
+        while (is_file($trashPath)) {
+            $basename = pathinfo($file, PATHINFO_FILENAME);
+            $trashPath = $trashDir . DIRECTORY_SEPARATOR . $basename . '_' . $i . '.log';
+            $i++;
+        }
+
+        rename($path, $trashPath);
+
+        return redirect()->route('admin.logs.index')
+            ->with('success', 'Log file moved to trash. It will auto-delete after 15 days.');
+    }
+
+    protected function logTrashDir(): string
+    {
+        return storage_path('logs/site-changes-trash');
+    }
+
+    protected function sanitizeLogFile(string $file): ?string
+    {
+        $file = basename($file);
+        if (! preg_match('/\.log$/', $file)) {
+            return null;
+        }
+        return $file;
+    }
+
+    public function logsTrash()
+    {
+        $directory = $this->logTrashDir();
+        $trashedFiles = [];
+
+        if (is_dir($directory)) {
+            $trashedFiles = array_values(array_filter(scandir($directory), function ($file) {
+                return preg_match('/\.log$/', $file);
+            }));
+            rsort($trashedFiles);
+        }
+
+        return view('admin.logs.trash', compact('trashedFiles'));
+    }
+
+    public function logRestore(string $file)
+    {
+        $file = $this->sanitizeLogFile($file);
+        $trashPath = $this->logTrashDir() . DIRECTORY_SEPARATOR . $file;
+        $destDir = storage_path('logs/site-changes');
+
+        if (! $file || ! is_file($trashPath)) {
+            return back()->with('error', 'Trashed log file not found.');
+        }
+
+        if (! is_dir($destDir)) {
+            mkdir($destDir, 0775, true);
+        }
+
+        rename($trashPath, $destDir . DIRECTORY_SEPARATOR . $file);
+
+        return redirect()->route('admin.logs.trash')
+            ->with('success', 'Log file restored from trash.');
+    }
+
+    public function logForceDelete(string $file)
+    {
+        $file = $this->sanitizeLogFile($file);
+        $trashPath = $this->logTrashDir() . DIRECTORY_SEPARATOR . $file;
+
+        if (! $file || ! is_file($trashPath)) {
+            return back()->with('error', 'Trashed log file not found.');
+        }
+
+        @unlink($trashPath);
+
+        return redirect()->route('admin.logs.trash')
+            ->with('success', 'Trashed log file permanently deleted.');
+    }
+
+    public function logEmptyTrash()
+    {
+        $directory = $this->logTrashDir();
+        $deleted = 0;
+
+        if (is_dir($directory)) {
+            foreach (scandir($directory) as $file) {
+                if (preg_match('/\.log$/', $file)) {
+                    @unlink($directory . DIRECTORY_SEPARATOR . $file);
+                    $deleted++;
+                }
+            }
+        }
+
+        return redirect()->route('admin.logs.trash')
+            ->with('success', "Log trash emptied ({$deleted} file(s) permanently deleted).");
     }
 
     public function revisions(Request $request)
@@ -320,8 +433,12 @@ class AdminController extends Controller
         $dateTo = $request->query('date_to');
         $filterModelType = $request->query('model_type');
         $filterModelId = $request->query('model_id');
+        $trashed = $request->has('trashed');
 
         $revisions = Revision::with('user');
+        if ($request->has('trashed')) {
+            $revisions->onlyTrashed();
+        }
         if ($dateFrom) {
             $revisions->whereDate('created_at', '>=', $dateFrom);
         }
@@ -340,13 +457,85 @@ class AdminController extends Controller
             ->appends($request->query())
             ->onEachSide(1);
 
-        return view('admin.revisions.index', compact('revisions', 'sortBy', 'sortDir', 'filterModelType', 'filterModelId'));
+        return view('admin.revisions.index', compact('revisions', 'sortBy', 'sortDir', 'filterModelType', 'filterModelId', 'trashed'));
     }
 
     public function revisionDetail($id)
     {
         $rev = Revision::with('user')->findOrFail($id);
         return view('admin.revisions.detail', compact('rev'));
+    }
+
+    public function revisionDestroy($id)
+    {
+        Revision::findOrFail($id)->delete();
+
+        return redirect()->route('admin.revisions.index')
+            ->with('success', 'Revision moved to trash. It will be auto-deleted after 15 days.');
+    }
+
+    public function revisionBulkDelete(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids)) {
+            return back()->with('error', 'No revisions selected.');
+        }
+
+        $deleted = Revision::whereIn('id', $ids)->delete();
+
+        return redirect()->route('admin.revisions.index')
+            ->with('success', "Moved {$deleted} revision(s) to trash. They will auto-delete after 15 days.");
+    }
+
+    public function revisionRestore($id)
+    {
+        Revision::onlyTrashed()->findOrFail($id)->restore();
+
+        return redirect()->route('admin.revisions.index', ['trashed' => 1])
+            ->with('success', 'Revision restored from trash.');
+    }
+
+    public function revisionForceDelete(Request $request, $id)
+    {
+        $rev = Revision::onlyTrashed()->findOrFail($id);
+        $rev->forceDelete();
+
+        return redirect()->route('admin.revisions.index', ['trashed' => 1])
+            ->with('success', 'Revision permanently deleted.');
+    }
+
+    public function revisionBulkRestore(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids)) {
+            return back()->with('error', 'No revisions selected.');
+        }
+
+        $restored = Revision::onlyTrashed()->whereIn('id', $ids)->restore();
+
+        return redirect()->route('admin.revisions.index', ['trashed' => 1])
+            ->with('success', "Restored {$restored} revision(s) from trash.");
+    }
+
+    public function revisionBulkForceDelete(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids)) {
+            return back()->with('error', 'No revisions selected.');
+        }
+
+        $deleted = Revision::onlyTrashed()->whereIn('id', $ids)->forceDelete();
+
+        return redirect()->route('admin.revisions.index', ['trashed' => 1])
+            ->with('success', "Permanently deleted {$deleted} revision(s).");
+    }
+
+    public function revisionEmptyTrash(Request $request)
+    {
+        $deleted = Revision::onlyTrashed()->forceDelete();
+
+        return redirect()->route('admin.revisions.index', ['trashed' => 1])
+            ->with('success', "Trash emptied ({$deleted} revision(s) permanently deleted).");
     }
 
     public function fileRevisions(Request $request)
@@ -357,7 +546,12 @@ class AdminController extends Controller
         $dateFrom = $request->query('date_from');
         $dateTo = $request->query('date_to');
 
+        $trashed = $request->has('trashed');
+
         $fileRevisions = FileRevision::with('user');
+        if ($trashed) {
+            $fileRevisions->onlyTrashed();
+        }
         if ($dateFrom) {
             $fileRevisions->whereDate('created_at', '>=', $dateFrom);
         }
@@ -370,7 +564,7 @@ class AdminController extends Controller
             ->appends($request->query())
             ->onEachSide(1);
 
-        return view('admin.file-revisions.index', compact('fileRevisions', 'sortBy', 'sortDir'));
+        return view('admin.file-revisions.index', compact('fileRevisions', 'sortBy', 'sortDir', 'trashed'));
     }
 
     public function fileRevisionDownload($id)
@@ -501,5 +695,109 @@ class AdminController extends Controller
 
         return redirect()->route('admin.file-revisions.index')
             ->with('success', "Per-file limit applied: kept last {$keepPerFile} revisions per file. Older diffs truncated.");
+    }
+
+    public function fileRevisionDestroy($id)
+    {
+        FileRevision::findOrFail($id)->delete();
+
+        return redirect()->route('admin.file-revisions.index')
+            ->with('success', 'File revision moved to trash. It will auto-delete after 15 days.');
+    }
+
+    public function fileRevisionBulkDelete(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids)) {
+            return back()->with('error', 'No file revisions selected.');
+        }
+
+        $deleted = FileRevision::whereIn('id', $ids)->delete();
+
+        return redirect()->route('admin.file-revisions.index')
+            ->with('success', "Moved {$deleted} file revision(s) to trash. They will auto-delete after 15 days.");
+    }
+
+    public function fileRevisionRestore($id)
+    {
+        FileRevision::onlyTrashed()->findOrFail($id)->restore();
+
+        return redirect()->route('admin.file-revisions.index', ['trashed' => 1])
+            ->with('success', 'File revision restored from trash.');
+    }
+
+    public function fileRevisionForceDelete($id)
+    {
+        $rev = FileRevision::onlyTrashed()->findOrFail($id);
+
+        if ($rev->backup_path) {
+            $path = storage_path('file-backups/archive/' . $rev->backup_path);
+            if (is_file($path)) {
+                @unlink($path);
+            }
+        }
+
+        $rev->forceDelete();
+
+        return redirect()->route('admin.file-revisions.index', ['trashed' => 1])
+            ->with('success', 'File revision permanently deleted.');
+    }
+
+    public function fileRevisionBulkRestore(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids)) {
+            return back()->with('error', 'No file revisions selected.');
+        }
+
+        $restored = FileRevision::onlyTrashed()->whereIn('id', $ids)->restore();
+
+        return redirect()->route('admin.file-revisions.index', ['trashed' => 1])
+            ->with('success', "Restored {$restored} file revision(s) from trash.");
+    }
+
+    public function fileRevisionBulkForceDelete(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids)) {
+            return back()->with('error', 'No file revisions selected.');
+        }
+
+        $revs = FileRevision::onlyTrashed()->whereIn('id', $ids)->get();
+
+        $deleted = 0;
+        foreach ($revs as $rev) {
+            if ($rev->backup_path) {
+                $path = storage_path('file-backups/archive/' . $rev->backup_path);
+                if (is_file($path)) {
+                    @unlink($path);
+                }
+            }
+            $rev->forceDelete();
+            $deleted++;
+        }
+
+        return redirect()->route('admin.file-revisions.index', ['trashed' => 1])
+            ->with('success', "Permanently deleted {$deleted} file revision(s).");
+    }
+
+    public function fileRevisionEmptyTrash(Request $request)
+    {
+        $revs = FileRevision::onlyTrashed()->get();
+
+        $deleted = 0;
+        foreach ($revs as $rev) {
+            if ($rev->backup_path) {
+                $path = storage_path('file-backups/archive/' . $rev->backup_path);
+                if (is_file($path)) {
+                    @unlink($path);
+                }
+            }
+            $rev->forceDelete();
+            $deleted++;
+        }
+
+        return redirect()->route('admin.file-revisions.index', ['trashed' => 1])
+            ->with('success', "Trash emptied ({$deleted} file revision(s) permanently deleted).");
     }
 }

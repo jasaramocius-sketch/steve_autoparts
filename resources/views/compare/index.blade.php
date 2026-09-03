@@ -89,13 +89,13 @@
                 <th>Rating</th>
                 @foreach($compareItems as $item)
                     @php
-                        $displayRating = $item->product->rating ?? 0;
-                        $displayReviews = $item->product->reviews ?? 0;
-                        if ($displayRating == 0 && $displayReviews > 0 && !empty($item->product->reviews_data)) {
-                            $visible = collect($item->product->reviews_data ?? [])->where('deleted', false);
-                            if ($visible->isNotEmpty()) {
-                                $displayRating = round($visible->avg('rating'));
-                            }
+                        $visibleReviews = collect($item->product->reviews_data ?? [])->where('deleted', false);
+                        if ($visibleReviews->isEmpty()) {
+                            $displayRating = 0;
+                            $displayReviews = 0;
+                        } else {
+                            $displayRating = round($visibleReviews->avg('rating'));
+                            $displayReviews = $visibleReviews->count();
                         }
                     @endphp
                     <td class="compare-col" data-compare-id="{{ $item->id }}">

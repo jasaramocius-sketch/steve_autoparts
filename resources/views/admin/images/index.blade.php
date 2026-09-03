@@ -217,7 +217,7 @@
                     </button>
                     <span>{{ $images->total() }} images found</span>
                     @if(request('filter') === 'convertible')
-                        <button type="button" class="btn btn-success steve-btn" onclick="convertAllUnconverted('{{ route('admin.images.bulk-convert') }}')">
+                        <button type="button" class="btn btn-success steve-btn gap-1" onclick="convertAllUnconverted('{{ route('admin.images.bulk-convert') }}')">
                             <i class="fas fa-bolt"></i> Convert All to WebP
                         </button>
                     @endif

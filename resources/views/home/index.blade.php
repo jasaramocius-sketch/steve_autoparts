@@ -1,4 +1,7 @@
 @extends('layouts.app')
+@push('slider-js')
+    <script src="{{ asset('assets/front/js/swiper-bundle.min.js') }}" defer></script>
+@endpush
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'home-page', 'pageClass' => 'home-page'])
 @section('meta_tags')
@@ -536,88 +539,64 @@
         </div>
         <div class="gs-partnerss row justify-content-center">
             <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 wow-replaced p-0" data-wow-delay=".1s">
-                <a href="#">
-                    <div class="single-partner">
-                        <img src="{{ asset('assets/images/partner/1571289583p1.jpg') }}" alt="partner" loading="lazy" decoding="async">
-                    </div>
-                </a>
+                <div class="single-partner">
+                    <img src="{{ asset('assets/images/partner/1571289583p1.jpg') }}" alt="partner" loading="lazy" decoding="async">
+                </div>                
             </div>
             <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 wow-replaced p-0" data-wow-delay=".1s">
-                <a href="#">
-                    <div class="single-partner">
-                        <img src="{{ asset('assets/images/partner/1571289601p2.jpg') }}" alt="partner" loading="lazy" decoding="async">
-                    </div>
-                </a>
+                <div class="single-partner">
+                    <img src="{{ asset('assets/images/partner/1571289601p2.jpg') }}" alt="partner" loading="lazy" decoding="async">
+                </div>
             </div>
             <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 wow-replaced p-0" data-wow-delay=".1s">
-                <a href="#">
-                    <div class="single-partner">
-                        <img src="{{ asset('assets/images/partner/1571289608p3.jpg') }}" alt="partner" loading="lazy" decoding="async">
-                    </div>
-                </a>
+                <div class="single-partner">
+                    <img src="{{ asset('assets/images/partner/1571289608p3.jpg') }}" alt="partner" loading="lazy" decoding="async">
+                </div>
             </div>
             <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 wow-replaced p-0" data-wow-delay=".1s">
-                <a href="#">
-                    <div class="single-partner">
-                        <img src="{{ asset('assets/images/partner/1571289614p4.jpg') }}" alt="partner" loading="lazy" decoding="async">
-                    </div>
-                </a>
+                <div class="single-partner">
+                    <img src="{{ asset('assets/images/partner/1571289614p4.jpg') }}" alt="partner" loading="lazy" decoding="async">
+                </div>
             </div>
             <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 wow-replaced p-0" data-wow-delay=".1s">
-                <a href="#">
-                    <div class="single-partner">
-                        <img src="{{ asset('assets/images/partner/1571289621p5.jpg') }}" alt="partner" loading="lazy" decoding="async">
-                    </div>
-                </a>
+                <div class="single-partner">
+                    <img src="{{ asset('assets/images/partner/1571289621p5.jpg') }}" alt="partner" loading="lazy" decoding="async">
+                </div>
             </div>
             <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 wow-replaced p-0" data-wow-delay=".1s">
-                <a href="#">
-                    <div class="single-partner">
-                        <img src="{{ asset('assets/images/partner/1571289627p6.jpg') }}" alt="partner" loading="lazy" decoding="async">
-                    </div>
-                </a>
+                <div class="single-partner">
+                    <img src="{{ asset('assets/images/partner/1571289627p6.jpg') }}" alt="partner" loading="lazy" decoding="async">
+                </div>
             </div>
             <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 wow-replaced p-0" data-wow-delay=".1s">
-                <a href="#">
-                    <div class="single-partner">
-                        <img src="{{ asset('assets/images/partner/1571289634p7.jpg') }}" alt="partner" loading="lazy" decoding="async">
-                    </div>
-                </a>
+                <div class="single-partner">
+                    <img src="{{ asset('assets/images/partner/1571289634p7.jpg') }}" alt="partner" loading="lazy" decoding="async">
+                </div>
             </div>
             <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 wow-replaced p-0" data-wow-delay=".1s">
-                <a href="#">
-                    <div class="single-partner">
-                        <img src="{{ asset('assets/images/partner/1571289642p8.jpg') }}" alt="partner" loading="lazy" decoding="async">
-                    </div>
-                </a>
+                <div class="single-partner">
+                    <img src="{{ asset('assets/images/partner/1571289642p8.jpg') }}" alt="partner" loading="lazy" decoding="async">
+                </div>
             </div>
             <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 wow-replaced p-0" data-wow-delay=".1s">
-                <a href="#">
-                    <div class="single-partner">
-                        <img src="{{ asset('assets/images/partner/1571289650p9.jpg') }}" alt="partner" loading="lazy" decoding="async">
-                    </div>
-                </a>
+                <div class="single-partner">
+                    <img src="{{ asset('assets/images/partner/1571289650p9.jpg') }}" alt="partner" loading="lazy" decoding="async">
+                </div>
             </div>
             <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 wow-replaced p-0" data-wow-delay=".1s">
-                <a href="#">
-                    <div class="single-partner">
-                        <img src="{{ asset('assets/images/partner/1571289657p10.jpg') }}" alt="partner" loading="lazy" decoding="async">
-                    </div>
-                </a>
+                <div class="single-partner">
+                    <img src="{{ asset('assets/images/partner/1571289657p10.jpg') }}" alt="partner" loading="lazy" decoding="async">
+                </div>
             </div>
             <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 wow-replaced p-0" data-wow-delay=".1s">
-                <a href="#">
-                    <div class="single-partner">
-                        <img src="{{ asset('assets/images/partner/1571289669p12.jpg') }}" alt="partner" loading="lazy" decoding="async">
-                    </div>
-                </a>
+                <div class="single-partner">
+                    <img src="{{ asset('assets/images/partner/1571289669p12.jpg') }}" alt="partner" loading="lazy" decoding="async">
+                </div>
             </div>
             <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 wow-replaced p-0" data-wow-delay=".1s">
-                <a href="#">
-                    <div class="single-partner">
-                        <img src="{{ asset('assets/images/partner/1571289675p13.jpg') }}" alt="partner" loading="lazy" decoding="async">
-                    </div>
-                </a>
+                <div class="single-partner">
+                    <img src="{{ asset('assets/images/partner/1571289675p13.jpg') }}" alt="partner" loading="lazy" decoding="async">
+                </div>
             </div>
         </div>
     </div>

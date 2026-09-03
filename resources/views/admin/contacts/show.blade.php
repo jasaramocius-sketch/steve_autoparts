@@ -75,7 +75,7 @@
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
                 <h6 class="mb-0 fw-semibold">Reply to Inquiry</h6>
                 @if($contact->replied_at)
-                    <span class="badge bg-success">Replied</span>
+                    <span class="badge bg-light text-success border border-success-subtle rounded-pill">Replied</span>
                 @endif
             </div>
             <div class="card-body">

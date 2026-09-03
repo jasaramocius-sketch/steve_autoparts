@@ -3331,3 +3331,276 @@ sudo -u www-data php artisan view:cache
 **Result:** All compiled views now owned by `www-data:www-data`. Runtime recompile works; category page (`/stautoparts/category/belts-and-cooling`) and login page both return **HTTP 200**.
 
 **Note for future:** Always run `view:cache` as the web server user (`sudo -u www-data php artisan view:cache`) to avoid ownership mismatch.
+
+## 255. Admin Login — Password Toggle Icon Outside Input Fix (2 Sep 2026)
+
+Admin login page (`admin/login.blade.php`) showed the eye toggle icon below/outside the password input.
+
+**Root cause:** `.admin-password-toggle` was `position: absolute; top: 38px;` measured from the whole `.admin-password-field` wrapper (label + input stacked). The fixed `top` didn't account for the label height, so the icon landed below the input.
+
+**Fix** (`resources/views/admin/login.blade.php` + `public/assets/front/css/backend.css`):
+- Wrapped the input + icon in a new `.admin-password-input-wrap { position: relative; }` div.
+- Icon is now positioned relative to just the input: `top: 50%; transform: translateY(-50%); right: 12px;`
+- Input gets `padding-right: 40px` so text doesn't run under the icon.
+
+**Result:** Toggle always centers inside the input regardless of label size.
+
+## 256. Unified Login — Removed Separate /admin/login Page (2 Sep 2026)
+
+The site had two login pages: `/login` (customer) and `/admin/login` (admin-only). Admin login should use the single `/login` page.
+
+**Changes** (`routes/web.php`, `app/Http/Controllers/AdminAuthController.php`, `app/Http/Middleware/AdminMiddleware.php`):
+- `GET /admin/login` now just redirects to `route('login')` (the route name is kept so `route('admin.login')` references don't break).
+- Removed the separate `admin.login.submit` POST route — `AuthController@login` already handles admin roles (routes master_admin/admin/staff to `admin.dashboard`).
+- `/admin` guest redirect now goes to `login` instead of `admin.login`.
+- `AdminAuthController` logout + unauthorized redirects now point to `route('login')`.
+- `AdminMiddleware` redirects updated to `route('login')` for consistency.
+
+## 257. Page Builder Admin — Per-Page Selector + Sortable thead Links (2 Sep 2026)
+
+The Page Builder listing page (`admin/page-builder`) lacked the per-page selector and clickable sortable column headers that all other admin list pages have.
+
+**Changes:**
+- `PageBuilderController@index` (package at `/var/www/html/laravel-page-builder/`): added sort whitelist (`sort_by`: id, title, updated_at; `sort_dir`), `per_page` handling (10/20/50/100), query-string preservation on the `LengthAwarePaginator`.
+- `index.blade.php`: added the standard "Show N per page" dropdown + "Showing X-Y of Z" line; made `#`, `Title`, `Last Updated` headers clickable via `sortUrl()` / `sortIndicator()` helpers.
+
+**Note:** All other admin list tables (brands, categories, customers, orders, products, staff, users, blogs, pages, coupons, sellers, faqs, contacts, revisions, file-revisions, home-page, blog-categories) already had both features. Image Manager and Logs use non-table UIs, so they were skipped at the time.
+
+## 258. Admin Logs — JSON Parse into Readable, Filterable Table (2 Sep 2026)
+
+The Logs page (`/admin/logs`) displayed raw JSON lines in a dark `<pre>` block.
+
+**Changes** (`app/Http/Controllers/AdminController.php`, `resources/views/admin/logs/index.blade.php`):
+- Each JSON line is parsed into a structured `{timestamp, type, message, context}` entry (malformed lines fall back to a plain-message entry).
+- Replaced the raw block with a table: `#`, `Timestamp` (formatted `Y-m-d H:i:s`), `Type` (color-coded badge), `Message`, `User`, `Context`.
+- Context shown via a collapsible "View" button (pretty-printed JSON) instead of inline.
+- Added search box (message/type/timestamp), type-filter dropdown, single combined toolbar (file + type + search share one form so params preserve), and pagination (50/page).
+- `SiteChangeLogger` log entries: source of data is `SiteChangeLogger.php` (`{timestamp, type, message, context}` JSON, one per line).
+
+## 259. LogSiteChange Middleware — Was Never Registered in Laravel 13 (2 Sep 2026)
+
+Context column on the Logs page was always blank because `LogSiteChange` (global middleware in legacy `app/Http/Kernel.php`) was **not registered** — Laravel 13 configures middleware in `bootstrap/app.php`, not the legacy Kernel.
+
+**Changes:**
+- `bootstrap/app.php`: added `\App\Http\Middleware\LogSiteChange::class` via `$middleware->append([...])` (global stack).
+- `app/Http/Middleware/LogSiteChange.php`: skips the logs viewer + `/up` health check to avoid recursive self-logging.
+- `app/Helpers/SiteChangeLogger.php`: wraps `file_put_contents` in try/catch so a permission failure can never 500 a request; `@chmod(..., 0664)` after write.
+
+**Also fixed:** web requests hit `Permission denied` writing to the day's log (file owned by `jasaram`, not writable by `www-data`). Fixed with `chmod g+w storage/logs/site-changes/*.log`; the logger's `0664` chmod keeps future files group-writable.
+
+**Result:** Web requests now log rich context: `{route, uri, ip, user_id, status, input_keys, ...}`.
+
+## 260. Logs User Identity — name/email/role in Context + User Column (2 Sep 2026)
+
+Before, log entries only had `user_id`, so you couldn't tell which staff/admin an entry belonged to.
+
+**Changes:**
+- `app/Http/Middleware/LogSiteChange.php`: context now includes `user_name`, `user_email`, `user_role` (resolved via `Auth::user()` — not `$request->user()`, because `$request->user()` is resolved before the controller performs login in the same request).
+- `resources/views/admin/logs/index.blade.php`: added a `User` column showing name + email (or "Guest" for unauthenticated requests).
+- Role badge was initially added as "Admin"/"Staff" (matching navbar mapping), then removed at the user's request — User column now shows just name + email; role is still visible in the expandable context.
+
+## 261. Smart Logging — Admin-Focused Audit Trail (Option A) (2 Sep 2026)
+
+Logging was noisy: every GET request, every public page view, every console boot ("Application booted in console", ~93×/day via `AppServiceProvider`) was logged, drowning out the useful audit data.
+
+**Changes:**
+- `app/Http/Middleware/LogSiteChange.php` — now only logs **write actions** (POST/PUT/PATCH/DELETE) that are **admin-relevant**:
+  - Admin panel actions (`/admin/*`)
+  - Admin logout (`admin.logout`)
+  - Successful admin login (`login.submit` when the logged-in user has an admin role)
+  - Skips: all GET, 4xx/5xx responses, and customer noise (cart/wishlist/register/checkout/review).
+  - New types: `auth` (login/logout), `change` (admin actions).
+- `app/Providers/AppServiceProvider.php`: removed the console boot log and its now-unused `use`/`require_once` for `SiteChangeLogger`.
+- `app/Http/Controllers/AdminController.php`: type dropdown now built from all entries (before filters); default `type=change` so the page opens showing the audit trail.
+- `resources/views/admin/logs/index.blade.php`: added `auth` badge color; "All types" dropdown uses `all` value.
+
+**Verified (tinker):** GET shop → 0 logs; POST cart.add (customer) → 0 logs; PUT admin product (as admin) → 1 log with user identity; login.submit (as admin) → 1 auth log.
+
+## 262. Shop Price Range Slider — Restore jQuery UI (Fix Broken Native Dual-Range) (3 Sep 2026)
+
+The native dual-range `<input type="range">` replacement (written the prior session) was broken: overlapping absolute-positioned inputs + `pointer-events:none`/z-index juggling caused an unreliable design, and the Apply Filter `disabled` toggle didn't fire reliably because the native range events didn't call `togglePriceApply()` in all cases.
+
+**Decision:** User said "bs filhal ye fix kre" — restore the proven working jQuery UI slider (from HEAD commit) rather than the lightweight-module optimization.
+
+**Changes:**
+- `resources/views/shop/index.blade.php`:
+  - Restored `@push('jquery-ui-css')` + `@push('jquery-ui-js')` loading local `jquery-ui.css` + `jquery-ui.js`.
+  - Removed the native `.price-dual-range` CSS block (custom gradient track + webkit/moz thumbs).
+  - Restored the empty `<div id="price-slider" class="mb-3" style="margin-top:15px;">` markup and the original PHP price bounds block.
+  - Restored the original jQuery UI slider JS: `$("#price-slider").slider({range:true,...})`, `isDefaultPriceRange()`, `togglePriceApply()`, clean-URL submit + clear handler.
+- `resources/views/layouts/app.blade.php`: re-added `@stack('jquery-ui-js')` after `jquery.min.js` (had been removed when the native slider was introduced). `@stack('jquery-ui-css')` at line 29 was already present.
+
+**Result:** Shop page is now byte-for-byte identical to HEAD (`git diff HEAD -- shop/index.blade.php` empty). Design + Apply Filter enable/disable working again. Slide loads full local `jquery-ui.js` (Lighthouse ~66K unused-JS on shop returns; lightweight-module optimization deferred).
+
+**Verified:** `view:cache`+`view:clear`; shop HTTP 200; `jquery-ui.js`+`jquery-ui.css` load (correct `defer` order before inline doc-ready script); `#price-slider`, all hidden inputs, and `#apply-price-filter` (disabled default) present.
+
+## 263. File Revisions — Add Per-Row Delete Option (3 Sep 2026)
+
+Admin "File Revisions" list had only View Diff + Download backup per row; no way to delete an individual revision.
+
+**Changes:**
+- `routes/web.php`: added `DELETE /admin/file-revisions/{id}` → `admin.file-revisions.destroy` → `AdminController@fileRevisionDestroy` (after the truncate-per-file route).
+- `app/Http/Controllers/AdminController.php`: added `fileRevisionDestroy($id)` — deletes the row AND removes its backup file (`storage/file-backups/archive/{backup_path}`) if present, then redirects back with success flash.
+- `resources/views/admin/file-revisions/index.blade.php`: added a red trash `btn-outline-danger steve-btn` DELETE form button in the Actions cell (consistent with existing action button style), with a `confirm()` dialog that warns when a backup file will also be removed.
+
+**Verified:** `view:cache` compiles clean; `route:list` shows DELETE route → correct controller. Tested the destroy logic in tinker on a throwaway revision: row deleted and backup file removed. Route uses standard auth/role middleware group (master_admin/admin).
+
+## 264. File Revisions — Add Bulk Delete (3 Sep 2026)
+
+Extends #263 with multi-select bulk delete on the same admin page.
+
+**Changes:**
+- `routes/web.php`: added `POST /admin/file-revisions/bulk-delete` → `admin.file-revisions.bulk-delete` → `AdminController@fileRevisionBulkDelete`.
+- `app/Http/Controllers/AdminController.php`: `fileRevisionBulkDelete(Request)` — reads `ids[]`, deletes each selected revision row AND its backup file, redirects back with a count flash.
+- `resources/views/admin/file-revisions/index.blade.php`:
+  - Standalone `#bulk-delete-form` (POST, csrf, hidden `ids[]` container) placed before the table (avoids nested-form issues with the per-row delete forms).
+  - Added a checkbox column: select-all checkbox in the header + per-row `bulk-select-row` checkboxes.
+  - Toolbar "Delete Selected (N)" button (hidden until rows are checked) submits the bulk form.
+  - `@push('scripts')` JS handles select-all toggle, live count, and populating hidden `ids[]` inputs.
+
+**Verified:** `view:cache` compiles; route registered correctly; delete logic tested in tinker (row removed). Same auth/role middleware group (master_admin/admin).
+
+## 265. Revisions — Add Delete + Bulk Delete (3 Sep 2026)
+
+Revisions page (DB `Revision` rows) got the same per-row delete + bulk delete as File Revisions.
+
+**Changes:**
+- `routes/web.php`: `DELETE /admin/revisions/{id}` → `admin.revisions.destroy` and `POST /admin/revisions/bulk-delete` → `admin.revisions.bulk-delete`.
+- `app/Http/Controllers/AdminController.php`: `revisionDestroy($id)` (delete single, redirect with flash) and `revisionBulkDelete(Request)` (deletes `whereIn('id', ids)`, redirects with count).
+- `resources/views/admin/revisions/index.blade.php`: bulk-delete form + checkbox column (select-all + per-row), toolbar "Delete Selected (N)" button + JS, and a `btn-outline-danger` per-row trash DELETE form (consistent with existing `btn btn-sm` action style). Empty-state colspan updated 8→9.
+
+**Verified:** `view:cache` compiles; both routes registered (no conflict with GET `revisions/{id}` detail); delete + bulk logic tested in tinker (ids 2577/2578 removed, count correct).
+
+## 266. Logs — Add Clear Log File Action (3 Sep 2026)
+
+Logs are parsed from JSON-lines files (`storage/logs/site-changes/*.log`) with no stable per-entry ID, so per-line/bulk-line delete is not reliable. Per user decision, added a full-file clear action instead.
+
+**Changes:**
+- `routes/web.php`: `DELETE /admin/logs/{file}` → `admin.logs.clear` → `AdminController@logClear`, placed in the `role:master_admin,admin` group (admin-only, not staff).
+- `app/Http/Controllers/AdminController.php`: `logClear(string $file)` — `basename()` + `.log` regex + `is_file()` guards (prevents traversal), then truncates the file to empty and redirects back with flash.
+- `resources/views/admin/logs/index.blade.php`: "Clear Log File" `btn-outline-danger` DELETE button near the title, shown only when a log file is selected AND the user role is `master_admin`/`admin`, with a `confirm()` warning. Also made the "entries" count hide when no file is selected.
+
+**Verified:** routes registered; tinker test confirmed the file is truncated to 0 bytes and the `.log`/`basename` traversal guard rejects non-log / `../` inputs. Admin-only via `role:master_admin,admin` middleware.
+
+## 267. Logs — Responsive Header + Smart Search/Clear Toggle Button (3 Sep 2026)
+
+Logs page header wasn't responsive on mobile and the filter form overflowed; also had separate Search and Clear buttons.
+
+**Changes (`resources/views/admin/logs/index.blade.php`):**
+- **Responsive header**: `card-header` changed to `d-flex flex-column flex-xl-row flex-wrap justify-content-between align-items-start align-items-xl-center` — stacks title + filter form vertically on mobile, identical original row layout on `xl+`. Title block got `flex-wrap align-items-center`.
+- **Filter form fields**: each field div now `style="flex:1 1 auto; min-width:170px"` so they wrap into tidy rows on mobile while staying inline on desktop. Search input changed from fixed `width:200px` to fluid `min-width`.
+- **Smart Search/Clear toggle (user-chosen)**: replaced the separate Search + Clear buttons inside the search field with one `<button id="logs-search-toggle">` (input-group, inside the search input). Server-side `$hasLogFilter` picks mode:
+  - No filter → `btn-primary` + `fa-search` icon, submits the form.
+  - Filter active → `btn-outline-secondary` + `fa-times` icon; clicking it clears the search input + resets type to `all`, swaps back to primary/search, then submits (via existing `stAutoPartsLogsSubmit`).
+  - `@push('scripts')` JS binds the click handler, updates class/icon/aria/tooltip.
+
+**Verified:** `view:cache` + `php -l` clean; `/admin/logs` returns 302 (auth redirect, no 500); toggle markup/classes confirmed in compiled output.
+
+Bonus fix: earlier ParseError (inline `@if(...)...entries@endif`) resolved by splitting into a multi-line block.
+
+## 268. Trash System + 15-Day Auto-Purge for Revisions, File Revisions & Logs (3 Sep 2026)
+
+Per user decision, deletes no longer immediately remove data. Deletes now send items to a **trash** that auto-clears after **15 days**, with restore / permanently-delete / empty-trash options (and "permanently delete + empty" specifically requested for logs trash).
+
+**Scope:** Revisions (DB `Revision`), File Revisions (DB `FileRevision` + backup files), Logs (file-based `.log` files).
+
+### Revisions & File Revisions (database soft-delete)
+- **Migration** `2026_09_03_063808_add_deleted_at_to_revisions_and_file_revisions_table.php`: added `deleted_at` (`softDeletes()`) to `revisions` + `file_revisions`.
+- **Models**: added `use SoftDeletes;` to `Revision` + `FileRevision` (backup-file rows keep their backup until force-delete/purge).
+- **Index**: `revisions()` / `fileRevisions()` accept `?trashed=1` → `onlyTrashed()`; `$trashed` passed to views.
+- **Controller** (`AdminController`): `revisionDestroy`/`revisionBulkDelete` and `fileRevisionDestroy`/`fileRevisionBulkDelete` now soft-delete (backup files preserved on soft delete). Added `*Restore`, `*ForceDelete` (file-rev force also unlinks backup), `*BulkRestore`, `*BulkForceDelete`, `*EmptyTrash` for both.
+- **Routes** (`admin.revisions.*`, `admin.file-revisions.*`): destroy, bulk-delete, restore, force-delete, bulk-restore, bulk-force-delete, empty-trash.
+- **Views** (`admin/revisions/index.blade.php`, `admin/file-revisions/index.blade.php`): "Trash" toggle button, trash-mode action bar (Restore Selected, Delete Selected, Empty Trash with confirm), per-row restore/force-delete in trash view, updated confirms on normal delete ("move to trash… auto-delete after 15 days"). Bulk JS uses shared `bulkTrashRun()` (sets form action) + `.bulk-count` spans.
+
+### Logs (file-based trash)
+- **Controller**: `logClear` now **moves** the `.log` file to `storage/logs/site-changes-trash/` (unique name via `_N` suffix if colliding) instead of truncating. Added `logsTrash()`, `logRestore`, `logForceDelete`, `logEmptyTrash`, plus `logTrashDir()`/`sanitizeLogFile()` helpers (basename + `.log` guard).
+- **Routes** (`admin.logs.*`): clear, trash, restore, force-delete, empty-trash — in `role:master_admin,admin` group.
+- **View** `admin/logs/trash.blade.php` (new): lists trashed `.log` files (name/size/mtime) with per-file Restore + Permanently Delete and an Empty Trash button; "Back to Logs" link. Logs index header shows Clear ("move to trash") + a "Log Trash" link.
+
+### Scheduled auto-purge
+- **Command** `app/Console/Commands/PurgeTrash.php` (`trash:purge --days=15`): force-deletes `Revision` + `FileRevision` trash older than N days (FileRevision force also unlinks its `backup_path` in `file-backups/archive/`), and deletes trashed `.log` files older than N days by mtime.
+- **Schedule** (`routes/console.php`): `trash:purge --days=15` → `dailyAt('03:30')->withoutOverlapping()` (after existing `file:audit` at 03:00).
+
+**Verified:** migration applied (columns added, data intact: revisions=2576, file_revisions=12489); soft-delete/restore tested in tinker (trashed row hidden, restore brings it back); log clear→trash→restore file-move flow tested via controller calls; all routes registered (`route:list`); all views render (`view:cache` + dummy paginator render); `php -l` clean on all changed files; `trash:purge` runs (0 items purged with no trash present).
+
+## 269. Admin — Tooltips on Icon-Only Buttons (3 Sep 2026)
+
+Per user request: every admin button that shows **only an icon** (no text label) should have a tooltip. Audited all `resources/views/admin/**/*.blade.php` + `admin/partials/*` for icon-only `<button>`/`<a>` lacking `data-bs-toggle="tooltip"` or `title`.
+
+**(No actual detection script kept — this was a one-off audit.)** Additions:
+- `admin/partials/search-form.blade.php:9` — search icon (`fa-search`) → `title="Search"` + `data-bs-toggle="tooltip"` (shared search form reused across many admin pages).
+- `admin/partials/search-form.blade.php:19` — clear-filter icon (`fa-times`) → `title="Clear search"` + `data-bs-toggle="tooltip"`.
+- `admin/file-revisions/index.blade.php:17` — Refresh (`fa-sync`) → `title="Refresh"` + `data-bs-toggle="tooltip"`.
+
+**Already covered (verified ho so not changed):** Revisions & File Revisions per-row Diff/View/Download/Restore/Delete/Force-delete; Logs trash restore/purge buttons; date-range-filter clear button. Buttons with visible text labels (e.g. "Add X", "Save", "Empty Trash") intentionally left without tooltips since the label is already visible.
+
+Tooltips are auto-initialized in `admin/layouts/app.blade.php` via `[data-bs-toggle="tooltip"]` + `.action-btn[title]` (Bootstrap 5, trigger hover).
+
+**Verified:** `view:cache` compiles clean.
+
+## 270. Admin — Logs Nav Highlight on Trash Page (3 Sep 2026)
+
+On `/admin/logs-trash` (and other logs sub-routes) the **Logs** sidebar item wasn't highlighted while the page was open.
+
+**Root cause:** `admin/partials/sidebar.blade.php` Logs nav-item active check was scoped to exactly one route:
+`{{ request()->routeIs('admin.logs.index') ? 'active' : '' }}`
+— the trash page uses `admin.logs.trash`, so it never matched.
+
+**Fix:** changed the condition to the wildcard `request()->routeIs('admin.logs.*')`, matching all logs routes (index, trash, restore, force-delete, empty-trash). (Consistent with the existing `admin.revisions.*` / `admin.file-revisions.*` wildcard pattern used by neighbouring Revisions / File Revisions items.)
+
+**Verified:** `admin.logs.trash` registered in `route:list`; `view:cache` compiles.
+
+## 271. Product Buy / Return Policy — Per-Product Unique Auto-Generated Content (3 Sep 2026)
+
+Products were showing "No policy information available." in the "Buy / Return Policy" tab because `products.policy_text` (nullable) was empty/null for all **808 products**.
+
+**User decision:** policy is product-specific → each product should show **unique** policy content. Chose the **view default fallback** approach (no DB bulk update), generating unique content per product from its own attributes via a template.
+
+**Changes:**
+- **New partial `resources/views/partials/product-buy-return-policy.blade.php`**:
+  - If the product has a custom `policy_text` (set via admin product form) → render it as-is (custom wins).
+  - Otherwise auto-generate a styled, product-specific policy block using the product's own attributes:
+    - **Subject line** — product name + brand + category + price (`USD n,format`).
+    - **Buy / Return Policy** — 30-day return window (matches site `/return-policy` rules).
+    - **Badge notes** — `Discounted / Sale item` (badge matching `off|sale|deal|discount`) and `New item` (badge `new`) get their own condition paragraph.
+    - **Fitment/Compatibility** — only when `year`/`make`/`model` present (e.g. `2020 / Toyota / Camry`).
+    - **Eligibility list** (unused, original packaging, within 30 days), **Refunds**, **Return Shipping** (customer pays, non-refundable, deducted), and a **Return Policy + Contact** CTA.
+- **`resources/views/product/show.blade.php`**: policy tab-pane now `@include('partials.product-buy-return-policy', ['product' => $product])` (replacing `{!! $product['policy_text'] ?? 'No policy...' !!}`).
+
+**Verified:** `view:cache` compiles; tinker render test → product without custom policy shows full unique auto-generated block (name/brand/category/price + sale badge + fitment seeded); product with custom `policy_text` shows its own content (custom wins); no DB tables touched (`policy_text` count remains 0). Tab button already hard-codes "Buy / Return Policy" (`show.blade.php:938`).
+
+## 272. Product Detail — "Similar Products To Compare" Table (Moglix-style) (3 Sep 2026)
+
+User wanted the product detail page to show a **side-by-side comparison** of the current product with alternatives from other brands — like Moglix's "Similar Products To Compare" section.
+
+**Changes:**
+
+- **`app/Http/Controllers/ProductController.php` `show()`**: builds `$similar` collection:
+  - **Primary match**: same `category_id` + same `year/make/model` fitment (same part, different brands) → orders different brands first.
+  - **Fallback**: if < 3 alternatives, fills remaining slots from same `category_id` (different brands prioritized).
+  - Limit: **3 alternatives** (total 4 columns including current product, Moglix-style).
+  - Passes `$similar` to the view.
+
+- **New partial `resources/views/partials/product-similar-compare.blade.php`**:
+  - Renders a **Moglix-style comparison table** only when alternatives exist (`$all->count() > 1`).
+  - **Columns**: Current product (fixed, badge "Current Product") + up to 3 alternative products.
+  - **Comparison rows**:
+    - Product (thumb + name + link, current product gets "Current Product" badge)
+    - Brand (`brand.name`)
+    - Price (`currency_format`, shows old price if exists)
+    - Rating (stars + count from `reviews_data`)
+    - Fitment / Vehicle (`year / make / model`, or "Universal")
+    - Availability (`stock` → In Stock / Out of Stock badges)
+    - Description (truncated 90 chars)
+    - Action: **Add to Cart** (same `cart.add` form) + **View Details** link.
+  - Responsive `.table-responsive` + Bootstrap table styling; each column has `similar-col` class.
+
+- **`resources/views/product/show.blade.php`**: inserts `@include('partials.product-similar-compare', ['current' => $product, 'similar' => $similar])` **above** "Related Products" section (guarded by `if(isset($similar) && count($similar) > 0)`).
+
+**Matching logic (same part, different brands):**
+- Primary: same `category_id` + same `year/make/model` (166 fitment groups with >1 product in DB; e.g. 2018/Hyundai/Elantra cat=65 has Mobil 1, Motorcraft, Castrol, MANN-FILTER).
+- Orders: different `brand_id` first → current product's own brand last.
+- Fallback to same `category_id` if fewer than 3 alternatives in fitment group.
+- Limit: 3 alternatives (4 columns total = current + 3, matching Moglix & existing `/compare` max-3).
+
+**Verified:** `view:cache` compiles; tinker render test → product with fitment alternatives shows 4-column table (current + 3 different-brand alternatives: Mobil 1 / Motorcraft / Castrol / MANN-FILTER) with all rows (Product/Brand/Price/Rating/Fitment/Availability/Description/Action with Add to Cart); product without alternatives returns empty (section hidden); `php -l` clean.

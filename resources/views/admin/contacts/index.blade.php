@@ -23,7 +23,7 @@
 
 <div class="card border-0 shadow-sm">
     <div class="card-body p-0">
-        <div class="d-flex justify-content-between align-items-center px-3 pt-3 pb-2 flex-wrap flex-md-nowrap flex-wrap flex-md-nowrap">
+        <div class="d-flex justify-content-between align-items-center p-2 flex-wrap flex-md-nowrap flex-wrap flex-md-nowrap">
             <div class="d-flex align-items-center gap-2">
                 <span class="text-muted small">Show</span>
                 <select class="form-select w-auto" onchange="window.location.href=this.value">
@@ -73,9 +73,9 @@
                         <td><small>{{ $contact->created_at->format('M d, Y') }}</small></td>
                         <td>
                             @if($contact->replied_at)
-                                <span class="badge bg-light text-success border border-success-subtle">Replied</span>
+                                <span class="badge bg-light text-success border border-success-subtle rounded-pill">Replied</span>
                             @else
-                                <span class="badge bg-light text-warning border border-warning-subtle">Pending</span>
+                                <span class="badge bg-light text-warning border border-warning-subtle rounded-pill">Pending</span>
                             @endif
                         </td>
                         <td class="pe-3 table-action-col">

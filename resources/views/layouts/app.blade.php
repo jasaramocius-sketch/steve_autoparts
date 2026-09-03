@@ -167,9 +167,9 @@
                                 <!-- <a href="{{ route('user.dashboard') }}" class="a-tag-hover-color dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <i class="fa-regular fa-circle-user"></i> My Account
                                 </a> -->
-                                <p class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <i class="fa-regular fa-circle-user"></i> {{ Str::limit(Auth::user()->name, 10, '...') }}
-                                </p>
+                                </button>
                                 <ul class="dropdown-menu">
                                     <li><a class="dropdown-item" href="{{ route('user.dashboard') }}">Dashboard</a></li>
                                     <li><a class="dropdown-item" href="{{ route('user.profile') }}">My Profile</a></li>
@@ -631,12 +631,10 @@
 
     <!-- Essential Js Files -->
     <script src="{{ asset('assets/front/js/jquery.min.js') }}"></script>
-    <script src="{{ asset('assets/front/js/slick.js') }}" defer></script>
-    <script src="{{ asset('assets/front/js/swiper-bundle.min.js') }}" defer></script>
     @stack('jquery-ui-js')
+    @stack('slider-js')
     <script src="{{ asset('assets/front/js/nice-select.js') }}?v={{ filemtime(public_path('assets/front/js/nice-select.js')) }}" defer></script>
     <script src="{{ asset('assets/front/js/wow.js') }}" defer></script>
-    <script src="{{ asset('assets/front/js/marked.min.js') }}" defer></script>
     <script src="{{ asset('assets/front/js/bootstrap.bundle.min.js') }}" defer></script>
     <script src="{{ asset('assets/front/js/toastr.min.js') }}" defer></script>
     <script src="{{ asset('assets/front/js/script.js') }}?v={{ filemtime(public_path('assets/front/js/script.js')) }}" defer></script>

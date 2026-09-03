@@ -68,7 +68,7 @@
         <a href="{{ route('admin.settings.footer') }}" class="nav-item {{ request()->routeIs('admin.settings.footer*') ? 'active' : '' }}">
             <i class="fas fa-address-book"></i> Footer Settings
         </a>
-        <a href="{{ route('admin.logs.index') }}" class="nav-item {{ request()->routeIs('admin.logs.index') ? 'active' : '' }}">
+        <a href="{{ route('admin.logs.index') }}" class="nav-item {{ request()->routeIs('admin.logs.*') ? 'active' : '' }}">
             <i class="fas fa-file-alt"></i> Logs
         </a>
         <a href="{{ route('admin.revisions.index') }}" class="nav-item {{ request()->routeIs('admin.revisions.*') ? 'active' : '' }}">

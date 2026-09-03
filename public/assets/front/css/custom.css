@@ -1805,10 +1805,19 @@ body.user-reviews-page.modal-open { overflow-y: scroll !important; padding-right
 
 /* A11y: distinguish in-text links beyond color (Lighthouse link-in-text-block) */
 .copyright-hyperlink-text {
-  text-decoration: underline;
+  text-decoration: underline !important;
+  text-underline-offset: 2px;
 }
 
 /* A11y contrast fixes (Lighthouse color-contrast) */
 .gs-footer-bottom .text-secondary {
   color: #a2a2ab !important;
+}
+
+/* A11y: footer bottom link must pass >= 4.5:1 on dark #353535 */
+.gs-footer-bottom a.copyright-hyperlink-text {
+  color: #ffad8e;
+}
+.gs-footer-bottom a.copyright-hyperlink-text:hover {
+  color: var(--light);
 }

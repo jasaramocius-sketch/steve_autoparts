@@ -25,11 +25,27 @@
     ];
 @endphp
 
-<div class="card border-0 shadow-sm">
-    <div class="card-header bg-white border-bottom d-flex flex-wrap gap-2 justify-content-between align-items-center py-3">
-        <h5 class="mb-0 fw-bold"><i class="fas fa-file-alt me-2"></i>Site Logs</h5>
-        <form method="GET" action="{{ route('admin.logs.index') }}" class="d-flex flex-wrap align-items-end gap-2">
-            <div>
+<div class="card border-0 shadow-sm logs-page-table">
+    <div class="card-header bg-white border-bottom d-grid gap-2 justify-content-between align-items-start align-items-xl-center p-2">
+        <div class="d-flex flex-row flex-xl-row flex-wrap align-items-center gap-2">
+        <h5 class="mb-0 fw-bold p-2"><i class="fas fa-file-alt me-2"></i>Site Logs</h5>
+        <div class="text-muted small p-2">
+            Showing: {{ $selectedFile }}
+            @if($selectedFile)
+                <span class="mx-1">|</span> {{ $entries->total() }} entries
+            @endif
+        </div>
+        @if($selectedFile && Auth::check() && in_array(Auth::user()->role, ['master_admin', 'admin']))
+            <form method="POST" action="{{ route('admin.logs.clear', $selectedFile) }}" 
+                  onsubmit="return confirm('Move the entire {{ basename($selectedFile) }} log file to trash? It will auto-delete after 15 days.')">
+                @csrf @method('DELETE')
+                <button type="submit" class="btn btn-outline-danger steve-btn gap-1"><i class="fas fa-trash me-1"></i> Clear Log File</button>
+            </form>
+            <a href="{{ route('admin.logs.trash') }}" class="btn btn-outline-secondary mt-xl-0"><i class="fas fa-trash-alt me-1"></i> Log Trash</a>
+        @endif
+        </div>
+        <form method="GET" action="{{ route('admin.logs.index') }}" class="d-flex flex-wrap align-items-end gap-2" onsubmit="return stAutoPartsLogsSubmit(this)">
+            <div style="flex:1 1 auto; min-width:170px">
                 <label class="form-label small mb-1 d-block">Log File</label>
                 <select name="file" class="form-select" onchange="this.form.submit()">
                     <option value="">Select log file</option>
@@ -38,28 +54,29 @@
                     @endforeach
                 </select>
             </div>
-            <div>
+            <div style="flex:1 1 auto; min-width:170px">
                 <label class="form-label small mb-1 d-block">Type</label>
                 <select name="type" class="form-select" onchange="this.form.submit()">
-                    <option value="all" {{ ($typeFilter ?? 'change') === 'all' ? 'selected' : '' }}>All types</option>
+                    <option value="all" {{ ($typeParam ?? 'change') === 'all' ? 'selected' : '' }}>All types</option>
                     @foreach($types as $type)
-                        <option value="{{ $type }}" {{ ($typeFilter ?? 'change') === $type ? 'selected' : '' }}>{{ ucfirst($type) }}</option>
+                        <option value="{{ $type }}" {{ ($typeParam ?? 'change') === $type ? 'selected' : '' }}>{{ ucfirst($type) }}</option>
                     @endforeach
                 </select>
             </div>
-            <div>
+            <div style="flex:1 1 auto; min-width:220px">
                 <label class="form-label small mb-1 d-block">Search</label>
-                <input type="text" name="search" value="{{ $search ?? '' }}" class="form-control" placeholder="Search logs..." style="width:200px">
+                <div class="input-group">
+                    <input type="text" name="search" value="{{ $search ?? '' }}" class="form-control" placeholder="Search logs..." style="min-width:130px" id="logs-search-input">
+                    @php $hasLogFilter = !empty($search) || (!empty($typeParam) && !in_array($typeParam, ['change', 'all'], true)); @endphp
+                    <button type="submit" id="logs-search-toggle" class="btn {{ $hasLogFilter ? 'btn-outline-secondary' : 'btn-primary' }} steve-btn gap-1" data-bs-toggle="tooltip" data-bs-original-title="{{ $hasLogFilter ? 'Clear' : 'Search' }}" aria-label="{{ $hasLogFilter ? 'Clear' : 'Search' }}">
+                        <i class="fas {{ $hasLogFilter ? 'fa-times' : 'fa-search' }}"></i>
+                    </button>
+                </div>
             </div>
-            <button type="submit" class="btn btn-primary steve-btn gap-1"><i class="fas fa-search"></i> Search</button>
-            @if(!empty($search) || !empty($typeFilter))
-                <a href="{{ route('admin.logs.index', ['file' => $selectedFile]) }}" class="btn btn-outline-secondary steve-btn gap-1"><i class="fas fa-times"></i> Clear</a>
-            @endif
         </form>
     </div>
-    <div class="card-body">
+    <div class="card-body p-0">
         @if($selectedFile)
-            <div class="mb-2 text-muted small">Showing: {{ $selectedFile }} <span class="mx-1">|</span> {{ $entries->total() }} entries</div>
 
             @if($entries->total())
                 <div class="table-responsive">
@@ -101,9 +118,14 @@
                                         <span class="text-muted">Guest</span>
                                     @endif
                                 </td>
-                                <td class="pe-3">
+                                <td class="pe-3 table-action-col">
                                     @if(!empty($entry['context']))
-                                        <button type="button" class="btn btn-sm btn-outline-secondary steve-btn" data-bs-toggle="collapse" data-bs-target="#log-context-{{ $loop->index }}">View</button>
+                                        <div class="action-buttons">
+                                            <button type="button" class="action-btn btn-view" data-bs-toggle="collapse" data-bs-target="#log-context-{{ $loop->index }}" title="View Context" aria-expanded="false" aria-controls="log-context-{{ $loop->index }}">
+                                                <svg class="eye-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                                <svg class="eye-icon eye-off d-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                                            </button>
+                                        </div>
                                     @else
                                         <span class="text-muted small">—</span>
                                     @endif
@@ -131,5 +153,60 @@
         @endif
     </div>
 </div>
+
+@push('scripts')
+<script>
+    function stAutoPartsLogsSubmit(form) {
+        var params = new URLSearchParams();
+        var file = form.querySelector('[name="file"]').value;
+        var type = form.querySelector('[name="type"]').value;
+        var search = form.querySelector('[name="search"]').value;
+        if (file) params.set('file', file);
+        if (type && type !== 'change' && type !== 'all') params.set('type', type);
+        if (search) params.set('search', search);
+        var qs = params.toString();
+        window.location.href = qs ? (form.getAttribute('action') + '?' + qs) : form.getAttribute('action');
+        return false;
+    }
+    (function () {
+        var toggleBtn = document.getElementById('logs-search-toggle');
+        if (!toggleBtn) return;
+        toggleBtn.addEventListener('click', function () {
+            if (toggleBtn.classList.contains('btn-outline-secondary')) {
+                var form = toggleBtn.closest('form');
+                var search = form.querySelector('[name="search"]');
+                var type = form.querySelector('[name="type"]');
+                if (search) search.value = '';
+                if (type) type.value = 'all';
+                toggleBtn.classList.remove('btn-outline-secondary');
+                toggleBtn.classList.add('btn-primary');
+                toggleBtn.innerHTML = '<i class="fas fa-search"></i>';
+                toggleBtn.setAttribute('aria-label', 'Search');
+                toggleBtn.setAttribute('data-bs-original-title', 'Search');
+                var tip = bootstrap.Tooltip.getInstance(toggleBtn);
+                if (tip) tip.setContent({ '.tooltip-inner': 'Search' });
+            }
+        });
+    })();
+    document.querySelectorAll('[data-bs-target^="#log-context-"]').forEach(function(btn) {
+        var target = document.querySelector(btn.getAttribute('data-bs-target'));
+        if (!target) return;
+        target.addEventListener('shown.bs.collapse', function() {
+            var open = btn.querySelector('.eye-open'), off = btn.querySelector('.eye-off');
+            if (open) open.classList.add('d-none');
+            if (off) off.classList.remove('d-none');
+            btn.setAttribute('aria-expanded', 'true');
+            btn.setAttribute('title', 'Hide Context');
+        });
+        target.addEventListener('hidden.bs.collapse', function() {
+            var open = btn.querySelector('.eye-open'), off = btn.querySelector('.eye-off');
+            if (open) open.classList.remove('d-none');
+            if (off) off.classList.add('d-none');
+            btn.setAttribute('aria-expanded', 'false');
+            btn.setAttribute('title', 'View Context');
+        });
+    });
+</script>
+@endpush
 
 @endsection

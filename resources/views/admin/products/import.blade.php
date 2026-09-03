@@ -38,7 +38,7 @@
                 <code>stock</code>,
                 <code>description</code>,
                 <code>badge</code>,
-                <code>product_type</code> (<code>physical</code> / <code>digital</code>),
+                <code>product_type</code> (<code>none</code> / <code>new_arrival</code> / <code>trending</code> / <code>best_selling</code> / <code>popular</code>),
                 <code>status</code> (<code>1/0</code> or <code>yes/no</code> or <code>active/inactive</code>),
                 <code>featured</code> (<code>1/0</code> or <code>yes/no</code>),
                 <code>brand</code> (matched by name — <strong>auto-created if missing</strong>),

@@ -1,4 +1,7 @@
 @extends('layouts.app')
+@push('slider-js')
+    <script src="{{ asset('assets/front/js/swiper-bundle.min.js') }}" defer></script>
+@endpush
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'product-page', 'pageClass' => 'product-page'])
 @php $prodName = $product['name'] ?? 'Product'; $prodDesc = trim(strip_tags(html_entity_decode($product['description'] ?? ''))); $prodDesc = mb_strlen($prodDesc) > 160 ? mb_substr($prodDesc, 0, 157) . '...' : $prodDesc; @endphp
@@ -961,7 +964,7 @@
             </div>
             <div class="tab-pane fade py-4" id="policy-tab-pane" role="tabpanel" aria-labelledby="policy-tab" tabindex="0">
                 <div style="line-height: 1.8; color: #4c3533;">
-                  {!! $product['policy_text'] ?? 'No policy information available.' !!}
+                  @include('partials.product-buy-return-policy', ['product' => $product])
                 </div>
             </div>
             <div class="tab-pane fade py-4" id="reviews-tab-pane" role="tabpanel" aria-labelledby="reviews-tab" tabindex="0">
@@ -1142,9 +1145,16 @@
 </section>
 <!-- SHOP DETAILS END -->
 
+<!-- Similar Products To Compare -->
+@if(isset($similar) && count($similar) > 0)
+<div class="container">
+    @include('partials.product-similar-compare', ['current' => $product, 'similar' => $similar])
+</div>
+@endif
+
 <!-- Related Products Area -->
 @if(isset($related) && $related->count() > 0)
-<section class="gs-product-cards-slider-area" style="background-color: #ffffff;">
+<section class="gs-product-cards-slider-area">
   <div class="container">
     <div class="title text-center mb-5">
       <h3 style="font-weight: 600;">Related Products</h3>
@@ -1208,6 +1218,7 @@
 @endsection
 
 @section('scripts')
+<script src="{{ asset('assets/front/js/marked.min.js') }}" defer></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   if (typeof marked !== 'undefined') {
