@@ -1501,12 +1501,12 @@ body.user-reviews-page.modal-open { overflow-y: scroll !important; padding-right
   font-size: inherit;
   font-weight: inherit;
 }
-.mobile-menu .tab-content .product-cat-widget ul li ul li {
+/* .mobile-menu .tab-content .product-cat-widget ul li ul li {
   padding: 10px 0;
-}
+} */
 .mobile-menu .tab-content .product-cat-widget ul li a {
   display: inline;
-  padding: 10px 0;
+  /* padding: 10px 0; */
   color: #1f0300;
   font-size: 15px;
   font-weight: 400;
@@ -1530,9 +1530,9 @@ body.user-reviews-page.modal-open { overflow-y: scroll !important; padding-right
   display: none;
 }
 .cat-toggle-btn {
-  padding: 8px !important;
-  min-width: 36px;
-  min-height: 36px;
+  padding: 0px !important;
+  min-width: 20px;
+  min-height: 20px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1812,12 +1812,4 @@ body.user-reviews-page.modal-open { overflow-y: scroll !important; padding-right
 /* A11y contrast fixes (Lighthouse color-contrast) */
 .gs-footer-bottom .text-secondary {
   color: #a2a2ab !important;
-}
-
-/* A11y: footer bottom link must pass >= 4.5:1 on dark #353535 */
-.gs-footer-bottom a.copyright-hyperlink-text {
-  color: #ffad8e;
-}
-.gs-footer-bottom a.copyright-hyperlink-text:hover {
-  color: var(--light);
 }

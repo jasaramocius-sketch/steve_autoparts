@@ -101,8 +101,9 @@
             : json_decode($order->shipping_details, true);
         $shippingFee = $order->shipping_fee ?? 0;
         $taxAmount = $order->tax ?? 0;
+        $couponDiscount = $order->coupon_discount ?? 0;
         $totalAmount = $order->total_amount ?? 0;
-        $subTotal = $totalAmount - $shippingFee - $taxAmount;
+        $subTotal = $totalAmount - $shippingFee - $taxAmount + $couponDiscount;
     @endphp
 
     <div class="address-section">

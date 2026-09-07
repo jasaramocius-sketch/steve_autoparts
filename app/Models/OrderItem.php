@@ -15,6 +15,7 @@ class OrderItem extends Model
         'product_id',
         'qty',
         'price',
+        'coupon_discount',
         'is_deleted',
     ];
 

@@ -6,24 +6,24 @@
 
 @if($all->count() > 1)
 <div class="gs-similar-compare-area mt-5">
-    <div class="title mb-4">
+    <div class="title pb-20">
         <h3 style="font-weight: 600;">Similar Products To Compare</h3>
         <p class="text-muted">Compare this part with alternatives from other brands</p>
     </div>
-    <div class="table-responsive bg-white border rounded">
+    <div class="table-responsive bg-white border">
         <table class="table table-bordered align-middle text-center compare-similar-table mb-0">
             <tr>
                 <th class="compare-row-label" width="160" style="vertical-align: middle;">Product</th>
                 @foreach($all as $p)
                 <td class="similar-col">
-                    <a href="{{ route('product', $p->slug) }}">
-                        {!! imgTag(storedPath($p->image, 'assets/images/thumbnails'), '', 'img-fluid mb-2', 'style="height:120px; object-fit:contain;"') !!}
+                    <a href="{{ route('product', $p->slug) }}" style="width: 20vw;height: 20vh; display: flex;">
+                        {!! imgTag(storedPath($p->image, 'assets/images/thumbnails'), '', 'img-fluid mb-2', 'style="height:100%; width:100%; object-fit:cover;"') !!}
                     </a>
-                    <a href="{{ route('product', $p->slug) }}" class="d-block text-decoration-none small fw-semibold">
+                    <a href="{{ route('product', $p->slug) }}" class="d-block text-decoration-none small fw-semibold pt-10">
                         {{ $p->name }}
                     </a>
                     @if($p->id === $product['id'])
-                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle mt-1">Current Product</span>
+                        <span class="badge bg-primary-subtle text-white border border-primary-subtle mt-1">Current Product</span>
                     @endif
                 </td>
                 @endforeach
@@ -61,7 +61,7 @@
                             <path d="M8.5 0.5L10.4084 6.37336L16.584 6.37336L11.5878 10.0033L13.4962 15.8766L8.5 12.2467L3.50383 15.8766L5.41219 10.0033L0.416019 6.37336L6.59163 6.37336L8.5 0.5Z" fill="{{ $i < $dispRating ? '#EEAE0B' : '#E2E8F0' }}" />
                         </svg>
                         @endfor
-                        <div class="small text-muted">{{ $dispRating > 0 ? number_format($dispRating, 1) : '' }} ({{ $dispReviews }})</div>
+                        <span class="small text-muted">{{ $dispRating > 0 ? number_format($dispRating, 1) : '' }} ({{ $dispReviews }})</span>
                     </td>
                 @endforeach
             </tr>
@@ -108,9 +108,7 @@
                                 <input type="hidden" name="product_name" value="{{ $p->name }}">
                                 <input type="hidden" name="product_price" value="{{ $p->price }}">
                                 <input type="hidden" name="product_image" value="{{ storedImageUrl($p->image, 'assets/images/thumbnails') }}">
-                                <button type="submit" class="btn btn-danger btn-sm steve-btn w-100 mb-1">
-                                    <i class="fas fa-cart-plus me-1"></i> Add to Cart
-                                </button>
+                                <button type="submit" class="btn btn-danger btn-sm steve-btn w-100 mb-1">Add to Cart</button>
                             </form>
                         @else
                             <span class="text-muted small">—</span>

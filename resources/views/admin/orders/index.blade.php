@@ -37,6 +37,15 @@
                         @endforeach
                     </select>
                 </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="text-muted small">Payment</span>
+                    <select class="form-select w-auto" onchange="window.location.href=this.value">
+                        <option value="{{ request()->fullUrlWithQuery(['payment_status' => null, 'page' => null]) }}" {{ !request('payment_status') ? 'selected' : '' }}>All Payments</option>
+                        @foreach(['unpaid', 'paid', 'refunded'] as $ps)
+                            <option value="{{ request()->fullUrlWithQuery(['payment_status' => $ps, 'page' => null]) }}" {{ request('payment_status') === $ps ? 'selected' : '' }}>{{ ucfirst($ps) }}</option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
             <div class="text-muted small">
                 Showing {{ $orders->firstItem() }}-{{ $orders->lastItem() }} of {{ $orders->total() }}
@@ -50,6 +59,7 @@
                         <th>Customer</th>
                         <th><a href="{{ sortUrl('total_amount', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Total {!! sortIndicator('total_amount', $sortBy, $sortDir) !!}</a></th>
                         <th><a href="{{ sortUrl('status', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Status {!! sortIndicator('status', $sortBy, $sortDir) !!}</a></th>
+                        <th><a href="{{ sortUrl('payment_status', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Payment {!! sortIndicator('payment_status', $sortBy, $sortDir) !!}</a></th>
                         <th><a href="{{ sortUrl('created_at', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Date {!! sortIndicator('created_at', $sortBy, $sortDir) !!}</a></th>
                         <th class="">Action</th>
                     </tr>
@@ -73,6 +83,16 @@
                             @endphp
                             <span class="badge {{ $badgeClass }}">{{ ucfirst($order->status) }}</span>
                         </td>
+                        <td>
+                            @php
+                                $paymentBadge = match($order->payment_status) {
+                                    'paid' => 'bg-light text-success border border-success-subtle',
+                                    'refunded' => 'bg-light text-secondary border border-secondary-subtle',
+                                    default => 'bg-light text-warning border border-warning-subtle',
+                                };
+                            @endphp
+                            <span class="badge {{ $paymentBadge }}">{{ ucfirst($order->payment_status ?? 'unpaid') }}</span>
+                        </td>
                         <td>{{ $order->created_at->format('M d, Y') }}</td>
                         <td class="pe-3 table-action-col">
                             <div class="action-buttons">
@@ -82,7 +102,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="text-center py-4 text-muted">No orders yet</td>
+                        <td colspan="7" class="text-center py-4 text-muted">No orders yet</td>
                     </tr>
                     @endforelse
                 </tbody>

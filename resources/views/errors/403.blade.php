@@ -41,7 +41,7 @@
                         @endif
                     </p>
                     
-                    <div class="alert alert-info mb-4" style="background-color: #e7f3ff; border-left: 4px solid var(--primary);">
+                    <div class="alert alert-info mb-4" style="background-color: #e7f3ff; border-bottom: 4px solid var(--primary);">
                         <small class="text-muted">
                             <strong>Why am I seeing this?</strong><br>
                             You can only view, track, and manage your own orders. If you need to access another order, please ask the order owner or contact our support team.

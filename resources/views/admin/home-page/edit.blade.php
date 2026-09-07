@@ -56,6 +56,12 @@
                         </div>
                     @endif
 
+                    @if($section->section_name === 'categories_heading')
+                        <div class="alert alert-info">
+                            <strong>All Categories section:</strong> <strong>Title</strong> = section heading (default: "All Categories"). Choose exactly which top-level categories appear on the home page using the multi-select below — leave empty to show all categories.
+                        </div>
+                    @endif
+
                     <form action="{{ route('admin.home-page.update', $section->id) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
@@ -295,6 +301,25 @@
                                 @endforeach
                             </select>
                             <small class="text-muted d-block">Hold Ctrl/Cmd to select multiple posts and choose exactly which ones appear (shown in the order selected). Leave empty to use the count-based setting above.</small>
+                        </div>
+                        @endif
+
+                        @if($section->section_name === 'categories_heading')
+                        @php
+                            $extra = $section->extra_data ?? [];
+                            $selectedCategoryIds = collect($extra['category_ids'] ?? [])->map(fn($id) => (int) $id)->all();
+                            $allCategories = \App\Models\Category::whereNull('parent_id')->where('status', true)->orderBy('name')->get();
+                        @endphp
+                        <div class="form-group mb-3">
+                            <label for="category_ids" class="form-label"><strong>Select Categories for Home Page</strong></label>
+                            <select name="category_ids[]" id="category_ids" class="form-control" multiple size="10">
+                                @foreach($allCategories as $category)
+                                    <option value="{{ $category->id }}" {{ in_array($category->id, $selectedCategoryIds) ? 'selected' : '' }}>
+                                        {{ $category->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <small class="text-muted d-block">Hold Ctrl/Cmd to select multiple categories and choose exactly which ones appear (in the order selected). Leave empty to show all top-level categories.</small>
                         </div>
                         @endif
 

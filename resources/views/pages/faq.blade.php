@@ -199,7 +199,10 @@
     line-height: 1.6;
 }
 .faq-answer.is-open {
-    padding: 0 16px 16px 58px;
+    padding: 0 16px 0px 68px;
+}
+.faq-answer.is-open .faq-answer p {
+    padding-bottom: 12px;
 }
 .faq-answer p {
     padding-bottom: 12px;

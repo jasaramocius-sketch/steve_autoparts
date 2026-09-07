@@ -11,8 +11,9 @@
 @section('content')
 
 @php
-  $subtotal = collect($order['items'] ?? [])->sum(fn($item) => $item['price'] * $item['qty']);
-  $shipping = max(($order['total'] ?? 0) - $subtotal, 0);
+  $subtotal = $order['subtotal'] ?? collect($order['items'] ?? [])->sum(fn($item) => $item['price'] * $item['qty']);
+  $couponDiscount = $order['coupon_discount'] ?? 0;
+  $shipping = max(($order['total'] ?? 0) - $subtotal + $couponDiscount, 0);
   $paymentLabels = [
     'cod' => 'Cash on Delivery',
     'card' => 'Credit / Debit Card',
@@ -150,10 +151,11 @@
                           <span>{{ currency_format(0) }}</span>
                         </td>
                       </tr>
+@php $couponCode = $order['coupon_code'] ?? null; @endphp
                       <tr>
-                        <th class="border-top-0 py-2">Coupon Discount</th>
+                        <th class="border-top-0 py-2">Coupon Discount @if(!empty($couponCode))<br><small class="text-muted fw-normal">{{ $couponCode }}</small>@endif</th>
                         <td class="text-right border-top-0 pr-0 py-2">
-                          <span>{{ currency_format(0) }}</span>
+                          <span class="{{ $couponDiscount > 0 ? 'text-success fw-600' : '' }}">{{ $couponDiscount > 0 ? '-' . currency_format($couponDiscount) : currency_format(0) }}</span>
                         </td>
                       </tr>
                       <tr>

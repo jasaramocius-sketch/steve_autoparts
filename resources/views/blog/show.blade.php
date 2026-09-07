@@ -32,6 +32,7 @@
 <div class="gs-blog-wrapper">
   <div class="container">
     <a href="{{ route('blog') }}" class="btn btn-outline-primary single-blog-button steve-btn w-auto mb-2">
+      <i class="fas fa-arrow-left"></i>
         Back to Blog
     </a>
     <div class="row">      

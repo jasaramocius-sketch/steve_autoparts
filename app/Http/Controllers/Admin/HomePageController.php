@@ -88,6 +88,10 @@ class HomePageController extends Controller
             $existing['post_ids'] = $ids;
         }
 
+        if ($request->has('category_ids')) {
+            $existing['category_ids'] = array_values(array_filter(array_map('intval', (array) $request->input('category_ids', []))));
+        }
+
         if ($request->filled('countdown')) {
             $existing['countdown'] = $request->countdown;
         }
@@ -143,6 +147,7 @@ class HomePageController extends Controller
             || $request->has('brand_ids')
             || $request->filled('posts_count')
             || $request->has('post_ids')
+            || $request->has('category_ids')
             || $request->filled('countdown')
             || ($section->section_name === 'offers' && $request->has('banners'))
             || ($section->section_name === 'deal_of_day' && ($request->filled('deal_bg_image_from_manager') || $request->has('remove_deal_bg_image')));

@@ -76,13 +76,7 @@
                         Main Category
                     </option>
 
-                    @foreach($parents as $parent)
-
-                        <option value="{{ $parent->id }}">
-                            {{ $parent->name }}
-                        </option>
-
-                    @endforeach
+                    @include('admin.categories._parent_options', ['categories' => $parents, 'depth' => 0, 'selected' => null])
 
                 </select>
 

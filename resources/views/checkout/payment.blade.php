@@ -165,6 +165,16 @@
                         <span class="fw-600">{{ currency_format($shippingCost) }}</span>
                       </td>
                     </tr>
+                    @if(!empty($couponData))
+                    <tr class="cart-coupon">
+                      <th class="pl-0 fs-14 pb-2 text-success fw-600">
+                        Coupon ({{ $couponData['code'] }})
+                      </th>
+                      <td class="text-right pr-0 fs-14 pb-2 fw-600 text-success">
+                        <span class="fw-600">-{{ currency_format($couponDiscount) }}</span>
+                      </td>
+                    </tr>
+                    @endif
                     <tr class="cart-total">
                       <th class="pl-0 fs-14 text-dark fw-600"><span class="strong-600">Total</span></th>
                       <td class="text-right pr-0 fs-14 fw-600 text-primary">

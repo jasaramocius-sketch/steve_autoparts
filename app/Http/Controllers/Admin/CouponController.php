@@ -81,4 +81,21 @@ class CouponController extends Controller
         Coupon::findOrFail($id)->delete();
         return redirect()->route('admin.coupons.index')->with('success', 'Coupon deleted successfully.');
     }
+
+    public function show(Request $request, $id)
+    {
+        $coupon = Coupon::findOrFail($id);
+
+        $perPage = in_array((int)$request->per_page, [10, 20, 50, 100]) ? (int)$request->per_page : 20;
+        $orders = \App\Models\Order::where('coupon_code', $coupon->code)
+            ->with(['user', 'items.product'])
+            ->orderByDesc('created_at')
+            ->paginate($perPage);
+        $orders->appends($request->query())->onEachSide(1);
+
+        $totalDiscount = \App\Models\Order::where('coupon_code', $coupon->code)->sum('coupon_discount');
+        $orderCount = $orders->total();
+
+        return view('admin.coupons.show', compact('coupon', 'orders', 'totalDiscount', 'orderCount'));
+    }
 }

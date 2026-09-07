@@ -17,6 +17,7 @@ class Order extends Model
         'order_number',
         'total_amount',
         'status',
+        'payment_status',
         'shipping_address_id',
         'shipping_details',
         'delivery_type',
@@ -25,6 +26,8 @@ class Order extends Model
         'additional_info',
         'shipping_fee',
         'tax',
+        'coupon_code',
+        'coupon_discount',
         'is_deleted',
     ];
 

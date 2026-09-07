@@ -16,7 +16,9 @@ class CartController extends Controller
         $cart = session('cart', []);
         $total = array_sum(array_map(fn($item) => $item['price'] * $item['qty'], $cart));
         $cartItems = session()->get('cart', []);
-        return view('cart.index', compact('cart', 'total','cartItems', 'page'));
+        $couponData = $this->recomputeCoupon($cart) ?? [];
+        $couponDiscount = $couponData['discount'] ?? 0;
+        return view('cart.index', compact('cart', 'total', 'cartItems', 'page', 'couponData', 'couponDiscount'));
     }
 
     public function add(Request $request)
@@ -42,6 +44,7 @@ class CartController extends Controller
         }
 
         session()->put('cart', $cart);
+        $this->recomputeCoupon($cart);
 
         // Buy Now
         if ($request->has('buy_now')) {
@@ -69,6 +72,7 @@ class CartController extends Controller
         $cart = session('cart', []);
         unset($cart[$request->product_id]);
         session(['cart' => $cart]);
+        $this->recomputeCoupon($cart);
 
         if ($request->ajax()) {
             $total = array_sum(array_map(fn($item) => $item['price'] * $item['qty'], $cart));
@@ -91,6 +95,7 @@ class CartController extends Controller
             unset($cart[$id]);
         }
         session(['cart' => $cart]);
+        $this->recomputeCoupon($cart);
         $count = count($ids);
         return back()->with('success', "$count item(s) removed from cart!");
     }
@@ -111,6 +116,7 @@ class CartController extends Controller
     $cart[$id]['qty']=$qty;
 
     session()->put('cart',$cart);
+    $this->recomputeCoupon($cart);
 
     $itemSubtotal=$cart[$id]['price']*$qty;
 
@@ -132,6 +138,89 @@ class CartController extends Controller
 
     ]);
 }
+    public function applyCoupon(Request $request)
+    {
+        $request->validate(['coupon_code' => 'required|string|max:50']);
+        $code = strtoupper(trim($request->coupon_code));
+        $coupon = \App\Models\Coupon::where('code', $code)->first();
+
+        if (!$coupon) {
+            return back()->with('error', 'Invalid coupon code.');
+        }
+        if (!$coupon->isValid()) {
+            return back()->with('error', 'This coupon is no longer valid.');
+        }
+
+        $cart = session('cart', []);
+        $subtotal = array_sum(array_map(fn($item) => $item['price'] * $item['qty'], $cart));
+
+        if ($coupon->min_order_amount > 0 && $subtotal < $coupon->min_order_amount) {
+            return back()->with('error', 'Minimum order amount for this coupon is ' . currency_format($coupon->min_order_amount) . '.');
+        }
+
+        $discount = $coupon->calculateDiscount($subtotal);
+        session([
+            'coupon' => [
+                'code'     => $coupon->code,
+                'discount' => $discount,
+                'type'     => $coupon->type,
+                'value'    => $coupon->value,
+            ]
+        ]);
+
+        return back()->with('success', 'Coupon applied! You saved ' . currency_format($discount) . '.');
+    }
+
+    public function removeCoupon()
+    {
+        session()->forget('coupon');
+        return back()->with('success', 'Coupon removed.');
+    }
+
+    /**
+     * Recompute the applied coupon against the CURRENT cart.
+     * Re-fetches the coupon from DB, re-validates (validity, capacity, min-order)
+     * and re-calculates the discount on the current subtotal.
+     * Used on every cart change and as the final authority in paymentSubmit.
+     */
+    private function recomputeCoupon(array $cart): ?array
+    {
+        if (session()->missing('coupon')) {
+            return null;
+        }
+
+        $code = session('coupon')['code'] ?? null;
+        if (!$code) {
+            session()->forget('coupon');
+            return null;
+        }
+
+        $subtotal = array_sum(array_map(fn($item) => $item['price'] * $item['qty'], $cart));
+        $coupon = \App\Models\Coupon::where('code', $code)->first();
+
+        if (!$coupon || !$coupon->isValid()) {
+            session()->forget('coupon');
+            return null;
+        }
+
+        $discount = $coupon->calculateDiscount($subtotal);
+
+        if ($discount <= 0) {
+            session()->forget('coupon');
+            return null;
+        }
+
+        $data = [
+            'code'     => $coupon->code,
+            'discount' => $discount,
+            'type'     => $coupon->type,
+            'value'    => $coupon->value,
+        ];
+        session()->put('coupon', $data);
+
+        return $data;
+    }
+
     public function addToCart(Request $request, $id)
 {
     $product = Product::findOrFail($id);
@@ -177,10 +266,12 @@ class CartController extends Controller
             return redirect()->route('cart')->with('error', 'Your cart is empty.');
         }
         $total = array_sum(array_map(fn($item) => $item['price'] * $item['qty'], $cart));
+        $couponData = $this->recomputeCoupon($cart) ?? [];
+        $couponDiscount = $couponData['discount'] ?? 0;
         $addresses = auth()->user()->addresses()->latest()->get();
         $vehicles = Vehicle::where('user_id', auth()->id())->get();
         $selectedVehicleId = session('selected_vehicle_id');
-        return view('checkout.index', compact('cart', 'total', 'addresses', 'vehicles', 'selectedVehicleId'));
+        return view('checkout.index', compact('cart', 'total', 'addresses', 'vehicles', 'selectedVehicleId', 'couponData', 'couponDiscount'));
     }
 
     public function checkoutSubmit(Request $request)
@@ -276,9 +367,11 @@ class CartController extends Controller
         }
         $total = array_sum(array_map(fn($item) => $item['price'] * $item['qty'], $cart));
         $shippingCost = $shipping['cost'];
-        $grandTotal = $total + $shippingCost;
+        $couponData = $this->recomputeCoupon($cart) ?? [];
+        $couponDiscount = $couponData['discount'] ?? 0;
+        $grandTotal = max($total + $shippingCost - $couponDiscount, 0);
         $shippingMethod = $shipping['method'];
-        return view('checkout.payment', compact('cart', 'total', 'shippingCost', 'grandTotal', 'shippingMethod'));
+        return view('checkout.payment', compact('cart', 'total', 'shippingCost', 'grandTotal', 'shippingMethod', 'couponData', 'couponDiscount'));
     }
 
     public function paymentSubmit(Request $request)
@@ -310,10 +403,12 @@ class CartController extends Controller
 
         $total = array_sum(array_map(fn($item) => $item['price'] * $item['qty'], $cart));
         $shippingCost = $shipping['cost'] ?? 0;
-        $grandTotal = $total + $shippingCost;
+        $couponData = $this->recomputeCoupon($cart) ?? [];
+        $couponDiscount = $couponData['discount'] ?? 0;
+        $grandTotal = max($total + $shippingCost - $couponDiscount, 0);
 
         // Save to database
-        $dbOrder = \Illuminate\Support\Facades\DB::transaction(function () use ($request, $cart, $billing, $shipping, $grandTotal, $shippingCost, $paymentDetails) {
+        $dbOrder = \Illuminate\Support\Facades\DB::transaction(function () use ($request, $cart, $billing, $shipping, $grandTotal, $shippingCost, $paymentDetails, $couponData, $couponDiscount, $total) {
 
             $orderNumber = 'ORD' . strtoupper(uniqid());
 
@@ -324,21 +419,47 @@ class CartController extends Controller
                 'total_amount'       => $grandTotal,
                 'status'             => 'pending',
                 'payment_method'     => $request->payment_method,
+                'payment_status'     => in_array($request->payment_method, ['card', 'paypal'], true) ? 'paid' : 'unpaid',
                 'payment_details'    => $paymentDetails,
                 'delivery_type'      => $shipping['method'] ?? 'free',
                 'shipping_fee'       => $shippingCost,
                 'tax'                => 0,
+                'coupon_code'        => $couponData['code'] ?? null,
+                'coupon_discount'    => $couponDiscount,
                 'additional_info'    => $request->input('additional_info'),
                 'shipping_details'   => json_encode($billing),
             ]);
 
-            foreach ($cart as $item) {
+            // Proportional coupon split: each item's share = discount * (line subtotal / order subtotal)
+            $distributedDiscount = 0.0;
+            $lineCount = count($cart);
+            foreach ($cart as $i => $item) {
+                $lineSubtotal = $item['price'] * $item['qty'];
+                $itemDiscount = 0.0;
+                if ($couponDiscount > 0 && $total > 0) {
+                    $itemDiscount = round($couponDiscount * ($lineSubtotal / $total), 2);
+                }
+                // Last item absorbs rounding remainder so line discounts sum exactly to the order discount
+                if ($i === $lineCount - 1 && $couponDiscount > 0) {
+                    $itemDiscount = round($couponDiscount - $distributedDiscount, 2);
+                }
+                $distributedDiscount += $itemDiscount;
+
                 \App\Models\OrderItem::create([
-                    'order_id'   => $dbOrder->id,
-                    'product_id' => $item['id'],
-                    'qty'        => $item['qty'],
-                    'price'      => $item['price'],
+                    'order_id'        => $dbOrder->id,
+                    'product_id'      => $item['id'],
+                    'qty'             => $item['qty'],
+                    'price'           => $item['price'],
+                    'coupon_discount' => $itemDiscount,
                 ]);
+            }
+
+            // Increment coupon usage count
+            if (!empty($couponData['code']) && $couponDiscount > 0) {
+                $coupon = \App\Models\Coupon::where('code', $couponData['code'])->first();
+                if ($coupon) {
+                    $coupon->increment('used_count');
+                }
             }
 
             return $dbOrder;
@@ -352,8 +473,11 @@ class CartController extends Controller
             'db_id'          => $dbOrder->id,
             'date'           => $dbOrder->created_at->format('d M, Y'),
             'total'          => $grandTotal,
+            'subtotal'       => $total,
             'status'         => 'Pending',
             'payment_method' => $request->payment_method,
+            'coupon_code'    => $couponData['code'] ?? null,
+            'coupon_discount' => $couponDiscount,
             'customer_name'  => $billing['name'] ?? auth()->user()->name,
             'customer_email' => $billing['email'] ?? auth()->user()->email,
             'customer_phone' => $billing['phone'] ?? '',
@@ -372,6 +496,7 @@ class CartController extends Controller
         session()->forget('billing_info');
         session()->forget('shipping_info');
         session()->forget('checkout_vehicle_id');
+        session()->forget('coupon');
 
         return redirect()->route('checkout.confirmed');
     }

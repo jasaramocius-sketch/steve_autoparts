@@ -187,7 +187,7 @@
           <div class="single-product-widget shadow-sm rounded border">
             <h5 class="widget-title">Categories</h5>
             <div class="product-cat-widget">
-              <ul class="list-unstyled mb-0">
+              <ul class="list-unstyled mb-0 gap-1 d-flex flex-column">
                 @if(isset($currentCategory))
                 <li class="mb-3 pb-2 border-bottom">
                   <a href="{{ route('shop') }}" class="text-decoration-none fw-600" style="color: #1f0300; font-size:15px;">
@@ -200,7 +200,7 @@
                     $isTopActive = isset($currentCategory) && $currentCategory->id === $topCat->id;
                   @endphp
                   @if(!isset($currentCategory) || $isTopActive)
-                  <li class="main-list mb-3">
+                  <li class="main-list mb-1 gap-1 d-flex flex-column">
                     <div class="d-flex justify-content-between align-items-center gap-3">
                       @if($topCat->descendant_count > 0 || $isTopActive)
                         <a href="{{ route('category', ['slug' => $topCat->slug]) }}" class="text-decoration-none flex-grow-1 primary-a-tag-text-hover" style="color: {{ $isTopActive ? 'var(--primary)' : '#1f0300' }}; font-weight: {{ $isTopActive ? '600' : '400' }};">
@@ -222,13 +222,13 @@
                     </div>
 
                     @if($topCat->children->count() > 0)
-                      <ul id="cat_{{ $topCat->id }}" class="collapse ms-3 mt-2 list-unstyled {{ $isTopActive ? 'show' : '' }}">
+                      <ul id="cat_{{ $topCat->id }}" class="collapse ms-3 mt-0 list-unstyled {{ $isTopActive ? 'show' : '' }}">
                         @foreach($topCat->children as $subCat)
                           @php
                             $isSubActive = isset($currentSubcategory) && $currentSubcategory->id === $subCat->id;
                             $showSubChildren = $isSubActive;
                           @endphp
-                          <li class="mb-2">
+                          <li class="mb-2 gap-1 d-flex flex-column">
                             <div class="d-flex justify-content-between align-items-center gap-3">
                               @if($subCat->descendant_count > 0 || $isSubActive)
                                 <a href="{{ route('subcategory', ['parent' => $topCat->slug, 'child' => $subCat->slug]) }}" class="text-decoration-none flex-grow-1 primary-a-tag-text-hover" style="color: {{ $isSubActive ? 'var(--primary)' : '#1f0300' }}; font-weight: {{ $isSubActive ? '600' : '400' }};">
@@ -250,12 +250,12 @@
                             </div>
 
                             @if($subCat->children->count() > 0)
-                              <ul id="cat_{{ $subCat->id }}" class="collapse ms-3 mt-1 list-unstyled {{ $showSubChildren ? 'show' : '' }}">
+                              <ul id="cat_{{ $subCat->id }}" class="collapse ms-3 mt-0 list-unstyled {{ $showSubChildren ? 'show' : '' }}">
                                 @foreach($subCat->children as $childCat)
                                   @php
                                     $isChildActive = isset($currentChildcategory) && $currentChildcategory->id === $childCat->id;
                                   @endphp
-                                  <li class="my-1">
+                                  <li class="my-1 gap-1 d-flex flex-column">
                                     @if($childCat->descendant_count > 0 || $isChildActive)
                                       <a href="{{ route('subcategory', ['parent' => $topCat->slug, 'child' => $subCat->slug, 'subchild' => $childCat->slug]) }}" class="text-decoration-none a-tag-text-hover" style="color: {{ $isChildActive ? 'var(--primary)' : '#1f0300' }}; font-weight: {{ $isChildActive ? '600' : '400' }};">
                                         {{ $childCat->name }}

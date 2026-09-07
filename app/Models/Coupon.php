@@ -38,4 +38,17 @@ class Coupon extends Model
         if ($this->starts_at && $this->starts_at->isFuture()) return false;
         return true;
     }
+
+    public function calculateDiscount(float $subtotal): float
+    {
+        if (!$this->isValid()) return 0;
+        if ($this->min_order_amount > 0 && $subtotal < $this->min_order_amount) return 0;
+
+        if ($this->type === 'fixed') {
+            return min((float) $this->value, $subtotal);
+        }
+
+        $discount = $subtotal * ((float) $this->value / 100);
+        return min($discount, $subtotal);
+    }
 }

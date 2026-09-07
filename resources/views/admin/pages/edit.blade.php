@@ -79,11 +79,11 @@
     @csrf
     @method('PUT')
 
-    <div class="d-flex gap-4 align-items-start page-builder">
+    <div class="d-flex gap-4 align-items-start page-builder admin-page-builder admin-page-builder-edit">
 
         {{-- Section nav --}}
         <div class="page-builder-nav">
-            <div class="text-muted small mb-2">Pages / Edit</div>
+            <div class="text-muted small mb-2"><a href="{{ route('admin.pages.index') }}">Pages</a> / Edit</div>
             <nav class="nav flex-column gap-1">
                 <a href="#s-details" class="nav-link-section active" data-target="s-details"><i class="fas fa-file-alt"></i> Details</a>
                 <a href="#s-banner" class="nav-link-section" data-target="s-banner"><i class="fas fa-image"></i> Banner</a>
@@ -96,25 +96,25 @@
 
             {{-- Header bar: title + status + actions --}}
             <div class="d-flex align-items-center gap-2 pb-3 mb-4 border-bottom page-header-bar flex-wrap">
-                <div class="d-flex gap-2 align-items-center flex-grow-1 min-width-0">
-                <div class="w-60">
+                <div class="page-header-bar-first d-flex gap-2 align-items-center flex-grow-1 min-width-0">
+                <div class="w-auto flex-grow-1">
                 <input type="text" name="title" id="titleInput" class="page-title-input form-control form-control-lg border-0 fw-semibold flex-grow-1 @error('title') is-invalid @enderror"
                        placeholder="Untitled page" value="{{ old('title', $page->title) }}" maxlength="255" required>
                 @error('title') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
-                <div class="w-40">
-                <button type="button" id="statusPill" class="status-pill {{ old('status', $page->status) ? 'is-active' : '' }}" data-active="{{ old('status', $page->status) ? '1' : '0' }}">
+                <div class="w-auto d-flex align-items-center gap-2 justify-content-end">
+                <button type="button" id="statusPill" class="status-pill {{ old('status', $page->status) ? 'is-active' : '' }}" data-active="{{ old('status', $page->status) ? '1' : '0' }}" style="height: 40px; font-size: 1rem; line-height: 1.2;">
                     {{ old('status', $page->status) ? 'Active' : 'Inactive' }}
                 </button>
                 <input type="hidden" name="status" id="statusInput" value="{{ old('status', $page->status) ? 1 : 0 }}">
 
                 <button type="submit" class="btn btn-primary steve-btn text-nowrap"><i class="fas fa-save me-1"></i> Update</button>
-                <a href="{{ route('admin.pages.index') }}" class="btn btn-outline-secondary text-nowrap"><i class="fas fa-times me-1"></i> Cancel</a>
+                <a href="{{ route('admin.pages.index') }}" class="btn btn-outline-secondary text-nowrap steve-btn gap-1"><i class="fas fa-times me-1"></i> Cancel</a>
                 </div>
                 </div>
-                <a href="{{ route('page.show', $page->slug) }}" target="_blank" id="viewPageLink" class="a-tag-text-hover text-nowrap">{{ route('page.show', $page->slug) }}</a>
-
-                <div class="w-100"></div>
+                <div class="w-100">
+                    <a href="{{ route('page.show', $page->slug) }}" target="_blank" id="viewPageLink" class="a-tag-text-hover text-nowrap">{{ route('page.show', $page->slug) }}</a>
+                </div>
                 <span class="small text-muted">Last updated: {{ optional($page->updated_at)->format('M d, Y h:i A') }}</span>
             </div>
 

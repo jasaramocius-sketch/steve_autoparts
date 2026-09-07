@@ -124,7 +124,11 @@ class CategoryController extends Controller
     // Create Form
     public function create()
     {
-        $parents = Category::whereNull('parent_id')->get();
+        $parents = Category::topLevel()
+            ->where('is_deleted', false)
+            ->with('children.children.children')
+            ->orderBy('name')
+            ->get();
 
         return view('admin.categories.create', compact('parents'));
     }
@@ -141,7 +145,7 @@ class CategoryController extends Controller
         $category = new Category();
         $category->name = $request->name;
         $category->slug = \Illuminate\Support\Str::slug($request->name);
-        $category->parent_id = $request->parent_id;
+        $category->parent_id = $request->filled('parent_id') ? $request->parent_id : null;
         $category->status = $request->boolean('status', true);
 
         if ($request->filled('image_from_manager')) {
@@ -175,9 +179,17 @@ class CategoryController extends Controller
     public function edit($id)
     {
         $category = Category::findOrFail($id);
-        $parents = Category::whereNull('parent_id')->get();
+        $descendantIds = $category->getAllDescendantIds();
+        $descendantIds[] = $category->id;
+        $excluded = array_unique($descendantIds);
+        $parents = Category::topLevel()
+            ->where('is_deleted', false)
+            ->whereNotIn('id', $excluded)
+            ->with('children.children.children')
+            ->orderBy('name')
+            ->get();
 
-        return view('admin.categories.edit', compact('category', 'parents'));
+        return view('admin.categories.edit', compact('category', 'parents', 'excluded'));
     }
 
     // Update Category
@@ -192,7 +204,7 @@ class CategoryController extends Controller
         $category = Category::findOrFail($id);
         $category->name = $request->name;
         $category->slug = \Illuminate\Support\Str::slug($request->name);
-        $category->parent_id = $request->parent_id;
+        $category->parent_id = $request->filled('parent_id') ? $request->parent_id : null;
         $category->status = $request->boolean('status', true);
 
         if ($request->filled('image_from_manager')) {

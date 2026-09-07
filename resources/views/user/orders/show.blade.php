@@ -554,8 +554,9 @@
 
     $shippingFee = $order->shipping_fee ?? 0;
     $taxAmount = $order->tax ?? 0;
+    $couponDiscount = $order->coupon_discount ?? 0;
     $totalAmount = $order->total_amount ?? 0;
-    $subTotal = $totalAmount - $shippingFee - $taxAmount;
+    $subTotal = $totalAmount - $shippingFee - $taxAmount + $couponDiscount;
 
     $statusSteps = ['Order Placed', 'On Review', 'On Delivery', 'Delivered'];
     $currentStatus = $order->status ?? 'pending';
@@ -887,6 +888,12 @@
                 {{ (float)$shippingFee <= 0 ? 'FREE' : currency_format($shippingFee) }}
             </strong>
         </div>
+        @if($couponDiscount > 0)
+        <div class="order-summary-row">
+            <span>Coupon Discount @if(!empty($order->coupon_code))<small class="text-muted">({{ $order->coupon_code }})</small>@endif</span>
+            <strong class="text-success">-{{ currency_format($couponDiscount) }}</strong>
+        </div>
+        @endif
         <div class="order-summary-row total">
             <span>Total</span>
             <strong>{{ currency_format($totalAmount) }}</strong>

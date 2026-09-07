@@ -28,12 +28,20 @@ class HomeController extends Controller
         return $names[$slug] ?? ucwords(str_replace('-', ' ', $slug));
     }
 
-    private function getCategories()
+    private function getCategories($categorySection = null)
     {
-        return Category::whereNull('parent_id')
-            ->where('status', true)
-            ->orderBy('name')
-            ->get()
+        $selectedIds = $categorySection?->extra_data['category_ids'] ?? [];
+        $selectedIds = is_array($selectedIds) ? array_values(array_filter(array_map('intval', $selectedIds))) : [];
+
+        $query = Category::whereNull('parent_id')->where('status', true);
+
+        if (!empty($selectedIds)) {
+            $query->whereIn('id', $selectedIds)->orderByRaw('FIELD(id, ' . implode(',', $selectedIds) . ')');
+        } else {
+            $query->orderBy('name');
+        }
+
+        return $query->get()
             ->map(function ($category) {
                 $categoryIds = $category->getAllDescendantIds();
                 return [
@@ -72,12 +80,12 @@ class HomeController extends Controller
 
     public function index()
     {
-        $categories = $this->getCategories();
-
         $sections = HomePageSection::where('status', true)
             ->orderBy('order')
             ->get()
             ->keyBy('section_name');
+
+        $categories = $this->getCategories($sections->get('categories_heading'));
 
         if (! HomePageSection::where('section_name', 'top_brands_heading')->exists()) {
             HomePageSection::create([

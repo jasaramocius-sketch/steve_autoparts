@@ -294,6 +294,11 @@
 .responsive-table td { word-wrap: break-word; }
 .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .table-responsive > .table { margin-bottom: 0; }
+/* Restore top border on first row (Bootstrap removes it by default) */
+.admin-content .table > tbody > tr:first-child > th,
+.admin-content .table > tbody > tr:first-child > td,
+.admin-content .table > tr:first-child > th,
+.admin-content .table > tr:first-child > td { border-top: 1px solid #dee2e6; }
 
 @media (max-width: 768px) {
     .responsive-table thead { display: none; }

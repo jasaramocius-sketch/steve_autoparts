@@ -410,7 +410,7 @@
                 aria-labelledby="categories-tab">
                 <div class="mobile-menu-widget">
                     <div class="product-cat-widget">
-                        <ul class="list-unstyled mb-0">
+                        <ul class="list-unstyled mb-0 gap-1 d-flex flex-column">
                             @php
                                 $catRoute = function($slug) { return url('/category/' . $slug); };
                                 $subcatRoute = function($parent, $child) { return url('/category/' . $parent . '/' . $child); };
@@ -436,7 +436,7 @@
                                         }
                                     }
                                 @endphp
-                                <li class="main-list mb-3 {{ $topActive || $hasActiveChild ? 'active' : '' }}">
+                                <li class="main-list gap-1 d-flex flex-column mb-1 {{ $topActive || $hasActiveChild ? 'active' : '' }}">
                                     <div class="d-flex justify-content-between align-items-center gap-3">
                                         @if($topCat->descendant_count > 0)
                                             <a href="{{ route('category', $topCat->slug) }}" class="text-decoration-none flex-grow-1 {{ $topActive || $hasActiveChild ? 'fw-bold' : '' }}" style="color: {{ $topActive || $hasActiveChild ? 'var(--primary)' : '#1f0300' }}; font-weight: {{ $topActive || $hasActiveChild ? '600' : '400' }}; font-size: 15px;">
@@ -459,7 +459,7 @@
 
                                     @if($topCat->children->count() > 0)
                                         @php $showTop = $topActive || $hasActiveChild; @endphp
-                                        <ul id="mobcat_{{ $topCat->id }}" class="collapse ms-3 mt-2 list-unstyled {{ $showTop ? 'show' : '' }}">
+                                        <ul id="mobcat_{{ $topCat->id }}" class="collapse ms-3 mt-0 list-unstyled {{ $showTop ? 'show' : '' }}">
                                             @foreach($topCat->children as $subCat)
                                                 @php
                                                     $subCatUrl = $subcatRoute($topCat->slug, $subCat->slug);
@@ -497,7 +497,7 @@
 
                                                     @if($subCat->children->count() > 0)
                                                         @php $showSub = $subActive || $hasActiveSubChild; @endphp
-                                                        <ul id="mobcat_{{ $subCat->id }}" class="collapse ms-3 mt-1 list-unstyled {{ $showSub ? 'show' : '' }}">
+                                                        <ul id="mobcat_{{ $subCat->id }}" class="collapse ms-3 mt-0 list-unstyled {{ $showSub ? 'show' : '' }}">
                                                             @foreach($subCat->children as $childCat)
                                                                 @php
                                                                     $childCatUrl = $subchildRoute($topCat->slug, $subCat->slug, $childCat->slug);

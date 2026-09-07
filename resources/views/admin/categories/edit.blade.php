@@ -89,16 +89,7 @@
                         Main Category
                     </option>
 
-                    @foreach($parents as $parent)
-
-                        <option value="{{ $parent->id }}"
-                            {{ $category->parent_id==$parent->id ? 'selected':'' }}>
-
-                            {{ $parent->name }}
-
-                        </option>
-
-                    @endforeach
+                    @include('admin.categories._parent_options', ['categories' => $parents, 'depth' => 0, 'selected' => $category->parent_id, 'excluded' => $excluded])
 
                 </select>
 

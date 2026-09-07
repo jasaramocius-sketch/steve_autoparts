@@ -92,6 +92,8 @@ Route::post('/cart/remove-selected', [CartController::class, 'removeSelected'])-
 
 Route::post('/cart/update/{id}', [CartController::class, 'updateQuantity'])->name('cart.update');
 Route::get('/cart/mini', [CartController::class, 'miniCart'])->name('cart.mini');
+Route::post('/cart/coupon/apply', [CartController::class, 'applyCoupon'])->name('cart.coupon.apply');
+Route::post('/cart/coupon/remove', [CartController::class, 'removeCoupon'])->name('cart.coupon.remove');
 
 Route::get('/checkout', [CartController::class, 'checkout'])->middleware(['auth', 'nocache'])->name('checkout');
 
@@ -373,6 +375,8 @@ Route::prefix('admin')
             ->name('admin.coupons.create');
         Route::post('/coupons', [CouponController::class, 'store'])
             ->name('admin.coupons.store');
+        Route::get('/coupons/{id}', [CouponController::class, 'show'])
+            ->name('admin.coupons.show');
         Route::get('/coupons/{id}/edit', [CouponController::class, 'edit'])
             ->name('admin.coupons.edit');
         Route::put('/coupons/{id}', [CouponController::class, 'update'])

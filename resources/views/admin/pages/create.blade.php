@@ -78,7 +78,7 @@
 <form action="{{ route('admin.pages.store') }}" method="POST" id="pageForm">
     @csrf
 
-    <div class="d-flex gap-4 align-items-start page-builder">
+    <div class="d-flex gap-4 align-items-start page-builder admin-page-builder admin-page-builder-edit">
 
         {{-- Section nav --}}
         <div class="page-builder-nav">
@@ -94,11 +94,14 @@
         <div class="flex-grow-1 min-width-0">
 
             {{-- Header bar: title + status + save --}}
-            <div class="d-flex align-items-center gap-2 pb-3 mb-4 border-bottom page-header-bar">
+            <div class="d-flex align-items-center gap-2 pb-3 mb-4 border-bottom page-header-bar flex-wrap">
+                <div class="page-header-bar-first d-flex gap-2 align-items-center flex-grow-1 min-width-0">
+                <div class="w-auto flex-grow-1">
                 <input type="text" name="title" id="titleInput" class="page-title-input form-control form-control-lg border-0 fw-semibold flex-grow-1 @error('title') is-invalid @enderror"
                        placeholder="Untitled page" value="{{ old('title') }}" maxlength="255" required>
                 @error('title') <div class="invalid-feedback">{{ $message }}</div> @enderror
-
+                </div>
+                <div class="w-auto d-flex align-items-center gap-2 justify-content-end">
                 <button type="button" id="statusPill" class="status-pill {{ old('status', true) ? 'is-active' : '' }}" data-active="{{ old('status', 1) ? '1' : '0' }}" style="height: 40px; font-size: 1rem; line-height: 1.2;">
                     {{ old('status', true) ? 'Active' : 'Inactive' }}
                 </button>
@@ -106,6 +109,8 @@
 
                 <button type="submit" class="btn btn-primary steve-btn text-nowrap"><i class="fas fa-save me-1"></i> Save page</button>
                 <a href="{{ route('admin.pages.index') }}" class="btn btn-outline-secondary text-nowrap steve-btn gap-1"><i class="fas fa-times me-1"></i> Cancel</a>
+                </div>
+                </div>
             </div>
 
             {{-- Page Details --}}

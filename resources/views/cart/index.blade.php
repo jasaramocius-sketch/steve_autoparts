@@ -79,6 +79,38 @@
             <span class="fw-600 fs-17 total-cart-price-sub total-cart-price-val">{{ currency_format($total) }}</span>
           </div>
 
+          @if(!empty($couponData))
+          <div class="px-3 mb-3 d-flex justify-content-between align-items-center bg-success-subtle border border-success-subtle rounded p-2">
+            <div class="fs-14">
+              <i class="las la-tag text-success me-1"></i>
+              <span class="fw-600 text-success">{{ $couponData['code'] }}</span>
+              <span class="opacity-70"> — saved {{ currency_format($couponDiscount) }}</span>
+            </div>
+            <form action="{{ route('cart.coupon.remove') }}" method="POST">
+              @csrf
+              <button type="submit" class="btn btn-sm btn-outline-danger steve-btn"><i class="las la-times"></i> Remove</button>
+            </form>
+          </div>
+          <div class="px-3 py-2 mb-3 border-top d-flex justify-content-between">
+            <span class="text-success fw-600 fs-14">Coupon Discount</span>
+            <span class="text-success fw-600 fs-14">-{{ currency_format($couponDiscount) }}</span>
+          </div>
+          <div class="px-3 py-2 mb-4 border-top d-flex justify-content-between">
+            <span class="opacity-60 fs-15 fw-700">Total</span>
+            <span class="fw-700 fs-17">{{ currency_format($total - $couponDiscount) }}</span>
+          </div>
+          @endif
+
+          @if(empty($couponData))
+          <div class="px-3 mb-4">
+            <form action="{{ route('cart.coupon.apply') }}" method="POST" class="d-flex gap-2">
+              @csrf
+              <input type="text" name="coupon_code" class="form-control form-control-sm rounded-0" placeholder="Enter coupon code" required>
+              <button type="submit" class="btn btn-sm btn-outline-primary steve-btn px-3">Apply</button>
+            </form>
+          </div>
+          @endif
+
           <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
               <a href="{{ route('shop') }}" class="fw-600 a-tag-hover-color">
                 <i class="fas fa-arrow-left"></i>

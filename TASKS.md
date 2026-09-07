@@ -3604,3 +3604,342 @@ User wanted the product detail page to show a **side-by-side comparison** of the
 - Limit: 3 alternatives (4 columns total = current + 3, matching Moglix & existing `/compare` max-3).
 
 **Verified:** `view:cache` compiles; tinker render test → product with fitment alternatives shows 4-column table (current + 3 different-brand alternatives: Mobil 1 / Motorcraft / Castrol / MANN-FILTER) with all rows (Product/Brand/Price/Rating/Fitment/Availability/Description/Action with Add to Cart); product without alternatives returns empty (section hidden); `php -l` clean.
+
+## 273. Admin Pages Edit — Responsive Header Bar + Button Fixes (3 Sep 2026)
+
+**Problem:** Admin page editor header bar didn't wrap on mobile; buttons had inconsistent widths; Cancel button lacked `steve-btn` class; view link was awkwardly placed.
+
+**Files changed:**
+- `resources/views/admin/pages/edit.blade.php`:
+  - Added `admin-page-builder admin-page-builder-edit` classes to the form wrapper for mobile CSS targeting
+  - Header bar: title input changed from `w-60` to `w-auto flex-grow-1`; status+action div changed from `w-40` to `w-auto d-flex align-items-center gap-2 justify-content-end`
+  - Status pill gets inline `height: 40px; font-size: 1rem; line-height: 1.2` for consistent sizing
+  - Cancel button gets `steve-btn gap-1` class
+  - View link moved inside `w-100` div for proper wrapping
+  - Page URL link and "Last updated" text reorganized in the header bar
+
+**Verified:** blade compiles; page renders; header bar wraps to multiple rows on mobile.
+
+## 274. CSS Cleanup + Responsive Table Borders + Mobile Page Builder Fix (3 Sep 2026)
+
+**Files changed:**
+
+### style.css — Formatting cleanup + new rules
+- Standardized whitespace/indentation across ~40 inline CSS blocks (newsletter-btn, gallery-nav, search icon, font-vw, sidebar, deal-of-day, swiper-disabled, summary-table, admin-product-name, logs-page-table, similar-compare)
+- Added `.compare-table>tbody>tr:first-child>td` / `>th` first-row top border (1px solid #dee2e6)
+- Added `@media (max-width:767px)` for page builder edit: `.admin-page-builder-edit, .page-header-bar-first` → `flex-direction: column`; `.page-header-bar-first div` → `width: 100%`; `.page-builder-nav` → `position: relative`
+
+### backend.css — Admin table first-row border
+- Added `.admin-content .table > tbody > tr:first-child > th/td` top border rule (prevents Bootstrap's default first-row border removal from hiding the top line)
+
+### blog/show.blade.php — Back button icon
+- Added `<i class="fas fa-arrow-left"></i>` before "Back to Blog" text
+
+### product/show.blade.php — Stock badge styling + quantity width
+- Added `.stock` base class (font-size: 14px, font-weight: 600)
+- Added `.stock.in-stock` (green #2e7d32) and `.stock.out-stock` (red #c62828) color variants
+- Applied conditional `in-stock`/`out-stock` class to stock `<p>` element
+- Quantity input width: 130px → 140px; quantity button width: 35px → 40px
+
+### partials/product-similar-compare.blade.php — Title spacing
+- Title div changed from `mb-4` to `pb-20` for consistent bottom padding
+
+## 275. Admin Pages Create + Edit — Complete Responsive Header Bar & Nav (4 Sep 2026)
+
+**Problem:** The admin Page Builder (create + edit) layout wasn't properly responsive. On mobile the fixed 180px `.page-builder-nav` side nav stayed vertical in a narrow column, the horizontal `page-builder` flex row didn't collapse, and the header-bar title/action wrapping was incomplete.
+
+**Solution:** Full, verified responsive layout with two breakpoints.
+
+### Blade (`resources/views/admin/pages/create.blade.php` + `edit.blade.php`)
+- Both forms carry `admin-page-builder admin-page-builder-edit` classes on the `.page-builder` wrapper (edit already had it; create now matches)
+- Header bar is `page-header-bar flex-wrap` with `page-header-bar-first` title container + `w-auto d-flex justify-content-end` action group (create now matches edit)
+
+### CSS (`public/assets/front/css/style.css`) — replaced incomplete `@media 767px` block with two-coverage breakpoint design
+
+**`@media (max-width: 991.98px)`** (tablet/mobile):
+- `.admin-page-builder-edit` → `flex-direction: column; gap: 12px` (nav stacks above content)
+- `.page-builder-nav` → full-width horizontal pill bar: `width:100%; position:relative; top:0; display:flex; flex-direction:row; flex-wrap:wrap;` with light `#f8f9fa` bg, border, radius
+- `.page-builder-nav .text-muted` ("Pages / New") → `flex-basis:100%` on its own row
+- `.page-builder-nav .nav` → `flex-direction:row; flex-wrap:wrap`
+- `.nav-link-section` → smaller 0.8rem padding for horizontal chips
+- `.page-header-bar-first` → `flex-wrap`; its `> div` children `flex:1 1 auto`; the action group (`justify-content-end`) → `flex-basis:100%` + `justify-content:flex-start` on its own wrapped row
+
+**`@media (max-width: 575.98px)`** (phones):
+- `.page-header-bar-first > div` → `flex-basis:100%` (title full-width)
+- Action group `gap:8px`, and its `.btn` + `#statusPill` → `flex:1 1 auto` (buttons stretch full width)
+
+**Verified:** CSS braces balanced (3160/3160); `php -l` clean on both blades; `view:cache` compiled OK.
+
+## 276. Admin Home "All Categories" — Select/Edit Which Categories Show (4 Sep 2026)
+
+**Problem:** The home page "All Categories" section always showed every top-level active category (16), ordered by name. There was no way to choose which categories appeared on the home page or control their order.
+
+**Solution:** Admin-driven category selection, mirroring the existing Brands/Posts pattern. The `categories_heading` section now stores a `category_ids[]` array in its `extra_data`; home rendering filters to exactly those categories (in selected order). Empty = show all (previous behavior).
+
+### Admin/HomePageController.php — `update()`
+- New branch: `if ($request->has('category_ids'))` → saves `$existing['category_ids'] = array_values(array_filter(array_map('intval', ...)))` (int-filtered, in selection order)
+- Added `|| $request->has('category_ids')` to the `$extraChanged` guard
+
+### admin/home-page/edit.blade.php
+- Added a `categories_heading` info alert (Title = heading, choose categories below)
+- Added a `@if($section->section_name === 'categories_heading')` block:
+  - Loads `$allCategories = Category::whereNull('parent_id')->where('status', true)->orderBy('name')->get()`
+  - Multi-select `category_ids[]` (size=10) with `$selectedCategoryIds` from `extra_data['category_ids']`, preselecting saved ids
+  - Help text: "Hold Ctrl/Cmd ... Leave empty to show all"
+
+### HomeController.php
+- `index()` now builds `$sections` before `getCategories()`, passing `$sections->get('categories_heading')`
+- `getCategories($categorySection = null)`:
+  - Reads `extra_data['category_ids']` (int-filtered)
+  - Non-empty → `whereIn('id', $selectedIds)->orderByRaw('FIELD(id, ...)')` (honors selection order)
+  - Empty → original behavior (all top-level active, ordered by name)
+
+**Verified:** `php -l` clean on both controllers; `view:cache` compiles; tinker unit-check returns 16 categories (empty), 3 in exact selected order when set, 16 after restore; end-to-end HTTP: home 200 + shows only selected categories, admin edit 200 + renders "Select Categories for Home Page" select. DB `categories_heading` extra_data left empty (shows all). New route/data: none.
+
+## 277. Admin Order Detail — New Design + Payment Status Field (4 Sep 2026)
+
+**Problem:** Admin order detail page (`admin/orders/show.blade.php`) was a basic table layout. The team provided a new design file (`Order-detail-page.html`, Tailwind mockup) with a richer layout (header badges, item thumbnails, totals strip, status-update selects, and side cards for customer/shipping/payment). Also, orders had no separate payment-status concept — only order `status` — so the design's "Payment Status" select had no real field to edit.
+
+**Solution:** Replicated the new design in the existing **Bootstrap 5.3** admin theme (no Tailwind added — would clash with the admin's Bootstrap utilities), and added a real `payment_status` column (unpaid/paid/refunded) end-to-end. Currency via the store's `currency_format()` helper (not the mockup's ₹).
+
+### Database
+- New migration `database/migrations/2026_09_04_000001_add_payment_status_to_orders_table.php`: `string('payment_status')->default('unpaid')->after('status')` (drop on rollback). Existing orders default `unpaid`.
+
+### app/Models/Order.php
+- Added `'payment_status'` to `$fillable`.
+
+### CartController.php — paymentSubmit()
+- New orders set `payment_status` by method: `card`/`paypal` → `paid`, `cod` → `unpaid`.
+
+### app/Http/Controllers/Admin/OrderController.php
+- `index()`: `payment_status` added to `sortBy` whitelist + optional `payment_status` filter (unpaid/paid/refunded); passes `paymentStatusFilter` to view.
+- `updateStatus()`: accepts optional `status` + `payment_status` (each validated). Persists whichever is present, on the same existing `admin.orders.update-status` POST route.
+
+### admin/orders/index.blade.php
+- New **Payment** filter dropdown (All Payments / Unpaid / Paid / Refunded) beside the Status filter.
+- New sortable **Payment** column with color-coded badge (paid=green, refunded=gray, unpaid=amber); empty-state colspan updated 6→7.
+
+### admin/orders/show.blade.php (rewritten)
+- **Header**: Back link, `Order #number` + order-status badge + payment-status badge + "Placed on" date; right = **Print Invoice** button (`admin.orders.invoice`, target `_blank`).
+- **Left (col-lg-8)**: Order Items card (product thumbnail via `storedImageUrl`, name, price, qty, line total; empty state) + totals strip (Subtotal, Shipping Fee, optional Tax, Total) + **Update Order Status** card with Order Status + Payment Status selects (one form → `update-status`).
+- **Right (col-lg-4)**: Customer Details card (avatar initials, name, since-year, email, phone), Shipping Address card (from decoded `shipping_details` JSON), Payment Info card (Method humanized; transaction row only when `payment_details` present).
+- Currencies through `currency_format()`; missing order thumbnails fall back to global placeholder img-onerror.
+
+**Verified:** `php -l` clean (Order model, CartController, Admin OrderController, both blades); `php artisan migrate` adds column (existing orders → `unpaid`); `view:cache` compiles; HTTP 200 on orders list (Payment filter + sortable header + Paid/Unpaid badges render; `?payment_status=paid` filters correctly) and order detail (order #, both selects, Print Invoice, Shipping Address, Payment Info all render); controller `updateStatus` persists `payment_status` (set → paid, restored → unpaid). No new routes added (reused existing show/update-status/invoice). Imported `Order-detail-page.html` is the design reference only (left in repo root, no longer auto-read by any view).
+
+## 278. Product Detail — "Similar Products To Compare" Responsive (Sticky Row Labels) (4 Sep 2026)
+
+**Problem:** On the product detail page, the "Similar Products To Compare" comparison table (`partials/product-similar-compare.blade.php`) is a wide table where each product is a column and attributes (Brand, Price, Rating, Fitment, Availability, Description, Action) are rows. On mobile it relied only on Bootstrap's `.table-responsive` horizontal scroll, so the row-label column ("Product", "Brand", "Price", …) scrolled away out of view — making rows unreadable.
+
+**Solution:** Made the row-label column sticky so it stays pinned on the left while the wide table scrolls horizontally inside `.table-responsive`. Added a `min-width` so the table keeps its columns readable instead of squeezing on narrow screens. (Kept as a table — not converted to a slider, since comparison tables pair attributes per-row.)
+
+### public/assets/front/css/style.css
+Added a block after the `.gs-similar-compare-area` styles:
+- `.gs-similar-compare-area .table-responsive` → `-webkit-overflow-scrolling: touch` for smooth mobile scroll
+- `.compare-similar-table` → `min-width: 720px`
+- First-column cell (`> tr > th:first-child` / `> tr > td:first-child`) → `position: sticky; left: 0; z-index: 2; background: #fff; border-right; subtle shadow` so row labels stay visible while scrolling
+- `th:first-child` → `min/max-width: 160px; white-space: nowrap; vertical-align: middle`
+- `thead th:first-child` → `z-index: 3; background: #f8f9fa` (header sits above row cells)
+
+**Verified:** CSS braces balanced (3166/3166); `view:cache` compiles; product page (e.g. `/product/front-shock-absorber-pair`) HTTP 200 with `gs-similar-compare-area` + `compare-similar-table` present. No blade/controller changes needed.
+
+## 279. Admin Order Detail — Shipping Address Icons (4 Sep 2026)
+
+**Problem:** In the admin order detail page, the "Shipping Address" card content was plain text (no icons), while the adjacent "Customer Details" card had icons for email/phone. The Shipping Address card looked inconsistent.
+
+**Solution:** Added Font Awesome icons next to each shipping-address line (matching the Customer Details card style):
+- `fa-user` — recipient name
+- `fa-map-marker-alt` — address line
+- `fa-building` — city / state / zip
+- `fa-globe` — country
+Each line is `d-flex align-items-start gap-2` with the icon muted; empty address fields are skipped entirely.
+
+**Files changed:**
+- `resources/views/admin/orders/show.blade.php` — replaced the `<p>`-based address block with icon row layout
+
+**Verified:** `php -l` clean; `view:cache` compiles; view renders all four icons (`fa-user`, `fa-map-marker-alt`, `fa-building`, `fa-globe`).
+
+## 280. Admin Order Detail — Transaction ID Only When Paid + Unique (4 Sep 2026)
+
+**Problem (2 logic flaws reported by user):**
+1. Transaction ID could be saved even when Payment Status was `unpaid` — a txn ID only makes sense once a payment is actually Paid.
+2. The same Transaction ID could be reused across multiple orders — no uniqueness enforcement (found 2 orders sharing `pay_L9xK20sKq` in seed data).
+
+**Solution (App/Controllers/Admin/OrderController@updateStatus):**
+- **Paid-only:** A Transaction ID is only persisted when the order's payment_status is `paid` (either being set to paid in this request, or already paid). Attempts while unpaid/refunded are ignored.
+- **Unique:** Before saving, checks any OTHER order whose `payment_details->transaction_id` matches; if a duplicate → `back()->withErrors(['transaction_id' => ...])`.
+- **One-time (kept):** If this order already has a txn ID, further changes are rejected with an error (can't change/clear).
+- Empty txn ID with no existing value = no-op (never saved blank).
+
+**Blade (admin/orders/show.blade.php):**
+- Replaced the single Transaction ID input with a 3-state group toggled by JS on the Payment Status select:
+  - **paid selected + no txn yet** → editable input
+  - **txn already exists** → readonly "locked" input + "can only be set once" note
+  - **unpaid/refunded selected** → disabled input + "only when Paid" note
+- Added `@push('scripts')` toggle JS reading the Payment Status select (initial state set via `txnIdExists`).
+
+**Verified:** `php -l` clean + `view:cache` compiles. Controller test across orders:
+1. txn while unpaid → blocked ✓
+2. unpaid→paid + txn `TXN_111` → saved, pay=paid ✓
+3. duplicate `TXN_111` on another order → rejected ✓
+4. change after set → stays `TXN_111` (one-time) ✓
+Detail page HTTP 200 with `transactionIdGroup`, toggle JS, and not-paid message present. Test-state orders reset to `unpaid`/null afterward.
+
+## 281. Customer-Facing Coupon Apply in Cart & Checkout (4 Sep 2026)
+
+**Problem:** Admin coupon CRUD existed, but customers had no way to apply a coupon — no cart/checkout input, no validation logic wired up, and orders had no coupon columns (invoice blade referenced a non-existent `coupon_discount`).
+
+**DB / Models:**
+- New migration `2026_09_04_000002_add_coupon_fields_to_orders_table` → adds `coupon_code` (nullable string) and `coupon_discount` (decimal, default 0) after `tax`. Ran with `php artisan migrate --force`.
+- `Order` $fillable: added `coupon_code`, `coupon_discount`.
+- `Coupon` model: added `calculateDiscount(float $subtotal)` (fixed = min(value, subtotal); % = min(subtotal*value/100, subtotal); 0 if invalid/min-order not met).
+
+**Routes (`routes/web.php`):**
+- `POST /cart/coupon/apply` → `cart.coupon.apply`
+- `POST /cart/coupon/remove` → `cart.coupon.remove`
+
+**CartController:**
+- `applyCoupon(Request)`: validates code, expiry, status, capacity, min-order via `Coupon::isValid()` + `calculateDiscount()`, stores `session('coupon')` as `['code','discount','type','value']`, flashes success/error (uses `currency_format()`).
+- `removeCoupon()`: clears `session('coupon')`.
+- `index()`, `checkout()`, `payment()`: now read `session('coupon')` and pass `couponData`/`couponDiscount` to views; totals subtract the discount.
+- `paymentSubmit()`: reads coupon, `grandTotal = max(total + shipping - discount, 0)`, stores `coupon_code`/`coupon_discount` on the Order, increments coupon `used_count` after success, and includes `coupon_code`/`coupon_discount` in the `last_order` confirmation session.
+
+**Blade:**
+- `cart/index.blade.php`: coupon input+Apply button (no coupon), or applied-code card with Remove button + Coupon Discount/total rows (coupon set).
+- `checkout/payment.blade.php`: shows "Coupon (CODE)" − discount row before Total when applied.
+- `checkout/order-confirmed.blade.php`: Coupon Discount row now uses real value and shows the applied code; subtotal calc accounts for coupon.
+- `user/orders/invoice.blade.php`: subtotal now re-adds coupon discount so totals line up (referenced `coupon_discount` that previously didn't exist).
+- `admin/orders/show.blade.php`: subtotal calc updated + shows "Coupon (CODE) −discount" row when > 0.
+
+**Verified:** `php -l` clean on all edited files; `view:cache` compiles. `calculateDiscount` cases (fixed cap, %, min-order) pass. Controller apply/remove + min-order reject + invalid reject + remove all pass. Full order placement with coupon → order saved with `total_amount=500` (600−100), `coupon_code`, `coupon_discount=100`, `used_count` 0→1. HTTP apply route with CSRF → 302 + coupon stored. Contact/payment/confirm/invoice/admin pages render coupon data.
+
+## 282. Admin Coupon Usage Visibility — Per-Product Tracking + Detail Page (4 Sep 2026)
+
+**Problem:** Admin could only see an aggregate `used_count` per coupon — no way to know WHICH orders/products used a coupon.
+
+**DB / Models:**
+- New migration `2026_09_04_000003_add_coupon_discount_to_order_items_table.php` → adds `coupon_discount` (decimal default 0) after `price` on `order_items`. Ran with `php artisan migrate --force`.
+- `OrderItem` $fillable: added `coupon_discount`.
+
+**Per-product split (`CartController::paymentSubmit`):**
+- When a coupon discount exists, the order's discount is split across each order item proportionally by line-subtotal weight (`round(discount * lineSubtotal / total, 2)`), with the last item absorbing the rounding remainder so per-item discounts sum exactly to the order discount.
+- Each `OrderItem::create` now stores its `coupon_discount` share.
+
+**Admin coupon detail page (`admin.coupons.show`):**
+- New route `GET /admin/coupons/{id}` → `CouponController@show`.
+- `show()`: fetches the coupon plus all orders that used it (`coupon_code = code`), eager-loads `user` + `items.product`, paginates (10/20/50/100), computes aggregate `totalDiscount` and `orderCount`.
+- New blade `admin/coupons/show.blade.php`: stat cards (Type/Value, Orders Used, Total Discount Given, Uses Limit) + per-order table showing Order #, Customer, Date, **Products column listing each item with its per-product `-$discount`**, Coupon Discount, Order Total, and a View button → admin order detail.
+
+**Wiring:**
+- `admin/coupons/index.blade.php`: coupon detail opened via an eye (`btn-view`) icon link added in the Action column (edit/destroy untouched). Removed the earlier external-link on the Uses cell.
+- `admin/orders/show.blade.php`: order items table gained a "Coupon Discount" column showing each product's share (with coupon code under the product name).
+
+**Verified:** `php -l` clean on all edited files; `view:cache` compiles. End-to-end order with 10% coupon on 700 subtotal → order total 630, item splits 60.00 + 10.00 summing to 70 = order discount. Admin coupon detail (HTTP 200) lists the order, real product name, and `-$25.00` per item; admin order detail has the Coupon Discount column and `-$25.00` per item; coupon index renders the view eye button. Test orders/coupons cleaned up.
+
+## 283. Coupon Hardening — Gaps Found & Fixed in Coupon Feature (4 Sep 2026)
+
+**Review of the coupon feature surfaced 3 real gaps (user selected full "Option B" hardening):**
+
+**Gap 1 — User order detail page showed wrong subtotal + no coupon row:**
+`user/orders/show.blade.php` computed `$subTotal = $totalAmount - $shippingFee - $taxAmount`, so a coupon-discounted order showed a subtotal that was too LOW and had no "Coupon Discount" line (unlike the invoice/admin pages already fixed).
+- Fix: subtotal now adds back `$order->coupon_discount`; added a "Coupon Discount (code) −$x" summary row shown only when discount > 0.
+
+**Gap 2 — Coupon survived after order placement:**
+`paymentSubmit()` forgot `cart`/`billing_info`/`shipping_info` on success but never `session('coupon')`, so a stale coupon silently attached to the user's NEXT cart.
+- Fix: added `session()->forget('coupon')` alongside the other checkout session clears.
+
+**Gap 3 — Stale / exploitable discount (the "hardening"):**
+The discount was computed once at apply-time and never revalidated. Cart changes (`add`, `updateQuantity`, `remove`, `removeSelected`) did not recompute, and `paymentSubmit()` trusted the stored session value — so a user could apply a coupon on a big cart, then shrink quantities (even below `min_order_amount`) and still get the full discount.
+
+**Fix (Option B, full hardening) — new private helper `CartController::recomputeCoupon(array $cart): ?array`:**
+- Re-fetches the coupon by code from the DB, re-runs `isValid()` (status, capacity, expiry/start), re-checks `min_order_amount` against the CURRENT cart subtotal, and re-calculates a fresh discount via `calculateDiscount()`.
+- Updates `session('coupon')` and returns it; if invalid/now-below-min/discount<=0 it clears the coupon and returns null.
+
+**Wired everywhere:**
+- `add()`, `remove()`, `removeSelected()`, `updateQuantity()` → call `recomputeCoupon($cart)` after mutating the cart, so the UI discount stays consistent and invalid coupons drop off.
+- `index()`, `checkout()`, `payment()` → totals now come from `recomputeCoupon(...)` so displayed money matches the coupon at all times.
+- `paymentSubmit()` → USES `recomputeCoupon($cart)` AS THE FINAL AUTHORITY instead of trusting the stored session discount, guaranteeing every order stores the correct discount against the actual paid-for cart.
+
+**Verified:** `php -l` clean; `view:cache` compiles. Tests: apply on 900 → discount 100; qty→1 (subtotal 300) recomputes to 100; order placed 300−100=200 with `coupon_discount=100`; coupon+cart sessions cleared after order; user order detail (HTTP 200) shows Subtotal 600, Coupon Discount (HRD) −$100.00, Total 500. Min-order coupon correctly rejected below threshold. Test data cleaned up.
+
+## 284. Coupon List — Action Column Reduced to Eye Icon Only (4 Sep 2026)
+
+**Request:** Admin coupon index page (`admin/coupons`) ke Action column me sirf eye (View) icon rakhna tha, Edit aur Delete buttons hata do.
+
+**Change (`admin/coupons/index.blade.php`):**
+- Removed the Edit button and the Delete (destroy) form from the row's Action cell.
+- Kept only the eye icon link (`btn-view`) which opens the coupon usage detail page (`admin.coupons.show`).
+
+**Note:** Deleting the row-level Edit/Delete buttons means listing no longer offers inline edit/delete. Edit access is still available from the coupon detail page's "Edit Coupon" button (which remains). Inline delete from the list is no longer present.
+
+**Verified:** `php -l` clean; `view:cache` compiles; admin coupon list renders HTTP 200 with btn-view (eye) present and btn-edit / destroy form absent.
+
+## 285. Coupon Detail Page — Order Action Column Converted to Eye Icon (4 Sep 2026)
+
+**Request:** Coupon detail page (`admin/coupons/{id}`) ke orders table ke "Action" column me bhi sirf eye icon rakhna tha, sirf isliye wo "View" text button ko replace kiya.
+
+**Change (`admin/coupons/show.blade.php`):**
+- The per-order Action cell previously used `<a class="btn btn-sm btn-outline-primary">View</a>`.
+- Replaced with an `action-btn btn-view` eye-icon link (SVG eye), matching the eye-icon convention used in the coupon index (#284) and admin orders list. Tooltip "View Order", opens `admin.orders.show`.
+
+**Note:** This is a different column than the coupon list's Action column (that one opens the coupon detail). Here the eye icon on each order row opens that order's detail page.
+
+**Verified:** `php -l` clean; `view:cache` compiles; `admin/coupons/{id}` renders HTTP 200 with `btn-view` (eye) present and the old "View" text button removed.
+
+## 286. Coupon Detail Page — Show Unit Price in Products Column + Clean Fake Test Order (4 Sep 2026)
+
+**Request:** On the coupon detail page (`admin/coupons/{id}`), the "Products (with coupon discount)" column showed only product name + quantity (and a bogus "Product #1000" fallback for a deleted/test product). User wanted the product price visible too.
+
+**Change (`admin/coupons/show.blade.php`):**
+- Each product line now appends the unit price in muted text: `Product Name × 2 @ $300.00`, keeping the `-$coupon_discount` on the right.
+
+**Data cleanup:**
+- Found a leftover test order `ORD6A9A9D64D4D1E` (coupon `ORDER10`, total 500, single item product_id=1000 with `price=300`, qty=2) created during earlier coupon testing (task #281). Its product_id=1000 does NOT exist in the products table (max id is 808), which is exactly why "Product #1000 × 2" rendered. Deleted this fake test order + its items so real coupons no longer display a bogus "Product #1000" fallback.
+
+**Verified:** `php -l` clean; `view:cache` compiles; real coupon `EREWREWR` detail page (HTTP 200) shows the real product name, the `@ $price` unit price, and `Product #1000` no longer present.
+
+## 287. Category Admin — Parent Category Dropdown Shows All Categories as a Hierarchy (4 Sep 2026)
+
+**Request:** When adding/editing a category, the "Parent Category" dropdown should let the admin select ANY category (not just top-level) and display them as an indented tree by level (level-1 → level-2 → level-3 → level-4, etc.).
+
+**Changes:**
+
+- `CategoryController::create()` — `$parents` now loads ALL non-deleted categories as a hierarchical tree: `Category::topLevel()->where('is_deleted', false)->with('children.children.children')->orderBy('name')->get()`.
+  - Fix: old code used `whereNull('is_deleted')`, but every category row stores `is_deleted = false` (not NULL), so that filter matched **zero** rows and the dropdown was empty. Switched to `where('is_deleted', false)`.
+- `CategoryController::edit()` — same tree load, but `whereNotIn('id', $excluded)` on top-level plus a recursive prune in the blade so the current category AND all its descendants (its whole subtree) are removed from the parent list, preventing cycles.
+- New partial `resources/views/admin/categories/_parent_options.blade.php` — recursively renders each node's `<option>` with indentation (`&nbsp;` × depth) and a `└` tree marker for non-root levels, then recurses into `$cat->children`.
+- `create.blade.php` / `edit.blade.php` — replaced the flat `@foreach` with `@include` of the partial; edit passes `$excluded` (self + descendants) so they are pruned, `$category->parent_id` for `selected`.
+- `store()` / `update()` — `parent_id = $request->filled('parent_id') ? $request->parent_id : null;` (unchanged, already normalized to NULL for "Main Category").
+
+**Verified:**
+- `php -l` clean on controller + 3 blades; `view:cache` compiles.
+- Create page `parent_id` select contains exactly 71 `<option value="N">` (all categories), with `└` tree markers showing hierarchy.
+- Edit top-level #64 (`Belts and Cooling`): descendants leaked = 0. Edit sub-category #2 (`Air Intake Systems`): 69 options, self excluded, descendantLeak = none (cycle-safe).
+- Save test: sub-category saved with `parent_id = '65'` (top-level parent) persisted; moving back to "Main Category" sets `parent_id = NULL`. Cleanup done, no test rows left.
+
+## 288. Image Restoration — Recover Missing Product Images After Accidental Deletion (4 Sep 2026)
+
+**Incident:** User deleted "unused" images from `storage/app/public/uploads/2026/08/`, but those images were actually in use by 224 active products (main images). Home page showed 33 broken images; full scan revealed 224/807 products missing their main image file.
+
+**Root cause:** The `2026/08` uploads folder contained the current product images. A duplicate backup existed in `2026/07/` (same filenames, different month folder). Deletion removed the active copies.
+
+**Recovery actions:**
+
+1. **213 products fully restored** — copied missing files from `uploads/2026/07/` → `uploads/2026/08/` (exact filename match). 100% success, zero failures.
+
+2. **5 path-correction fixes (DB updates):**
+   - P#309 (SKF Pinion Seal): DB had double prefix `storage/uploads/2026/09/...` → fixed to `uploads/2026/09/...` (file existed at correct path).
+   - P#67: Same double-prefix fix.
+   - P#314, 315, 316 (K&N products): DB pointed to `uploads/2026/07/...` but files actually in `uploads/users/...` — updated DB paths.
+
+3. **7 irrecoverable products (original deleted, only `_250.webp` thumbnails remained):**
+   - P#56, 67, 74, 83, 89, 90, 92 — copied `_250.webp` thumbnail as the main image file (fallback). These now show a lower-res but valid image instead of broken icon.
+
+4. **1 additional home page image** (`1730880696Fabpng.png` for P#246 MagnaFlow Y-Pipe) restored from 2026/07 backup.
+
+**Verification:**
+- Product scan: **0/807 missing** (was 224).
+- Home page: **0/187 images missing** (was 33).
+- Product pages (slug URLs): HTTP 200, images render.
+
+**Note:** 7 products now use thumbnail-as-main-image fallback. Original hi-res files are permanently lost; recommend re-upload when possible.

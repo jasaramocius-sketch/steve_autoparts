@@ -235,7 +235,9 @@
     color: #7d7b7b;
     line-height: 26px;
 }
-
+.shop_details_text .details_list_btn .wishlist-btn:hover{
+  color:var(--primary) !important;
+}
 .details_single_variant {
     display: flex;
     flex-wrap: wrap;
@@ -315,7 +317,7 @@
     background: #F5F5F5;
     overflow: hidden;
     margin-right: 15px;
-    width: 130px;
+    width: 140px;
     border-radius: 8px;
     margin-bottom: 15px;
 }
@@ -336,7 +338,7 @@
 }
 
 .details_qty_input button {
-    width: 35px;
+    width: 40px;
     min-height: 40px;
     font-weight: 400;
     color: #333;
@@ -518,6 +520,9 @@
     padding: 15px;
     border-radius: 10px;
     margin-bottom: 25px;
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
 }
 
 .shop_details_sidebar_info ul {
@@ -566,6 +571,9 @@
     padding: 20px;
     position: relative;
     border-radius: 10px;
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
 }
 
 .shop_details_sidebar_store .sold_by {
@@ -706,7 +714,22 @@
       /* height: 108px;  */
     }
 }
-
+.tab-product-des-wrapper .nav .nav-item button.active:before {
+    content: " ";
+    background-color: var(--primary);
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    bottom: -5px;
+    transform: rotate(45deg);
+    z-index: 0;
+}
+.tab-product-des-wrapper .nav .nav-item button.active:hover:before{
+  background-color: var(--hov-primary);
+}
+.tab-product-des-wrapper .nav .nav-item button{
+  position: relative;
+}
 .product-description-body > *:first-child { margin-top: 0; }
 .product-description-body > *:last-child { margin-bottom: 0; }
 .product-description-body h1,
@@ -747,6 +770,16 @@
     margin: 0 0 1em;
     color: #6d5c5a;
 }
+
+/* Stock badge */
+.stock {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 0;
+    margin-right: 15px;
+}
+.stock.in-stock  { color: #2e7d32; }
+.stock.out-stock { color: #c62828; }
 </style>
 @endsection
 
@@ -819,7 +852,7 @@
               <h2 class="details_title">{{ $product['name'] }}</h2>
 
               <div class="d-flex flex-wrap align-items-center">
-                <p class="stock">{{ $product['stock'] > 0 ? 'In Stock' : 'Out of Stock' }}</p>
+                <p class="stock {{ $product['stock'] > 0 ? 'in-stock' : 'out-stock' }}">{{ $product['stock'] > 0 ? 'In Stock' : 'Out of Stock' }}</p>
                 @php
                   $visibleReviews = collect($product['reviews_data'] ?? [])->where('deleted', false);
                   $avgRating = $visibleReviews->avg('rating');
@@ -1156,7 +1189,7 @@
 @if(isset($related) && $related->count() > 0)
 <section class="gs-product-cards-slider-area">
   <div class="container">
-    <div class="title text-center mb-5">
+    <div class="title text-center m-0 pb-20">
       <h3 style="font-weight: 600;">Related Products</h3>
       <p class="text-muted">Explore other premium products in this category</p>
     </div>
