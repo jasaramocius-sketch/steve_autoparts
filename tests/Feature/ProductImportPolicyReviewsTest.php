@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
 use App\Http\Controllers\ProductController;
+use Tests\TestCase;
 
 class ProductImportPolicyReviewsTest extends TestCase
 {
@@ -18,7 +18,7 @@ class ProductImportPolicyReviewsTest extends TestCase
 
         $normalized = ProductController::normalizeImportedProductData($data);
 
-        $this->assertSame('High quality replacement part.', $normalized['description']);
+        $this->assertSame("<p>High quality replacement part.</p>\n", $normalized['description']);
         $this->assertSame('<p>30-day return policy</p>', $normalized['policy_text']);
         $this->assertSame('Jamie', $normalized['reviews_data'][0]['name']);
         $this->assertSame(5, $normalized['reviews_data'][0]['rating']);

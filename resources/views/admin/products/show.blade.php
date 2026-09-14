@@ -105,9 +105,9 @@
                     @endif
                     @if(!empty($product->features) && count($product->features ?? []))
                     <div class="tab-pane fade" id="features" role="tabpanel">
-                        <ul class="mb-0">
+                        <ul class="mb-0 key-features-list">
                             @foreach(($product->features ?? []) as $feature)
-                                <li>{{ $feature }}</li>
+                                <li>{!! $feature !!}</li>
                             @endforeach
                         </ul>
                     </div>

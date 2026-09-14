@@ -1,12 +1,16 @@
 @extends('layouts.app')
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'blog-page', 'pageClass' => 'blog-page'])
-@php $blogTitle = isset($category) ? $category->name : 'Blogs'; @endphp
+@php $blogTitle = isset($category) ? $category->name : (isset($tag) ? 'Tag: ' . $tag->name : 'Blogs'); @endphp
 @section('meta_tags')
     @include('partials.meta-tags', [
         'pageTitle' => $blogTitle . ' - ' . config('app.name', 'StAutoparts'),
         'metaTitle' => $blogTitle . ' | ' . config('app.name', 'StAutoparts'),
-        'metaDescription' => isset($category) ? ($category->description ?? 'Blogs about ' . $category->name) : 'Latest blogs, auto parts guides and tips from ' . config('app.name', 'StAutoparts') . '.',
+        'metaDescription' => isset($category)
+            ? ($category->description ?? 'Blogs about ' . $category->name)
+            : (isset($tag)
+                ? 'Blogs tagged with "' . $tag->name . '" from ' . config('app.name', 'StAutoparts') . '.'
+                : 'Latest blogs, auto parts guides and tips from ' . config('app.name', 'StAutoparts') . '.'),
     ])
 @endsection
 
@@ -17,10 +21,11 @@
   <div class="container">
     <div class="row justify-content-center content-wrapper">
       <div class="col-12">
-        <h2 class="breadcrumb-title">Blog</h2>
+        <h2 class="breadcrumb-title">{{ $blogTitle }}</h2>
         <ul class="bread-menu">
           <li><a href="{{ route('home') }}">Home</a></li>
-          <li style="color: var(--primary)">Blog</li>
+          <li><a href="{{ route('blog') }}">Blog</a></li>
+          <li style="color: var(--primary)">{{ $blogTitle }}</li>
         </ul>
       </div>
     </div>
@@ -59,7 +64,7 @@
             @include('admin.partials.search-form', [
                 'route' => route('blog'),
                 'placeholder' => 'Search blogs...',
-                'showClear' => !empty(request('search')) || isset($category)
+                'showClear' => !empty(request('search')) || isset($category) || isset($tag)
             ])
           </div>
 
@@ -73,8 +78,20 @@
             </ul>
           </div>
 
+          <!-- Popular Tags Widget -->
+          @if($tags->count())
+          <div class="single-blog-widget">
+            <h5 class="widget-title">Popular Tags</h5>
+            <ul class="tags-wrapper">
+              @foreach($tags as $t)
+              <li><a href="{{ route('blog.tag', $t->slug) }}" class="{{ isset($tag) && $tag->id === $t->id ? 'active' : '' }}">{{ $t->name }} ({{ $t->blogs_count }})</a></li>
+              @endforeach
+            </ul>
+          </div>
+          @endif
+
           <!-- Clear Filters -->
-          @if(!empty(request('search')) || isset($category))
+          @if(!empty(request('search')) || isset($category) || isset($tag))
           <div class="single-blog-widget">
             <a href="{{ route('blog') }}" class="btn w-100 steve-btn fw-600 btn-primary">
               <i class="fas fa-times me-1"></i> Clear Filters
@@ -123,7 +140,7 @@
               </a>
             </h4>
             <p class="des">
-              {{ Str::limit(strip_tags($blog->details ?? ''), 180) }}
+              {{ Str::limit(strip_tags(html_entity_decode($blog->details ?? '')), 180) }}
             </p>
             <div class="date-wrapper">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -131,6 +148,13 @@
               </svg>
               <span class="date-text">{{ $blog->created_at->format('M d - Y') }}</span>
             </div>
+            @if($blog->tags->count())
+            <div class="blog-card-tags">
+              @foreach($blog->tags as $blogTag)
+              <a href="{{ route('blog.tag', $blogTag->slug) }}" class="blog-card-tag">{{ $blogTag->name }}</a>
+              @endforeach
+            </div>
+            @endif
             <a class="template-btn steve-btn outlinee-btn" href="{{ route('blog.show', $blog->slug) }}">read more</a>
           </div>
         </div>

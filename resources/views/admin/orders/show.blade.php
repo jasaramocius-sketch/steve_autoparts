@@ -166,7 +166,12 @@
                         <div class="col-12" id="transactionIdGroup">
                             <label class="form-label fw-semibold small text-muted text-uppercase">Transaction ID</label>
                             <div id="transactionIdPaid">
-                                <input type="text" name="transaction_id" class="form-control" value="" placeholder="e.g. pay_xxxxxxxxxxxx">
+                                <div class="input-group">
+                                    <input type="text" name="transaction_id" class="form-control" value="" placeholder="e.g. pay_xxxxxxxxxxxx">
+                                    <button type="button" class="btn btn-outline-secondary steve-btn" id="generateTxnBtn" title="Generate a random Transaction ID">
+                                        <i class="fas fa-dice me-1"></i> Generate
+                                    </button>
+                                </div>
                                 <small class="text-muted d-block">Must be unique. Can only be set once, and only when payment is Paid.</small>
                             </div>
                             <div id="transactionIdLocked" style="display:none;">
@@ -306,6 +311,23 @@
             lockedDiv.style.display = 'none';
             notPaidDiv.style.display = 'block';
         }
+    }
+
+    function randomTxnId() {
+        var chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        var rnd = '';
+        for (var i = 0; i < 24; i++) {
+            rnd += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return 'pay_' + rnd;
+    }
+
+    var txnInput = document.querySelector('#transactionIdPaid input[name="transaction_id"]');
+    var generateBtn = document.getElementById('generateTxnBtn');
+    if (generateBtn && txnInput) {
+        generateBtn.addEventListener('click', function() {
+            txnInput.value = randomTxnId();
+        });
     }
 
     paySelect.addEventListener('change', applyState);

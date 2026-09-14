@@ -47,6 +47,7 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="{{ asset('assets/front/js/jquery-ui.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-bs5.min.js"></script>
+<script src="{{ asset('assets/front/js/marked.min.js') }}"></script>
 <script src="{{ asset('assets/front/js/toastr.min.js') }}"></script>
 <script src="{{ asset('assets/front/js/nice-select.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
@@ -138,16 +139,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.key === 'Escape' && sidebar.classList.contains('open')) {
             closeSidebar();
         }
-    });
-});
-</script>
-
-<script>
-$(document).ready(function() {
-    $('textarea.texteditor, textarea#editor').summernote({
-        placeholder: 'WYSIWYG rich text editor',
-        tabsize: 2,
-        height: 250
     });
 });
 </script>

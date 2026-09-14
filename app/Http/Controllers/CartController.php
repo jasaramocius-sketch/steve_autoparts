@@ -1,23 +1,30 @@
 <?php
+
 namespace App\Http\Controllers;
-use Illuminate\Http\Request;
+
+use App\Helpers\NotificationHelper;
+use App\Models\Address;
 use App\Models\Cart;
+use App\Models\Coupon;
+use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Page;
 use App\Models\Product;
 use App\Models\Vehicle;
-use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CartController extends Controller
 {
     public function index()
     {
-        $page = \App\Models\Page::where('slug', 'cart')->first();
+        $page = Page::where('slug', 'cart')->first();
         $cart = session('cart', []);
-        $total = array_sum(array_map(fn($item) => $item['price'] * $item['qty'], $cart));
+        $total = array_sum(array_map(fn ($item) => $item['price'] * $item['qty'], $cart));
         $cartItems = session()->get('cart', []);
         $couponData = $this->recomputeCoupon($cart) ?? [];
         $couponDiscount = $couponData['discount'] ?? 0;
+
         return view('cart.index', compact('cart', 'total', 'cartItems', 'page', 'couponData', 'couponDiscount'));
     }
 
@@ -26,7 +33,7 @@ class CartController extends Controller
         $cart = session('cart', []);
 
         $id = $request->product_id;
-        $qty = max((int)$request->input('qty', 1), 1);
+        $qty = max((int) $request->input('qty', 1), 1);
 
         if (isset($cart[$id])) {
 
@@ -54,12 +61,13 @@ class CartController extends Controller
 
         // AJAX request
         if ($request->ajax()) {
-            $total = array_sum(array_map(fn($item) => $item['price'] * $item['qty'], $cart));
+            $total = array_sum(array_map(fn ($item) => $item['price'] * $item['qty'], $cart));
+
             return response()->json([
                 'success' => true,
                 'message' => 'Product added to cart!',
                 'cart_count' => count($cart),
-                'cart_total' => currency_format($total)
+                'cart_total' => currency_format($total),
             ]);
         }
 
@@ -75,12 +83,13 @@ class CartController extends Controller
         $this->recomputeCoupon($cart);
 
         if ($request->ajax()) {
-            $total = array_sum(array_map(fn($item) => $item['price'] * $item['qty'], $cart));
+            $total = array_sum(array_map(fn ($item) => $item['price'] * $item['qty'], $cart));
+
             return response()->json([
                 'success' => true,
                 'message' => 'Product removed from cart!',
                 'cart_count' => count($cart),
-                'cart_total' => currency_format($total)
+                'cart_total' => currency_format($total),
             ]);
         }
 
@@ -97,83 +106,87 @@ class CartController extends Controller
         session(['cart' => $cart]);
         $this->recomputeCoupon($cart);
         $count = count($ids);
+
         return back()->with('success', "$count item(s) removed from cart!");
     }
-    public function updateQuantity(Request $request, $id)
-{
-    $cart = session()->get('cart', []);
 
-    if (!isset($cart[$id])) {
+    public function updateQuantity(Request $request, $id)
+    {
+        $cart = session()->get('cart', []);
+
+        if (! isset($cart[$id])) {
+
+            return response()->json([
+                'success' => false,
+            ]);
+
+        }
+
+        $qty = max((int) $request->quantity, 1);
+
+        $cart[$id]['qty'] = $qty;
+
+        session()->put('cart', $cart);
+        $this->recomputeCoupon($cart);
+
+        $itemSubtotal = $cart[$id]['price'] * $qty;
+
+        $cartTotal = array_sum(array_map(function ($item) {
+
+            return $item['price'] * $item['qty'];
+
+        }, $cart));
 
         return response()->json([
-            'success' => false
-        ]);
 
+            'success' => true,
+
+            'qty' => $qty,
+
+            'itemSubtotal' => currency_format($itemSubtotal),
+
+            'cartTotal' => currency_format($cartTotal),
+
+        ]);
     }
 
-    $qty = max((int)$request->quantity,1);
-
-    $cart[$id]['qty']=$qty;
-
-    session()->put('cart',$cart);
-    $this->recomputeCoupon($cart);
-
-    $itemSubtotal=$cart[$id]['price']*$qty;
-
-    $cartTotal=array_sum(array_map(function($item){
-
-        return $item['price']*$item['qty'];
-
-    },$cart));
-
-    return response()->json([
-
-        'success'=>true,
-
-        'qty'=>$qty,
-
-        'itemSubtotal'=>currency_format($itemSubtotal),
-
-        'cartTotal'=>currency_format($cartTotal)
-
-    ]);
-}
     public function applyCoupon(Request $request)
     {
         $request->validate(['coupon_code' => 'required|string|max:50']);
         $code = strtoupper(trim($request->coupon_code));
-        $coupon = \App\Models\Coupon::where('code', $code)->first();
+        $coupon = Coupon::where('code', $code)->first();
 
-        if (!$coupon) {
+        if (! $coupon) {
             return back()->with('error', 'Invalid coupon code.');
         }
-        if (!$coupon->isValid()) {
+        if (! $coupon->isValid()) {
             return back()->with('error', 'This coupon is no longer valid.');
         }
 
         $cart = session('cart', []);
-        $subtotal = array_sum(array_map(fn($item) => $item['price'] * $item['qty'], $cart));
+        $subtotal = array_sum(array_map(fn ($item) => $item['price'] * $item['qty'], $cart));
 
         if ($coupon->min_order_amount > 0 && $subtotal < $coupon->min_order_amount) {
-            return back()->with('error', 'Minimum order amount for this coupon is ' . currency_format($coupon->min_order_amount) . '.');
+            return back()->with('error', 'Minimum order amount for this coupon is '.currency_format($coupon->min_order_amount).'.');
         }
 
         $discount = $coupon->calculateDiscount($subtotal);
         session([
             'coupon' => [
-                'code'     => $coupon->code,
+                'code' => $coupon->code,
                 'discount' => $discount,
-                'type'     => $coupon->type,
-                'value'    => $coupon->value,
-            ]
+                'type' => $coupon->type,
+                'value' => $coupon->value,
+            ],
         ]);
 
-        return back()->with('success', 'Coupon applied! You saved ' . currency_format($discount) . '.');
+        return back()->with('success', 'Coupon applied! You saved '.currency_format($discount).'.');
     }
 
     public function removeCoupon()
     {
         session()->forget('coupon');
+
         return back()->with('success', 'Coupon removed.');
     }
 
@@ -190,16 +203,18 @@ class CartController extends Controller
         }
 
         $code = session('coupon')['code'] ?? null;
-        if (!$code) {
+        if (! $code) {
             session()->forget('coupon');
+
             return null;
         }
 
-        $subtotal = array_sum(array_map(fn($item) => $item['price'] * $item['qty'], $cart));
-        $coupon = \App\Models\Coupon::where('code', $code)->first();
+        $subtotal = array_sum(array_map(fn ($item) => $item['price'] * $item['qty'], $cart));
+        $coupon = Coupon::where('code', $code)->first();
 
-        if (!$coupon || !$coupon->isValid()) {
+        if (! $coupon || ! $coupon->isValid()) {
             session()->forget('coupon');
+
             return null;
         }
 
@@ -207,14 +222,15 @@ class CartController extends Controller
 
         if ($discount <= 0) {
             session()->forget('coupon');
+
             return null;
         }
 
         $data = [
-            'code'     => $coupon->code,
+            'code' => $coupon->code,
             'discount' => $discount,
-            'type'     => $coupon->type,
-            'value'    => $coupon->value,
+            'type' => $coupon->type,
+            'value' => $coupon->value,
         ];
         session()->put('coupon', $data);
 
@@ -222,42 +238,43 @@ class CartController extends Controller
     }
 
     public function addToCart(Request $request, $id)
-{
-    $product = Product::findOrFail($id);
+    {
+        $product = Product::findOrFail($id);
 
-    $cart = session()->get('cart', []);
+        $cart = session()->get('cart', []);
 
-    if (isset($cart[$id])) {
+        if (isset($cart[$id])) {
 
-        $cart[$id]['qty']++;
+            $cart[$id]['qty']++;
 
-    } else {
+        } else {
 
-        $cart[$id] = [
+            $cart[$id] = [
 
-            'id'    => $product->id,
-            'name'  => $product->name,
-            'price' => $product->price,
-            'image' => $product->image,
-            'qty'   => 1,
+                'id' => $product->id,
+                'name' => $product->name,
+                'price' => $product->price,
+                'image' => $product->image,
+                'qty' => 1,
 
-        ];
+            ];
+        }
+
+        session()->put('cart', $cart);
+
+        if ($request->ajax()) {
+            $total = array_sum(array_map(fn ($item) => $item['price'] * $item['qty'], $cart));
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Product added to cart!',
+                'cart_count' => count($cart),
+                'cart_total' => currency_format($total),
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Product added to cart!');
     }
-
-    session()->put('cart', $cart);
-
-    if ($request->ajax()) {
-        $total = array_sum(array_map(fn($item) => $item['price'] * $item['qty'], $cart));
-        return response()->json([
-            'success' => true,
-            'message' => 'Product added to cart!',
-            'cart_count' => count($cart),
-            'cart_total' => currency_format($total)
-        ]);
-    }
-
-    return redirect()->back()->with('success', 'Product added to cart!');
-}
 
     public function checkout()
     {
@@ -265,12 +282,13 @@ class CartController extends Controller
         if (count($cart) === 0) {
             return redirect()->route('cart')->with('error', 'Your cart is empty.');
         }
-        $total = array_sum(array_map(fn($item) => $item['price'] * $item['qty'], $cart));
+        $total = array_sum(array_map(fn ($item) => $item['price'] * $item['qty'], $cart));
         $couponData = $this->recomputeCoupon($cart) ?? [];
         $couponDiscount = $couponData['discount'] ?? 0;
         $addresses = auth()->user()->addresses()->latest()->get();
         $vehicles = Vehicle::where('user_id', auth()->id())->get();
         $selectedVehicleId = session('selected_vehicle_id');
+
         return view('checkout.index', compact('cart', 'total', 'addresses', 'vehicles', 'selectedVehicleId', 'couponData', 'couponDiscount'));
     }
 
@@ -285,7 +303,7 @@ class CartController extends Controller
             return redirect()->route('cart')->with('error', 'Your cart is empty.');
         }
 
-        $address = \App\Models\Address::findOrFail($request->address_id);
+        $address = Address::findOrFail($request->address_id);
         if ($address->user_id !== auth()->id()) {
             abort(403);
         }
@@ -307,7 +325,7 @@ class CartController extends Controller
                 'state' => $address->state,
                 'country' => $address->country,
                 'zip_code' => $address->zip_code,
-            ]
+            ],
         ]);
 
         return redirect()->route('checkout.delivery-info');
@@ -320,10 +338,11 @@ class CartController extends Controller
             return redirect()->route('cart')->with('error', 'Your cart is empty.');
         }
         $billing = session('billing_info');
-        if (!$billing) {
+        if (! $billing) {
             return redirect()->route('checkout');
         }
-        $total = array_sum(array_map(fn($item) => $item['price'] * $item['qty'], $cart));
+        $total = array_sum(array_map(fn ($item) => $item['price'] * $item['qty'], $cart));
+
         return view('checkout.delivery-info', compact('cart', 'total', 'billing'));
     }
 
@@ -345,7 +364,7 @@ class CartController extends Controller
             'shipping_info' => [
                 'method' => $request->shipping_method,
                 'cost' => $shippingCost,
-            ]
+            ],
         ]);
 
         return redirect()->route('checkout.payment');
@@ -358,19 +377,20 @@ class CartController extends Controller
             return redirect()->route('cart')->with('error', 'Your cart is empty.');
         }
         $billing = session('billing_info');
-        if (!$billing) {
+        if (! $billing) {
             return redirect()->route('checkout');
         }
         $shipping = session('shipping_info');
-        if (!$shipping) {
+        if (! $shipping) {
             return redirect()->route('checkout.delivery-info');
         }
-        $total = array_sum(array_map(fn($item) => $item['price'] * $item['qty'], $cart));
+        $total = array_sum(array_map(fn ($item) => $item['price'] * $item['qty'], $cart));
         $shippingCost = $shipping['cost'];
         $couponData = $this->recomputeCoupon($cart) ?? [];
         $couponDiscount = $couponData['discount'] ?? 0;
         $grandTotal = max($total + $shippingCost - $couponDiscount, 0);
         $shippingMethod = $shipping['method'];
+
         return view('checkout.payment', compact('cart', 'total', 'shippingCost', 'grandTotal', 'shippingMethod', 'couponData', 'couponDiscount'));
     }
 
@@ -380,14 +400,18 @@ class CartController extends Controller
             'payment_method' => 'required|in:cod,card,paypal',
         ]);
 
-        $paymentDetails = null;
+        $paymentDetails = [];
         if ($request->payment_method === 'card' && $request->filled('card_number')) {
             $digits = preg_replace('/\D/', '', $request->card_number);
-            $paymentDetails = json_encode([
-                'card_last_four' => substr($digits, -4),
-                'card_number'    => substr($request->card_number, 0, 6) . '****' . substr($digits, -4),
-            ]);
+            $paymentDetails['card_last_four'] = substr($digits, -4);
+            $paymentDetails['card_number'] = substr($request->card_number, 0, 6).'****'.substr($digits, -4);
         }
+
+        if (in_array($request->payment_method, ['card', 'paypal'], true)) {
+            $paymentDetails['transaction_id'] = generateTransactionId();
+        }
+
+        $paymentDetails = empty($paymentDetails) ? null : json_encode($paymentDetails);
 
         $cart = session('cart', []);
         if (count($cart) === 0) {
@@ -397,37 +421,37 @@ class CartController extends Controller
         $billing = session('billing_info');
         $shipping = session('shipping_info');
 
-        if (!$billing || !$shipping) {
+        if (! $billing || ! $shipping) {
             return redirect()->route('checkout');
         }
 
-        $total = array_sum(array_map(fn($item) => $item['price'] * $item['qty'], $cart));
+        $total = array_sum(array_map(fn ($item) => $item['price'] * $item['qty'], $cart));
         $shippingCost = $shipping['cost'] ?? 0;
         $couponData = $this->recomputeCoupon($cart) ?? [];
         $couponDiscount = $couponData['discount'] ?? 0;
         $grandTotal = max($total + $shippingCost - $couponDiscount, 0);
 
         // Save to database
-        $dbOrder = \Illuminate\Support\Facades\DB::transaction(function () use ($request, $cart, $billing, $shipping, $grandTotal, $shippingCost, $paymentDetails, $couponData, $couponDiscount, $total) {
+        $dbOrder = DB::transaction(function () use ($request, $cart, $billing, $shipping, $grandTotal, $shippingCost, $paymentDetails, $couponData, $couponDiscount, $total) {
 
-            $orderNumber = 'ORD' . strtoupper(uniqid());
+            $orderNumber = 'ORD'.strtoupper(uniqid());
 
-            $dbOrder = \App\Models\Order::create([
-                'user_id'            => auth()->id(),
-                'vehicle_id'         => session('checkout_vehicle_id'),
-                'order_number'       => $orderNumber,
-                'total_amount'       => $grandTotal,
-                'status'             => 'pending',
-                'payment_method'     => $request->payment_method,
-                'payment_status'     => in_array($request->payment_method, ['card', 'paypal'], true) ? 'paid' : 'unpaid',
-                'payment_details'    => $paymentDetails,
-                'delivery_type'      => $shipping['method'] ?? 'free',
-                'shipping_fee'       => $shippingCost,
-                'tax'                => 0,
-                'coupon_code'        => $couponData['code'] ?? null,
-                'coupon_discount'    => $couponDiscount,
-                'additional_info'    => $request->input('additional_info'),
-                'shipping_details'   => json_encode($billing),
+            $dbOrder = Order::create([
+                'user_id' => auth()->id(),
+                'vehicle_id' => session('checkout_vehicle_id'),
+                'order_number' => $orderNumber,
+                'total_amount' => $grandTotal,
+                'status' => 'pending',
+                'payment_method' => $request->payment_method,
+                'payment_status' => in_array($request->payment_method, ['card', 'paypal'], true) ? 'paid' : 'unpaid',
+                'payment_details' => $paymentDetails,
+                'delivery_type' => $shipping['method'] ?? 'free',
+                'shipping_fee' => $shippingCost,
+                'tax' => 0,
+                'coupon_code' => $couponData['code'] ?? null,
+                'coupon_discount' => $couponDiscount,
+                'additional_info' => $request->input('additional_info'),
+                'shipping_details' => json_encode($billing),
             ]);
 
             // Proportional coupon split: each item's share = discount * (line subtotal / order subtotal)
@@ -445,18 +469,18 @@ class CartController extends Controller
                 }
                 $distributedDiscount += $itemDiscount;
 
-                \App\Models\OrderItem::create([
-                    'order_id'        => $dbOrder->id,
-                    'product_id'      => $item['id'],
-                    'qty'             => $item['qty'],
-                    'price'           => $item['price'],
+                OrderItem::create([
+                    'order_id' => $dbOrder->id,
+                    'product_id' => $item['id'],
+                    'qty' => $item['qty'],
+                    'price' => $item['price'],
                     'coupon_discount' => $itemDiscount,
                 ]);
             }
 
             // Increment coupon usage count
-            if (!empty($couponData['code']) && $couponDiscount > 0) {
-                $coupon = \App\Models\Coupon::where('code', $couponData['code'])->first();
+            if (! empty($couponData['code']) && $couponDiscount > 0) {
+                $coupon = Coupon::where('code', $couponData['code'])->first();
                 if ($coupon) {
                     $coupon->increment('used_count');
                 }
@@ -465,26 +489,26 @@ class CartController extends Controller
             return $dbOrder;
         });
 
-        \App\Helpers\NotificationHelper::orderPlaced($dbOrder);
+        NotificationHelper::orderPlaced($dbOrder);
 
         // Build session data for the confirmation page
         $order = [
-            'id'             => '#' . $dbOrder->order_number,
-            'db_id'          => $dbOrder->id,
-            'date'           => $dbOrder->created_at->format('d M, Y'),
-            'total'          => $grandTotal,
-            'subtotal'       => $total,
-            'status'         => 'Pending',
+            'id' => '#'.$dbOrder->order_number,
+            'db_id' => $dbOrder->id,
+            'date' => $dbOrder->created_at->format('d M, Y'),
+            'total' => $grandTotal,
+            'subtotal' => $total,
+            'status' => 'Pending',
             'payment_method' => $request->payment_method,
-            'coupon_code'    => $couponData['code'] ?? null,
+            'coupon_code' => $couponData['code'] ?? null,
             'coupon_discount' => $couponDiscount,
-            'customer_name'  => $billing['name'] ?? auth()->user()->name,
+            'customer_name' => $billing['name'] ?? auth()->user()->name,
             'customer_email' => $billing['email'] ?? auth()->user()->email,
             'customer_phone' => $billing['phone'] ?? '',
-            'address'        => ($billing['address'] ?? '') . ', ' . ($billing['city'] ?? '') . ', ' . ($billing['country'] ?? ''),
-            'items'          => array_values(array_map(fn($item) => [
-                'name'  => $item['name'],
-                'qty'   => $item['qty'],
+            'address' => ($billing['address'] ?? '').', '.($billing['city'] ?? '').', '.($billing['country'] ?? ''),
+            'items' => array_values(array_map(fn ($item) => [
+                'name' => $item['name'],
+                'qty' => $item['qty'],
                 'price' => $item['price'],
             ], $cart)),
         ];
@@ -506,8 +530,8 @@ class CartController extends Controller
         $order = session('last_order');
 
         // Fallback: if session expired, try loading the user's latest order
-        if (!$order && auth()->check()) {
-            $dbOrder = \App\Models\Order::where('user_id', auth()->id())
+        if (! $order && auth()->check()) {
+            $dbOrder = Order::where('user_id', auth()->id())
                 ->latest()
                 ->with('items.product')
                 ->first();
@@ -515,26 +539,26 @@ class CartController extends Controller
             if ($dbOrder) {
                 $billing = json_decode($dbOrder->shipping_details, true) ?? [];
                 $order = [
-                    'id'             => '#' . $dbOrder->order_number,
-                    'db_id'          => $dbOrder->id,
-                    'date'           => $dbOrder->created_at->format('d M, Y'),
-                    'total'          => $dbOrder->total_amount,
-                    'status'         => ucfirst($dbOrder->status),
+                    'id' => '#'.$dbOrder->order_number,
+                    'db_id' => $dbOrder->id,
+                    'date' => $dbOrder->created_at->format('d M, Y'),
+                    'total' => $dbOrder->total_amount,
+                    'status' => ucfirst($dbOrder->status),
                     'payment_method' => $dbOrder->payment_method,
-                    'customer_name'  => $billing['name'] ?? auth()->user()->name,
+                    'customer_name' => $billing['name'] ?? auth()->user()->name,
                     'customer_email' => $billing['email'] ?? auth()->user()->email,
                     'customer_phone' => $billing['phone'] ?? '',
-                    'address'        => ($billing['address'] ?? '') . ', ' . ($billing['city'] ?? '') . ', ' . ($billing['country'] ?? ''),
-                    'items'          => $dbOrder->items->map(fn($i) => [
-                        'name'  => $i->product->name ?? 'Product #' . $i->product_id,
-                        'qty'   => $i->qty,
+                    'address' => ($billing['address'] ?? '').', '.($billing['city'] ?? '').', '.($billing['country'] ?? ''),
+                    'items' => $dbOrder->items->map(fn ($i) => [
+                        'name' => $i->product->name ?? 'Product #'.$i->product_id,
+                        'qty' => $i->qty,
                         'price' => $i->price,
                     ])->toArray(),
                 ];
             }
         }
 
-        if (!$order) {
+        if (! $order) {
             return redirect()->route('home');
         }
 
@@ -545,7 +569,8 @@ class CartController extends Controller
     {
         $cart = session('cart', []);
         $cartCount = count($cart);
-        $cartTotal = array_sum(array_map(fn($item) => $item['price'] * $item['qty'], $cart));
+        $cartTotal = array_sum(array_map(fn ($item) => $item['price'] * $item['qty'], $cart));
+
         return view('partials.mini-cart', compact('cart', 'cartCount', 'cartTotal'));
     }
 }

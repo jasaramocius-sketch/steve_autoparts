@@ -84,7 +84,7 @@
     flex-shrink: 0;
 }
 .details_slider_thumb_item {
-    background: #F5F5F5;
+    /* background: #F5F5F5; */
     overflow: hidden;
     margin: 0;
     border-radius: 16px;
@@ -664,10 +664,15 @@
 }
 .details_slider_nav button {
     background-color: white;
-    width: 40px;
-    height: 40px;
+    width: 30px;
+    height: 30px;
     padding: 0;
     box-shadow: 0px 0px 10px #000;
+    min-height: 30px;
+}
+.details_slider_nav button i {
+  width: 30px !important;
+  height: 30px !important;
 }
 /* .details_slider_nav button:after{
     font-size: 20px;
@@ -716,7 +721,8 @@
 }
 .tab-product-des-wrapper .nav .nav-item button.active:before {
     content: " ";
-    background-color: var(--primary);
+    background: var(--primary);
+    background: linear-gradient(139deg,rgba(208, 42, 3, 0) 50%, var(--primary) 50%);
     position: absolute;
     width: 10px;
     height: 10px;
@@ -725,7 +731,8 @@
     z-index: 0;
 }
 .tab-product-des-wrapper .nav .nav-item button.active:hover:before{
-  background-color: var(--hov-primary);
+  background: var(--hov-primary);
+  background: linear-gradient(139deg,rgba(208, 42, 3, 0) 50%, var(--hov-primary) 50%);
 }
 .tab-product-des-wrapper .nav .nav-item button{
   position: relative;
@@ -769,6 +776,18 @@
     padding-left: 14px;
     margin: 0 0 1em;
     color: #6d5c5a;
+}
+.product-description-body {
+    line-height: 1.8;
+    color: #4c3533;
+}
+.short_description {
+    line-height: 1.8;
+    color: #4c3533;
+}
+.product-policy-tab-body {
+    line-height: 1.8;
+    color: #4c3533;
 }
 
 /* Stock badge */
@@ -899,7 +918,7 @@
                 @endif
               </h3>
 
-              <div class="short_description" style="line-height: 1.8; color: #4c3533;">{!! $product['description'] ?? 'Auctor urna nunc id cursus. Scelerisque purus semper eget duis at pharetra vel turpis nunc eget.' !!}</div>
+              <div class="short_description">{!! $product['description'] ?? 'Auctor urna nunc id cursus. Scelerisque purus semper eget duis at pharetra vel turpis nunc eget.' !!}</div>
 
               <form action="{{ route('cart.add') }}" method="POST">
                 @csrf
@@ -982,13 +1001,13 @@
                   $hasFeaturesInDesc = str_contains($descLower, 'key features') || preg_match('/^\s*[•\-*]\s/m', $descText);
               @endphp
               @if(!empty($descText))
-              <div class="product-description-body" style="line-height: 1.8; color: #4c3533;">{!! $descText !!}</div>
+              <div class="product-description-body">{!! $descText !!}</div>
               @else
               <p class="text-muted mb-0">No description available for this product yet.</p>
               @endif
               @if(!empty($product['features']) && !$hasFeaturesInDesc)
-                <h5 class="mt-4 mb-3" style="font-weight: 600;">Key Features:</h5>
-                <ul style="line-height: 1.8; color: #4c3533; padding-left: 20px;">
+                <h5 class="mt-4 mb-3 fw-bold">Key Features:</h5>
+                <ul class="key-features-list">
                   @foreach($product['features'] ?? [] as $feature)
                     <li>{!! $feature !!}</li>
                   @endforeach
@@ -996,7 +1015,7 @@
               @endif
             </div>
             <div class="tab-pane fade py-4" id="policy-tab-pane" role="tabpanel" aria-labelledby="policy-tab" tabindex="0">
-                <div style="line-height: 1.8; color: #4c3533;">
+                <div class="product-policy-tab-body">
                   @include('partials.product-buy-return-policy', ['product' => $product])
                 </div>
             </div>
@@ -1196,7 +1215,7 @@
     <div class="related-products-grid d-grid">
       @foreach($related as $rel)
         <div class="grid-item">
-          @include("partials.product-card", ["product" => $rel, "cardClass" => "h-100 shadow-sm border overflow-hidden", "titleTag" => "h5", "titleClass" => "mb-2", "priceTag" => "h4", "viewIcon" => "fa", "wishedProductIds" => $wishedProductIds ?? []])
+          @include("partials.product-card", ["product" => $rel, "cardClass" => "h-100 shadow-sm border overflow-hidden", "titleTag" => "h5", "titleClass" => "mb-2", "priceTag" => "h4", "wishedProductIds" => $wishedProductIds ?? []])
         </div>
       @endforeach
     </div>
@@ -1613,10 +1632,6 @@ $(document).ready(function() {
       992: { slidesPerView: 3 },
       768: { slidesPerView: 2 },
     },
-    navigation: {
-        nextEl: '#productGalleryNav .swiper-btn-next',
-        prevEl: '#productGalleryNav .swiper-btn-prev',
-    },
   });
 
   var thumbSwiper = new Swiper('#productGallery', {
@@ -1629,6 +1644,10 @@ $(document).ready(function() {
     zoom: {
       maxRatio: 3,
       minRatio: 1,
+    },
+    navigation: {
+      nextEl: '#productGalleryNav .swiper-btn-next',
+      prevEl: '#productGalleryNav .swiper-btn-prev',
     },
     thumbs: {
       swiper: galleryNav,

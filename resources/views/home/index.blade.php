@@ -46,7 +46,7 @@
                         @endif
                         @if($heroSection->description)
                             <p class="des wow-replaced" data-wow-delay=".2s" style="color:#000000">
-                                {{ $heroSection->description }}
+                                {!! $heroSection->description !!}
                             </p>
                         @endif
                         @if($heroSection->button_text && $heroSection->button_url)
@@ -120,7 +120,7 @@
             <div class="flex" >
                 <div class="gs-title-box flex-column">
                     <h2 class="title wow-replaced">{{ $sections->get('offers')?->title ?? 'Special Offer' }}</h2>
-                     <p class="des mb-0 wow-replaced" data-wow-delay=".1s">{{ $sections->get('offers')?->description ??  'Discover outstanding deals on high-quality auto parts. Upgraded selection and special savings this month only.' }}</p>
+                     <p class="des mb-0 wow-replaced" data-wow-delay=".1s">{!! $sections->get('offers')?->description ??  'Discover outstanding deals on high-quality auto parts. Upgraded selection and special savings this month only.' !!}</p>
                 </div>
                 <div class="shop-page-nav flex-column" data-wow-delay=".2s">
                     <a href="{{ route('shop') }}" class="a-tag-hover-color">
@@ -291,10 +291,12 @@
 <!-- Featured Products Section Started -->
 <section class="gs-explore-product-section bg-white" {!! $sections->get('featured_products_heading')?->bgStyle() !!}>
     <div class="container section-with-padding">
-
         <div class="d-flex justify-content-between align-items-center pb-20 featured-title-row-first">
             <div class="gs-title-box">
                 <h2 class="title">{{ $sections->get('featured_products_heading')?->title ??  'Featured Products' }}</h2>
+                <div class="gs-title-box">
+                    <p class="des mb-0 wow-replaced" data-wow-delay=".1s">{!! $sections->get('featured_products_heading')?->description ??  'Discover our handpicked selection of quality products at great prices. Shop top-rated items designed to deliver reliable performance and value.' !!}</p>
+                </div>
             </div>
 
             <div class="featured-nav slider-nav">
@@ -383,7 +385,7 @@
                     <h2 class="title wow-replaced">{{ $sections->get('best_selling')?->title ??  'Best Selling' }}</h2>
                 </div>
                 <div class="gs-title-box">
-                    <p class="des mb-0 wow-replaced" data-wow-delay=".1s">{{ $sections->get('best_selling')?->description ??  'Discover our top-performing products that customers love most. Quality parts, verified performance, and exceptional ratings.' }}</p>
+                    <p class="des mb-0 wow-replaced" data-wow-delay=".1s">{!! $sections->get('best_selling')?->description ??  'Discover our top-performing products that customers love most. Quality parts, verified performance, and exceptional ratings.' !!}</p>
                 </div>
                 <div class="best-selling-nav slider-nav">
                     <button class="best-selling-prev steve-btn ">
@@ -420,7 +422,7 @@
             <div class="col-12 d-flex column flex-lg-row flex-xl-row latest-post-title-row-first pb-20">
                 <div class="gs-title-box">
                     <h2 class="title wow-replaced">{{ $sections->get('latest_post')?->title ??  'Latest Post' }}</h2>
-                    <p class="des mb-0 wow-replaced" data-wow-delay=".1s">{{ $sections->get('latest_post')?->description ??  'Stay updated with our latest maintenance guides, tips, and insights from professional automotive mechanics.' }}</p>
+                    <p class="des mb-0 wow-replaced" data-wow-delay=".1s">{!! $sections->get('latest_post')?->description ??  'Stay updated with our latest maintenance guides, tips, and insights from professional automotive mechanics.' !!}</p>
                 </div>
 
                 
@@ -454,7 +456,7 @@
                         <div class="post-content home-2">
                             <h3 class="post-title">{{ $post->title }}</h3>
                             <p class="date">{{ $post->created_at->format('d M, Y') }}</p>
-                            <p class="post-desc">{{ Str::limit(strip_tags($post->details), 150) }}</p>
+                            <p class="post-desc">{{ Str::limit(strip_tags(html_entity_decode($post->details ?? '')), 150) }}</p>
                             <span class="read-more">Read More</span>
                         </div>
                     </a>
@@ -474,7 +476,7 @@
                     <div class="post-content home-2">
                         <h3 class="post-title">{{ $post->title }}</h3>
                         <p class="date">{{ $post->created_at->format('d M, Y') }}</p>
-                        <p class="post-desc">{{ Str::limit(strip_tags($post->details), 150) }}</p>
+                        <p class="post-desc">{{ Str::limit(strip_tags(html_entity_decode($post->details ?? '')), 150) }}</p>
                         <span class="read-more">Read More</span>
                     </div>
                 </a>
@@ -499,7 +501,7 @@
             <div class="flex">
                 <div class="gs-title-box flex-column">
                     <h2 class="title wow-replaced">{{ $sections->get('top_brands_heading')?->title ??  'Top Brands' }}</h2>
-                    <p class="des mb-0 wow-replaced" data-wow-delay=".1s">{{ $sections->get('top_brands_heading')?->description ??  'Explore our curated selection of premium auto part brands known for quality and reliability.' }}</p>
+                    <p class="des mb-0 wow-replaced" data-wow-delay=".1s">{!! $sections->get('top_brands_heading')?->description ??  'Explore our curated selection of premium auto part brands known for quality and reliability.' !!}</p>
                 </div>
                 <div class="brands-page-nav flex-column">
                     <a href="{{ route('brands') }}" class="a-tag-hover-color">
@@ -533,7 +535,7 @@
             <div class="col-lg-7">
                 <div class="gs-title-box text-center">
                     <h2 class="title wow-replaced">{{ $sections->get('partners_heading')?->title ??  'Our Partners' }}</h2>
-                    <p class="des mb-0 wow-replaced" data-wow-delay=".1s">{{ $sections->get('partners_heading')?->description ??  'We collaborate with world-class manufacturers to provide the highest-grade auto parts and accessories.' }}</p>
+                    <p class="des mb-0 wow-replaced" data-wow-delay=".1s">{!! $sections->get('partners_heading')?->description ??  'We collaborate with world-class manufacturers to provide the highest-grade auto parts and accessories.' !!}</p>
                 </div>
             </div>
         </div>

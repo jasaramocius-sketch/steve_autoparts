@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\NotificationHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Contact;
 use Illuminate\Http\Request;
@@ -12,7 +13,7 @@ class ContactController extends Controller
     {
         $sortBy = in_array($request->sort_by, ['id', 'name', 'email', 'subject', 'created_at']) ? $request->sort_by : 'created_at';
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
-        $perPage = in_array((int)$request->per_page, [10, 20, 50, 100]) ? (int)$request->per_page : 20;
+        $perPage = in_array((int) $request->per_page, [10, 20, 50, 100]) ? (int) $request->per_page : 20;
 
         $query = Contact::with('product');
 
@@ -33,6 +34,7 @@ class ContactController extends Controller
     public function show($id)
     {
         $contact = Contact::with('product', 'user', 'replier')->findOrFail($id);
+
         return view('admin.contacts.show', compact('contact'));
     }
 
@@ -50,6 +52,11 @@ class ContactController extends Controller
             'replied_at' => now(),
         ]);
 
+        // Notify the user (in-app bell) whenever a reply is saved on their inquiry.
+        if ($contact->user_id) {
+            NotificationHelper::inquiryReplied($contact);
+        }
+
         return redirect()->route('admin.contacts.show', $contact->id)
             ->with('success', 'Reply saved successfully.');
     }
@@ -58,6 +65,7 @@ class ContactController extends Controller
     {
         $contact = Contact::findOrFail($id);
         $contact->delete();
+
         return back()->with('success', 'Contact deleted successfully.');
     }
 }

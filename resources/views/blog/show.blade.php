@@ -78,6 +78,15 @@
               {!! $blog->details !!}
             </div>
 
+            @if($blog->tags->count())
+            <div class="blog-details-tags">
+              <span class="tags-label">Tags:</span>
+              @foreach($blog->tags as $blogTag)
+              <a href="{{ route('blog.tag', $blogTag->slug) }}" class="blog-details-tag">{{ $blogTag->name }}</a>
+              @endforeach
+            </div>
+            @endif
+
           </div>
         </div>
 
@@ -144,6 +153,18 @@
               @endforeach
             </ul>
           </div> -->
+
+          <!-- Popular Tags Widget -->
+          @if($tags->count())
+          <div class="single-blog-widget">
+            <h5 class="widget-title">Popular Tags</h5>
+            <ul class="tags-wrapper">
+              @foreach($tags as $t)
+              <li><a href="{{ route('blog.tag', $t->slug) }}">{{ $t->name }} ({{ $t->blogs_count }})</a></li>
+              @endforeach
+            </ul>
+          </div>
+          @endif
 
           <!-- Recent Posts Widget -->
           <div class="single-blog-widget">

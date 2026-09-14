@@ -152,26 +152,26 @@
                 <a href="{{ route('user.vehicles') }}" class="text-decoration-none small a-tag-hover-color">View All <i class="fas fa-arrow-right ms-1"></i></a>
             </div>
             @if(isset($userVehicles) && $userVehicles->count() > 0)
-                <div class="row g-3">
-                    @foreach($userVehicles->take(3) as $vehicle)
-                        <div class="col-md-4">
-                            <div class="border rounded p-3 d-flex align-items-center justify-content-between" style="background: #f8f9fa;">
-                                <div>
-                                    <div class="fw-600" style="font-size: 14px;">{{ $vehicle->year }} {{ $vehicle->make }} {{ $vehicle->model }}</div>
-                                    @if($vehicle->engine)
-                                        <div class="text-muted" style="font-size: 12px;">{{ $vehicle->engine }}</div>
-                                    @endif
-                                </div>
-                                <a href="{{ route('shop', ['year' => $vehicle->year, 'make' => $vehicle->make, 'model' => $vehicle->model]) }}" class="btn steve-btn btn-primary text-white" style="">
-                                    <i class="las la-search"></i> Shop
-                                </a>
+            <div class="row g-3">
+                @foreach($userVehicles->take(3) as $vehicle)
+                    <div class="col-md-4">
+                        <div class="border rounded p-3 d-flex align-items-center justify-content-between" style="background: #f8f9fa;">
+                            <div>
+                                <div class="fw-600" style="font-size: 14px;">{{ $vehicle->year }} {{ $vehicle->make }} {{ $vehicle->model }}</div>
+                                @if($vehicle->engine)
+                                    <div class="text-muted" style="font-size: 12px;">{{ $vehicle->engine }}</div>
+                                @endif
                             </div>
+                            <a href="{{ route('shop', ['year' => $vehicle->year, 'make' => $vehicle->make, 'model' => $vehicle->model]) }}" class="btn steve-btn btn-primary text-white" style="padding: 8px !important;">
+                                <i class="las la-search"></i> Shop
+                            </a>
                         </div>
-                    @endforeach
-                </div>
+                    </div>
+                @endforeach
+            </div>
             @else
-                <div class="text-muted small mb-3">No vehicles added yet.</div>
-                <a href="{{ route('user.vehicles') }}" class="btn btn-sm btn-dark rounded-pill px-4">Add Your First Vehicle</a>
+            <div class="text-muted small mb-3">No vehicles added yet.</div>
+            <a href="{{ route('user.vehicles') }}" class="btn btn-sm btn-dark rounded-pill px-4">Add Your First Vehicle</a>
             @endif
         </div>
     </div>

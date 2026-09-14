@@ -60,7 +60,7 @@
                 <i class="fas fa-plus faq-icon"></i>
             </button>
             <div id="faq{{ $faq->id }}" class="faq-answer">
-                <p class="mb-0">{{ $faq->answer }}</p>
+                <div class="mb-0">{!! $faq->answer !!}</div>
             </div>
           </div>
           @empty

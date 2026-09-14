@@ -2,16 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Product;
-use App\Models\Category;
+use App\Helpers\NotificationHelper;
 use App\Models\Brand;
-use App\Models\Seller;
+use App\Models\Category;
+use App\Models\Contact;
 use App\Models\Image;
+use App\Models\Product;
+use App\Models\Seller;
+use App\Models\User;
 use App\Models\Wishlist;
+use App\Support\DescriptionMarkdown;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
@@ -34,7 +38,9 @@ class ProductController extends Controller
             } elseif (str_contains($rawReviews, '|')) {
                 foreach (explode('|', $rawReviews) as $chunk) {
                     $chunk = trim($chunk);
-                    if ($chunk === '') continue;
+                    if ($chunk === '') {
+                        continue;
+                    }
                     $parts = explode('::', $chunk, 3);
                     if (count($parts) === 3) {
                         $reviews[] = [
@@ -51,22 +57,35 @@ class ProductController extends Controller
         }
 
         foreach ($reviews as $key => $review) {
-            if (!is_array($review)) {
+            if (! is_array($review)) {
                 unset($reviews[$key]);
+
                 continue;
             }
             $reviews[$key]['deleted'] = (bool) ($review['deleted'] ?? false);
-            if (!isset($reviews[$key]['rating'])) {
+            if (! isset($reviews[$key]['rating'])) {
                 $reviews[$key]['rating'] = 5;
             }
             $reviews[$key]['rating'] = max(1, min(5, (int) $reviews[$key]['rating']));
-            if (!isset($reviews[$key]['name'])) {
+            if (! isset($reviews[$key]['name'])) {
                 $reviews[$key]['name'] = 'Customer';
             }
         }
 
+        $description = DescriptionMarkdown::toHtml((string) ($data['description'] ?? ''));
+
+        // If the description embeds a "Key Features:" section and no separate
+        // feature list was provided, split it out so content is not duplicated.
+        if ($features === [] && $description !== '') {
+            $split = DescriptionMarkdown::splitKeyFeatures($description);
+            if ($split['features'] !== []) {
+                $description = $split['description'];
+                $features = $split['features'];
+            }
+        }
+
         return [
-            'description' => (string) ($data['description'] ?? ''),
+            'description' => $description,
             'policy_text' => $rawPolicy !== '' ? $rawPolicy : null,
             'features' => $features ?: null,
             'reviews_data' => $reviews ?: null,
@@ -78,7 +97,7 @@ class ProductController extends Controller
         $sortBy = $request->query('sort_by', 'created_at');
         $sortDir = $request->query('sort_dir', 'desc');
 
-        if (!in_array($sortBy, ['id', 'name', 'price', 'old_price', 'stock', 'category_id', 'featured', 'status', 'created_at'])) {
+        if (! in_array($sortBy, ['id', 'name', 'price', 'old_price', 'stock', 'category_id', 'featured', 'status', 'created_at'])) {
             $sortBy = 'created_at';
         }
         $sortDir = $sortDir === 'asc' ? 'asc' : 'desc';
@@ -88,7 +107,7 @@ class ProductController extends Controller
             $perPage = Product::count() ?: 10;
         } else {
             $perPage = (int) $perPage;
-            if (!in_array($perPage, [10, 20, 50, 100])) {
+            if (! in_array($perPage, [10, 20, 50, 100])) {
                 $perPage = 10;
             }
         }
@@ -106,12 +125,14 @@ class ProductController extends Controller
         $products = $query->orderBy($sortBy, $sortDir)->paginate($perPage);
 
         $products->appends($request->query())->onEachSide(1);
+
         return view('admin.products.index', compact('products', 'sortBy', 'sortDir'));
     }
 
     public function restore($id)
     {
         Product::onlyTrashed()->findOrFail($id)->restore();
+
         return redirect()->route('admin.products.index')->with('success', 'Product restored successfully!');
     }
 
@@ -119,12 +140,13 @@ class ProductController extends Controller
     {
         $product = Product::onlyTrashed()->findOrFail($id);
         $product->forceDelete();
+
         return redirect()->route('admin.products.index')->with('success', 'Product permanently deleted!');
     }
 
     public function show($slug)
     {
-        $product = Product::with(['galleryImages', 'category.parent', 'seller' => fn($q) => $q->withCount('products')])->where('slug', $slug)->where('status', true)->firstOrFail();
+        $product = Product::with(['galleryImages', 'category.parent', 'seller' => fn ($q) => $q->withCount('products')])->where('slug', $slug)->where('status', true)->firstOrFail();
         $related = Product::with('category')->where('status', true)->where('id', '!=', $product->id)->take(4)->get();
 
         // "Similar Products To Compare" — same part, other brands (Moglix-style).
@@ -134,13 +156,13 @@ class ProductController extends Controller
             ->where('status', true)
             ->where('id', '!=', $product->id);
 
-        if (!empty($product->category_id) && !empty($product->year) && !empty($product->make) && !empty($product->model)) {
+        if (! empty($product->category_id) && ! empty($product->year) && ! empty($product->make) && ! empty($product->model)) {
             $fitmentMatches = (clone $similarBase)
                 ->where('category_id', $product->category_id)
                 ->where('year', $product->year)
                 ->where('make', $product->make)
                 ->where('model', $product->model)
-                ->orderByRaw('IF(brand_id = ' . (int) $product->brand_id . ', 1, 0) ASC, id ASC')
+                ->orderByRaw('IF(brand_id = '.(int) $product->brand_id.', 1, 0) ASC, id ASC')
                 ->limit($similarLimit)
                 ->get();
             $similar = $fitmentMatches;
@@ -151,7 +173,7 @@ class ProductController extends Controller
             $categoryCandidates = (clone $similarBase)
                 ->where('category_id', $product->category_id)
                 ->whereNotIn('id', $exclude)
-                ->orderByRaw('IF(brand_id = ' . (int) $product->brand_id . ', 1, 0) ASC, id ASC')
+                ->orderByRaw('IF(brand_id = '.(int) $product->brand_id.', 1, 0) ASC, id ASC')
                 ->limit($similarLimit - $similar->count())
                 ->get();
             $similar = $similar->merge($categoryCandidates)->take($similarLimit);
@@ -159,9 +181,9 @@ class ProductController extends Controller
 
         $activeCategoryUrls = [];
         if ($product->category) {
-            $activeCategoryUrls[] = url('/category/' . $product->category->slug);
+            $activeCategoryUrls[] = url('/category/'.$product->category->slug);
             if ($product->category->parent) {
-                $activeCategoryUrls[] = url('/category/' . $product->category->parent->slug);
+                $activeCategoryUrls[] = url('/category/'.$product->category->parent->slug);
             }
         }
         view()->share('activeCategoryUrls', $activeCategoryUrls);
@@ -176,7 +198,7 @@ class ProductController extends Controller
         }
         $inWishlist = in_array($product->id, $wishedProductIds);
 
-        $hasPurchased = \App\Http\Controllers\ReviewController::hasPurchased(auth()->id(), $product->id);
+        $hasPurchased = ReviewController::hasPurchased(auth()->id(), $product->id);
 
         return view('product.show', compact('product', 'related', 'inWishlist', 'wishedProductIds', 'hasPurchased', 'similar'));
     }
@@ -186,6 +208,7 @@ class ProductController extends Controller
         $categories = Category::orderBy('name')->get();
         $brands = Brand::where('status', true)->orderBy('name')->get();
         $sellers = Seller::orderBy('name')->get();
+
         return view('admin.products.create', compact('categories', 'brands', 'sellers'));
     }
 
@@ -214,12 +237,16 @@ class ProductController extends Controller
         $data = $request->only(['name', 'description', 'price', 'old_price', 'category_id', 'brand_id', 'seller_id', 'year', 'make', 'model', 'badge', 'product_type', 'stock', 'status', 'tab_label_1', 'tab_label_2', 'tab_label_3', 'policy_text']);
         $data['featured'] = $request->boolean('featured');
         $data['added_by'] = 'admin';
-        $data['features'] = $request->filled('features') ? array_filter(explode("\n", str_replace("\r", "", $request->features))) : null;
+        [$data['description'], $data['policy_text']] = $this->normalizeEditorContent(
+            (string) ($data['description'] ?? ''),
+            (string) ($data['policy_text'] ?? '')
+        );
+        $data['features'] = $request->filled('features') ? array_filter(explode("\n", str_replace("\r", '', $request->features))) : null;
         $data['reviews_data'] = $request->filled('reviews_data') ? json_decode($request->reviews_data, true) : null;
-        $data['slug'] = Str::slug($request->name) . '-' . time();
+        $data['slug'] = Str::slug($request->name).'-'.time();
 
         if ($request->filled('image_from_manager')) {
-            $data['image'] = 'storage/' . ltrim($request->image_from_manager, '/');
+            $data['image'] = 'storage/'.ltrim($request->image_from_manager, '/');
         } elseif ($request->hasFile('image')) {
             $data['image'] = saveImageWithWebp($request->file('image'));
         }
@@ -235,16 +262,16 @@ class ProductController extends Controller
         $this->attachGalleryUploads($product, $request->file('gallery_images'));
 
         if ($product->category_id) {
-            $userIds = \App\Models\Wishlist::whereHas('product', fn($q) => $q->where('category_id', $product->category_id))
+            $userIds = Wishlist::whereHas('product', fn ($q) => $q->where('category_id', $product->category_id))
                 ->where('user_id', '!=', auth()->id())
                 ->pluck('user_id')
                 ->unique()
                 ->toArray();
-            $category = \App\Models\Category::find($product->category_id);
+            $category = Category::find($product->category_id);
             foreach ($userIds as $uid) {
-                $user = \App\Models\User::find($uid);
+                $user = User::find($uid);
                 if ($user) {
-                    \App\Helpers\NotificationHelper::newProductInCategory($user, $product, $category);
+                    NotificationHelper::newProductInCategory($user, $product, $category);
                 }
             }
         }
@@ -255,6 +282,7 @@ class ProductController extends Controller
     public function details($id)
     {
         $product = Product::with(['category', 'brand', 'galleryImages'])->findOrFail($id);
+
         return view('admin.products.show', compact('product'));
     }
 
@@ -264,6 +292,7 @@ class ProductController extends Controller
         $categories = Category::orderBy('name')->get();
         $brands = Brand::where('status', true)->orderBy('name')->get();
         $sellers = Seller::orderBy('name')->get();
+
         return view('admin.products.edit', compact('product', 'categories', 'brands', 'sellers'));
     }
 
@@ -293,11 +322,15 @@ class ProductController extends Controller
 
         $data = $request->only(['name', 'description', 'price', 'old_price', 'category_id', 'brand_id', 'seller_id', 'year', 'make', 'model', 'badge', 'product_type', 'stock', 'status', 'tab_label_1', 'tab_label_2', 'tab_label_3', 'policy_text']);
         $data['featured'] = $request->boolean('featured');
-        $data['features'] = $request->filled('features') ? array_filter(explode("\n", str_replace("\r", "", $request->features))) : null;
+        [$data['description'], $data['policy_text']] = $this->normalizeEditorContent(
+            (string) ($data['description'] ?? ''),
+            (string) ($data['policy_text'] ?? '')
+        );
+        $data['features'] = $request->filled('features') ? array_filter(explode("\n", str_replace("\r", '', $request->features))) : null;
         $data['reviews_data'] = $request->filled('reviews_data') ? json_decode($request->reviews_data, true) : null;
 
         if ($request->filled('image_from_manager')) {
-            $data['image'] = 'storage/' . ltrim($request->image_from_manager, '/');
+            $data['image'] = 'storage/'.ltrim($request->image_from_manager, '/');
         } elseif ($request->hasFile('image')) {
             $data['image'] = saveImageWithWebp($request->file('image'));
         }
@@ -321,7 +354,7 @@ class ProductController extends Controller
 
     private function attachGalleryUploads(Product $product, $files): void
     {
-        if (!$files) {
+        if (! $files) {
             return;
         }
 
@@ -339,14 +372,14 @@ class ProductController extends Controller
 
         foreach ($imageIds as $imageId) {
             $image = Image::find($imageId);
-            if (!$image) {
+            if (! $image) {
                 continue;
             }
 
             $hasOtherOwners = DB::table('image_product')->where('image_id', $imageId)->exists();
 
             if (
-                !$hasOtherOwners
+                ! $hasOtherOwners
                 && $image->attachable_type === Product::class
                 && (int) $image->attachable_id === (int) $product->id
             ) {
@@ -360,17 +393,17 @@ class ProductController extends Controller
 
     private function attachGalleryImagesFromManager(Product $product, ?string $galleryImagesFromManager): void
     {
-        if (!$galleryImagesFromManager) {
+        if (! $galleryImagesFromManager) {
             return;
         }
 
         $paths = json_decode($galleryImagesFromManager, true);
-        if (!is_array($paths)) {
+        if (! is_array($paths)) {
             $paths = [$galleryImagesFromManager];
         }
 
         foreach ($paths as $imgPath) {
-            if (!$imgPath) {
+            if (! $imgPath) {
                 continue;
             }
 
@@ -390,22 +423,25 @@ class ProductController extends Controller
     {
         $product = Product::findOrFail($id);
         $product->delete();
+
         return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully!');
     }
 
     public function toggleStatus($id)
     {
         $product = Product::findOrFail($id);
-        $product->status = !$product->status;
+        $product->status = ! $product->status;
         $product->save();
+
         return back()->with('success', 'Product status updated successfully.');
     }
 
     public function toggleFeatured($id)
     {
         $product = Product::findOrFail($id);
-        $product->featured = !$product->featured;
+        $product->featured = ! $product->featured;
         $product->save();
+
         return back()->with('success', 'Product featured status updated successfully.');
     }
 
@@ -421,12 +457,12 @@ class ProductController extends Controller
 
         $product = Product::find($request->product_id);
 
-        \App\Models\Contact::create([
+        Contact::create([
             'name' => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
-            'subject' => 'Seller Contact: ' . ($product->name ?? 'Product Inquiry'),
-            'message' => "Product: {$product->name}\nProduct URL: " . route('product', $product->slug) . "\n\n{$request->message}",
+            'subject' => 'Seller Contact: '.($product->name ?? 'Product Inquiry'),
+            'message' => "Product: {$product->name}\nProduct URL: ".route('product', $product->slug)."\n\n{$request->message}",
             'user_id' => auth()->id(),
             'product_id' => $product->id,
         ]);
@@ -464,8 +500,9 @@ class ProductController extends Controller
             }
         }
 
-        if (!isset($colMap[array_search('name', $colMap)]) || !isset($colMap[array_search('price', $colMap)])) {
+        if (! isset($colMap[array_search('name', $colMap)]) || ! isset($colMap[array_search('price', $colMap)])) {
             fclose($handle);
+
             return back()->with('error', 'CSV must contain at least "name" and "price" columns.');
         }
 
@@ -500,20 +537,22 @@ class ProductController extends Controller
 
             if (empty($data['name'])) {
                 $errors[] = "Row {$rowNum}: name is required.";
+
                 continue;
             }
-            if (!is_numeric($data['price']) || $data['price'] < 0) {
+            if (! is_numeric($data['price']) || $data['price'] < 0) {
                 $errors[] = "Row {$rowNum}: price must be a positive number.";
+
                 continue;
             }
 
             $existingProduct = null;
-            if (!empty($data['id']) && is_numeric($data['id'])) {
-                $existingProduct = Product::find((int)$data['id']);
+            if (! empty($data['id']) && is_numeric($data['id'])) {
+                $existingProduct = Product::find((int) $data['id']);
             }
 
             $categoryId = null;
-            if (!empty($data['category'])) {
+            if (! empty($data['category'])) {
                 $catKey = strtolower(trim($data['category']));
                 if (isset($categories[$catKey])) {
                     $categoryId = $categories[$catKey]->id;
@@ -530,7 +569,7 @@ class ProductController extends Controller
             }
 
             $brandId = null;
-            if (!empty($data['brand'])) {
+            if (! empty($data['brand'])) {
                 $brandKey = strtolower(trim($data['brand']));
                 if (isset($brands[$brandKey])) {
                     $brandId = $brands[$brandKey]->id;
@@ -547,14 +586,14 @@ class ProductController extends Controller
             }
 
             $sellerId = null;
-            if (!empty($data['seller'])) {
+            if (! empty($data['seller'])) {
                 $sellerKey = strtolower(trim($data['seller']));
                 if (isset($sellers[$sellerKey])) {
                     $sellerId = $sellers[$sellerKey]->id;
                 } else {
                     $newSeller = Seller::create([
                         'name' => trim($data['seller']),
-                        'slug' => Str::slug(trim($data['seller'])) . '-' . uniqid(),
+                        'slug' => Str::slug(trim($data['seller'])).'-'.uniqid(),
                         'status' => true,
                     ]);
                     $sellers[$sellerKey] = $newSeller;
@@ -568,14 +607,14 @@ class ProductController extends Controller
             $insertData = [
                 'name' => $data['name'],
                 'price' => $data['price'],
-                'old_price' => (!empty($data['old_price']) && is_numeric($data['old_price'])) ? $data['old_price'] : null,
+                'old_price' => (! empty($data['old_price']) && is_numeric($data['old_price'])) ? $data['old_price'] : null,
                 'category_id' => $categoryId,
                 'brand_id' => $brandId,
                 'seller_id' => $sellerId,
-                'year' => (!empty($data['year']) && is_numeric($data['year'])) ? (int)$data['year'] : null,
+                'year' => (! empty($data['year']) && is_numeric($data['year'])) ? (int) $data['year'] : null,
                 'make' => $data['make'] ?? null,
                 'model' => $data['model'] ?? null,
-                'stock' => (!empty($data['stock']) && is_numeric($data['stock'])) ? (int)$data['stock'] : 0,
+                'stock' => (! empty($data['stock']) && is_numeric($data['stock'])) ? (int) $data['stock'] : 0,
                 'description' => $normalized['description'] ?: ($data['description'] ?? ''),
                 'badge' => $data['badge'] ?? null,
                 'product_type' => in_array($data['product_type'] ?? '', ['none', 'new_arrival', 'trending', 'best_selling', 'popular']) ? $data['product_type'] : 'none',
@@ -589,11 +628,11 @@ class ProductController extends Controller
             if ($existingProduct) {
                 $insertData['slug'] = $existingProduct->slug;
             } else {
-                $insertData['slug'] = Str::slug($data['name']) . '-' . time() . '-' . $imported;
+                $insertData['slug'] = Str::slug($data['name']).'-'.time().'-'.$imported;
                 $insertData['added_by'] = 'admin';
             }
 
-            if (!empty($data['image']) && filter_var($data['image'], FILTER_VALIDATE_URL)) {
+            if (! empty($data['image']) && filter_var($data['image'], FILTER_VALIDATE_URL)) {
                 $saved = saveImageFromUrlWithWebp($data['image']);
                 if ($saved) {
                     $insertData['image'] = $saved;
@@ -613,30 +652,42 @@ class ProductController extends Controller
                 }
                 $imported++;
 
-                if (!empty($data['gallery_images'])) {
+                if (! empty($data['gallery_images'])) {
                     $galleryUrls = array_filter(array_map('trim', explode('|', $data['gallery_images'])));
-                    $subdir = 'uploads/' . now()->format('Y/m');
-                    $destDir = storage_path('app/public/' . $subdir);
-                    if (!is_dir($destDir)) mkdir($destDir, 0775, true);
+                    $subdir = 'uploads/'.now()->format('Y/m');
+                    $destDir = storage_path('app/public/'.$subdir);
+                    if (! is_dir($destDir)) {
+                        mkdir($destDir, 0775, true);
+                    }
                     foreach ($galleryUrls as $imgUrl) {
-                        if (!filter_var($imgUrl, FILTER_VALIDATE_URL)) continue;
-                        $response = \Illuminate\Support\Facades\Http::get($imgUrl);
-                        if ($response->failed()) continue;
+                        if (! filter_var($imgUrl, FILTER_VALIDATE_URL)) {
+                            continue;
+                        }
+                        $response = Http::get($imgUrl);
+                        if ($response->failed()) {
+                            continue;
+                        }
                         $contentType = $response->header('Content-Type');
-                        if (!str_contains($contentType, 'image/')) continue;
+                        if (! str_contains($contentType, 'image/')) {
+                            continue;
+                        }
                         $ext = 'jpg';
-                        if (str_contains($contentType, 'png')) $ext = 'png';
-                        elseif (str_contains($contentType, 'webp')) $ext = 'webp';
-                        elseif (str_contains($contentType, 'gif')) $ext = 'gif';
-                        $filename = time() . '_' . uniqid() . '.' . $ext;
-                        file_put_contents($destDir . '/' . $filename, $response->body());
+                        if (str_contains($contentType, 'png')) {
+                            $ext = 'png';
+                        } elseif (str_contains($contentType, 'webp')) {
+                            $ext = 'webp';
+                        } elseif (str_contains($contentType, 'gif')) {
+                            $ext = 'gif';
+                        }
+                        $filename = time().'_'.uniqid().'.'.$ext;
+                        file_put_contents($destDir.'/'.$filename, $response->body());
                         Image::create([
                             'original_name' => $filename,
                             'filename' => $filename,
-                            'path' => $subdir . '/' . $filename,
-                            'url' => 'storage/' . $subdir . '/' . $filename,
+                            'path' => $subdir.'/'.$filename,
+                            'url' => 'storage/'.$subdir.'/'.$filename,
                             'mime_type' => $contentType,
-                            'size' => filesize($destDir . '/' . $filename),
+                            'size' => filesize($destDir.'/'.$filename),
                             'width' => null,
                             'height' => null,
                             'is_unused' => false,
@@ -647,7 +698,7 @@ class ProductController extends Controller
                     }
                 }
             } catch (\Exception $e) {
-                $errors[] = "Row {$rowNum}: " . $e->getMessage();
+                $errors[] = "Row {$rowNum}: ".$e->getMessage();
             }
         }
 
@@ -667,13 +718,13 @@ class ProductController extends Controller
         if ($galleryImported > 0) {
             $extras[] = "{$galleryImported} gallery image(s) imported";
         }
-        if (!empty($extras)) {
-            $message .= ' (' . implode(', ', $extras) . ')';
+        if (! empty($extras)) {
+            $message .= ' ('.implode(', ', $extras).')';
         }
-        if (!empty($errors)) {
-            $message .= ' ' . count($errors) . ' error(s): ' . implode('; ', array_slice($errors, 0, 10));
+        if (! empty($errors)) {
+            $message .= ' '.count($errors).' error(s): '.implode('; ', array_slice($errors, 0, 10));
             if (count($errors) > 10) {
-                $message .= ' (and ' . (count($errors) - 10) . ' more)';
+                $message .= ' (and '.(count($errors) - 10).' more)';
             }
         }
 
@@ -746,7 +797,19 @@ class ProductController extends Controller
 
         return response()->stream($callback, 200, [
             'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="products-export-' . date('Y-m-d') . '.csv"',
+            'Content-Disposition' => 'attachment; filename="products-export-'.date('Y-m-d').'.csv"',
         ]);
+    }
+
+    private function normalizeEditorContent(string $description, string $policyText): array
+    {
+        $description = DescriptionMarkdown::toHtml(trim($description));
+
+        $policyText = trim($policyText);
+        if ($policyText !== '' && preg_match('/<[a-z][^>]*>/i', $policyText) !== 1) {
+            $policyText = nl2br(e($policyText));
+        }
+
+        return [$description, $policyText];
     }
 }

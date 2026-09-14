@@ -17,6 +17,10 @@
             if (flashMessages.info) toastr.info(flashMessages.info);
 
             document.querySelectorAll('textarea.texteditor, textarea#editor').forEach(function(editor) {
+                if (window.marked && editor.value && !/<[a-z][^>]*>/i.test(editor.value)) {
+                    var raw = editor.value.replace(/^[ \t]*\u2022[ \t]+/gm, '- ');
+                    editor.value = marked.parse(raw);
+                }
                 $(editor).summernote({ placeholder: 'WYSIWYG rich text editor', tabsize: 2, height: 250 });
             });
         }

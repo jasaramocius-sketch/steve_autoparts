@@ -1,29 +1,37 @@
 <?php
 
-if (!function_exists('sortUrl')) {
-function sortUrl($column, $currentSortBy, $currentSortDir): string
-{
-    $newDir = $currentSortBy === $column && $currentSortDir === 'asc' ? 'desc' : 'asc';
-    return request()->fullUrlWithQuery(['sort_by' => $column, 'sort_dir' => $newDir, 'page' => null]);
-}
+use Illuminate\Support\Str;
+
+if (! function_exists('sortUrl')) {
+    function sortUrl($column, $currentSortBy, $currentSortDir): string
+    {
+        $newDir = $currentSortBy === $column && $currentSortDir === 'asc' ? 'desc' : 'asc';
+
+        return request()->fullUrlWithQuery(['sort_by' => $column, 'sort_dir' => $newDir, 'page' => null]);
+    }
 }
 
-if (!function_exists('sortIndicator')) {
+if (! function_exists('sortIndicator')) {
     function sortIndicator($column, $currentSortBy, $currentSortDir): string
     {
-        if ($currentSortBy !== $column) return '';
+        if ($currentSortBy !== $column) {
+            return '';
+        }
+
         return $currentSortDir === 'asc'
             ? '<small class="text-muted ms-1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="display:inline"><polyline points="18 15 12 9 6 15"></polyline></svg></small>'
             : '<small class="text-muted ms-1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="display:inline"><polyline points="6 9 12 15 18 9"></polyline></svg></small>';
     }
 }
 
-if (!function_exists('resolveImageSource')) {
+if (! function_exists('resolveImageSource')) {
     function resolveImageSource(?string $path): ?string
     {
-        if (!$path) return null;
+        if (! $path) {
+            return null;
+        }
 
-        $candidates = [public_path($path), storage_path('app/public/' . $path)];
+        $candidates = [public_path($path), storage_path('app/public/'.$path)];
         foreach ($candidates as $candidate) {
             if (file_exists($candidate)) {
                 return $candidate;
@@ -34,7 +42,7 @@ if (!function_exists('resolveImageSource')) {
     }
 }
 
-if (!function_exists('normalizeImagePath')) {
+if (! function_exists('normalizeImagePath')) {
     function normalizeImagePath($value, ?string $legacyPrefix = null): ?string
     {
         if ($value === null || trim((string) $value) === '') {
@@ -62,18 +70,18 @@ if (!function_exists('normalizeImagePath')) {
         }
 
         if ($legacyPrefix) {
-            return $legacyPrefix . '/' . $value;
+            return $legacyPrefix.'/'.$value;
         }
 
         return $value;
     }
 }
 
-if (!function_exists('storedPath')) {
+if (! function_exists('storedPath')) {
     function storedPath($value, ?string $legacyPrefix = null, string $fallback = 'assets/images/placeholder.png'): string
     {
         $path = normalizeImagePath($value, $legacyPrefix);
-        if (!$path) {
+        if (! $path) {
             return $fallback;
         }
 
@@ -87,17 +95,17 @@ if (!function_exists('storedPath')) {
     }
 }
 
-if (!function_exists('webpOriginal')) {
+if (! function_exists('webpOriginal')) {
     function webpOriginal(string $path): ?string
     {
-        if (!preg_match('/\.webp$/i', $path)) {
+        if (! preg_match('/\.webp$/i', $path)) {
             return null;
         }
 
         $info = pathinfo($path);
         foreach (['jpg', 'jpeg', 'png', 'gif'] as $ext) {
-            $candidate = $info['dirname'] . '/' . $info['filename'] . '.' . $ext;
-            $checkPath = str_starts_with($candidate, 'uploads/') ? 'storage/' . $candidate : $candidate;
+            $candidate = $info['dirname'].'/'.$info['filename'].'.'.$ext;
+            $checkPath = str_starts_with($candidate, 'uploads/') ? 'storage/'.$candidate : $candidate;
             if (file_exists(public_path($checkPath))) {
                 return $checkPath;
             }
@@ -107,7 +115,7 @@ if (!function_exists('webpOriginal')) {
     }
 }
 
-if (!function_exists('imageUrl')) {
+if (! function_exists('imageUrl')) {
     function imageUrl(string $path): string
     {
         if (preg_match('/\.webp$/i', $path)) {
@@ -118,18 +126,18 @@ if (!function_exists('imageUrl')) {
         }
 
         if (str_starts_with($path, 'uploads/')) {
-            return asset('storage/' . $path);
+            return asset('storage/'.$path);
         }
 
         return asset($path);
     }
 }
 
-if (!function_exists('storedImageUrl')) {
+if (! function_exists('storedImageUrl')) {
     function storedImageUrl($value, ?string $legacyPrefix = null, string $fallback = 'assets/images/placeholder.png'): string
     {
         $path = normalizeImagePath($value, $legacyPrefix);
-        if (!$path) {
+        if (! $path) {
             return asset($fallback);
         }
 
@@ -138,31 +146,40 @@ if (!function_exists('storedImageUrl')) {
         }
 
         if (str_starts_with($path, 'uploads/')) {
-            return asset('storage/' . $path);
+            return asset('storage/'.$path);
         }
 
         return imageUrl($path);
     }
 }
 
-if (!function_exists('webpExists')) {
+if (! function_exists('webpExists')) {
     function webpExists(string $path): bool
     {
         $info = pathinfo($path);
-        $webpPath = $info['dirname'] . '/' . $info['filename'] . '.webp';
-        $checkPath = str_starts_with($webpPath, 'uploads/') ? 'storage/' . $webpPath : $webpPath;
+        $webpPath = $info['dirname'].'/'.$info['filename'].'.webp';
+        $checkPath = str_starts_with($webpPath, 'uploads/') ? 'storage/'.$webpPath : $webpPath;
+
         return file_exists(public_path($checkPath));
     }
 }
 
-if (!function_exists('webpSrc')) {
+if (! function_exists('webpSrc')) {
     function webpSrc(string $path): string
     {
         $info = pathinfo($path);
-        $webpPath = $info['dirname'] . '/' . $info['filename'] . '.webp';
+        $webpPath = $info['dirname'].'/'.$info['filename'].'.webp';
         if (str_starts_with($webpPath, 'uploads/')) {
-            return asset('storage/' . $webpPath);
+            return asset('storage/'.$webpPath);
         }
+
         return asset($webpPath);
+    }
+}
+
+if (! function_exists('generateTransactionId')) {
+    function generateTransactionId(): string
+    {
+        return 'pay_'.Str::random(24);
     }
 }

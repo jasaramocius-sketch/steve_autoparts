@@ -177,12 +177,18 @@
                         
                         <div class="col-md-12">
                             <label class="form-label">Policy Text</label>
-                            <textarea name="policy_text" class="form-control texteditor" rows="4">{{ old('policy_text', $product->policy_text) }}</textarea>
+                            @php
+                                $policyEditorValue = old('policy_text', !empty(trim((string) $product->policy_text))
+                                    ? $product->policy_text
+                                    : trim(view('partials.product-buy-return-policy', ['product' => $product])->render()));
+                            @endphp
+                            <textarea name="policy_text" class="form-control texteditor" rows="4">{{ $policyEditorValue }}</textarea>
                         </div>
                         
                         <div class="col-md-12">
                             <label class="form-label">Key Features</label>
                             <textarea name="features" class="form-control" rows="4" placeholder="Enter one feature per line...">{{ old('features', is_array($product->features) ? implode("\n", $product->features) : '') }}</textarea>
+                            @include('admin.partials.key-features-preview', ['initialFeatures' => old('features', is_array($product->features) ? implode("\n", $product->features) : '')])
                         </div>
                         
                         <div class="col-md-12">

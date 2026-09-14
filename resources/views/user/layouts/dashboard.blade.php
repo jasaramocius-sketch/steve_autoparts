@@ -2,7 +2,7 @@
 @include('partials.page-attributes', ['pageId' => 'user-dashboard-layout', 'pageClass' => 'user-dashboard-layout'])
 
 @section('content')
-<section class="gs-dashboard-section py-5">
+<section class="gs-dashboard-section py-5 py-md-4 py-sm-5">
     <div class="container">
         <div class="row">
 

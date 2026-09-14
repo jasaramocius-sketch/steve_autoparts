@@ -2,14 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Blog;
+use App\Models\Category;
 use App\Models\FileRevision;
+use App\Models\Image;
 use App\Models\Order;
+use App\Models\Page;
 use App\Models\Product;
 use App\Models\Revision;
 use App\Models\Setting;
 use App\Models\User;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -28,10 +33,10 @@ class AdminController extends Controller
 
         if ($topProducts->isNotEmpty()) {
             $products = Product::whereIn('id', $topProducts->pluck('product_id'))->get()->keyBy('id');
-            $topProducts = $topProducts->map(fn($item) => tap($item, fn($i) => $i->product = $products->get($i->product_id)));
+            $topProducts = $topProducts->map(fn ($item) => tap($item, fn ($i) => $i->product = $products->get($i->product_id)));
         }
 
-        $ordersByStatus = Order::selectRaw("status, COUNT(*) as count")->groupBy('status')->get();
+        $ordersByStatus = Order::selectRaw('status, COUNT(*) as count')->groupBy('status')->get();
 
         $dbRevenue = Order::selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, SUM(total_amount) as total")->groupBy('month')->orderBy('month')->take(12)->pluck('total', 'month');
 
@@ -41,7 +46,7 @@ class AdminController extends Controller
             $monthlyRevenueData->put($key, (float) ($dbRevenue->get($key) ?? 0));
         }
 
-        $weeklyRevenue = Order::selectRaw("YEARWEEK(created_at, 1) as week, SUM(total_amount) as total")
+        $weeklyRevenue = Order::selectRaw('YEARWEEK(created_at, 1) as week, SUM(total_amount) as total')
             ->where('created_at', '>=', now()->subWeeks(12))
             ->groupBy('week')
             ->orderBy('week')
@@ -51,11 +56,11 @@ class AdminController extends Controller
         for ($i = 11; $i >= 0; $i--) {
             $start = now()->subWeeks($i)->startOfWeek();
             $key = $start->format('Y-m-d');
-            $weekKey = (int)$start->format('oW');
+            $weekKey = (int) $start->format('oW');
             $weeklyRevenueData->put($key, (float) ($weeklyRevenue->get($weekKey) ?? 0));
         }
 
-        $dailyRevenue = Order::selectRaw("DATE(created_at) as date, SUM(total_amount) as total")
+        $dailyRevenue = Order::selectRaw('DATE(created_at) as date, SUM(total_amount) as total')
             ->where('created_at', '>=', now()->subDays(30))
             ->groupBy('date')
             ->orderBy('date')
@@ -74,16 +79,16 @@ class AdminController extends Controller
             ->pluck('total', 'hour');
 
         $hourlyRevenueData = collect();
-        $currentHour = (int)now()->format('H');
+        $currentHour = (int) now()->format('H');
         for ($h = 0; $h <= $currentHour; $h++) {
-            $key = now()->format('Y-m-d') . ' ' . str_pad($h, 2, '0', STR_PAD_LEFT) . ':00:00';
+            $key = now()->format('Y-m-d').' '.str_pad($h, 2, '0', STR_PAD_LEFT).':00:00';
             $hourlyRevenueData->put($key, (float) ($hourlyRevenue->get($key) ?? 0));
         }
 
-        $fiveMinRevenue = Order::selectRaw("
+        $fiveMinRevenue = Order::selectRaw('
             FROM_UNIXTIME(FLOOR(UNIX_TIMESTAMP(created_at) / 300) * 300) as interval_time,
             SUM(total_amount) as total
-        ")
+        ')
             ->whereDate('created_at', today())
             ->groupBy('interval_time')
             ->orderBy('interval_time')
@@ -120,6 +125,7 @@ class AdminController extends Controller
     public function profile()
     {
         $user = Auth::user();
+
         return view('admin.profile', compact('user'));
     }
 
@@ -128,19 +134,19 @@ class AdminController extends Controller
         $user = Auth::user();
 
         $request->validate([
-            'name'    => 'required|string|max:255',
-            'email'   => ['required', 'email', Rule::unique('users')->ignore($user->id)],
-            'phone'   => 'nullable|string|max:255|regex:/^[0-9+\-\s()]*$/',
+            'name' => 'required|string|max:255',
+            'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
+            'phone' => 'nullable|string|max:255|regex:/^[0-9+\-\s()]*$/',
             'address' => 'nullable|string|max:255',
-            'city'    => 'nullable|string|max:255',
-            'state'   => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:255',
+            'state' => 'nullable|string|max:255',
             'country' => 'nullable|string|max:255',
             'postal_code' => 'nullable|string|max:255|regex:/^[A-Za-z0-9\-\s]{3,20}$/',
         ]);
 
         if ($request->filled('image_from_manager')) {
             $oldAvatar = $user->avatar;
-            $user->avatar = 'storage/' . ltrim($request->input('image_from_manager'), '/');
+            $user->avatar = 'storage/'.ltrim($request->input('image_from_manager'), '/');
             if ($oldAvatar && $oldAvatar !== $user->avatar) {
                 deleteImageFiles($oldAvatar);
             }
@@ -157,10 +163,10 @@ class AdminController extends Controller
     {
         $request->validate([
             'current_password' => 'required',
-            'new_password'     => 'required|min:8|confirmed',
+            'new_password' => 'required|min:8|confirmed',
         ]);
 
-        if (!Hash::check($request->current_password, Auth::user()->password)) {
+        if (! Hash::check($request->current_password, Auth::user()->password)) {
             return back()->withErrors(['current_password' => 'Incorrect current password']);
         }
 
@@ -183,19 +189,19 @@ class AdminController extends Controller
                 ->pluck('total', 'hour');
 
             $data = collect();
-            $currentHour = (int)now()->format('H');
+            $currentHour = (int) now()->format('H');
             for ($h = 0; $h <= $currentHour; $h++) {
-                $key = now()->format('Y-m-d') . ' ' . str_pad($h, 2, '0', STR_PAD_LEFT) . ':00:00';
+                $key = now()->format('Y-m-d').' '.str_pad($h, 2, '0', STR_PAD_LEFT).':00:00';
                 $data->put($key, (float) ($hourlyRevenue->get($key) ?? 0));
             }
 
             return response()->json($data);
         }
 
-        $todayRevenue = Order::selectRaw("
+        $todayRevenue = Order::selectRaw('
             FROM_UNIXTIME(FLOOR(UNIX_TIMESTAMP(created_at) / 300) * 300) as interval_time,
             SUM(total_amount) as total
-        ")
+        ')
             ->whereDate('created_at', today())
             ->groupBy('interval_time')
             ->orderBy('interval_time')
@@ -216,13 +222,14 @@ class AdminController extends Controller
     public function headerSettings()
     {
         $settings = Setting::getAllAsArray();
-        $categories = \App\Models\Category::with('children')->orderBy('name')->get();
-        $pages = \App\Models\Page::where('status', true)
+        $categories = Category::with('children')->orderBy('name')->get();
+        $pages = Page::where('status', true)
             ->select('id', 'title', 'slug')
             ->orderBy('title')->get();
-        $posts = \App\Models\Blog::where('status', 'published')
+        $posts = Blog::where('status', 'published')
             ->select('id', 'title', 'slug')
             ->orderBy('title')->get();
+
         return view('admin.settings.header', compact('settings', 'categories', 'pages', 'posts'));
     }
 
@@ -241,28 +248,29 @@ class AdminController extends Controller
         $selectedFile = $request->get('file', $files[0] ?? null);
         $contents = [];
 
-        if ($selectedFile && is_file($directory . DIRECTORY_SEPARATOR . $selectedFile)) {
-            $contents = file($directory . DIRECTORY_SEPARATOR . $selectedFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        if ($selectedFile && is_file($directory.DIRECTORY_SEPARATOR.$selectedFile)) {
+            $contents = file($directory.DIRECTORY_SEPARATOR.$selectedFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         }
 
         // Parse each JSON line into a structured entry; skip malformed lines.
         $entries = [];
         foreach ($contents as $line) {
             $decoded = json_decode(trim($line), true);
-            if (!is_array($decoded)) {
+            if (! is_array($decoded)) {
                 $entries[] = [
                     'timestamp' => null,
-                    'type'      => 'info',
-                    'message'   => $line,
-                    'context'   => [],
+                    'type' => 'info',
+                    'message' => $line,
+                    'context' => [],
                 ];
+
                 continue;
             }
             $entries[] = [
                 'timestamp' => $decoded['timestamp'] ?? null,
-                'type'      => $decoded['type'] ?? 'info',
-                'message'   => $decoded['message'] ?? '',
-                'context'   => $decoded['context'] ?? [],
+                'type' => $decoded['type'] ?? 'info',
+                'message' => $decoded['message'] ?? '',
+                'context' => $decoded['context'] ?? [],
             ];
         }
 
@@ -294,17 +302,17 @@ class AdminController extends Controller
 
         // Paginate.
         $perPage = 50;
-        $currentPage = \Illuminate\Pagination\Paginator::resolveCurrentPage();
+        $currentPage = Paginator::resolveCurrentPage();
         $total = count($entries);
         $pageEntries = array_slice($entries, ($currentPage - 1) * $perPage, $perPage);
 
-        $entries = new \Illuminate\Pagination\LengthAwarePaginator(
+        $entries = new LengthAwarePaginator(
             $pageEntries,
             $total,
             $perPage,
             $currentPage,
             [
-                'path' => \Illuminate\Pagination\Paginator::resolveCurrentPath(),
+                'path' => Paginator::resolveCurrentPath(),
                 'query' => $request->query(),
             ]
         );
@@ -316,7 +324,7 @@ class AdminController extends Controller
     {
         $file = $this->sanitizeLogFile($file);
         $directory = storage_path('logs/site-changes');
-        $path = $directory . DIRECTORY_SEPARATOR . $file;
+        $path = $directory.DIRECTORY_SEPARATOR.$file;
 
         if (! $file || ! is_file($path)) {
             return back()->with('error', 'Log file not found.');
@@ -327,12 +335,12 @@ class AdminController extends Controller
             mkdir($trashDir, 0775, true);
         }
 
-        $trashPath = $trashDir . DIRECTORY_SEPARATOR . $file;
+        $trashPath = $trashDir.DIRECTORY_SEPARATOR.$file;
 
         $i = 1;
         while (is_file($trashPath)) {
             $basename = pathinfo($file, PATHINFO_FILENAME);
-            $trashPath = $trashDir . DIRECTORY_SEPARATOR . $basename . '_' . $i . '.log';
+            $trashPath = $trashDir.DIRECTORY_SEPARATOR.$basename.'_'.$i.'.log';
             $i++;
         }
 
@@ -353,6 +361,7 @@ class AdminController extends Controller
         if (! preg_match('/\.log$/', $file)) {
             return null;
         }
+
         return $file;
     }
 
@@ -374,7 +383,7 @@ class AdminController extends Controller
     public function logRestore(string $file)
     {
         $file = $this->sanitizeLogFile($file);
-        $trashPath = $this->logTrashDir() . DIRECTORY_SEPARATOR . $file;
+        $trashPath = $this->logTrashDir().DIRECTORY_SEPARATOR.$file;
         $destDir = storage_path('logs/site-changes');
 
         if (! $file || ! is_file($trashPath)) {
@@ -385,7 +394,7 @@ class AdminController extends Controller
             mkdir($destDir, 0775, true);
         }
 
-        rename($trashPath, $destDir . DIRECTORY_SEPARATOR . $file);
+        rename($trashPath, $destDir.DIRECTORY_SEPARATOR.$file);
 
         return redirect()->route('admin.logs.trash')
             ->with('success', 'Log file restored from trash.');
@@ -394,7 +403,7 @@ class AdminController extends Controller
     public function logForceDelete(string $file)
     {
         $file = $this->sanitizeLogFile($file);
-        $trashPath = $this->logTrashDir() . DIRECTORY_SEPARATOR . $file;
+        $trashPath = $this->logTrashDir().DIRECTORY_SEPARATOR.$file;
 
         if (! $file || ! is_file($trashPath)) {
             return back()->with('error', 'Trashed log file not found.');
@@ -414,7 +423,7 @@ class AdminController extends Controller
         if (is_dir($directory)) {
             foreach (scandir($directory) as $file) {
                 if (preg_match('/\.log$/', $file)) {
-                    @unlink($directory . DIRECTORY_SEPARATOR . $file);
+                    @unlink($directory.DIRECTORY_SEPARATOR.$file);
                     $deleted++;
                 }
             }
@@ -428,7 +437,7 @@ class AdminController extends Controller
     {
         $sortBy = in_array($request->sort_by, ['id', 'created_at', 'action', 'model_type']) ? $request->sort_by : 'created_at';
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
-        $perPage = in_array((int)$request->per_page, [10, 20, 50, 100]) ? (int)$request->per_page : 20;
+        $perPage = in_array((int) $request->per_page, [10, 20, 50, 100]) ? (int) $request->per_page : 20;
         $dateFrom = $request->query('date_from');
         $dateTo = $request->query('date_to');
         $filterModelType = $request->query('model_type');
@@ -463,6 +472,7 @@ class AdminController extends Controller
     public function revisionDetail($id)
     {
         $rev = Revision::with('user')->findOrFail($id);
+
         return view('admin.revisions.detail', compact('rev'));
     }
 
@@ -542,7 +552,7 @@ class AdminController extends Controller
     {
         $sortBy = in_array($request->sort_by, ['id', 'created_at', 'event', 'file_path']) ? $request->sort_by : 'created_at';
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
-        $perPage = in_array((int)$request->per_page, [10, 20, 50, 100]) ? (int)$request->per_page : 20;
+        $perPage = in_array((int) $request->per_page, [10, 20, 50, 100]) ? (int) $request->per_page : 20;
         $dateFrom = $request->query('date_from');
         $dateTo = $request->query('date_to');
 
@@ -570,19 +580,21 @@ class AdminController extends Controller
     public function fileRevisionDownload($id)
     {
         $rev = FileRevision::findOrFail($id);
-        if (!$rev->backup_path) {
+        if (! $rev->backup_path) {
             return abort(404);
         }
-        $path = storage_path('file-backups/archive/' . $rev->backup_path);
-        if (!file_exists($path)) {
+        $path = storage_path('file-backups/archive/'.$rev->backup_path);
+        if (! file_exists($path)) {
             return abort(404, 'Backup file not found.');
         }
-        return response()->download($path, basename($rev->file_path) . '.bak');
+
+        return response()->download($path, basename($rev->file_path).'.bak');
     }
 
     public function fileRevisionDiff($id)
     {
         $rev = FileRevision::with('user')->findOrFail($id);
+
         return view('admin.file-revisions.diff', compact('rev'));
     }
 
@@ -597,10 +609,10 @@ class AdminController extends Controller
         $imageKeys = ['header_logo', 'header_favicon', 'mobile_logo', 'footer_logo', 'admin_header_bg'];
 
         foreach ($keys as $key) {
-            $managerKey = 'image_from_manager_' . $key;
+            $managerKey = 'image_from_manager_'.$key;
             if (in_array($key, $imageKeys) && $request->filled($managerKey)) {
-                Setting::set($key, 'storage/' . ltrim($request->input($managerKey), '/'));
-                \App\Models\Image::markUsed($request->input($managerKey));
+                Setting::set($key, 'storage/'.ltrim($request->input($managerKey), '/'));
+                Image::markUsed($request->input($managerKey));
             } elseif ($request->hasFile($key)) {
                 $filename = saveImageWithWebp($request->file($key));
                 Setting::set($key, $filename);
@@ -621,6 +633,7 @@ class AdminController extends Controller
     public function footerSettings()
     {
         $settings = Setting::getAllAsArray();
+
         return view('admin.settings.footer', compact('settings'));
     }
 
@@ -628,7 +641,7 @@ class AdminController extends Controller
     {
         $data = json_decode((string) $request->input('footer_columns', '[]'), true);
 
-        if (!is_array($data)) {
+        if (! is_array($data)) {
             return back()->with('error', 'Invalid footer columns data.');
         }
 
@@ -637,7 +650,7 @@ class AdminController extends Controller
 
         $columns = [];
         foreach ($data as $col) {
-            if (!is_array($col)) {
+            if (! is_array($col)) {
                 continue;
             }
 
@@ -646,7 +659,7 @@ class AdminController extends Controller
 
             $links = [];
             foreach (($col['links'] ?? []) as $link) {
-                if (!is_array($link)) {
+                if (! is_array($link)) {
                     continue;
                 }
                 if ($type === 'newsletter') {
@@ -679,10 +692,47 @@ class AdminController extends Controller
         return redirect()->route('admin.settings.footer')->with('success', 'Footer settings updated successfully.');
     }
 
+    public function searchCategorySettings()
+    {
+        $settings = Setting::getAllAsArray();
+        $categories = Category::with('children')->orderBy('name')->get();
+        $selected = json_decode((string) ($settings['search_category_menu'] ?? '[]'), true);
+        if (! is_array($selected)) {
+            $selected = [];
+        }
+
+        return view('admin.settings.search-categories', compact('settings', 'categories', 'selected'));
+    }
+
+    public function updateSearchCategorySettings(Request $request)
+    {
+        $items = json_decode((string) $request->input('search_category_menu', '[]'), true);
+        if (! is_array($items)) {
+            return back()->with('error', 'Invalid search categories data.');
+        }
+
+        $searchCategories = [];
+        foreach ($items as $item) {
+            if (! is_array($item)) {
+                continue;
+            }
+            $label = trim((string) ($item['label'] ?? ''));
+            $url = trim((string) ($item['url'] ?? ''));
+            if ($label === '' || $url === '') {
+                continue;
+            }
+            $searchCategories[] = ['label' => $label, 'url' => $url];
+        }
+
+        Setting::set('search_category_menu', json_encode($searchCategories));
+
+        return redirect()->route('admin.settings.search-categories')->with('success', 'Search categories updated successfully.');
+    }
+
     public function fileRevisionTruncateDiffs(Request $request)
     {
         $olderThanDays = (int) $request->input('older_than_days', 90);
-        $trimmed = \App\Models\FileRevision::truncateDiffs($olderThanDays);
+        $trimmed = FileRevision::truncateDiffs($olderThanDays);
 
         return redirect()->route('admin.file-revisions.index')
             ->with('success', "Truncated diff data on {$trimmed} old revision(s).");
@@ -691,7 +741,7 @@ class AdminController extends Controller
     public function fileRevisionTruncatePerFile(Request $request)
     {
         $keepPerFile = (int) $request->input('keep_per_file', 50);
-        \App\Models\FileRevision::truncatePerFileLimit($keepPerFile);
+        FileRevision::truncatePerFileLimit($keepPerFile);
 
         return redirect()->route('admin.file-revisions.index')
             ->with('success', "Per-file limit applied: kept last {$keepPerFile} revisions per file. Older diffs truncated.");
@@ -731,7 +781,7 @@ class AdminController extends Controller
         $rev = FileRevision::onlyTrashed()->findOrFail($id);
 
         if ($rev->backup_path) {
-            $path = storage_path('file-backups/archive/' . $rev->backup_path);
+            $path = storage_path('file-backups/archive/'.$rev->backup_path);
             if (is_file($path)) {
                 @unlink($path);
             }
@@ -768,7 +818,7 @@ class AdminController extends Controller
         $deleted = 0;
         foreach ($revs as $rev) {
             if ($rev->backup_path) {
-                $path = storage_path('file-backups/archive/' . $rev->backup_path);
+                $path = storage_path('file-backups/archive/'.$rev->backup_path);
                 if (is_file($path)) {
                     @unlink($path);
                 }
@@ -788,7 +838,7 @@ class AdminController extends Controller
         $deleted = 0;
         foreach ($revs as $rev) {
             if ($rev->backup_path) {
-                $path = storage_path('file-backups/archive/' . $rev->backup_path);
+                $path = storage_path('file-backups/archive/'.$rev->backup_path);
                 if (is_file($path)) {
                     @unlink($path);
                 }

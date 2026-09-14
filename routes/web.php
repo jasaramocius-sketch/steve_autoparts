@@ -72,6 +72,7 @@ Route::get('/category/{slug}', [ShopController::class, 'category'])->name('categ
 Route::get('/blog', [BlogController::class, 'index'])->name('blog');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 Route::get('/blog/category/{slug}', [BlogController::class, 'category'])->name('blog.category');
+Route::get('/blog/tag/{slug}', [BlogController::class, 'tag'])->name('blog.tag');
 
 Route::get('/about-us', [HomeController::class, 'about'])->name('about');
 Route::get('/contact-us', [HomeController::class, 'contact'])->name('contact');
@@ -403,6 +404,10 @@ Route::prefix('admin')
             ->name('admin.settings.footer');
         Route::post('/settings/footer', [AdminController::class, 'updateFooterSettings'])
             ->name('admin.settings.footer.update');
+        Route::get('/settings/search-categories', [AdminController::class, 'searchCategorySettings'])
+            ->name('admin.settings.search-categories');
+        Route::post('/settings/search-categories', [AdminController::class, 'updateSearchCategorySettings'])
+            ->name('admin.settings.search-categories.update');
         Route::get('/logs', [AdminController::class, 'logs'])
             ->name('admin.logs.index');
         Route::get('/revisions', [AdminController::class, 'revisions'])

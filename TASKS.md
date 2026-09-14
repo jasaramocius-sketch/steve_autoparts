@@ -3943,3 +3943,72 @@ The discount was computed once at apply-time and never revalidated. Cart changes
 - Product pages (slug URLs): HTTP 200, images render.
 
 **Note:** 7 products now use thumbnail-as-main-image fallback. Original hi-res files are permanently lost; recommend re-upload when possible.
+
+**Task (2026-09-07): Duplicate image cleanup + modal search improvements**
+
+1. **Avatar fix:** `uploads/users/` was an orphan folder (arrived via backup restore, Aug 12). Restored Jasa (id 9), Purvi (id 2), test (id 7) avatars from `uploads/users/` → correct `uploads/2026/07/` paths; removed orphan folder (moved to /tmp backup).
+
+2. **Image Manager modal search:** now searches DB (`original_name`, `alt_text`, `title`, `filename`) AND scans `uploads/` on disk, so every image (with/without an `images` table row) is findable. Added `filename` to admin images index search too. Auto-generated `_250.webp`/`_500.webp` responsive variants are hidden from results; folder-duplicate copies collapse to one entry. (ImageController.php)
+
+3. **Duplicate cleanup** (`artisan images:cleanup-duplicates`):
+   - Detected 1,856 duplicate filename groups (files present in both `2026/07` and `2026/08`).
+   - Rewrote 5,632 DB references (565 product images, home banners, page content_blocks, revisions) to a single canonical (kept) copy — mostly `2026/08`.
+   - Moved 1,856 duplicate copies (+ variant siblings) to `storage/app/cleanup_trash/dup_cleanup_20260907_060047/` — 75.55 MB freed, reversible via MANIFEST.json.
+   - DB backup: `database/stautoparts_dupcleanup_backup_20260907_060042.sql`.
+   - Verify: 0 references point to moved files; 0 duplicate groups remain.
+
+4. **Pre-existing broken references (not caused by cleanup):** 319 referenced images still missing on disk (product images pointing to `2026/08` files that never existed in `2026/07` backup, 2 home banners, 1 test.webp). These were broken before this task. If needed, re-upload or restore from earlier DB/file backups.
+
+**Task (2026-09-07, follow-up): Thumbnail fallback for permanently-lost images**
+
+- 303 referenced-but-missing image rows (media library `images` table, categories, pages, home banners) remapped to their existing `_250.webp`/`_500.webp` respavailableure variant (`artisan images:fallback-missing`, 5,382 references rewritten). DB backup: `database/stautoparts_dupcleanup_backup_20260907_061055.sql`.
+- Restored 1 home banner (`home_page_sections#5` → `uploads/2026/08/17821312686a392a448fe5c.png`) from `2026/07` copy.
+- 3 avatar `_250.webp` variants referenced in images table fixed (these were soft-delete rows anyway).
+- Verified: only ~8 non-variant missing refs remain — all are test/junk media rows already soft-deleted (`is_deleted=1`, no product/gallery pivot), plus `category#70 (Body)` image `1786523970_6a7c3142132bc.png` which has no file or variant anywhere (needs re-upload).
+
+**Task (2026-09-07): Content-level image consolidation + shared-file delete protection**
+
+- New command `artisan images:consolidate-content` (app/Console/Commands/ConsolidateContentDuplicates.php, extends CleanupDuplicateImages): MD5-hash scan of `uploads/`, groups byte-identical files regardless of filename.
+- Dry-run verified 326 groups / 12,161 files / 623.54 MB. Real run rewrote 10,696 `images.path` + product/brand/category/blog/page/user/seller/settings refs to one canonical copy per group, moved 12,161 exact duplicates to `storage/app/cleanup_trash/content_dedup_20260907_091641/` (reversible via MANIFEST.json). DB backup: `database/stautoparts_dupcleanup_backup_20260907_091543.sql`. `uploads/` shrank ~648 MB → 25 MB.
+- Canonical = most-referenced copy; ties prefer non-variant original, then newest month. Byte-identical, so no quality loss.
+- Regression found + fixed: home banner slider `home_page_sections#5.extra_data` is double-encoded JSON (`\/`), so the path rewrite missed it and the banner file moved to trash. Restored `uploads/2026/08/17821312686a392a448fe5c.png` from trash. Verified: 0 missing refs beyond the 15 pre-existing ones.
+- `ImageController::bulkDelete` now keeps (skips unlink) any file still shared by another active image row — required because many rows now point to the same canonical file.
+- Residual: 33 leftover 2-file groups (mostly `_250/_500.webp` pairs regenerated on-demand + restored banner) — normal, not referenced-missing.
+- Known bug (pre-existing, unrelated): any non-existent URL renders errors/404.blade.php which uses undefined `$page` (`partials.page-attributes`) → 500. commit 53f71c55.
+
+**Task (2026-09-07): Image Manager counts real unique files**
+
+- `ImageController::index` now counts/displays one entry per unique file path instead of raw `images` rows. After content consolidation 10,635 rows pointed to only ~296 files; the stats grid now shows Total ~296 / Attached ~294 / Unused ~2 (previously 10,635 / 10,634 / 1). Grid pages unique paths (representative = newest row for that path) so the same image no longer repeats; filter=attached/unused uses EXISTS/NOT EXISTS subqueries; total_size sums max size per unique path.
+
+**Task (2026-09-07): unreferenced files + test.webp cleanup**
+
+- `test.webp` image row soft-deleted (was the last active image row pointing to a missing file; it was unused junk).
+- New command `artisan images:cleanup-unreferenced` (CleanupUnreferencedImages extends CleanupDuplicateImages): uses full reference set (simple columns + JSON blobs + double-encoded `home_page_sections.extra_data`) to move files with zero DB references to `storage/app/cleanup_trash/unreferenced_20260907_094156/` — 167 files, 2.37 MB, MANIFEST.json included. DB backup: `database/stautoparts_dupcleanup_backup_20260907_094155.sql`.
+- Verified: 0 moved files referenced anywhere in DB; uploads/ now 454 files / ~24 MB.
+- Image Manager now: Total 295 / Attached 294 / Unused 1 (logo — kept, used via settings).
+- Trash on disk (reversible): content_dedup_20260907_091641 (644 MB) + dup_cleanup_20260907_060047 (80 MB) + unreferenced_20260907_094156 (2.4 MB) + 4 DB backups (~276 MB).
+
+**Task (2026-09-07): inquiry reply → user notification**
+
+- `ContactController@reply` (admin) sirf record update karta tha; koi notification nahi banta tha.
+- Added `NotificationHelper::inquiryReplied(Contact)` → in-app Notification ("Reply to Your Inquiry" + link to `route('user.inquiries')`) for `$contact->user_id`.
+- Reply save pe hamesha notify (first-time aur update dono). Guest contacts (user_id null) ke liye in-app notification possible nahi — koi mail nahi bheji (MAIL config incomplete).
+
+- Root cause for "old inquiry reply notification nahi ja rahi": zyada tar old contacts ke paas `user_id` hi nahi tha (contact form `user_id` capture nahi karta tha).
+- Fixed: `ContactController::submit`/`store` ab `user_id` = logged-in user set karte hain.
+- DashboardController::notifications ab real `unreadCount` badge dikhata hai (pehle 0 hardcoded).
+- Backfill: contacts me `user_id` email match se set (14 contacts, 4 guest reh gaye bina matching user: #3 #4 #12).
+- Already-replied inquiries ke liye in-app "Reply to Your Inquiry" notifications bana di (u9 → #80, u2 → #81), unread. Backup: `database/contact_notify_backfill_20260907_152109.sql`.
+
+**Task (2026-09-07): product description ↔ editor formatting + Policy Text editability**
+
+- All 808 product descriptions were plain markdown; frontend rendered via marked (breaks+gfm). Admin Summernote showed one raw paragraph.
+- New `app/Console/Commands/ConvertProductsDescriptionToHtml.php` + `Commands/ConvertDescriptionsToHtml.js` (reuses frontend marked.min.js) — migrated all 808 to HTML (verified: 0 markdown remain, 808 with <ul>). Backup: `database/desc_html_migration_20260907_153642.sql`.
+- New `App\Support\DescriptionMarkdown::toHtml()` PHP converter — verified 808/808 byte-identical vs node marked output. Hooks into `ProductController::normalizeImportedProductData` so future CSV imports store HTML directly.
+- Editor safety net: `backend.js` pre-renders markdown textareas via marked before Summernote init; admin layout now loads `marked.min.js`; removed 3 duplicate Summernote init blocks (layout had multiple copies; backend.js is single init point).
+- Side effect: frontend `.short_description` area (product page) now renders formatted HTML instead of raw markdown (improvement).
+- Admin Product Edit: "Policy Text" field was empty because policy_text is null for 807 products (auto-generated template). Now pre-fills with the same auto-generated Buy/Return Policy content (via the partial) so admin can edit; saving stores it as custom policy_text.
+
+- Policy Text DB backfill: all 808 products' Buy/Return Policy now stored in `policy_text` (auto-generated template content persisted per product). One product (781) had hidden `<p><br></p>` — force-nulled & re-generated (2207 chars). Backup: `database/policy_backfill_20260907_155545.sql`. Frontend unchanged visually (same partial output); admin edit form shows stored content.
+
+- Key Features dedupe: descriptions of all 808 products contained a baked-in "Key Features:" + <ul> section AND there was a separate (empty) `features` field. New `DescriptionMarkdown::splitKeyFeatures()` extracts the trailing Key Features <ul> into the `features` column (inner HTML preserved); description cleaned to intro-only. Import path (`normalizeImportedProductData`) now auto-splits too. Frontend renders Key Features from the `features` field (same items). Backup: `database/features_extract_20260907_160104.sql`. Verified: 0 descriptions with Key Features, 808 features populated, live page OK.

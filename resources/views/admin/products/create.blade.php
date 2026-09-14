@@ -180,6 +180,7 @@
                         <div class="col-md-12">
                             <label class="form-label">Key Features</label>
                             <textarea name="features" class="form-control" rows="4" placeholder="Enter one feature per line...">{{ old('features') }}</textarea>
+                            @include('admin.partials.key-features-preview', ['initialFeatures' => old('features', '')])
                         </div>
                         
                         <div class="col-md-12">

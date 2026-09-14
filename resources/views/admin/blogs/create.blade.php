@@ -46,6 +46,14 @@
                     @error('blog_category_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
 
+                <div class="col-md-8">
+                    <label class="form-label">Tags</label>
+                    @include('admin.partials.blog-tags-input', [
+                        'selectedTags' => old('tags', ''),
+                        'allTags' => $allTagsString
+                    ])
+                </div>
+
                 <div class="col-md-12">
                     <label class="form-label">Content</label>
                     <textarea id="editor"

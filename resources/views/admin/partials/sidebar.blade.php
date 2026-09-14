@@ -52,7 +52,7 @@
             <i class="fas fa-question-circle"></i> FAQs
         </a>
         <a href="{{ route('admin.contacts.index') }}" class="nav-item {{ request()->routeIs('admin.contacts.*') ? 'active' : '' }}">
-            <i class="fas fa-envelope-open-text"></i> Questions
+            <i class="fas fa-envelope-open-text"></i> Questions / Inquiries
         </a>
         <a href="{{ route('admin.coupons.index') }}" class="nav-item {{ request()->routeIs('admin.coupons.*') ? 'active' : '' }}">
             <i class="fas fa-percent"></i> Coupons
@@ -67,6 +67,9 @@
         </a>
         <a href="{{ route('admin.settings.footer') }}" class="nav-item {{ request()->routeIs('admin.settings.footer*') ? 'active' : '' }}">
             <i class="fas fa-address-book"></i> Footer Settings
+        </a>
+        <a href="{{ route('admin.settings.search-categories') }}" class="nav-item {{ request()->routeIs('admin.settings.search-categories*') ? 'active' : '' }}">
+            <i class="fas fa-list-ul"></i> Search Categories
         </a>
         <a href="{{ route('admin.logs.index') }}" class="nav-item {{ request()->routeIs('admin.logs.*') ? 'active' : '' }}">
             <i class="fas fa-file-alt"></i> Logs

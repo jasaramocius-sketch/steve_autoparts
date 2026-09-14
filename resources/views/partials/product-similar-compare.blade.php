@@ -13,13 +13,15 @@
     <div class="table-responsive bg-white border">
         <table class="table table-bordered align-middle text-center compare-similar-table mb-0">
             <tr>
-                <th class="compare-row-label" width="160" style="vertical-align: middle;">Product</th>
+                <th class="compare-row-label" width="10%" style="vertical-align: middle;">Product</th>
                 @foreach($all as $p)
-                <td class="similar-col">
-                    <a href="{{ route('product', $p->slug) }}" style="width: 20vw;height: 20vh; display: flex;">
-                        {!! imgTag(storedPath($p->image, 'assets/images/thumbnails'), '', 'img-fluid mb-2', 'style="height:100%; width:100%; object-fit:cover;"') !!}
-                    </a>
-                    <a href="{{ route('product', $p->slug) }}" class="d-block text-decoration-none small fw-semibold pt-10">
+                <td class="similar-col p-0">
+                    <div class="compare-product-image-wrapper">
+                        <a class="compare-product-image" href="{{ route('product', $p->slug) }}" style="width: 210px;height: 210px; display: flex; margin: 0 auto;">
+                            {!! imgTag(storedPath($p->image, 'assets/images/thumbnails'), '', 'img-fluid mb-2', 'style="height:100%; width:100%; object-fit:cover;"') !!}
+                        </a>
+                    </div>
+                    <a href="{{ route('product', $p->slug) }}" class="d-block text-decoration-none small fw-semibold p-10">
                         {{ $p->name }}
                     </a>
                     @if($p->id === $product['id'])
@@ -93,7 +95,7 @@
                 <th class="compare-row-label">Description</th>
                 @foreach($all as $p)
                     <td class="similar-col small text-muted" style="max-width:260px;">
-                        {{ \Illuminate\Support\Str::limit(strip_tags((string) $p->description), 90) }}
+                        {{ \Illuminate\Support\Str::limit(strip_tags(html_entity_decode((string) $p->description)), 90) }}
                     </td>
                 @endforeach
             </tr>
@@ -101,19 +103,21 @@
                 <th class="compare-row-label">Action</th>
                 @foreach($all as $p)
                     <td class="similar-col">
-                        @if((int) ($p->stock ?? 0) > 0)
-                            <form action="{{ route('cart.add') }}" method="POST" class="add-cart-form">
-                                @csrf
-                                <input type="hidden" name="product_id" value="{{ $p->id }}">
-                                <input type="hidden" name="product_name" value="{{ $p->name }}">
-                                <input type="hidden" name="product_price" value="{{ $p->price }}">
-                                <input type="hidden" name="product_image" value="{{ storedImageUrl($p->image, 'assets/images/thumbnails') }}">
-                                <button type="submit" class="btn btn-danger btn-sm steve-btn w-100 mb-1">Add to Cart</button>
-                            </form>
-                        @else
-                            <span class="text-muted small">—</span>
-                        @endif
-                        <a href="{{ route('product', $p->slug) }}" class="btn btn-outline-secondary btn-sm steve-btn w-100">View Details</a>
+                        <div class="d-flex gap-1 justify-content-center">
+                            @if((int) ($p->stock ?? 0) > 0)
+                                <form action="{{ route('cart.add') }}" method="POST" class="add-cart-form">
+                                    @csrf
+                                    <input type="hidden" name="product_id" value="{{ $p->id }}">
+                                    <input type="hidden" name="product_name" value="{{ $p->name }}">
+                                    <input type="hidden" name="product_price" value="{{ $p->price }}">
+                                    <input type="hidden" name="product_image" value="{{ storedImageUrl($p->image, 'assets/images/thumbnails') }}">
+                                    <button type="submit" class="btn btn-danger btn-sm steve-btn w-100">Add to Cart</button>
+                                </form>
+                            @else
+                                <span class="text-muted small"></span>
+                            @endif
+                            <a href="{{ route('product', $p->slug) }}" class="btn btn-outline-secondary btn-sm steve-btn">View Details</a>
+                        </div>
                     </td>
                 @endforeach
             </tr>

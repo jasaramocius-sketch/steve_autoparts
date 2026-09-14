@@ -47,12 +47,12 @@
     <div class="table-responsive bg-white compare-table-wrapper" id="compare-table-wrapper">
         <table class="table compare-table align-middle text-center mb-0">
             <tr>
-                <th class="border-top" width="180">Product Name</th>
+                <th class="border-top" width="10%">Product Name</th>
                 @foreach($compareItems as $item)
                 <td class="compare-col border-top" data-compare-id="{{ $item->id }}">
                     <div>
                         <a href="{{ route('product',$item->product->slug) }}">
-                    {!! imgTag(storedPath($item->product->image, 'assets/images/thumbnails'), '', 'img-fluid mb-3', 'style="height:170px; object-fit:contain;"') !!}
+                    {!! imgTag(storedPath($item->product->image, 'assets/images/thumbnails'), '', 'img-fluid mb-3 compare-page-img', 'style="width:260px; height:260px; object-fit:cover;"') !!}
                         </a>    
                     </div>
 
@@ -113,7 +113,7 @@
                 <th>Description</th>
                 @foreach($compareItems as $item)
                     <td style="min-width:300px" class="compare-col" data-compare-id="{{ $item->id }}">
-                        {{ Str::limit($item->product->description,150) }}
+                        {{ Str::limit(strip_tags(html_entity_decode((string) $item->product->description)), 150) }}
                     </td>
                 @endforeach
             </tr>

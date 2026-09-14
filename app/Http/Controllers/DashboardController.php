@@ -2,28 +2,30 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Order;
-use App\Models\Wishlist;
-use App\Models\Vehicle;
 use App\Models\Address;
-use App\Models\User;
-use App\Models\Notification;
 use App\Models\Contact;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
-use App\Models\Product;
+use App\Models\FollowedSeller;
+use App\Models\Notification;
+use App\Models\Order;
 use App\Models\OrderItem;
-use APP\Models\Cart;
+use App\Models\Product;
+use App\Models\Seller;
+use App\Models\User;
+use App\Models\Vehicle;
+use App\Models\Wishlist;
+use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class DashboardController extends Controller
-{   
+{
     public function index()
     {
         $user = Auth::user();
 
-        $ordersByStatus = Order::selectRaw("status, COUNT(*) as count")->groupBy('status')->get();
+        $ordersByStatus = Order::selectRaw('status, COUNT(*) as count')->groupBy('status')->get();
 
         $dbRevenue = Order::selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, SUM(total_amount) as total")->groupBy('month')->orderBy('month')->take(12)->pluck('total', 'month');
 
@@ -48,18 +50,18 @@ class DashboardController extends Controller
             'user' => $user,
         ]);
     }
+
     public function __construct()
     {
         // Intentionally left blank; data should be loaded from the database.
     }
-
 
     // -------------------------------------------------------------
     // User Dashboard
     // -------------------------------------------------------------
     public function userDashboard()
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return redirect()->route('login')->with('error', 'Please login to access your dashboard.');
         }
 
@@ -68,20 +70,20 @@ class DashboardController extends Controller
         }
 
         // Always fetch fresh data from the database
-        $userId  = Auth::id();
-        $dbUser  = $userId ? \App\Models\User::find($userId) : null;
+        $userId = Auth::id();
+        $dbUser = $userId ? User::find($userId) : null;
 
         if ($dbUser) {
             // Sync session with latest DB values
             $profile = [
-                'id'      => $dbUser->id,
-                'name'    => $dbUser->name,
-                'email'   => $dbUser->email,
-                'phone'   => $dbUser->phone   ?? '',
+                'id' => $dbUser->id,
+                'name' => $dbUser->name,
+                'email' => $dbUser->email,
+                'phone' => $dbUser->phone ?? '',
                 'address' => $dbUser->address ?? '',
-                'city'    => $dbUser->city    ?? '',
+                'city' => $dbUser->city ?? '',
                 'country' => $dbUser->country ?? '',
-                'role'    => $dbUser->role,
+                'role' => $dbUser->role,
             ];
             session(['user_profile' => $profile]);
         } else {
@@ -92,13 +94,13 @@ class DashboardController extends Controller
         }
 
         // Fetch orders from database
-        $orders           = Order::where('user_id', $userId)->with('items.product')->latest()->get();
-        $total_orders     = $orders->count();
-        $pending_orders   = $orders->where('status', 'pending')->count();
+        $orders = Order::where('user_id', $userId)->with('items.product')->latest()->get();
+        $total_orders = $orders->count();
+        $pending_orders = $orders->where('status', 'pending')->count();
         $completed_orders = $orders->where('status', 'delivered')->count();
-        $total_spent      = $orders->where('status', '!=', 'cancelled')->sum('total_amount');
+        $total_spent = $orders->where('status', '!=', 'cancelled')->sum('total_amount');
         $wishlist = Wishlist::with('product')
-        ->where('user_id', auth()->id())->get();
+            ->where('user_id', auth()->id())->get();
 
         return view('user.dashboard', compact(
             'orders', 'total_orders', 'pending_orders',
@@ -106,20 +108,20 @@ class DashboardController extends Controller
         ));
     }
 
-    public function userProfileUpdate(\Illuminate\Http\Request $request)
+    public function userProfileUpdate(Request $request)
     {
         $request->validate([
-            'name'    => 'required',
-            'email'   => 'required|email',
-            'phone'   => 'nullable|string|max:255|regex:/^[0-9+\-\s()]*$/',
+            'name' => 'required',
+            'email' => 'required|email',
+            'phone' => 'nullable|string|max:255|regex:/^[0-9+\-\s()]*$/',
             'address' => 'nullable|string|max:255',
-            'city'    => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:255',
             'country' => 'nullable|string|max:255',
         ]);
 
         $userId = session('user_profile.id');
         if ($userId) {
-            $user = \App\Models\User::find($userId);
+            $user = User::find($userId);
             if ($user) {
                 $user->update($request->only('name', 'email', 'phone', 'address', 'city', 'country'));
                 // Refresh session
@@ -144,10 +146,10 @@ class DashboardController extends Controller
 
         if ($topProducts->isNotEmpty()) {
             $products = Product::whereIn('id', $topProducts->pluck('product_id'))->get()->keyBy('id');
-            $topProducts = $topProducts->map(fn($item) => tap($item, fn($i) => $i->product = $products->get($i->product_id)));
+            $topProducts = $topProducts->map(fn ($item) => tap($item, fn ($i) => $i->product = $products->get($i->product_id)));
         }
 
-        $ordersByStatus = Order::selectRaw("status, COUNT(*) as count")->groupBy('status')->get();
+        $ordersByStatus = Order::selectRaw('status, COUNT(*) as count')->groupBy('status')->get();
 
         $dbRevenue = Order::selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, SUM(total_amount) as total")->groupBy('month')->orderBy('month')->take(12)->pluck('total', 'month');
 
@@ -174,7 +176,7 @@ class DashboardController extends Controller
 
     public function orders()
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return redirect()->route('login');
         }
 
@@ -194,7 +196,7 @@ class DashboardController extends Controller
 
     public function wishlist()
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return redirect()->route('login');
         }
 
@@ -207,7 +209,7 @@ class DashboardController extends Controller
 
     public function followedSellers()
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return redirect()->route('login');
         }
 
@@ -216,13 +218,13 @@ class DashboardController extends Controller
         $followedSellers = [];
 
         if ($userId) {
-            $followedSellers = \App\Models\FollowedSeller::with(['seller.products' => fn($q) => $q->where('status', true)->orderBy('id')])
+            $followedSellers = FollowedSeller::with(['seller.products' => fn ($q) => $q->where('status', true)->orderBy('id')])
                 ->where('user_id', $userId)
                 ->orderBy('created_at', 'desc')
                 ->get();
         }
 
-        $availableSellers = \App\Models\Seller::where('status', true)->orderBy('name')->get();
+        $availableSellers = Seller::where('status', true)->orderBy('name')->get();
 
         return view('user.followed-sellers', compact('followedSellers', 'availableSellers'));
     }
@@ -233,26 +235,27 @@ class DashboardController extends Controller
             'seller_id' => 'required|exists:sellers,id',
         ]);
 
-        $seller = \App\Models\Seller::findOrFail($request->seller_id);
+        $seller = Seller::findOrFail($request->seller_id);
 
         if ($seller->status !== true) {
             return response()->json(['success' => false, 'message' => 'This seller is not available.']);
         }
 
-        $existing = \App\Models\FollowedSeller::withTrashed()
+        $existing = FollowedSeller::withTrashed()
             ->where('user_id', Auth::id())
             ->where('seller_id', $seller->id)
             ->first();
 
         if ($existing) {
-            if (!$existing->trashed()) {
+            if (! $existing->trashed()) {
                 return response()->json(['success' => false, 'message' => 'You are already following this seller.']);
             }
             $existing->restore();
+
             return response()->json(['success' => true, 'seller' => $existing]);
         }
 
-        $followedSeller = \App\Models\FollowedSeller::create([
+        $followedSeller = FollowedSeller::create([
             'user_id' => Auth::id(),
             'seller_id' => $seller->id,
             'seller_name' => $seller->name,
@@ -268,7 +271,7 @@ class DashboardController extends Controller
 
     public function destroyFollowedSeller($id)
     {
-        $followedSeller = \App\Models\FollowedSeller::where('user_id', Auth::id())
+        $followedSeller = FollowedSeller::where('user_id', Auth::id())
             ->where('id', $id)
             ->firstOrFail();
 
@@ -279,7 +282,7 @@ class DashboardController extends Controller
 
     public function getSellerDetails($id)
     {
-        $followedSeller = \App\Models\FollowedSeller::with('seller')
+        $followedSeller = FollowedSeller::with('seller')
             ->where('user_id', Auth::id())
             ->where('id', $id)
             ->firstOrFail();
@@ -302,7 +305,7 @@ class DashboardController extends Controller
             'seller_image' => ($sellerModel && $sellerModel->image)
                 ? storedImageUrl($sellerModel->image, 'assets/images')
                 : null,
-            'product_list' => $products->map(fn($p) => [
+            'product_list' => $products->map(fn ($p) => [
                 'id' => $p->id,
                 'name' => $p->name,
                 'slug' => $p->slug,
@@ -316,7 +319,7 @@ class DashboardController extends Controller
 
     public function getSellerProducts($id)
     {
-        $followedSeller = \App\Models\FollowedSeller::with('seller')
+        $followedSeller = FollowedSeller::with('seller')
             ->where('user_id', Auth::id())
             ->where('id', $id)
             ->firstOrFail();
@@ -336,7 +339,7 @@ class DashboardController extends Controller
 
         return response()->json([
             'success' => true,
-            'product_list' => $products->map(fn($p) => [
+            'product_list' => $products->map(fn ($p) => [
                 'id' => $p->id,
                 'name' => $p->name,
                 'slug' => $p->slug,
@@ -349,7 +352,7 @@ class DashboardController extends Controller
 
     public function vehicles()
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return redirect()->route('login');
         }
 
@@ -375,13 +378,13 @@ class DashboardController extends Controller
         }
         unset($query['year'], $query['make'], $query['model'], $query['page']);
 
-        return redirect($path . (!empty($query) ? '?' . http_build_query($query) : ''))
-            ->with('success', 'Vehicle selected: ' . $vehicle->year . ' ' . $vehicle->make . ' ' . $vehicle->model);
+        return redirect($path.(! empty($query) ? '?'.http_build_query($query) : ''))
+            ->with('success', 'Vehicle selected: '.$vehicle->year.' '.$vehicle->make.' '.$vehicle->model);
     }
 
     public function addresses()
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return redirect()->route('login');
         }
 
@@ -394,14 +397,14 @@ class DashboardController extends Controller
 
     public function notifications()
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return redirect()->route('login');
         }
 
         $userId = Auth::id();
-        Notification::where('user_id', $userId)->unread()->update(['is_read' => true]);
+        $unreadCount = Notification::where('user_id', $userId)->unread()->count();
         $notifications = Notification::where('user_id', $userId)->latest()->paginate(10);
-        $unreadCount = 0;
+        Notification::where('user_id', $userId)->unread()->update(['is_read' => true]);
 
         return view('user.notifications', compact('notifications', 'unreadCount'));
     }
@@ -410,12 +413,14 @@ class DashboardController extends Controller
     {
         $notification = Notification::where('user_id', Auth::id())->findOrFail($id);
         $notification->update(['is_read' => true]);
+
         return back()->with('success', 'Notification marked as read.');
     }
 
     public function markAllNotificationsRead()
     {
         Notification::where('user_id', Auth::id())->unread()->update(['is_read' => true]);
+
         return back()->with('success', 'All notifications marked as read.');
     }
 
@@ -473,10 +478,10 @@ class DashboardController extends Controller
     public function storeVehicle(Request $request)
     {
         $validated = $request->validate([
-            'year'  => 'required|integer|digits:4|min:1900|max:2026',
-            'make'  => 'required|string|max:100',
+            'year' => 'required|integer|digits:4|min:1900|max:2026',
+            'make' => 'required|string|max:100',
             'model' => 'required|string|max:100',
-            'engine'=> 'nullable|string|max:100',
+            'engine' => 'nullable|string|max:100',
         ]);
 
         Vehicle::create(array_merge($validated, ['user_id' => Auth::id()]));
@@ -489,10 +494,10 @@ class DashboardController extends Controller
         $vehicle = Vehicle::where('user_id', Auth::id())->findOrFail($id);
 
         $validated = $request->validate([
-            'year'  => 'required|integer|digits:4|min:1900|max:2026',
-            'make'  => 'required|string|max:100',
+            'year' => 'required|integer|digits:4|min:1900|max:2026',
+            'make' => 'required|string|max:100',
             'model' => 'required|string|max:100',
-            'engine'=> 'nullable|string|max:100',
+            'engine' => 'nullable|string|max:100',
         ]);
 
         $vehicle->update($validated);
@@ -514,13 +519,13 @@ class DashboardController extends Controller
     public function storeAddress(Request $request)
     {
         $validated = $request->validate([
-            'full_name'  => 'required|string|max:255',
-            'phone'      => 'required|string|max:20|regex:/^[0-9+\-\s()]+$/',
-            'address'    => 'required|string|max:500',
-            'city'       => 'required|string|max:100',
-            'state'      => 'nullable|string|max:100',
-            'country'    => 'required|string|max:100',
-            'zip_code'   => 'required|string|max:20|regex:/^[0-9a-zA-Z\-\s]+$/',
+            'full_name' => 'required|string|max:255',
+            'phone' => 'required|string|max:20|regex:/^[0-9+\-\s()]+$/',
+            'address' => 'required|string|max:500',
+            'city' => 'required|string|max:100',
+            'state' => 'nullable|string|max:100',
+            'country' => 'required|string|max:100',
+            'zip_code' => 'required|string|max:20|regex:/^[0-9a-zA-Z\-\s]+$/',
             'set_default' => 'nullable|boolean',
         ]);
 
@@ -539,13 +544,13 @@ class DashboardController extends Controller
         $address = Address::where('user_id', Auth::id())->findOrFail($id);
 
         $validated = $request->validate([
-            'full_name'  => 'required|string|max:255',
-            'phone'      => 'required|string|max:20|regex:/^[0-9+\-\s()]+$/',
-            'address'    => 'required|string|max:500',
-            'city'       => 'required|string|max:100',
-            'state'      => 'nullable|string|max:100',
-            'country'    => 'required|string|max:100',
-            'zip_code'   => 'required|string|max:20|regex:/^[0-9a-zA-Z\-\s]+$/',
+            'full_name' => 'required|string|max:255',
+            'phone' => 'required|string|max:20|regex:/^[0-9+\-\s()]+$/',
+            'address' => 'required|string|max:500',
+            'city' => 'required|string|max:100',
+            'state' => 'nullable|string|max:100',
+            'country' => 'required|string|max:100',
+            'zip_code' => 'required|string|max:20|regex:/^[0-9a-zA-Z\-\s]+$/',
             'set_default' => 'nullable|boolean',
         ]);
 
@@ -567,10 +572,9 @@ class DashboardController extends Controller
         return redirect()->route('user.addresses')->with('success', 'Address removed successfully.');
     }
 
-    
     public function profile()
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return redirect()->route('login')
                 ->with('error', 'Please login to access your profile.');
         }
@@ -579,14 +583,14 @@ class DashboardController extends Controller
 
         if ($user) {
             $profile = [
-                'id'      => $user->id,
-                'name'    => $user->name,
-                'email'   => $user->email,
-                'phone'   => $user->phone   ?? '',
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => $user->phone ?? '',
                 'address' => $user->address ?? '',
-                'city'    => $user->city    ?? '',
+                'city' => $user->city ?? '',
                 'country' => $user->country ?? '',
-                'role'    => $user->role,
+                'role' => $user->role,
             ];
         } else {
             $profile = session('user_profile', [
@@ -603,25 +607,25 @@ class DashboardController extends Controller
         $user = User::find(Auth::id());
 
         $request->validate([
-            'name'    => 'required|string|max:255',
-            'email'   => 'required|email|max:255',
-            'phone'   => 'required|string|max:255|regex:/^[0-9+\-\s()]+$/',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'phone' => 'required|string|max:255|regex:/^[0-9+\-\s()]+$/',
             'address' => 'required|string|max:255',
-            'city'    => 'required|string|max:255',
+            'city' => 'required|string|max:255',
             'country' => 'required|string|max:255',
         ]);
 
         $user->update([
-            'name'    => $request->name,
-            'email'   => $request->email,
-            'phone'   => $request->phone,
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone,
             'address' => $request->address,
-            'city'    => $request->city,
+            'city' => $request->city,
             'country' => $request->country,
         ]);
 
         session([
-            'user_profile' => $user->toArray()
+            'user_profile' => $user->toArray(),
         ]);
 
         return back()->with(
@@ -629,6 +633,7 @@ class DashboardController extends Controller
             'Profile updated successfully'
         );
     }
+
     public function updatePassword(Request $request)
     {
         $request->validate([
@@ -638,11 +643,11 @@ class DashboardController extends Controller
 
         $user = User::find(session('user_profile.id'));
 
-        if (!$user) {
+        if (! $user) {
             return back()->with('error', 'User not found.');
         }
 
-        if (!Hash::check($request->current_password, $user->password)) {
+        if (! Hash::check($request->current_password, $user->password)) {
             return back()->with('error', 'Current password is incorrect.');
         }
 
@@ -651,9 +656,11 @@ class DashboardController extends Controller
 
         return back()->with('success', 'Password changed successfully.');
     }
+
     public function dashboard()
     {
         $wishlist = Wishlist::with('product')->where('user_id', auth()->id())->get();
+
         return view('user.dashboard', compact('wishlist'));
     }
 
@@ -669,7 +676,7 @@ class DashboardController extends Controller
         foreach ($products as $product) {
             $reviews = is_array($product->reviews_data) ? $product->reviews_data : [];
             foreach ($reviews as $review) {
-                if (($review['user_id'] ?? null) == $userId && !($review['deleted'] ?? false)) {
+                if (($review['user_id'] ?? null) == $userId && ! ($review['deleted'] ?? false)) {
                     $reviewedSlugs[] = $product->slug;
                     $items[] = [
                         'product_name' => $product->name,
@@ -688,8 +695,8 @@ class DashboardController extends Controller
 
         // Fetch purchased products not yet reviewed
         $purchasedProducts = OrderItem::whereHas('order', function ($q) use ($userId) {
-                $q->where('user_id', $userId);
-            })
+            $q->where('user_id', $userId);
+        })
             ->with('product')
             ->get()
             ->pluck('product')
@@ -697,7 +704,7 @@ class DashboardController extends Controller
             ->unique('id');
 
         foreach ($purchasedProducts as $product) {
-            if (!in_array($product->slug, $reviewedSlugs)) {
+            if (! in_array($product->slug, $reviewedSlugs)) {
                 $items[] = [
                     'product_name' => $product->name,
                     'product_slug' => $product->slug,
@@ -732,7 +739,7 @@ class DashboardController extends Controller
 
         $perPage = 10;
         $currentPage = $request->input('page', 1);
-        $paginatedItems = new \Illuminate\Pagination\LengthAwarePaginator(
+        $paginatedItems = new LengthAwarePaginator(
             $items->slice(($currentPage - 1) * $perPage, $perPage),
             $items->count(),
             $perPage,

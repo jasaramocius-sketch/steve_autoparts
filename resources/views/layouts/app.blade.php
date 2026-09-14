@@ -186,7 +186,7 @@
                                     <path d="M1 0.5V20.5" stroke="white" stroke-opacity="0.8"></path>
                                 </svg>
                             </li>
-                            <li class="bell-icon-col d-none d-md-flex align-items-center" style="list-style:none;" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Notifications">
+                            <li class="bell-icon-col d-none d-md-flex align-items-center" style="list-style:none;left: -10px;position: relative;" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Notifications">
                                 <a href="{{ route('user.notifications') }}" class="position-relative" aria-label="Notifications" style="color:#fff;text-decoration:none;line-height:1;">
                                     @if(!empty($unreadNotificationCount) && $unreadNotificationCount > 0)
                                         <span class="cart-count" id="notification-count">{{ $unreadNotificationCount }}</span>
@@ -567,11 +567,24 @@
                                 <button class="dropdown-toggle btn btn-secondary search-category-dropdown steve-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     All Categories
                                 </button>
+                                @php
+                                    $searchCategoryMenu = json_decode(\App\Models\Setting::get('search_category_menu', '[]'), true);
+                                    if (!is_array($searchCategoryMenu)) {
+                                        $searchCategoryMenu = [];
+                                    }
+                                    if (empty($searchCategoryMenu)) {
+                                        $searchCategoryMenu = [
+                                            ['label' => 'Engine Parts', 'url' => url('/category/Engine-Parts')],
+                                            ['label' => 'Body & Exterior', 'url' => url('/category/Body-Exterior')],
+                                            ['label' => 'Interior Parts', 'url' => url('/category/Interior-Parts')],
+                                        ];
+                                    }
+                                @endphp
                                 <ul class="dropdown-menu">
                                     <li><a class="dropdown-item dropdown__item" href="{{ route('shop') }}">All Categories</a></li>
-                                    <li><a class="dropdown-item dropdown__item" href="{{ url('/category/Engine-Parts') }}">Engine Parts</a></li>
-                                    <li><a class="dropdown-item dropdown__item" href="{{ url('/category/Body-Exterior') }}">Body & Exterior</a></li>
-                                    <li><a class="dropdown-item dropdown__item" href="{{ url('/category/Interior-Parts') }}">Interior Parts</a></li>
+                                    @foreach($searchCategoryMenu as $item)
+                                        <li><a class="dropdown-item dropdown__item" href="{{ $item['url'] ?? '/' }}">{{ $item['label'] ?? '' }}</a></li>
+                                    @endforeach
                                 </ul>
                             </div>
                             <div class="input-group-append">

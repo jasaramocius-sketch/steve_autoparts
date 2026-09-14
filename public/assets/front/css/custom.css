@@ -1813,3 +1813,17 @@ body.user-reviews-page.modal-open { overflow-y: scroll !important; padding-right
 .gs-footer-bottom .text-secondary {
   color: #a2a2ab !important;
 }
+
+.key-features-list { list-style: none; padding: 0; margin: 0; }
+.key-features-list li { position: relative; padding-left: 18px; line-height: 1.8; }
+.key-features-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 7px;
+  width: 5px;
+  height: 5px;
+  background-color: var(--primary);
+  border-radius: 8px;
+  padding: 5px;
+}
