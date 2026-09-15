@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasColumn('brands', 'is_deleted')) {
+        if (! Schema::hasColumn('brands', 'is_deleted')) {
             Schema::table('brands', function (Blueprint $table) {
                 $table->boolean('is_deleted')->default(false)->after('status');
             });

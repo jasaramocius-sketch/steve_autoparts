@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;   
-use App\Traits\TracksIsDeleted;
 use App\Traits\Revisable;
+use App\Traits\TracksIsDeleted;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Staff extends Model
 {
-    use SoftDeletes, TracksIsDeleted, Revisable;
+    use Revisable, SoftDeletes, TracksIsDeleted;
 
     protected $fillable = [
         'name',

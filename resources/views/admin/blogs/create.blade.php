@@ -29,24 +29,23 @@
                     <label class="form-label">Status</label>
                     <select name="status" class="form-control @error('status') is-invalid @enderror">
                         <option value="draft" {{ old('status') === 'draft' ? 'selected' : '' }}>Draft</option>
+                        <option value="scheduled" {{ old('status') === 'scheduled' ? 'selected' : '' }}>Scheduled</option>
                         <option value="published" {{ old('status') === 'published' ? 'selected' : '' }}>Published</option>
                     </select>
                     @error('status') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
+
                 <div class="col-md-4">
-                    <label class="form-label">Category</label>
-                    <select name="blog_category_id" class="form-control @error('blog_category_id') is-invalid @enderror">
-                        <option value="">None</option>
-                        @foreach($blogCategories as $cat)
-                            <option value="{{ $cat->id }}" {{ old('blog_category_id', $blog->blog_category_id ?? '') == $cat->id ? 'selected' : '' }}>
-                                {{ $cat->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('blog_category_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    <label class="form-label">Post Date <small class="text-muted">(optional)</small></label>
+                    <input type="datetime-local" name="published_at" class="form-control @error('published_at') is-invalid @enderror" value="{{ old('published_at') }}">
+                    @error('published_at') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    <small class="text-muted">Required when status is Scheduled. Empty + Published = visible now.</small>
+                </div>
+                <div class="col-md-4">
+                    @include('admin.partials.blog-category-field', ['selectedCategoryId' => old('blog_category_id')])
                 </div>
 
-                <div class="col-md-8">
+                <div class="col-md-4">
                     <label class="form-label">Tags</label>
                     @include('admin.partials.blog-tags-input', [
                         'selectedTags' => old('tags', ''),

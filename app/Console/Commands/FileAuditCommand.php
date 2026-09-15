@@ -6,7 +6,6 @@ use App\Models\FileRevision;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Storage;
 
 class FileAuditCommand extends Command
 {
@@ -32,9 +31,13 @@ class FileAuditCommand extends Command
     ];
 
     private string $basePath;
+
     private string $backupRoot;
+
     private string $mirrorDir;
+
     private string $archiveDir;
+
     private string $stateFile;
 
     public function __construct()
@@ -42,9 +45,9 @@ class FileAuditCommand extends Command
         parent::__construct();
         $this->basePath = base_path();
         $this->backupRoot = storage_path('file-backups');
-        $this->mirrorDir = $this->backupRoot . '/mirror';
-        $this->archiveDir = $this->backupRoot . '/archive';
-        $this->stateFile = $this->backupRoot . '/.state.json';
+        $this->mirrorDir = $this->backupRoot.'/mirror';
+        $this->archiveDir = $this->backupRoot.'/archive';
+        $this->stateFile = $this->backupRoot.'/.state.json';
     }
 
     public function handle(): int
@@ -54,15 +57,15 @@ class FileAuditCommand extends Command
         }
 
         if ($this->option('max-archive-days')) {
-            $this->purgeOldArchives((int)$this->option('max-archive-days'));
+            $this->purgeOldArchives((int) $this->option('max-archive-days'));
         }
 
         if ($this->option('truncate-diffs')) {
-            $this->truncateOldDiffs((int)$this->option('truncate-diffs-days'));
+            $this->truncateOldDiffs((int) $this->option('truncate-diffs-days'));
         }
 
         if ($this->option('per-file-limit')) {
-            $this->truncatePerFileLimit((int)$this->option('per-file-limit'));
+            $this->truncatePerFileLimit((int) $this->option('per-file-limit'));
         }
 
         if ($this->option('watch')) {
@@ -83,13 +86,13 @@ class FileAuditCommand extends Command
 
         $state = [];
         foreach ($files as $relative) {
-            $full = $this->basePath . '/' . $relative;
+            $full = $this->basePath.'/'.$relative;
             $hash = md5_file($full);
             $state[$relative] = $hash;
 
-            $mirrorPath = $this->mirrorDir . '/' . $relative;
+            $mirrorPath = $this->mirrorDir.'/'.$relative;
             $mirrorDir = dirname($mirrorPath);
-            if (!is_dir($mirrorDir)) {
+            if (! is_dir($mirrorDir)) {
                 mkdir($mirrorDir, 0755, true);
             }
             copy($full, $mirrorPath);
@@ -101,22 +104,22 @@ class FileAuditCommand extends Command
         $this->newLine();
 
         $stateDir = dirname($this->stateFile);
-        if (!is_dir($stateDir)) {
+        if (! is_dir($stateDir)) {
             mkdir($stateDir, 0755, true);
         }
         file_put_contents($this->stateFile, json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
-        $this->info("Done. Tracked " . count($state) . " files.");
+        $this->info('Done. Tracked '.count($state).' files.');
 
         return self::SUCCESS;
     }
 
     protected function watchLoop(): int
     {
-        $interval = max(2, (int)$this->option('interval'));
+        $interval = max(2, (int) $this->option('interval'));
         $this->info("Watching files every {$interval}s. Press Ctrl+C to stop.");
 
-        if (!file_exists($this->stateFile)) {
+        if (! file_exists($this->stateFile)) {
             $this->warn('State file not found. Running --init first...');
             $this->initMirror();
         }
@@ -131,12 +134,14 @@ class FileAuditCommand extends Command
 
     protected function scanOnce(): int
     {
-        if (!file_exists($this->stateFile)) {
+        if (! file_exists($this->stateFile)) {
             $this->warn('State file not found. Run with --init first.');
+
             return self::FAILURE;
         }
 
         $this->scanChanges();
+
         return self::SUCCESS;
     }
 
@@ -147,7 +152,7 @@ class FileAuditCommand extends Command
         $currentMap = [];
 
         foreach ($current as $relative) {
-            $full = $this->basePath . '/' . $relative;
+            $full = $this->basePath.'/'.$relative;
             $hash = md5_file($full);
             $currentMap[$relative] = $hash;
         }
@@ -183,11 +188,11 @@ class FileAuditCommand extends Command
 
     protected function handleCreated(string $relative, string $hash, ?int $userId): void
     {
-        $full = $this->basePath . '/' . $relative;
-        $mirrorPath = $this->mirrorDir . '/' . $relative;
+        $full = $this->basePath.'/'.$relative;
+        $mirrorPath = $this->mirrorDir.'/'.$relative;
         $mirrorDir = dirname($mirrorPath);
 
-        if (!is_dir($mirrorDir)) {
+        if (! is_dir($mirrorDir)) {
             mkdir($mirrorDir, 0755, true);
         }
         copy($full, $mirrorPath);
@@ -206,8 +211,8 @@ class FileAuditCommand extends Command
 
     protected function handleUpdated(string $relative, string $newHash, string $oldHash, ?int $userId): void
     {
-        $full = $this->basePath . '/' . $relative;
-        $mirrorPath = $this->mirrorDir . '/' . $relative;
+        $full = $this->basePath.'/'.$relative;
+        $mirrorPath = $this->mirrorDir.'/'.$relative;
 
         // Archive the OLD mirror content (before change)
         $backupRel = $this->archiveBackup($relative, 'updated');
@@ -222,7 +227,7 @@ class FileAuditCommand extends Command
 
         // Update mirror with new content
         $mirrorDir = dirname($mirrorPath);
-        if (!is_dir($mirrorDir)) {
+        if (! is_dir($mirrorDir)) {
             mkdir($mirrorDir, 0755, true);
         }
         copy($full, $mirrorPath);
@@ -241,7 +246,7 @@ class FileAuditCommand extends Command
 
     protected function handleDeleted(string $relative, string $hash, ?int $userId): void
     {
-        $mirrorPath = $this->mirrorDir . '/' . $relative;
+        $mirrorPath = $this->mirrorDir.'/'.$relative;
 
         // Archive the mirror copy (last known good version)
         $backupRel = $this->archiveBackup($relative, 'deleted');
@@ -264,22 +269,23 @@ class FileAuditCommand extends Command
 
     protected function archiveBackup(string $relative, string $event): ?string
     {
-        $mirrorPath = $this->mirrorDir . '/' . $relative;
+        $mirrorPath = $this->mirrorDir.'/'.$relative;
 
-        if (!file_exists($mirrorPath)) {
+        if (! file_exists($mirrorPath)) {
             return null;
         }
 
         $timestamp = now()->format('Y-m-d_H-i-s');
-        $backupRel = $timestamp . '/' . $relative . '.bak';
-        $backupFull = $this->archiveDir . '/' . $backupRel;
+        $backupRel = $timestamp.'/'.$relative.'.bak';
+        $backupFull = $this->archiveDir.'/'.$backupRel;
         $backupDir = dirname($backupFull);
 
-        if (!is_dir($backupDir)) {
+        if (! is_dir($backupDir)) {
             mkdir($backupDir, 0755, true);
         }
 
         copy($mirrorPath, $backupFull);
+
         return $backupRel;
     }
 
@@ -297,7 +303,7 @@ class FileAuditCommand extends Command
             }
             $userId = $_SESSION['user_profile']['id'] ?? null;
             if ($userId) {
-                return (int)$userId;
+                return (int) $userId;
             }
         } catch (\Throwable $e) {
             // silent
@@ -311,8 +317,8 @@ class FileAuditCommand extends Command
         $files = [];
 
         foreach ($this->watchDirs as $dir) {
-            $fullDir = $this->basePath . '/' . $dir;
-            if (!is_dir($fullDir)) {
+            $fullDir = $this->basePath.'/'.$dir;
+            if (! is_dir($fullDir)) {
                 continue;
             }
 
@@ -326,16 +332,17 @@ class FileAuditCommand extends Command
                     continue;
                 }
 
-                $relative = str_replace($this->basePath . '/', '', $file->getRealPath());
+                $relative = str_replace($this->basePath.'/', '', $file->getRealPath());
                 $relative = str_replace(DIRECTORY_SEPARATOR, '/', $relative);
 
-                if (!$this->shouldExclude($relative)) {
+                if (! $this->shouldExclude($relative)) {
                     $files[] = $relative;
                 }
             }
         }
 
         sort($files);
+
         return $files;
     }
 
@@ -350,6 +357,7 @@ class FileAuditCommand extends Command
                 return true;
             }
         }
+
         return false;
     }
 
@@ -363,24 +371,30 @@ class FileAuditCommand extends Command
         $maxLen = max($oldLen, $newLen);
 
         $output = "--- a/{$relative}\n+++ b/{$relative}\n";
-        $i = 0; $j = 0;
+        $i = 0;
+        $j = 0;
         $chunk = [];
 
         while ($i < $oldLen || $j < $newLen) {
             if ($i < $oldLen && $j < $newLen && $oldLines[$i] === $newLines[$j]) {
-                if (!empty($chunk)) {
+                if (! empty($chunk)) {
                     $output .= $this->formatChunk($chunk, $i - count($chunk) + 1, $j - count($chunk) + 1);
                     $chunk = [];
                 }
-                $i++; $j++;
+                $i++;
+                $j++;
             } else {
                 $chunk[] = ['old' => $i < $oldLen ? $oldLines[$i] : null, 'new' => $j < $newLen ? $newLines[$j] : null];
-                if ($i < $oldLen) $i++;
-                if ($j < $newLen) $j++;
+                if ($i < $oldLen) {
+                    $i++;
+                }
+                if ($j < $newLen) {
+                    $j++;
+                }
             }
         }
 
-        if (!empty($chunk)) {
+        if (! empty($chunk)) {
             $output .= $this->formatChunk($chunk, $i - count($chunk) + 1, $j - count($chunk) + 1);
         }
 
@@ -404,6 +418,7 @@ class FileAuditCommand extends Command
                 $output .= "+{$line['new']}\n";
             }
         }
+
         return $output;
     }
 
@@ -424,14 +439,14 @@ class FileAuditCommand extends Command
 
     protected function purgeOldArchives(int $maxDays): void
     {
-        if (!is_dir($this->archiveDir)) {
+        if (! is_dir($this->archiveDir)) {
             return;
         }
 
         $cutoff = now()->subDays($maxDays)->timestamp;
         $count = 0;
 
-        $dirs = glob($this->archiveDir . '/*', GLOB_ONLYDIR);
+        $dirs = glob($this->archiveDir.'/*', GLOB_ONLYDIR);
         foreach ($dirs as $dir) {
             $name = basename($dir);
             $ts = strtotime(str_replace('_', ' ', $name));

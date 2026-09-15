@@ -26,6 +26,7 @@ class AdminController extends Controller
     public function restore($id)
     {
         Admin::onlyTrashed()->findOrFail($id)->restore();
+
         return redirect()->route('admin.users.index')->with('success', 'Admin restored successfully.');
     }
 
@@ -33,6 +34,7 @@ class AdminController extends Controller
     {
         $admin = Admin::onlyTrashed()->findOrFail($id);
         $admin->forceDelete();
+
         return redirect()->route('admin.users.index')->with('success', 'Admin permanently deleted.');
     }
 }

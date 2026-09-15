@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use App\Traits\TracksIsDeleted;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\TracksIsDeleted;
 
 class OrderItem extends Model
 {

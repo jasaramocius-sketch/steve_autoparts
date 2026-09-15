@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 class FileRevision extends Model
 {
     use SoftDeletes;
+
     protected $fillable = [
         'file_path',
         'event',

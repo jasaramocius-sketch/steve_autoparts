@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Compare;
 use App\Models\Page;
 use App\Models\Product;
+use Illuminate\Http\Request;
 
 class CompareController extends Controller
 {
@@ -24,7 +24,7 @@ class CompareController extends Controller
             $products = Product::whereIn('id', $guestCompare)->get();
 
             foreach ($products as $product) {
-                $compareItems->push((object)[
+                $compareItems->push((object) [
                     'id' => $product->id,
                     'product_id' => $product->id,
                     'product' => $product,
@@ -39,7 +39,7 @@ class CompareController extends Controller
     {
         $productId = $request->input('product_id');
 
-        if (!$productId) {
+        if (! $productId) {
             return response()->json([
                 'error' => 'Invalid product selected for compare.',
                 'count' => 0,
@@ -53,8 +53,8 @@ class CompareController extends Controller
 
             // Duplicate check
             if (Compare::where('user_id', $userId)
-                    ->where('product_id', $productId)
-                    ->exists()) {
+                ->where('product_id', $productId)
+                ->exists()) {
 
                 return response()->json([
                     'error' => 'Product already in compare list.',
@@ -83,7 +83,7 @@ class CompareController extends Controller
                 ->pluck('id')
                 ->toArray();
 
-            if (!empty($idsToKeep)) {
+            if (! empty($idsToKeep)) {
                 Compare::where('user_id', $userId)
                     ->whereNotIn('id', $idsToKeep)
                     ->delete();
@@ -130,6 +130,7 @@ class CompareController extends Controller
             'count' => $count,
         ]);
     }
+
     public function remove(Request $request, $id)
     {
         if (session('user_logged_in') && session('user_profile.id')) {

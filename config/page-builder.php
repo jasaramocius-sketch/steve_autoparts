@@ -1,5 +1,16 @@
 <?php
 
+use App\Models\Blog;
+use App\Models\Page;
+use SteveStore\PageBuilder\Blocks\BuiltIn\CTABanner;
+use SteveStore\PageBuilder\Blocks\BuiltIn\FeaturesGrid;
+use SteveStore\PageBuilder\Blocks\BuiltIn\HeroBanner;
+use SteveStore\PageBuilder\Blocks\BuiltIn\HtmlBlock;
+use SteveStore\PageBuilder\Blocks\BuiltIn\ImageGallery;
+use SteveStore\PageBuilder\Blocks\BuiltIn\SnippetBlock;
+use SteveStore\PageBuilder\Blocks\BuiltIn\TestimonialCarousel;
+use SteveStore\PageBuilder\Blocks\BuiltIn\TextBlock;
+
 return [
 
     /*
@@ -32,8 +43,8 @@ return [
     |
     */
     'models' => [
-        'page' => \App\Models\Page::class,
-        'blog' => \App\Models\Blog::class,
+        'page' => Page::class,
+        'blog' => Blog::class,
     ],
 
     /*
@@ -46,14 +57,14 @@ return [
     |
     */
     'blocks' => [
-        \SteveStore\PageBuilder\Blocks\BuiltIn\HeroBanner::class,
-        \SteveStore\PageBuilder\Blocks\BuiltIn\TextBlock::class,
-        \SteveStore\PageBuilder\Blocks\BuiltIn\ImageGallery::class,
-        \SteveStore\PageBuilder\Blocks\BuiltIn\FeaturesGrid::class,
-        \SteveStore\PageBuilder\Blocks\BuiltIn\TestimonialCarousel::class,
-        \SteveStore\PageBuilder\Blocks\BuiltIn\CTABanner::class,
-        \SteveStore\PageBuilder\Blocks\BuiltIn\SnippetBlock::class,
-        \SteveStore\PageBuilder\Blocks\BuiltIn\HtmlBlock::class,
+        HeroBanner::class,
+        TextBlock::class,
+        ImageGallery::class,
+        FeaturesGrid::class,
+        TestimonialCarousel::class,
+        CTABanner::class,
+        SnippetBlock::class,
+        HtmlBlock::class,
     ],
 
     /*
@@ -87,20 +98,20 @@ return [
     */
     'live_url_map' => [
         'page' => [
-            'home'               => 'home',
-            'shop'               => 'shop',
-            'faq'                => 'faq',
-            'contact'            => 'contact',
-            'about'              => 'about',
-            'blog'               => 'blog',
-            'categories'         => 'categories.index',
-            'brands'             => 'brands',
-            'cart'               => 'cart',
-            'compare'            => 'compare.index',
-            'privacy-policy'     => 'privacy.policy',
-            'terms-conditions'   => 'terms.conditions',
-            'return-policy'      => 'return.policy',
-            'support-policy'     => 'support.policy',
+            'home' => 'home',
+            'shop' => 'shop',
+            'faq' => 'faq',
+            'contact' => 'contact',
+            'about' => 'about',
+            'blog' => 'blog',
+            'categories' => 'categories.index',
+            'brands' => 'brands',
+            'cart' => 'cart',
+            'compare' => 'compare.index',
+            'privacy-policy' => 'privacy.policy',
+            'terms-conditions' => 'terms.conditions',
+            'return-policy' => 'return.policy',
+            'support-policy' => 'support.policy',
         ],
     ],
 

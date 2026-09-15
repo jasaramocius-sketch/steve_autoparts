@@ -15,10 +15,11 @@ class VerifyActiveUser
             $user = Auth::user();
             $freshUser = $user->fresh();
 
-            if (!$freshUser) {
+            if (! $freshUser) {
                 Auth::logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
+
                 return redirect()->route('login')->with('error', 'Session expired. Please login again.');
             }
 

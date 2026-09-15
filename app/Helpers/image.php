@@ -1,9 +1,12 @@
 <?php
 
-if (!function_exists('convertToWebp')) {
+use App\Models\Setting;
+use Illuminate\Support\Facades\Http;
+
+if (! function_exists('convertToWebp')) {
     function convertToWebp(string $sourcePath, string $destPath, int $quality = 80): bool
     {
-        if (!file_exists($sourcePath)) {
+        if (! file_exists($sourcePath)) {
             return false;
         }
 
@@ -21,7 +24,7 @@ if (!function_exists('convertToWebp')) {
             default => null,
         };
 
-        if (!$imageResource) {
+        if (! $imageResource) {
             return false;
         }
 
@@ -38,36 +41,36 @@ if (!function_exists('convertToWebp')) {
     }
 }
 
-if (!function_exists('saveImageWithWebp')) {
+if (! function_exists('saveImageWithWebp')) {
     function saveImageWithWebp($file, string $dir = 'uploads'): string
     {
-        $subdir = 'uploads/' . now()->format('Y/m');
-        $destination = storage_path('app/public/' . $subdir);
+        $subdir = 'uploads/'.now()->format('Y/m');
+        $destination = storage_path('app/public/'.$subdir);
 
         // Directory auto-create karo agar nahi hai
-        if (!is_dir($destination)) {
+        if (! is_dir($destination)) {
             mkdir($destination, 0775, true);
         }
 
         // Permission check
-        if (!is_writable($destination)) {
-            throw new Exception("Upload directory is not writable: " . $destination);
+        if (! is_writable($destination)) {
+            throw new Exception('Upload directory is not writable: '.$destination);
         }
 
-        $filename = time() . '_' . uniqid() . '.' . $file->extension();
+        $filename = time().'_'.uniqid().'.'.$file->extension();
 
         $file->move($destination, $filename);
 
-        $fullPath = $destination . '/' . $filename;
-        $webpPath = $destination . '/' . pathinfo($filename, PATHINFO_FILENAME) . '.webp';
+        $fullPath = $destination.'/'.$filename;
+        $webpPath = $destination.'/'.pathinfo($filename, PATHINFO_FILENAME).'.webp';
 
         convertToWebp($fullPath, $webpPath);
 
-        return 'storage/' . $subdir . '/' . $filename;
+        return 'storage/'.$subdir.'/'.$filename;
     }
 }
 
-if (!function_exists('saveImageFromUrlWithWebp')) {
+if (! function_exists('saveImageFromUrlWithWebp')) {
     function saveImageFromUrlWithWebp(string $url, string $dir = 'uploads'): ?string
     {
         // SSRF guard: sirf public http(s) URLs allow karo
@@ -84,7 +87,7 @@ if (!function_exists('saveImageFromUrlWithWebp')) {
             return null;
         }
 
-        $response = \Illuminate\Support\Facades\Http::timeout(15)->get($url);
+        $response = Http::timeout(15)->get($url);
         if ($response->failed()) {
             return null;
         }
@@ -94,7 +97,7 @@ if (!function_exists('saveImageFromUrlWithWebp')) {
         }
 
         $contentType = $response->header('Content-Type');
-        if (!str_contains($contentType, 'image/')) {
+        if (! str_contains($contentType, 'image/')) {
             return null;
         }
 
@@ -109,36 +112,38 @@ if (!function_exists('saveImageFromUrlWithWebp')) {
             $extension = 'gif';
         }
 
-        $filename = time() . '_' . uniqid() . '.' . $extension;
-        $subdir = 'uploads/' . now()->format('Y/m');
-        $dirPath = storage_path('app/public/' . $subdir);
-        if (!file_exists($dirPath)) {
+        $filename = time().'_'.uniqid().'.'.$extension;
+        $subdir = 'uploads/'.now()->format('Y/m');
+        $dirPath = storage_path('app/public/'.$subdir);
+        if (! file_exists($dirPath)) {
             mkdir($dirPath, 0775, true);
         }
-        file_put_contents($dirPath . '/' . $filename, $response->body());
+        file_put_contents($dirPath.'/'.$filename, $response->body());
 
-        $webpPath = $dirPath . '/' . pathinfo($filename, PATHINFO_FILENAME) . '.webp';
-        $fullPath = $dirPath . '/' . $filename;
+        $webpPath = $dirPath.'/'.pathinfo($filename, PATHINFO_FILENAME).'.webp';
+        $fullPath = $dirPath.'/'.$filename;
 
         convertToWebp($fullPath, $webpPath);
 
-        return 'storage/' . $subdir . '/' . $filename;
+        return 'storage/'.$subdir.'/'.$filename;
     }
 }
 
-if (!function_exists('deleteImageFiles')) {
+if (! function_exists('deleteImageFiles')) {
     function deleteImageFiles(?string $filename, string $dir = 'uploads'): void
     {
-        if (!$filename) return;
+        if (! $filename) {
+            return;
+        }
 
         $path = normalizeImagePath($filename, $dir);
 
-        foreach ([public_path($path), storage_path('app/public/' . $path)] as $fullPath) {
+        foreach ([public_path($path), storage_path('app/public/'.$path)] as $fullPath) {
             if (file_exists($fullPath)) {
                 @unlink($fullPath);
             }
 
-            $webpPath = dirname($fullPath) . '/' . pathinfo($fullPath, PATHINFO_FILENAME) . '.webp';
+            $webpPath = dirname($fullPath).'/'.pathinfo($fullPath, PATHINFO_FILENAME).'.webp';
             if (file_exists($webpPath)) {
                 @unlink($webpPath);
             }
@@ -146,41 +151,47 @@ if (!function_exists('deleteImageFiles')) {
     }
 }
 
-if (!function_exists('webpExists')) {
+if (! function_exists('webpExists')) {
     function webpExists(string $path): bool
     {
         $info = pathinfo($path);
-        return file_exists(public_path($info['dirname'] . '/' . $info['filename'] . '.webp'));
+
+        return file_exists(public_path($info['dirname'].'/'.$info['filename'].'.webp'));
     }
 }
 
-if (!function_exists('webpSrc')) {
+if (! function_exists('webpSrc')) {
     function webpSrc(string $path): string
     {
         $info = pathinfo($path);
-        return asset($info['dirname'] . '/' . $info['filename'] . '.webp');
+
+        return asset($info['dirname'].'/'.$info['filename'].'.webp');
     }
 }
 
-if (!function_exists('ensureResponsiveVariant')) {
+if (! function_exists('ensureResponsiveVariant')) {
     function ensureResponsiveVariant(string $src, int $targetWidth): ?string
     {
-        $checkPath = str_starts_with($src, 'uploads/') ? 'storage/' . $src : $src;
+        $checkPath = str_starts_with($src, 'uploads/') ? 'storage/'.$src : $src;
         $fullPath = public_path($checkPath);
-        if (!file_exists($fullPath)) return null;
+        if (! file_exists($fullPath)) {
+            return null;
+        }
 
         $info = pathinfo($fullPath);
-        $variantName = $info['filename'] . '_' . $targetWidth . '.webp';
-        $variantPath = $info['dirname'] . '/' . $variantName;
+        $variantName = $info['filename'].'_'.$targetWidth.'.webp';
+        $variantPath = $info['dirname'].'/'.$variantName;
 
         if (file_exists($variantPath)) {
             return str_starts_with($src, 'uploads/')
-                ? 'storage/' . ltrim(substr($variantPath, strlen(public_path('storage/'))), '/')
-                : str_replace(public_path('') . '/', '', $variantPath);
+                ? 'storage/'.ltrim(substr($variantPath, strlen(public_path('storage/'))), '/')
+                : str_replace(public_path('').'/', '', $variantPath);
         }
 
         $imageInfo = @getimagesize($fullPath);
-        if ($imageInfo === false || $imageInfo[0] <= $targetWidth) return null;
+        if ($imageInfo === false || $imageInfo[0] <= $targetWidth) {
+            return null;
+        }
 
         $mime = $imageInfo['mime'];
         $srcImg = match ($mime) {
@@ -190,7 +201,9 @@ if (!function_exists('ensureResponsiveVariant')) {
             'image/webp' => @imagecreatefromwebp($fullPath),
             default => null,
         };
-        if (!$srcImg) return null;
+        if (! $srcImg) {
+            return null;
+        }
 
         if ($mime === 'image/png') {
             imagepalettetotruecolor($srcImg);
@@ -209,15 +222,17 @@ if (!function_exists('ensureResponsiveVariant')) {
         $ok = @imagewebp($resized, $variantPath, 80);
         imagedestroy($resized);
 
-        if (!$ok || !file_exists($variantPath)) return null;
+        if (! $ok || ! file_exists($variantPath)) {
+            return null;
+        }
 
         return str_starts_with($src, 'uploads/')
-            ? 'storage/' . ltrim(substr($variantPath, strlen(public_path('storage/'))), '/')
-            : str_replace(public_path('') . '/', '', $variantPath);
+            ? 'storage/'.ltrim(substr($variantPath, strlen(public_path('storage/'))), '/')
+            : str_replace(public_path('').'/', '', $variantPath);
     }
 }
 
-if (!function_exists('imgTag')) {
+if (! function_exists('imgTag')) {
     function imgTag(string $src, ?string $alt = '', string $class = '', string $extra = '', int $displayWidth = 0): string
     {
         $alt = $alt ?? '';
@@ -235,9 +250,9 @@ if (!function_exists('imgTag')) {
             $src = 'assets/images/placeholder.png';
         }
 
-        $checkPath = str_starts_with($src, 'uploads/') ? 'storage/' . $src : $src;
+        $checkPath = str_starts_with($src, 'uploads/') ? 'storage/'.$src : $src;
         $isRemote = (bool) preg_match('#^https?://#i', $src);
-        if (!$isRemote && !file_exists(public_path($checkPath))) {
+        if (! $isRemote && ! file_exists(public_path($checkPath))) {
             $src = 'assets/images/placeholder.png';
             $checkPath = $src;
         }
@@ -260,41 +275,41 @@ if (!function_exists('imgTag')) {
             $webpSource = webpSrc($src);
         }
 
-        $assetSrc = str_starts_with($imgSrc, 'uploads/') ? 'storage/' . $imgSrc : $imgSrc;
-        $assetWebp = $webpSource ? (str_starts_with($webpSource, 'uploads/') ? 'storage/' . $webpSource : $webpSource) : null;
+        $assetSrc = str_starts_with($imgSrc, 'uploads/') ? 'storage/'.$imgSrc : $imgSrc;
+        $assetWebp = $webpSource ? (str_starts_with($webpSource, 'uploads/') ? 'storage/'.$webpSource : $webpSource) : null;
 
         $srcsetAttr = '';
-        if ($displayWidth > 0 && !$isRemote) {
+        if ($displayWidth > 0 && ! $isRemote) {
             $v250 = ensureResponsiveVariant($src, 250);
             $v500 = ensureResponsiveVariant($src, 500);
             $srcsetParts = [];
             if ($v250) {
-                $a = str_starts_with($v250, 'uploads/') ? 'storage/' . $v250 : $v250;
-                $srcsetParts[] = asset($a) . ' 250w';
+                $a = str_starts_with($v250, 'uploads/') ? 'storage/'.$v250 : $v250;
+                $srcsetParts[] = asset($a).' 250w';
             }
             if ($v500) {
-                $a = str_starts_with($v500, 'uploads/') ? 'storage/' . $v500 : $v500;
-                $srcsetParts[] = asset($a) . ' 500w';
+                $a = str_starts_with($v500, 'uploads/') ? 'storage/'.$v500 : $v500;
+                $srcsetParts[] = asset($a).' 500w';
             }
             if ($srcsetParts) {
-                $srcsetAttr = ' srcset="' . implode(', ', $srcsetParts) . '" sizes="' . $displayWidth . 'px"';
+                $srcsetAttr = ' srcset="'.implode(', ', $srcsetParts).'" sizes="'.$displayWidth.'px"';
             }
         }
 
         $loadingAttr = str_contains($extra, 'loading=') ? '' : ' loading="lazy"';
         $decodingAttr = str_contains($extra, 'decoding=') ? '' : ' decoding="async"';
-        $html = '<img src="' . asset($assetSrc) . '" alt="' . e($alt) . '"' . $classAttr . $loadingAttr . $decodingAttr . ' onerror="' . $onerror . '"' . $extraAttr . '>';
+        $html = '<img src="'.asset($assetSrc).'" alt="'.e($alt).'"'.$classAttr.$loadingAttr.$decodingAttr.' onerror="'.$onerror.'"'.$extraAttr.'>';
 
         static $webpFrontend = null;
         if ($webpFrontend === null) {
-            $webpFrontend = \App\Models\Setting::get('webp_frontend', '1') === '1';
+            $webpFrontend = Setting::get('webp_frontend', '1') === '1';
         }
         if ($srcsetAttr && $webpFrontend) {
-            $html = '<picture><source' . $srcsetAttr . ' type="image/webp">' . $html . '</picture>';
+            $html = '<picture><source'.$srcsetAttr.' type="image/webp">'.$html.'</picture>';
         } elseif ($assetWebp && $webpFrontend) {
-            $html = '<picture><source srcset="' . asset($assetWebp) . '" type="image/webp">' . $html . '</picture>';
+            $html = '<picture><source srcset="'.asset($assetWebp).'" type="image/webp">'.$html.'</picture>';
         } elseif ($srcsetAttr) {
-            $html = str_replace('<img ', '<img' . $srcsetAttr . ' ', $html);
+            $html = str_replace('<img ', '<img'.$srcsetAttr.' ', $html);
         }
 
         return $html;

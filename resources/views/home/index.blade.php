@@ -431,7 +431,7 @@
                         <a href="{{ route('blog') }}" class="a-tag-hover-color">
                             {{ $sections->get('latest_post')?->button_text ??  'View More' }}
                             <i class="fas fa-arrow-right ms-1"></i> 
-                        </a>                       
+                        </a>
                     </div>
                     @if($showAsSlider)
                     <div class="slider-nav d-flex gap-2">

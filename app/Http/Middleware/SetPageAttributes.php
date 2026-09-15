@@ -2,44 +2,45 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Vehicle;
 use Closure;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;
-use App\Models\Vehicle;
 
 class SetPageAttributes
 {
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse)  $next
-     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
+     * @param  Closure(Request): (Response|RedirectResponse)  $next
+     * @return Response|RedirectResponse
      */
     public function handle(Request $request, Closure $next)
     {
         $route = $request->route();
-        
+
         if ($route) {
             $routeName = $route->getName() ?? '';
-            
+
             // Generate page-id from route name (dots to dashes) + -page suffix
-            $pageId = $routeName ? Str::replace('.', '-', $routeName) . '_page' : 'page';
-            
+            $pageId = $routeName ? Str::replace('.', '-', $routeName).'_page' : 'page';
+
             // Generate page-class from route prefix and name
             $segments = explode('.', $routeName);
             $prefix = $segments[0] ?? 'frontend'; // admin, user, auth, frontend, etc.
-            
+
             // Build page class
             $pageClass = "{$prefix}-page";
-            
+
             if (count($segments) > 1) {
                 $rest = implode('-', array_slice($segments, 1));
                 $pageClass .= " {$prefix}-{$rest}";
             }
-            
+
             // Share with all views
             View::share('pageId', $pageId);
             View::share('pageClass', $pageClass);
@@ -63,7 +64,7 @@ class SetPageAttributes
             View::share('userVehicles', $userVehicles);
             View::share('selectedVehicle', $selectedVehicle);
         }
-        
+
         return $next($request);
     }
 }

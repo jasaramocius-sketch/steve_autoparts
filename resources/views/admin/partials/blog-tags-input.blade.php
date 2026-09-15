@@ -1,9 +1,9 @@
 <div class="blog-tag-input">
     <input type="hidden" name="tags" class="blog-tag-hidden" value="{{ $selectedTags }}" data-all-tags="{{ $allTags }}">
-    <div class="blog-tag-chips"></div>
-    <input type="text" class="form-control blog-tag-text" placeholder="Type tag and press Enter, or pick from suggestions" autocomplete="off">
+    <input type="text" class="form-control blog-tag-text" placeholder="Type or paste tags separated by commas, or press Enter" autocomplete="off">
     <div class="blog-tag-suggest" style="display:none"></div>
-    <small class="text-muted">Press Enter or comma (,) to add a tag. Tags are created automatically when the blog is saved.</small>
+    <small class="text-muted">Type or paste tags separated by commas (e.g. "brake pads, engine oil"). Each tag appears as a chip; everything is saved automatically with the blog.</small>
+    <div class="blog-tag-chips"></div>
 </div>
 
 <style>
@@ -25,13 +25,13 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 16px;
-        height: 16px;
+        width: 20px;
+        height: 20px;
         border: 0;
         border-radius: 50%;
         background: rgba(31,3,0,.15);
         color: #1f0300;
-        font-size: .6875rem;
+        font-size: 1rem;
         line-height: 1;
         padding: 0;
         cursor: pointer;
@@ -122,6 +122,12 @@
         textInput.value = '';
     }
 
+    function commitText(raw) {
+        String(raw || '').split(',').forEach(function(part) {
+            addTag(part);
+        });
+    }
+
     function showSuggest(items) {
         suggestBox.innerHTML = '';
         if (!items.length) { hideSuggest(); return; }
@@ -150,7 +156,7 @@
             e.preventDefault();
             var active = suggestBox.querySelector('.blog-tag-suggest-item.active');
             if (active) { addTag(active.textContent); }
-            else { addTag(textInput.value); }
+            else { commitText(textInput.value); }
         } else if (e.key === 'Backspace' && !textInput.value && selected.length) {
             selected.pop();
             renderChips();
@@ -160,6 +166,13 @@
     });
 
     textInput.addEventListener('input', function() {
+        var v = textInput.value;
+        if (v.indexOf(',') !== -1) {
+            var parts = v.split(',');
+            var last = parts.pop();
+            commitText(parts.join(','));
+            textInput.value = last.trimStart();
+        }
         var openItems = suggestBox.querySelectorAll('.blog-tag-suggest-item');
         [].slice.call(openItems).forEach(function(el) { el.classList.remove('active'); });
         var q = textInput.value.trim().toLowerCase();
@@ -190,6 +203,13 @@
             }
         }
     });
+
+    var form = $wrapper.closest('form');
+    if (form) {
+        form.addEventListener('submit', function() {
+            commitText(textInput.value);
+        });
+    }
 
     renderChips();
 })();

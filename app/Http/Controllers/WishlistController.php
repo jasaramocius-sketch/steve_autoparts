@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Wishlist;
 use App\Models\Product;
+use App\Models\Wishlist;
+use Illuminate\Http\Request;
 
 class WishlistController extends Controller
 {
@@ -28,7 +28,7 @@ class WishlistController extends Controller
             } else {
                 Wishlist::create([
                     'user_id' => $userId,
-                    'product_id' => $productId
+                    'product_id' => $productId,
                 ]);
                 $action = 'added';
                 $message = 'Product added to wishlist!';
@@ -56,7 +56,7 @@ class WishlistController extends Controller
             'success' => true,
             'action' => $action,
             'message' => $message,
-            'count' => $count
+            'count' => $count,
         ]);
     }
 
@@ -81,7 +81,7 @@ class WishlistController extends Controller
 
         $wishlist = collect();
 
-        if (!empty($guestWishlist)) {
+        if (! empty($guestWishlist)) {
 
             $products = Product::whereIn(
                 'id',
@@ -90,10 +90,10 @@ class WishlistController extends Controller
 
             foreach ($products as $product) {
 
-                $wishlist->push((object)[
+                $wishlist->push((object) [
                     'id' => $product->id,
                     'product_id' => $product->id,
-                    'product' => $product
+                    'product' => $product,
                 ]);
             }
         }
@@ -166,7 +166,7 @@ class WishlistController extends Controller
                 'name' => $wishlist->product->name,
                 'price' => $wishlist->product->price,
                 'image' => $wishlist->product->image,
-                'quantity' => 1
+                'quantity' => 1,
             ];
         }
 

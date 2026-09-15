@@ -18,7 +18,7 @@ return new class extends Migration
     public function up(): void
     {
         foreach ($this->tables as $table) {
-            if (!Schema::hasColumn($table, 'is_deleted')) {
+            if (! Schema::hasColumn($table, 'is_deleted')) {
                 Schema::table($table, function (Blueprint $t) {
                     $t->boolean('is_deleted')->default(false);
                 });

@@ -7,7 +7,7 @@ trait TracksIsDeleted
     protected static function bootTracksIsDeleted()
     {
         static::deleted(function ($model) {
-            if (!$model->isForceDeleting()) {
+            if (! $model->isForceDeleting()) {
                 $model->newQueryWithoutScopes()
                     ->where($model->getKeyName(), $model->getKey())
                     ->update(['is_deleted' => 1]);

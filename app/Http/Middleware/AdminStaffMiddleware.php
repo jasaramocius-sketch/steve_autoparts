@@ -17,7 +17,7 @@ class AdminStaffMiddleware
     {
         if (
             auth()->check() &&
-            in_array(auth()->user()->role, ['master_admin','admin','staff'])
+            in_array(auth()->user()->role, ['master_admin', 'admin', 'staff'])
         ) {
             return $next($request);
         }

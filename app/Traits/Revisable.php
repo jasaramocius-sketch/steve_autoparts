@@ -28,7 +28,7 @@ trait Revisable
                 $newValues[$key] = $newValue;
             }
 
-            if (!empty($oldValues) || !empty($newValues)) {
+            if (! empty($oldValues) || ! empty($newValues)) {
                 static::logRevision($model, 'updated', $oldValues, $newValues);
             }
         });
@@ -41,19 +41,19 @@ trait Revisable
     protected static function logRevision($model, string $action, array $oldValues, array $newValues): void
     {
         $user = Auth::user();
-        if (!$user) {
+        if (! $user) {
             return;
         }
 
         Revision::create([
-            'user_id'    => $user->id,
+            'user_id' => $user->id,
             'model_type' => get_class($model),
-            'model_id'   => $model->getKey(),
-            'action'     => $action,
+            'model_id' => $model->getKey(),
+            'action' => $action,
             'old_values' => $oldValues,
             'new_values' => $newValues,
             'ip_address' => request()->ip(),
-            'url'        => request()->fullUrl(),
+            'url' => request()->fullUrl(),
         ]);
     }
 }

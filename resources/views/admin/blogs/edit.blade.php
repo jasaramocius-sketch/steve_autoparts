@@ -30,26 +30,18 @@
                     <label class="form-label">Status</label>
                     <select name="status" class="form-control @error('status') is-invalid @enderror">
                         <option value="draft" {{ (old('status', $blog->status) ?? 'draft') === 'draft' ? 'selected' : '' }}>Draft</option>
+                        <option value="scheduled" {{ (old('status', $blog->status) ?? 'draft') === 'scheduled' ? 'selected' : '' }}>Scheduled</option>
                         <option value="published" {{ (old('status', $blog->status) ?? 'draft') === 'published' ? 'selected' : '' }}>Published</option>
                     </select>
                     @error('status') <div class="invalid-feedback">{{ $message }}</div> @enderror
+
+                    <label class="form-label mt-3">Post Date <small class="text-muted">(optional)</small></label>
+                    <input type="datetime-local" name="published_at" class="form-control @error('published_at') is-invalid @enderror" value="{{ old('published_at', $blog->published_at?->format('Y-m-d\TH:i')) }}">
+                    @error('published_at') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    <small class="text-muted">Required when status is Scheduled. Empty + Published = visible now.</small>
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label">Category</label>
-                    <select name="blog_category_id" class="form-control @error('blog_category_id') is-invalid @enderror">
-                        <option value="">None</option>
-                        @foreach($blogCategories as $cat)
-                            <option value="{{ $cat->id }}" {{ old('blog_category_id', $blog->blog_category_id ?? '') == $cat->id ? 'selected' : '' }}>
-                                {{ $cat->name }}
-                            </option>
-                            @foreach($cat->children as $child)
-                                <option value="{{ $child->id }}" {{ old('blog_category_id', $blog->blog_category_id ?? '') == $child->id ? 'selected' : '' }}>
-                                    &nbsp;&nbsp;&nbsp;{{ $child->name }}
-                                </option>
-                            @endforeach
-                        @endforeach
-                    </select>
-                    @error('blog_category_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    @include('admin.partials.blog-category-field', ['selectedCategoryId' => old('blog_category_id', $blog->blog_category_id ?? '')])
                 </div>
 
                 <div class="col-md-8">

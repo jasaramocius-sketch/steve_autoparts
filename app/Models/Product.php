@@ -2,15 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\Revisable;
+use App\Traits\TracksIsDeleted;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\TracksIsDeleted;
-use App\Traits\Revisable;
-use App\Models\Image;
 
 class Product extends Model
 {
-    use SoftDeletes, TracksIsDeleted, Revisable;
+    use Revisable, SoftDeletes, TracksIsDeleted;
 
     protected $fillable = [
         'name',
@@ -58,21 +57,29 @@ class Product extends Model
 
     public function getReviewsDataAttribute($value)
     {
-        if (is_array($value)) return $value;
+        if (is_array($value)) {
+            return $value;
+        }
         if (is_string($value)) {
             $decoded = json_decode($value, true);
+
             return is_array($decoded) ? $decoded : [];
         }
+
         return [];
     }
 
     public function getFeaturesAttribute($value)
     {
-        if (is_array($value)) return $value;
+        if (is_array($value)) {
+            return $value;
+        }
         if (is_string($value)) {
             $decoded = json_decode($value, true);
+
             return is_array($decoded) ? $decoded : [];
         }
+
         return [];
     }
 

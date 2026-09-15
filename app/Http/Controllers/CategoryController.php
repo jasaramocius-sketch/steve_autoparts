@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Image;
 use App\Models\Page;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
 
 class CategoryController extends Controller
 {
@@ -19,7 +19,7 @@ class CategoryController extends Controller
 
         $sortBy = in_array($request->sort_by, ['id', 'name', 'products_count', 'status']) ? $request->sort_by : 'id';
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
-        $perPage = in_array((int)$request->per_page, [10, 20, 50, 100]) ? (int)$request->per_page : 10;
+        $perPage = in_array((int) $request->per_page, [10, 20, 50, 100]) ? (int) $request->per_page : 10;
 
         if ($trashed) {
             $categories = Category::onlyTrashed()->withCount('products')
@@ -28,9 +28,9 @@ class CategoryController extends Controller
             $categories = Category::withCount('products');
 
             if ($search !== '') {
-                $categories->where(function($q) use ($search) {
+                $categories->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('slug', 'like', "%{$search}%");
+                        ->orWhere('slug', 'like', "%{$search}%");
                 });
             }
 
@@ -51,6 +51,7 @@ class CategoryController extends Controller
     public function restore($id)
     {
         Category::onlyTrashed()->findOrFail($id)->restore();
+
         return redirect()->route('admin.categories.index')->with('success', 'Category restored successfully.');
     }
 
@@ -58,6 +59,7 @@ class CategoryController extends Controller
     {
         $category = Category::onlyTrashed()->findOrFail($id);
         $category->forceDelete();
+
         return redirect()->route('admin.categories.index')->with('success', 'Category permanently deleted.');
     }
 
@@ -65,8 +67,9 @@ class CategoryController extends Controller
     public function toggleStatus($id)
     {
         $category = Category::findOrFail($id);
-        $category->status = !$category->status;
+        $category->status = ! $category->status;
         $category->save();
+
         return back()->with('success', 'Category status updated successfully.');
     }
 
@@ -78,18 +81,18 @@ class CategoryController extends Controller
 
         $topCategories = Category::topLevel()
             ->where('status', true)
-            ->withCount(['products' => fn($q) => $q->where('status', true)])
+            ->withCount(['products' => fn ($q) => $q->where('status', true)])
             ->with(['children' => function ($q) {
                 $q->where('status', true)
-                  ->withCount(['products' => fn($q2) => $q2->where('status', true)])
-                  ->with(['children' => function ($q2) {
-                      $q2->where('status', true)
-                         ->withCount(['products' => fn($q3) => $q3->where('status', true)]);
-                  }]);
+                    ->withCount(['products' => fn ($q2) => $q2->where('status', true)])
+                    ->with(['children' => function ($q2) {
+                        $q2->where('status', true)
+                            ->withCount(['products' => fn ($q3) => $q3->where('status', true)]);
+                    }]);
             }]);
 
         if ($search !== '') {
-            $topCategories->where(function($q) use ($search) {
+            $topCategories->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%");
             });
         }
@@ -108,6 +111,7 @@ class CategoryController extends Controller
                 ->latest()
                 ->take(3)
                 ->get();
+
             return $category;
         });
 
@@ -121,6 +125,7 @@ class CategoryController extends Controller
 
         return view('categories.index', compact('categories', 'page'));
     }
+
     // Create Form
     public function create()
     {
@@ -142,14 +147,14 @@ class CategoryController extends Controller
             'image_url' => 'nullable|url',
         ]);
 
-        $category = new Category();
+        $category = new Category;
         $category->name = $request->name;
-        $category->slug = \Illuminate\Support\Str::slug($request->name);
+        $category->slug = Str::slug($request->name);
         $category->parent_id = $request->filled('parent_id') ? $request->parent_id : null;
         $category->status = $request->boolean('status', true);
 
         if ($request->filled('image_from_manager')) {
-            $category->image = 'storage/' . ltrim($request->image_from_manager, '/');
+            $category->image = 'storage/'.ltrim($request->image_from_manager, '/');
         } elseif ($request->hasFile('image')) {
             $category->image = saveImageWithWebp($request->file('image'));
         } elseif ($request->filled('image_url')) {
@@ -161,14 +166,14 @@ class CategoryController extends Controller
                 }
                 $category->image = $filename;
             } catch (\Exception $e) {
-                return back()->withInput()->withErrors(['image_url' => 'An error occurred while downloading the image: ' . $e->getMessage()]);
+                return back()->withInput()->withErrors(['image_url' => 'An error occurred while downloading the image: '.$e->getMessage()]);
             }
         }
 
         $category->save();
 
         if ($request->filled('image_from_manager')) {
-            \App\Models\Image::markUsed($request->image_from_manager, $category);
+            Image::markUsed($request->image_from_manager, $category);
         }
 
         return redirect()->route('admin.categories.index')
@@ -203,12 +208,12 @@ class CategoryController extends Controller
 
         $category = Category::findOrFail($id);
         $category->name = $request->name;
-        $category->slug = \Illuminate\Support\Str::slug($request->name);
+        $category->slug = Str::slug($request->name);
         $category->parent_id = $request->filled('parent_id') ? $request->parent_id : null;
         $category->status = $request->boolean('status', true);
 
         if ($request->filled('image_from_manager')) {
-            $category->image = 'storage/' . ltrim($request->image_from_manager, '/');
+            $category->image = 'storage/'.ltrim($request->image_from_manager, '/');
         } elseif ($request->hasFile('image')) {
             $category->image = saveImageWithWebp($request->file('image'));
         } elseif ($request->filled('image_url')) {
@@ -220,14 +225,14 @@ class CategoryController extends Controller
                 }
                 $category->image = $filename;
             } catch (\Exception $e) {
-                return back()->withInput()->withErrors(['image_url' => 'An error occurred while downloading the image: ' . $e->getMessage()]);
+                return back()->withInput()->withErrors(['image_url' => 'An error occurred while downloading the image: '.$e->getMessage()]);
             }
         }
-        
+
         $category->save();
 
         if ($request->filled('image_from_manager')) {
-            \App\Models\Image::markUsed($request->image_from_manager, $category);
+            Image::markUsed($request->image_from_manager, $category);
         }
 
         return redirect()->route('admin.categories.index')

@@ -19,11 +19,11 @@ class CountriesStatesCitiesSeeder extends Seeder
         DB::statement('ALTER TABLE cities AUTO_INCREMENT = 1');
 
         // countries.csv — one name per line (order == country id)
-        $fh = fopen($dataDir . '/countries.csv', 'r');
+        $fh = fopen($dataDir.'/countries.csv', 'r');
         $countries = [];
         $chunk = [];
         while (($row = fgetcsv($fh)) !== false) {
-            if (!isset($row[0]) || trim($row[0]) === '') {
+            if (! isset($row[0]) || trim($row[0]) === '') {
                 continue;
             }
             $name = trim($row[0]);
@@ -40,18 +40,18 @@ class CountriesStatesCitiesSeeder extends Seeder
         fclose($fh);
 
         // states.csv — countryIndex,name (line order == state id)
-        $fh = fopen($dataDir . '/states.csv', 'r');
+        $fh = fopen($dataDir.'/states.csv', 'r');
         $stateKeyToId = [];
         $chunk = [];
         $stateId = 0;
         while (($row = fgetcsv($fh)) !== false) {
-            if (!isset($row[1]) || trim($row[1]) === '') {
+            if (! isset($row[1]) || trim($row[1]) === '') {
                 continue;
             }
             $countryIdx = (int) $row[0];
             $name = trim($row[1]);
             $stateId++;
-            $stateKeyToId[$countryIdx . '|' . $name] = $stateId;
+            $stateKeyToId[$countryIdx.'|'.$name] = $stateId;
             $chunk[] = ['country_id' => $countryIdx + 1, 'name' => $name, 'created_at' => now(), 'updated_at' => now()];
             if (count($chunk) >= 500) {
                 DB::table('states')->insert($chunk);
@@ -64,11 +64,11 @@ class CountriesStatesCitiesSeeder extends Seeder
         fclose($fh);
 
         // cities.csv — stateIndex,name
-        $fh = fopen($dataDir . '/cities.csv', 'r');
+        $fh = fopen($dataDir.'/cities.csv', 'r');
         $chunk = [];
         $inserted = 0;
         while (($row = fgetcsv($fh)) !== false) {
-            if (!isset($row[1]) || trim($row[1]) === '') {
+            if (! isset($row[1]) || trim($row[1]) === '') {
                 continue;
             }
             $stateIdx = (int) $row[0];
@@ -85,7 +85,7 @@ class CountriesStatesCitiesSeeder extends Seeder
         }
         fclose($fh);
 
-        $this->command->info('Countries/States/Cities seeded: ' . DB::table('countries')->count() . '/' .
-            DB::table('states')->count() . '/' . DB::table('cities')->count() . ' (' . $inserted . ' city rows read)');
+        $this->command->info('Countries/States/Cities seeded: '.DB::table('countries')->count().'/'.
+            DB::table('states')->count().'/'.DB::table('cities')->count().' ('.$inserted.' city rows read)');
     }
 }

@@ -15,8 +15,8 @@ class HomeTopBrandsTest extends TestCase
     {
         for ($i = 0; $i < 8; $i++) {
             Brand::create([
-                'name' => 'Brand ' . ($i + 1),
-                'slug' => 'brand-' . ($i + 1),
+                'name' => 'Brand '.($i + 1),
+                'slug' => 'brand-'.($i + 1),
                 'status' => true,
             ]);
         }

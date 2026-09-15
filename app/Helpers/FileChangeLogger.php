@@ -9,11 +9,11 @@ class FileChangeLogger
         $date = now()->format('Y-m-d');
         $directory = storage_path('logs/file-changes');
 
-        if (!is_dir($directory)) {
+        if (! is_dir($directory)) {
             mkdir($directory, 0755, true);
         }
 
-        $filePath = $directory . DIRECTORY_SEPARATOR . $date . '.log';
+        $filePath = $directory.DIRECTORY_SEPARATOR.$date.'.log';
         $entry = [
             'timestamp' => now()->toIso8601String(),
             'event' => $event,
@@ -21,7 +21,7 @@ class FileChangeLogger
             'details' => $details,
         ];
 
-        $line = json_encode($entry, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . PHP_EOL;
+        $line = json_encode($entry, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE).PHP_EOL;
 
         file_put_contents($filePath, $line, FILE_APPEND | LOCK_EX);
     }

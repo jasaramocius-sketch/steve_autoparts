@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Product;
-use App\Models\Category;
 use App\Models\Brand;
+use App\Models\Category;
+use App\Models\Page;
+use App\Models\Product;
 use App\Models\Vehicle;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class ShopController extends Controller
 {
@@ -24,30 +24,30 @@ class ShopController extends Controller
         $model = $request->get('model', '');
 
         if ($search !== '') {
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
         $currency = session('currency', 'USD');
-        $rate = config('currencies.' . $currency . '.rate', 1);
+        $rate = config('currencies.'.$currency.'.rate', 1);
 
         if ($applyPriceFilter) {
             if ($minPrice !== '') {
-                $query->where('price', '>=', (float)$minPrice / $rate);
+                $query->where('price', '>=', (float) $minPrice / $rate);
             }
 
             if ($maxPrice !== '') {
                 // Add 0.999999 to cover decimal prices up to the selected max integer (e.g. max_price = 4 covers 4.42)
-                $effectiveMax = (float)$maxPrice + 0.999999;
+                $effectiveMax = (float) $maxPrice + 0.999999;
                 $query->where('price', '<=', $effectiveMax / $rate);
             }
         }
 
         if ($brand !== '') {
             if (is_numeric($brand)) {
-                $query->where('brand_id', (int)$brand);
+                $query->where('brand_id', (int) $brand);
             } else {
                 $brandModel = Brand::where('slug', $brand)->first();
                 if ($brandModel) {
@@ -94,14 +94,14 @@ class ShopController extends Controller
             if ($selectedVehicleId) {
                 $selectedVehicle = Vehicle::where('user_id', Auth::id())->where('id', $selectedVehicleId)->first();
             }
-            if (!$selectedVehicle && $autoFirst) {
+            if (! $selectedVehicle && $autoFirst) {
                 $selectedVehicle = Vehicle::where('user_id', Auth::id())->first();
             }
         }
 
         $hasVehicleFilters = $request->filled('year') || $request->filled('make') || $request->filled('model');
 
-        if ($selectedVehicle && !$hasVehicleFilters && !$vehicleFilterCleared) {
+        if ($selectedVehicle && ! $hasVehicleFilters && ! $vehicleFilterCleared) {
             $request->merge([
                 'year' => $selectedVehicle->year,
                 'make' => $selectedVehicle->make,
@@ -164,7 +164,7 @@ class ShopController extends Controller
                 ->get(),
             'maxProductPrice' => (clone $priceScopedQuery)->max('price') ?? 1000,
             'minProductPrice' => (clone $priceScopedQuery)->min('price') ?? 0,
-            'currencySymbol' => config('currencies.' . $currency . '.symbol', '$'),
+            'currencySymbol' => config('currencies.'.$currency.'.symbol', '$'),
         ];
     }
 
@@ -176,6 +176,7 @@ class ShopController extends Controller
             $total += $this->computeCategoryTotals($child, $productCounts);
         }
         $category->descendant_count = $total;
+
         return $total;
     }
 
@@ -194,7 +195,7 @@ class ShopController extends Controller
             $vehicleData,
             compact('products'),
             $this->getSharedData($baseQuery),
-            ['page' => \App\Models\Page::where('slug', 'shop')->where('status', true)->first()]
+            ['page' => Page::where('slug', 'shop')->where('status', true)->first()]
         ));
     }
 
@@ -211,7 +212,7 @@ class ShopController extends Controller
         }
         unset($query['year'], $query['make'], $query['model'], $query['page']);
 
-        return redirect($path . (!empty($query) ? '?' . http_build_query($query) : ''));
+        return redirect($path.(! empty($query) ? '?'.http_build_query($query) : ''));
     }
 
     public function customerProducts(Request $request)
@@ -322,7 +323,7 @@ class ShopController extends Controller
             if ($selectedVehicleId) {
                 $userVehicle = Vehicle::where('user_id', Auth::id())->where('id', $selectedVehicleId)->first();
             }
-            if (!$userVehicle) {
+            if (! $userVehicle) {
                 $userVehicle = Vehicle::where('user_id', Auth::id())->first();
             }
             if ($userVehicle && $product->year && $product->make && $product->model) {

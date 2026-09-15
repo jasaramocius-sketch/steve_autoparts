@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         // Create categories table
@@ -28,10 +29,16 @@ return new class extends Migration {
 
         // Drop old string columns
         $dropCols = [];
-        if (Schema::hasColumn('products', 'category')) $dropCols[] = 'category';
-        if (Schema::hasColumn('products', 'subcategory')) $dropCols[] = 'subcategory';
-        if (Schema::hasColumn('products', 'childcategory')) $dropCols[] = 'childcategory';
-        if (!empty($dropCols)) {
+        if (Schema::hasColumn('products', 'category')) {
+            $dropCols[] = 'category';
+        }
+        if (Schema::hasColumn('products', 'subcategory')) {
+            $dropCols[] = 'subcategory';
+        }
+        if (Schema::hasColumn('products', 'childcategory')) {
+            $dropCols[] = 'childcategory';
+        }
+        if (! empty($dropCols)) {
             Schema::table('products', function (Blueprint $table) use ($dropCols) {
                 $table->dropColumn($dropCols);
             });

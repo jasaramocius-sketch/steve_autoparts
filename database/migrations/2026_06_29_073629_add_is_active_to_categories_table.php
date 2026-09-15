@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasColumn('categories', 'status')) {
+        if (! Schema::hasColumn('categories', 'status')) {
             Schema::table('categories', function (Blueprint $table) {
                 $table->boolean('status')->default(true)->after('image');
             });

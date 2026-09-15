@@ -3,17 +3,16 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Traits\Revisable;
+use App\Traits\TracksIsDeleted;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Traits\TracksIsDeleted;
-use App\Traits\Revisable;
 
 #[Fillable([
     'name', 'email', 'password', 'role', 'user_type',
@@ -27,7 +26,7 @@ use App\Traits\Revisable;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, SoftDeletes, TracksIsDeleted, Revisable;
+    use HasFactory, Notifiable, Revisable, SoftDeletes, TracksIsDeleted;
 
     protected function casts(): array
     {

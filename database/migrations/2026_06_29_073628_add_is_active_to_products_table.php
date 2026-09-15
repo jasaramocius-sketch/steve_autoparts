@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasColumn('products', 'status')) {
+        if (! Schema::hasColumn('products', 'status')) {
             Schema::table('products', function (Blueprint $table) {
                 $table->boolean('status')->default(true)->after('stock');
             });

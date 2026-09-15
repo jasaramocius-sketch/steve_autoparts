@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Revision extends Model
 {
     use SoftDeletes;
+
     protected $fillable = [
         'user_id',
         'model_type',
@@ -45,6 +46,7 @@ class Revision extends Model
 
         try {
             $record = $this->model_type::withoutGlobalScopes()->find($this->model_id);
+
             return $record ? ($record->title ?? $record->name ?? null) : null;
         } catch (\Throwable $e) {
             return null;

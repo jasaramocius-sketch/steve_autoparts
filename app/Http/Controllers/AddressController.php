@@ -10,18 +10,19 @@ class AddressController extends Controller
     public function index()
     {
         $addresses = auth()->user()->addresses()->latest()->get();
+
         return response()->json(['addresses' => $addresses]);
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'phone'     => 'required|string|max:20|regex:/^[0-9+\-\s()]+$/',
-            'address'   => 'required|string|max:500',
-            'city'      => 'required|string|max:100',
-            'state'     => 'nullable|string|max:100',
-            'country'   => 'required|string|max:100',
-            'zip_code'  => 'required|string|max:20|regex:/^[0-9a-zA-Z\-\s]+$/',
+            'phone' => 'required|string|max:20|regex:/^[0-9+\-\s()]+$/',
+            'address' => 'required|string|max:500',
+            'city' => 'required|string|max:100',
+            'state' => 'nullable|string|max:100',
+            'country' => 'required|string|max:100',
+            'zip_code' => 'required|string|max:20|regex:/^[0-9a-zA-Z\-\s]+$/',
         ]);
 
         $user = auth()->user();
@@ -54,6 +55,7 @@ class AddressController extends Controller
         if ($address->user_id !== auth()->id()) {
             abort(403);
         }
+
         return response()->json($address);
     }
 
@@ -64,12 +66,12 @@ class AddressController extends Controller
         }
 
         $request->validate([
-            'phone'     => 'required|string|max:20|regex:/^[0-9+\-\s()]+$/',
-            'address'   => 'required|string|max:500',
-            'city'      => 'required|string|max:100',
-            'state'     => 'nullable|string|max:100',
-            'country'   => 'required|string|max:100',
-            'zip_code'  => 'required|string|max:20|regex:/^[0-9a-zA-Z\-\s]+$/',
+            'phone' => 'required|string|max:20|regex:/^[0-9+\-\s()]+$/',
+            'address' => 'required|string|max:500',
+            'city' => 'required|string|max:100',
+            'state' => 'nullable|string|max:100',
+            'country' => 'required|string|max:100',
+            'zip_code' => 'required|string|max:20|regex:/^[0-9a-zA-Z\-\s]+$/',
         ]);
 
         $data = $request->only([
@@ -119,6 +121,7 @@ class AddressController extends Controller
         $user = auth()->user();
         $user->addresses()->where('id', '!=', $address->id)->update(['set_default' => false]);
         $address->update(['set_default' => true]);
+
         return back()->with('success', 'Default address updated!');
     }
 }

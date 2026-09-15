@@ -13,7 +13,7 @@ class BlogCategoryController extends Controller
     {
         $sortBy = in_array($request->sort_by, ['id', 'name', 'slug', 'status', 'created_at']) ? $request->sort_by : 'created_at';
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
-        $perPage = in_array((int)$request->per_page, [10, 20, 50, 100]) ? (int)$request->per_page : 10;
+        $perPage = in_array((int) $request->per_page, [10, 20, 50, 100]) ? (int) $request->per_page : 10;
 
         $query = BlogCategory::withCount('blogs')->with('parent');
         if ($search = $request->query('search')) {
@@ -31,6 +31,7 @@ class BlogCategoryController extends Controller
     public function restore($id)
     {
         BlogCategory::onlyTrashed()->findOrFail($id)->restore();
+
         return redirect()->route('admin.blog-categories.index')->with('success', 'Blog category restored successfully.');
     }
 
@@ -39,12 +40,14 @@ class BlogCategoryController extends Controller
         $category = BlogCategory::onlyTrashed()->findOrFail($id);
         BlogCategory::where('parent_id', $id)->update(['parent_id' => null]);
         $category->forceDelete();
+
         return redirect()->route('admin.blog-categories.index')->with('success', 'Blog category permanently deleted.');
     }
 
     public function create()
     {
         $parents = BlogCategory::whereNull('parent_id')->where('status', 'active')->get();
+
         return view('admin.blog-categories.create', compact('parents'));
     }
 
@@ -57,7 +60,7 @@ class BlogCategoryController extends Controller
         ]);
 
         $data = $request->only(['name', 'status', 'parent_id']);
-        $data['slug'] = Str::slug($request->name) . '-' . time();
+        $data['slug'] = Str::slug($request->name).'-'.time();
 
         BlogCategory::create($data);
 
@@ -70,6 +73,7 @@ class BlogCategoryController extends Controller
         $parents = BlogCategory::whereNull('parent_id')->where('status', 'active')
             ->where('id', '!=', $id)
             ->get();
+
         return view('admin.blog-categories.edit', compact('category', 'parents'));
     }
 
@@ -84,7 +88,7 @@ class BlogCategoryController extends Controller
         ]);
 
         $data = $request->only(['name', 'status', 'parent_id']);
-        $data['slug'] = Str::slug($request->name) . '-' . time();
+        $data['slug'] = Str::slug($request->name).'-'.time();
 
         $category->update($data);
 
@@ -96,6 +100,7 @@ class BlogCategoryController extends Controller
         $category = BlogCategory::findOrFail($id);
         BlogCategory::where('parent_id', $id)->update(['parent_id' => null]);
         $category->delete();
+
         return redirect()->route('admin.blog-categories.index')->with('success', 'Blog category deleted successfully.');
     }
 }

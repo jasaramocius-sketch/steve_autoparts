@@ -1,5 +1,12 @@
 <?php
 
+use App\Http\Middleware\AdminMiddleware;
+use App\Http\Middleware\LogSiteChange;
+use App\Http\Middleware\NoCache;
+use App\Http\Middleware\RoleMiddleware;
+use App\Http\Middleware\SetLocale;
+use App\Http\Middleware\SetPageAttributes;
+use App\Http\Middleware\StaffMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -13,17 +20,17 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->append([
-            \App\Http\Middleware\LogSiteChange::class,
+            LogSiteChange::class,
         ]);
         $middleware->web(append: [
-            \App\Http\Middleware\SetLocale::class,
-            \App\Http\Middleware\SetPageAttributes::class,
+            SetLocale::class,
+            SetPageAttributes::class,
         ]);
         $middleware->alias([
-            'admin' => \App\Http\Middleware\AdminMiddleware::class,
-            'staff' => \App\Http\Middleware\StaffMiddleware::class,
-            'role' => \App\Http\Middleware\RoleMiddleware::class,
-            'nocache' => \App\Http\Middleware\NoCache::class,
+            'admin' => AdminMiddleware::class,
+            'staff' => StaffMiddleware::class,
+            'role' => RoleMiddleware::class,
+            'nocache' => NoCache::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
@@ -31,4 +38,3 @@ return Application::configure(basePath: dirname(__DIR__))
             fn (Request $request) => $request->is('api/*') || $request->ajax(),
         );
     })->create();
-    

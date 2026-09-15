@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use App\Traits\Revisable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Traits\Revisable;
 
 class HomePageSection extends Model
 {
@@ -54,6 +54,7 @@ class HomePageSection extends Model
         if (! $dealImage) {
             return null;
         }
+
         return storedImageUrl($dealImage, 'assets/images/home');
     }
 
@@ -63,6 +64,7 @@ class HomePageSection extends Model
         if (! $path) {
             return '';
         }
+
         return "style=\"background-image: url('{$path}'); background-size: cover; background-position: center;\"";
     }
 }

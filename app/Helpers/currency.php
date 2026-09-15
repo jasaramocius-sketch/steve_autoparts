@@ -1,8 +1,6 @@
 <?php
 
-use Illuminate\Support\Facades\Blade;
-
-if (!function_exists('currency_format')) {
+if (! function_exists('currency_format')) {
     function currency_format($amount, ?string $currency = null): string
     {
         $currency = $currency ?? session('currency', 'USD');
@@ -11,6 +9,6 @@ if (!function_exists('currency_format')) {
 
         $converted = ($amount ?? 0) * $info['rate'];
 
-        return $info['symbol'] . number_format($converted, 2);
+        return $info['symbol'].number_format($converted, 2);
     }
 }

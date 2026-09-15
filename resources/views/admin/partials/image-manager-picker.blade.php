@@ -69,6 +69,7 @@
           </div>
           <small class="text-muted">Uploading...</small>
         </div>
+        <div id="impUploadError_{{ $pickerId }}" class="alert alert-danger py-2 small d-none mb-2"></div>
 
         <!-- Image Grid -->
         <div id="impGrid_{{ $pickerId }}" class="imp-grid"></div>
@@ -356,13 +357,24 @@
             formData.append('images[]', files[i]);
         }
         var progress = document.getElementById('impUploadProgress_' + pid);
+        var errorEl = document.getElementById('impUploadError_' + pid);
+        errorEl.classList.add('d-none');
         progress.classList.remove('d-none');
         fetch(uploadUrl, {
             method: 'POST',
             headers: { 'X-CSRF-TOKEN': csrfToken, 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
             body: formData
         })
-        .then(function(r) { return r.json(); })
+        .then(function(r) {
+            var ct = r.headers.get('content-type') || '';
+            if (ct.indexOf('text/html') !== -1 && !r.ok) {
+                throw new Error('Session expired — page refresh karke dobara login karein.');
+            }
+            return r.json().then(function(d) {
+                if (!r.ok) throw { status: r.status, data: d };
+                return d;
+            });
+        })
         .then(function(res) {
             progress.classList.add('d-none');
             if (res.success && res.images && res.images.length > 0) {
@@ -376,13 +388,30 @@
                     updateSelectBtn();
                 }
                 loadImages();
+            } else {
+                var msg = (res && res.message) || 'Upload failed.';
+                if (res && res.errors) {
+                    var errs = res.errors;
+                    var first = typeof errs === 'object' ? errs[Object.keys(errs)[0]] : errs;
+                    if (Array.isArray(first)) first = first[0];
+                    if (first) msg = first;
+                }
+                errorEl.textContent = msg;
+                errorEl.classList.remove('d-none');
             }
             e.target.value = '';
         })
-        .catch(function() {
+        .catch(function(err) {
             progress.classList.add('d-none');
             e.target.value = '';
-            alert('Upload failed. Please try again.');
+            var msg = 'Upload failed — please try again.';
+            if (err && err.data && err.data.message) {
+                msg = err.data.message;
+            } else if (err && err.message) {
+                msg = err.message;
+            }
+            errorEl.textContent = msg;
+            errorEl.classList.remove('d-none');
         });
     });
 
@@ -409,7 +438,13 @@
             headers: { 'X-CSRF-TOKEN': csrfToken, 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
             body: formData
         })
-        .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+        .then(function(r) {
+            var ct = r.headers.get('content-type') || '';
+            if (ct.indexOf('text/html') !== -1 && !r.ok) {
+                throw new Error('Session expired — page refresh karke dobara login karein.');
+            }
+            return r.json().then(function(d) { return { ok: r.ok, data: d }; });
+        })
         .then(function(res) {
             btn.disabled = false;
             btn.innerHTML = originalHtml;
@@ -430,10 +465,13 @@
                 errorEl.classList.remove('d-none');
             }
         })
-        .catch(function() {
+        .catch(function(err) {
             btn.disabled = false;
             btn.innerHTML = originalHtml;
-            errorEl.textContent = 'Download failed. Please try again.';
+            var msg = 'Download failed — please try again.';
+            if (err && err.message) msg = err.message;
+            else if (err && err.data && err.data.message) msg = err.data.message;
+            errorEl.textContent = msg;
             errorEl.classList.remove('d-none');
         });
     };

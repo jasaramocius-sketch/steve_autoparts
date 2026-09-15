@@ -1,18 +1,20 @@
 <?php
+
 namespace App\Http\Controllers;
-use Illuminate\Http\Request;
+
+use App\Helpers\NotificationHelper;
+use App\Models\Compare;
 use App\Models\User;
 use App\Models\Wishlist;
-use App\Models\Compare;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    
     private function dashboardRoute()
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return null;
         }
 
@@ -67,6 +69,7 @@ class AuthController extends Controller
 
         return view('auth.login');
     }
+
     public function registerForm()
     {
         if ($route = $this->dashboardRoute()) {
@@ -83,7 +86,7 @@ class AuthController extends Controller
     {
         $credentials = $request->only('email', 'password');
 
-        if (!Auth::attempt($credentials, $request->boolean('remember'))) {
+        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
             return back()->withErrors(['email' => 'Invalid credentials']);
         }
 
@@ -110,16 +113,16 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|email|unique:users,email',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6|confirmed',
         ]);
 
         $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
+            'name' => $request->name,
+            'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role'     => 'customer',
+            'role' => 'customer',
         ]);
 
         Auth::login($user);
@@ -132,7 +135,7 @@ class AuthController extends Controller
 
         $this->mergeGuestData();
 
-        \App\Helpers\NotificationHelper::welcomeUser($user);
+        NotificationHelper::welcomeUser($user);
 
         return redirect()->route('user.dashboard')->with('success', 'Account created successfully!');
     }
@@ -147,6 +150,7 @@ class AuthController extends Controller
 
         return redirect('/login');
     }
+
     public function showLogin()
     {
         if ($route = $this->dashboardRoute()) {
@@ -155,5 +159,4 @@ class AuthController extends Controller
 
         return view('auth.login');
     }
-
 }

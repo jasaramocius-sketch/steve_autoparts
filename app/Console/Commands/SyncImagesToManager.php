@@ -2,18 +2,19 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Product;
-use App\Models\Category;
 use App\Models\Blog;
 use App\Models\Brand;
+use App\Models\Category;
 use App\Models\HomePageSection;
 use App\Models\Image;
+use App\Models\Product;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 
 class SyncImagesToManager extends Command
 {
     protected $signature = 'images:sync {--dry-run : Show what would be done without inserting}';
+
     protected $description = 'Scan all image directories and sync into the images table';
 
     protected array $sources = [
@@ -32,9 +33,10 @@ class SyncImagesToManager extends Command
         $skipped = 0;
 
         foreach ($this->sources as $source) {
-            $dir = $publicPath . '/' . $source['dir'];
-            if (!is_dir($dir)) {
+            $dir = $publicPath.'/'.$source['dir'];
+            if (! is_dir($dir)) {
                 $this->warn("Directory not found: {$dir}");
+
                 continue;
             }
 
@@ -45,7 +47,7 @@ class SyncImagesToManager extends Command
                 $filename = $file->getFilename();
                 $ext = strtolower($file->getExtension());
 
-                if (!in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'])) {
+                if (! in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'])) {
                     continue;
                 }
 
@@ -53,23 +55,25 @@ class SyncImagesToManager extends Command
                 if ($existing) {
                     $this->comment("SKIP (already exists): {$filename}");
                     $skipped++;
+
                     continue;
                 }
 
                 $parent = $source['model']::where($source['column'], $filename)->first();
 
                 if ($dryRun) {
-                    $this->line("  WOULD INSERT: {$filename} → " . ($parent ? get_class($parent) . ' #' . $parent->id : 'UNUSED'));
+                    $this->line("  WOULD INSERT: {$filename} → ".($parent ? get_class($parent).' #'.$parent->id : 'UNUSED'));
                     $inserted++;
+
                     continue;
                 }
 
-                $image = new Image();
+                $image = new Image;
                 $image->original_name = $filename;
                 $image->filename = $filename;
-                $image->path = 'assets/images/' . $source['dir'] . '/' . $filename;
-                $image->url = 'assets/images/' . $source['dir'] . '/' . $filename;
-                $image->mime_type = mime_content_type($file->getPathname()) ?: 'image/' . $ext;
+                $image->path = 'assets/images/'.$source['dir'].'/'.$filename;
+                $image->url = 'assets/images/'.$source['dir'].'/'.$filename;
+                $image->mime_type = mime_content_type($file->getPathname()) ?: 'image/'.$ext;
                 $image->size = $file->getSize();
                 $image->alt_text = null;
                 $image->title = null;
@@ -89,7 +93,7 @@ class SyncImagesToManager extends Command
                 }
 
                 $image->save();
-                $this->line("  INSERTED: {$filename} → " . ($parent ? get_class($parent) . ' #' . $parent->id : 'UNUSED'));
+                $this->line("  INSERTED: {$filename} → ".($parent ? get_class($parent).' #'.$parent->id : 'UNUSED'));
                 $inserted++;
             }
         }

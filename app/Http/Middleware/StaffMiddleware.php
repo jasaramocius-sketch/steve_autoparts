@@ -14,15 +14,15 @@ class StaffMiddleware
      * @param  Closure(Request): (Response)  $next
      */
     public function handle($request, Closure $next)
-{
-if (
-!session('user_logged_in') ||
-!in_array(session('user_profile.role'), ['master_admin','admin','staff'])
-) {
-return redirect()->route('login');
-}
+    {
+        if (
+            ! session('user_logged_in') ||
+            ! in_array(session('user_profile.role'), ['master_admin', 'admin', 'staff'])
+        ) {
+            return redirect()->route('login');
+        }
 
-return $next($request);
+        return $next($request);
 
-}
+    }
 }

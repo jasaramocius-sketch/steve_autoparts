@@ -2,13 +2,16 @@
 
 namespace App\Helpers;
 
+use App\Models\Country;
+use Illuminate\Support\Facades\Cache;
+
 class AddressHelper
 {
     public static function countries(): array
     {
         try {
-            $names = \Illuminate\Support\Facades\Cache::rememberForever('address_countries', function () {
-                return \App\Models\Country::query()->orderBy('name')->pluck('name')->all();
+            $names = Cache::rememberForever('address_countries', function () {
+                return Country::query()->orderBy('name')->pluck('name')->all();
             });
             if (is_array($names) && count($names)) {
                 return $names;

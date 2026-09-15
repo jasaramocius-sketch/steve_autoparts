@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Blog;
-use App\Models\Category;
-use App\Models\Product;
 use App\Models\Brand;
+use App\Models\Category;
 use App\Models\Faq;
 use App\Models\HomePageSection;
 use App\Models\Page;
+use App\Models\Product;
 
 class HomeController extends Controller
 {
@@ -35,8 +34,8 @@ class HomeController extends Controller
 
         $query = Category::whereNull('parent_id')->where('status', true);
 
-        if (!empty($selectedIds)) {
-            $query->whereIn('id', $selectedIds)->orderByRaw('FIELD(id, ' . implode(',', $selectedIds) . ')');
+        if (! empty($selectedIds)) {
+            $query->whereIn('id', $selectedIds)->orderByRaw('FIELD(id, '.implode(',', $selectedIds).')');
         } else {
             $query->orderBy('name');
         }
@@ -44,6 +43,7 @@ class HomeController extends Controller
         return $query->get()
             ->map(function ($category) {
                 $categoryIds = $category->getAllDescendantIds();
+
                 return [
                     'name' => $category->name,
                     'slug' => $category->slug,
@@ -114,10 +114,10 @@ class HomeController extends Controller
 
         $offersSection = $sections->get('offers');
         $bannerData = $offersSection?->extra_data['banners'] ?? [];
-        if (!empty($bannerData)) {
-            $banners = collect($bannerData)->map(fn($b) => (object) $b);
+        if (! empty($bannerData)) {
+            $banners = collect($bannerData)->map(fn ($b) => (object) $b);
         } else {
-            $banners = $sections->filter(fn($s) => str_starts_with($s->section_name, 'banner_'))->values();
+            $banners = $sections->filter(fn ($s) => str_starts_with($s->section_name, 'banner_'))->values();
         }
 
         $bestSelling = Product::where('status', true)->where('added_by', 'admin')->where('product_type', 'best_selling')->latest()->take(8)->get();
@@ -134,14 +134,14 @@ class HomeController extends Controller
         $selectedPostIds = $latestPostSection?->extra_data['post_ids'] ?? [];
         $selectedPostIds = is_array($selectedPostIds) ? array_filter(array_map('intval', $selectedPostIds)) : [];
 
-        if (!empty($selectedPostIds)) {
-            $latestPosts = Blog::where('status', 'published')
+        if (! empty($selectedPostIds)) {
+            $latestPosts = Blog::accessible()
                 ->whereIn('id', $selectedPostIds)
-                ->orderByRaw('FIELD(id, ' . implode(',', $selectedPostIds) . ')')
+                ->orderByRaw('FIELD(id, '.implode(',', $selectedPostIds).')')
                 ->take($latestPostLimit)
                 ->get();
         } else {
-            $latestPosts = Blog::where('status', 'published')->latest()->take($latestPostLimit)->get();
+            $latestPosts = Blog::accessible()->latest()->take($latestPostLimit)->get();
         }
 
         $brandsSection = $sections->get('top_brands_heading');
@@ -153,12 +153,12 @@ class HomeController extends Controller
         $brandsQuery = Brand::where('status', true)
             ->orderBy('name');
 
-        if (!empty($selectedBrandIds) && is_array($selectedBrandIds)) {
+        if (! empty($selectedBrandIds) && is_array($selectedBrandIds)) {
             $selectedBrandIds = array_filter(array_map('intval', $selectedBrandIds));
-            if (!empty($selectedBrandIds)) {
+            if (! empty($selectedBrandIds)) {
                 $brandsQuery = Brand::whereIn('id', $selectedBrandIds)
                     ->where('status', true)
-                    ->orderByRaw('FIELD(id, ' . implode(',', $selectedBrandIds) . ')');
+                    ->orderByRaw('FIELD(id, '.implode(',', $selectedBrandIds).')');
             }
         } elseif ((int) $brandsLimit > 0) {
             $brandsQuery->take((int) $brandsLimit);
@@ -179,7 +179,7 @@ class HomeController extends Controller
             $oldKeys = ['new_arrival' => 'New Arrivals', 'trending' => 'Trending', 'best_selling' => 'Best Selling', 'popular' => 'Popular'];
             foreach ($oldKeys as $key => $label) {
                 $ids = $extra[$key] ?? [];
-                if (!empty($ids)) {
+                if (! empty($ids)) {
                     $tabs[] = ['label' => $label, 'product_ids' => $ids];
                 }
             }
@@ -187,17 +187,17 @@ class HomeController extends Controller
 
         $result = [];
         foreach ($tabs as $i => $tab) {
-            $label = $tab['label'] ?? ('Tab ' . ($i + 1));
+            $label = $tab['label'] ?? ('Tab '.($i + 1));
             $sectionKeys = [
-                'New Arrivals'  => 'new_arrival',
-                'Trending'      => 'trending',
-                'Best Selling'  => 'best_selling',
-                'Popular'       => 'popular',
+                'New Arrivals' => 'new_arrival',
+                'Trending' => 'trending',
+                'Best Selling' => 'best_selling',
+                'Popular' => 'popular',
             ];
             $sectionKey = $sectionKeys[$label] ?? null;
             $ids = $tab['product_ids'] ?? [];
 
-            if (!empty($ids)) {
+            if (! empty($ids)) {
                 $products = Product::where('status', true)->where('added_by', 'admin')
                     ->whereIn('id', $ids)
                     ->latest()
@@ -238,7 +238,7 @@ class HomeController extends Controller
     {
         $page = Page::where('slug', $slug)->first();
 
-        if ($page && !$page->status) {
+        if ($page && ! $page->status) {
             abort(404);
         }
 
@@ -251,13 +251,17 @@ class HomeController extends Controller
         if ($page) {
             return view('pages.show', compact('page'));
         }
+
         return view('pages.about');
     }
+
     public function contact()
     {
         $page = $this->pageOrAbort('contact');
+
         return view('pages.contact', compact('page'));
     }
+
     public function page($slug)
     {
         $canonicalRoute = config("page-builder.live_url_map.page.$slug");
@@ -266,20 +270,25 @@ class HomeController extends Controller
         }
 
         $page = Page::where('slug', $slug)->where('status', true)->firstOrFail();
+
         return view('pages.show', compact('page'));
     }
+
     public function faq()
     {
         $faqs = Faq::where('status', true)->orderBy('order')->get();
         $page = $this->pageOrAbort('faq');
+
         return view('pages.faq', compact('faqs') + ['page' => $page]);
     }
+
     public function privacy()
     {
         $page = $this->pageOrAbort('privacy-policy');
         if ($page) {
             return view('pages.show', compact('page'));
         }
+
         return view('pages.privacy');
     }
 
@@ -289,14 +298,17 @@ class HomeController extends Controller
         if ($page) {
             return view('pages.show', compact('page'));
         }
+
         return view('pages.terms');
     }
+
     public function returnPolicy()
     {
         $page = $this->pageOrAbort('return-policy');
         if ($page) {
             return view('pages.show', compact('page'));
         }
+
         return view('pages.return-policy');
     }
 
@@ -306,6 +318,7 @@ class HomeController extends Controller
         if ($page) {
             return view('pages.show', compact('page'));
         }
+
         return view('pages.support-policy');
     }
 }

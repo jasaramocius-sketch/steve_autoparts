@@ -80,11 +80,11 @@
 
           <!-- Popular Tags Widget -->
           @if($tags->count())
-          <div class="single-blog-widget">
+          <div class="single-blog-widget popular-tags">
             <h5 class="widget-title">Popular Tags</h5>
-            <ul class="tags-wrapper">
+            <ul class="cat-wrapper">
               @foreach($tags as $t)
-              <li><a href="{{ route('blog.tag', $t->slug) }}" class="{{ isset($tag) && $tag->id === $t->id ? 'active' : '' }}">{{ $t->name }} ({{ $t->blogs_count }})</a></li>
+              <a href="{{ route('blog.tag', $t->slug) }}" class="blog-page-cat-list {{ isset($tag) && $tag->id === $t->id ? 'active' : '' }}"><i class="fas fa-arrow-right ms-1"></i> {{ $t->name }} ({{ $t->blogs_count }})</a>
               @endforeach
             </ul>
           </div>
@@ -112,7 +112,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none">
                       <path d="M8 2V4M16 2V4M3 10.5H21M5 4H19C20.1046 4 21 4.89543 21 6V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V6C3 4.89543 3.89543 4 5 4Z" stroke="#4c3533" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                    {{ $post->created_at->format('M d - Y') }}
+                    {{ $post->post_date->format('M d - Y') }}
                   </span>
                 </div>
               </a>
@@ -134,6 +134,11 @@
             </a>
           </div>
           <div class="right-side-content">
+            @if($blog->category)
+            <a href="{{ route('blog.category', $blog->category->slug) }}" class="blog-card-category">
+              <i class="fas fa-folder me-1"></i> {{ $blog->category->name }}
+            </a>
+            @endif
             <h4>
               <a class="title" href="{{ route('blog.show', $blog->slug) }}">
                 {{ Str::limit($blog->title, 70) }}
@@ -146,7 +151,7 @@
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <path d="M8 2V4M16 2V4M3 10.5H21M5 4H19C20.1046 4 21 4.89543 21 6V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V6C3 4.89543 3.89543 4 5 4Z" stroke="#292D32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
-              <span class="date-text">{{ $blog->created_at->format('M d - Y') }}</span>
+              <span class="date-text">{{ $blog->post_date->format('M d - Y') }}</span>
             </div>
             @if($blog->tags->count())
             <div class="blog-card-tags">

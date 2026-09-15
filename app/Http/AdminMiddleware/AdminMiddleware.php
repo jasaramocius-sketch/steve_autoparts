@@ -3,7 +3,6 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Illuminate\Support\Facades\Session;
 
 class AdminMiddleware
 {
@@ -14,6 +13,7 @@ class AdminMiddleware
             return redirect()->route('user.dashboard')
                 ->with('error', 'You are not authorized to access the admin area.');
         }
+
         return $next($request);
     }
 }

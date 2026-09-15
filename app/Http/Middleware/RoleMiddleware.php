@@ -12,12 +12,12 @@ class RoleMiddleware
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
         // not logged in
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return redirect()->route('login');
         }
 
         // logged in but wrong role
-        if (!in_array($role = Auth::user()->role, $roles)) {
+        if (! in_array($role = Auth::user()->role, $roles)) {
 
             if (in_array($role, ['master_admin', 'admin', 'staff'])) {
                 return redirect()->route('admin.dashboard');

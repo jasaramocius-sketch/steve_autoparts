@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasColumn('addresses', 'set_default')) {
+        if (! Schema::hasColumn('addresses', 'set_default')) {
             Schema::table('addresses', function (Blueprint $table) {
                 $table->boolean('set_default')->default(false)->after('zip_code');
             });

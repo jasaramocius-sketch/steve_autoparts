@@ -8,6 +8,7 @@ use App\Models\BlogCategory;
 use App\Models\Image;
 use App\Models\Tag;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 class BlogController extends Controller
@@ -48,7 +49,7 @@ class BlogController extends Controller
 
     public function create()
     {
-        $blogCategories = BlogCategory::with('children')
+        $blogCategories = BlogCategory::with(['children' => fn ($q) => $q->where('status', 'active')])
             ->whereNull('parent_id')
             ->where('status', 'active')
             ->get();
@@ -62,13 +63,27 @@ class BlogController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'details' => 'nullable|string',
-            'status' => 'required|in:published,draft',
+            'status' => 'required|in:published,draft,scheduled',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'image_url' => 'nullable|url',
             'blog_category_id' => 'nullable|exists:blog_categories,id',
-        ]);
+            'new_category' => 'nullable|string|max:255',
+            'new_category_parent_id' => 'nullable|exists:blog_categories,id',
+            'published_at' => 'required_if:status,scheduled|nullable|date',
+        ],
+            [
+                'published_at.required_if' => 'Post Date is required when status is Scheduled.',
+            ]);
 
-        $data = $request->only(['title', 'details', 'status', 'blog_category_id']);
+        $data = $request->only(['title', 'details', 'status']);
+        $data['blog_category_id'] = $this->resolveCategory($request);
+        $data['published_at'] = $request->filled('published_at')
+            ? Carbon::parse($request->input('published_at'))->format('Y-m-d H:i:s')
+            : null;
+
+        if ($data['published_at'] && Carbon::parse($data['published_at'])->isFuture()) {
+            $data['status'] = 'scheduled';
+        }
         $slug = Str::slug($request->title);
         $counter = 1;
         while (Blog::where('slug', $slug)->exists()) {
@@ -107,7 +122,7 @@ class BlogController extends Controller
     public function edit($id)
     {
         $blog = Blog::findOrFail($id);
-        $blogCategories = BlogCategory::with('children')
+        $blogCategories = BlogCategory::with(['children' => fn ($q) => $q->where('status', 'active')])
             ->whereNull('parent_id')
             ->where('status', 'active')
             ->get();
@@ -124,13 +139,27 @@ class BlogController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'details' => 'nullable|string',
-            'status' => 'required|in:published,draft',
+            'status' => 'required|in:published,draft,scheduled',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'image_url' => 'nullable|url',
             'blog_category_id' => 'nullable|exists:blog_categories,id',
-        ]);
+            'new_category' => 'nullable|string|max:255',
+            'new_category_parent_id' => 'nullable|exists:blog_categories,id',
+            'published_at' => 'required_if:status,scheduled|nullable|date',
+        ],
+            [
+                'published_at.required_if' => 'Post Date is required when status is Scheduled.',
+            ]);
 
-        $data = $request->only(['title', 'details', 'status', 'blog_category_id']);
+        $data = $request->only(['title', 'details', 'status']);
+        $data['blog_category_id'] = $this->resolveCategory($request);
+        $data['published_at'] = $request->filled('published_at')
+            ? Carbon::parse($request->input('published_at'))->format('Y-m-d H:i:s')
+            : null;
+
+        if ($data['published_at'] && Carbon::parse($data['published_at'])->isFuture()) {
+            $data['status'] = 'scheduled';
+        }
 
         if ($request->filled('image_from_manager')) {
             $data['image'] = 'storage/'.ltrim($request->image_from_manager, '/');
@@ -160,6 +189,29 @@ class BlogController extends Controller
         return redirect()->route('admin.blogs.index')->with('success', 'Blog updated successfully.');
     }
 
+    /**
+     * Resolve the selected category for a blog. When a new category name is
+     * provided alongside the form, it is created on the fly (active) and used
+     * instead of the dropdown selection.
+     */
+    protected function resolveCategory(Request $request): ?int
+    {
+        if ($request->filled('new_category')) {
+            $category = BlogCategory::create([
+                'name' => $request->input('new_category'),
+                'slug' => Str::slug((string) $request->input('new_category')).'-'.time(),
+                'status' => 'active',
+                'parent_id' => $request->filled('new_category_parent_id')
+                    ? (int) $request->input('new_category_parent_id')
+                    : null,
+            ]);
+
+            return $category->id;
+        }
+
+        return $request->filled('blog_category_id') ? (int) $request->input('blog_category_id') : null;
+    }
+
     protected function syncTags(Request $request, Blog $blog)
     {
         $names = collect(explode(',', (string) $request->input('tags')))
@@ -183,10 +235,17 @@ class BlogController extends Controller
     public function toggleStatus($id)
     {
         $blog = Blog::findOrFail($id);
-        $blog->status = $blog->status === 'published' ? 'draft' : 'published';
+        $blog->status = match ($blog->status) {
+            'published' => 'draft',
+            'draft' => 'published',
+            'scheduled' => 'published',
+        };
+        if ($blog->status === 'published' && $blog->getOriginal('status') === 'scheduled') {
+            $blog->published_at = now();
+        }
         $blog->save();
 
-        return back()->with('success', 'Blog status updated successfully.');
+        return redirect()->route('admin.blogs.index')->with('success', 'Blog status updated successfully.');
     }
 
     public function destroy($id)

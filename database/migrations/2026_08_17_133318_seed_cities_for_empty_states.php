@@ -89,16 +89,20 @@ return new class extends Migration
 
         foreach ($states as $state) {
             $cityCount = DB::table('cities')->where('state_id', $state->id)->count();
-            if ($cityCount > 0) continue;
+            if ($cityCount > 0) {
+                continue;
+            }
 
             $cities = $this->getCitiesForState($state->country_name, $state->state_name);
 
             foreach ($cities as $city) {
                 $city = trim($city);
-                if ($city === '') continue;
+                if ($city === '') {
+                    continue;
+                }
                 $inserts[] = [
-                    'state_id'   => $state->id,
-                    'name'       => $city,
+                    'state_id' => $state->id,
+                    'name' => $city,
                     'created_at' => $now,
                     'updated_at' => $now,
                 ];

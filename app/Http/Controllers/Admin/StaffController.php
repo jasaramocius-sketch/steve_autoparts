@@ -12,7 +12,7 @@ class StaffController extends Controller
     {
         $sortBy = in_array($request->sort_by, ['id', 'name', 'email', 'role', 'created_at']) ? $request->sort_by : 'created_at';
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
-        $perPage = in_array((int)$request->per_page, [10, 20, 50, 100]) ? (int)$request->per_page : 10;
+        $perPage = in_array((int) $request->per_page, [10, 20, 50, 100]) ? (int) $request->per_page : 10;
 
         if ($request->has('trashed')) {
             $staffs = Staff::onlyTrashed()->orderBy($sortBy, $sortDir)->paginate($perPage);
@@ -29,6 +29,7 @@ class StaffController extends Controller
     public function restore($id)
     {
         Staff::onlyTrashed()->findOrFail($id)->restore();
+
         return redirect()->route('admin.staff.index')->with('success', 'Staff restored successfully.');
     }
 
@@ -36,6 +37,7 @@ class StaffController extends Controller
     {
         $staff = Staff::onlyTrashed()->findOrFail($id);
         $staff->forceDelete();
+
         return redirect()->route('admin.staff.index')->with('success', 'Staff permanently deleted.');
     }
 }

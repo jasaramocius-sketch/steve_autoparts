@@ -2,15 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Model; 
-use Illuminate\Support\Str;
-use App\Traits\TracksIsDeleted;
 use App\Traits\Revisable;
+use App\Traits\TracksIsDeleted;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 class Category extends Model
 {
-    use SoftDeletes, TracksIsDeleted, Revisable;
+    use Revisable, SoftDeletes, TracksIsDeleted;
 
     protected $fillable = [
         'name',
@@ -31,7 +31,6 @@ class Category extends Model
         'is_deleted' => false,
     ];
 
-
     public function parent()
     {
         return $this->belongsTo(Category::class, 'parent_id');
@@ -49,7 +48,7 @@ class Category extends Model
 
     public function products()
     {
-        return $this->hasMany(\App\Models\Product::class, 'category_id');
+        return $this->hasMany(Product::class, 'category_id');
     }
 
     public function getAllDescendantIds(): array
@@ -58,6 +57,7 @@ class Category extends Model
         foreach ($this->children as $child) {
             $ids = array_merge($ids, $child->getAllDescendantIds());
         }
+
         return $ids;
     }
 
@@ -76,7 +76,7 @@ class Category extends Model
         $storedImage = trim((string) $this->image);
         if ($storedImage !== '') {
             $candidate = storedPath($storedImage, 'assets/images/categories');
-            $checkPath = str_starts_with($candidate, 'uploads/') ? 'storage/' . $candidate : $candidate;
+            $checkPath = str_starts_with($candidate, 'uploads/') ? 'storage/'.$candidate : $candidate;
             if (file_exists(public_path($checkPath))) {
                 return $candidate;
             }
@@ -95,7 +95,7 @@ class Category extends Model
         $slug = Str::slug((string) ($this->slug ?: $this->name));
         $fallback = $fallbacks[$slug] ?? null;
         if ($fallback) {
-            $candidate = 'assets/images/categories/' . $fallback;
+            $candidate = 'assets/images/categories/'.$fallback;
             if (file_exists(public_path($candidate))) {
                 return $candidate;
             }
@@ -121,6 +121,7 @@ class Category extends Model
                 $count += $child->total_products_count;
             }
         }
+
         return $count;
     }
 }

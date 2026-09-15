@@ -338,3 +338,175 @@
     max-height: 160px;
     overflow-y: auto;
 }
+
+/* =========================================
+   Summernote (note-editor) Responsive Fix
+   ========================================= */
+.note-editor.note-frame.card {
+    border: 1px solid #dee2e6;
+    border-radius: .5rem;
+    overflow: hidden;
+    background: #fff;
+}
+
+/* Toolbar responsive */
+.note-editor .note-toolbar.card-header {
+    background: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    padding: .375rem .5rem;
+    flex-wrap: wrap;
+    gap: .25rem;
+}
+
+.note-editor .note-btn-group {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    margin-right: .25rem;
+}
+
+.note-editor .note-btn {
+    padding: .25rem .5rem;
+    font-size: .8125rem;
+    border-radius: .25rem;
+    min-width: 2.25rem;
+    white-space: nowrap;
+}
+
+.note-editor .note-btn i {
+    font-size: .875rem;
+}
+
+/* Dropdown menus in toolbar */
+.note-editor .note-dropdown-menu {
+    min-width: 160px;
+    max-width: calc(100vw - 2rem);
+    font-size: .8125rem;
+}
+
+.note-editor .note-dropdown-menu .note-btn {
+    padding: .375rem .75rem;
+    border-radius: 0;
+    min-width: auto;
+    white-space: normal;
+}
+
+/* Editing area */
+.note-editor .note-editing-area {
+    overflow: hidden;
+}
+
+.note-editor .note-editable,
+.note-editor .note-codable {
+    min-height: 200px;
+    max-height: 60vh;
+    overflow-y: auto;
+    font-size: .875rem;
+    line-height: 1.6;
+    word-wrap: break-word;
+}
+
+/* Statusbar */
+.note-editor .note-statusbar {
+    background: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+    padding: .25rem .5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .25rem;
+}
+
+.note-editor .note-resizebar {
+    height: 6px;
+    cursor: ns-resize;
+    background: #e9ecef;
+}
+
+/* Fullscreen mode */
+.note-editor.note-frame.fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1050;
+    border-radius: 0;
+    border: none;
+    height: 100vh !important;
+    max-height: 100vh !important;
+}
+
+.note-editor.note-frame.fullscreen .note-editable,
+.note-editor.note-frame.fullscreen .note-codable {
+    max-height: calc(100vh - 140px);
+}
+
+.note-editor.note-frame.fullscreen .note-toolbar {
+    z-index: 1051;
+}
+
+/* Mobile responsive */
+@media (max-width: 767px) {
+    .note-editor .note-toolbar.card-header {
+        padding: .25rem .375rem;
+        gap: .125rem;
+    }
+    .note-editor .note-btn-group {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+    .note-editor .note-btn {
+        padding: .1875rem .375rem;
+        font-size: .75rem;
+        min-width: 2rem;
+    }
+    .note-editor .note-btn i {
+        font-size: .75rem;
+    }
+    .note-editor .note-editable,
+    .note-editor .note-codable {
+        min-height: 150px;
+        max-height: 50vh;
+        font-size: .8125rem;
+    }
+    .note-editor .note-statusbar {
+        padding: .1875rem .375rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .note-editor .note-btn-group {
+        margin-right: .125rem;
+    }
+    .note-editor .note-btn {
+        padding: .125rem .25rem;
+        font-size: .75rem;
+        min-width: 1.75rem;
+    }
+    .note-editor .note-dropdown-menu {
+        min-width: 140px;
+    }
+}
+
+/* Make sure images in editor are responsive */
+.note-editor .note-editable img,
+.note-editor .note-editable table {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Code view responsiveness */
+.note-editor .note-codable {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: .8125rem;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+@media (max-width: 575px) {
+    .note-editor .note-codable {
+        font-size: .75rem;
+    }
+}

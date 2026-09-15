@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\City;
-use App\Models\Country;
 use App\Models\State;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -17,7 +16,7 @@ class LocationController extends Controller
             return response()->json(['states' => []]);
         }
 
-        $states = Cache::rememberForever('address_states_' . mb_strtolower($countryName), function () use ($countryName) {
+        $states = Cache::rememberForever('address_states_'.mb_strtolower($countryName), function () use ($countryName) {
             return State::query()
                 ->whereHas('country', fn ($q) => $q->whereRaw('LOWER(name) = ?', [mb_strtolower($countryName)]))
                 ->orderBy('name')
@@ -37,7 +36,7 @@ class LocationController extends Controller
         }
 
         $cities = Cache::rememberForever(
-            'address_cities_' . mb_strtolower($countryName) . '_' . mb_strtolower($stateName),
+            'address_cities_'.mb_strtolower($countryName).'_'.mb_strtolower($stateName),
             function () use ($countryName, $stateName) {
                 return City::query()
                     ->whereHas('state', function ($q) use ($countryName, $stateName) {

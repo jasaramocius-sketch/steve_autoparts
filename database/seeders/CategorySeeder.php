@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Category;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 class CategorySeeder extends Seeder
@@ -31,7 +31,7 @@ class CategorySeeder extends Seeder
                             ['name' => 'Air Filters', 'slug' => 'Air-Filters'],
                             ['name' => 'Intake Manifolds', 'slug' => 'Intake-Manifolds'],
                             ['name' => 'Throttle Bodies', 'slug' => 'Throttle-Bodies'],
-                        ]
+                        ],
                     ],
                     'Fuel Systems' => [
                         'slug' => 'Fuel-Systems',
@@ -39,7 +39,7 @@ class CategorySeeder extends Seeder
                             ['name' => 'Fuel Injectors', 'slug' => 'Fuel-Injectors'],
                             ['name' => 'Fuel Pumps', 'slug' => 'Fuel-Pumps'],
                             ['name' => 'Carburetors', 'slug' => 'Carburetors'],
-                        ]
+                        ],
                     ],
                     'Cooling Systems' => [
                         'slug' => 'Cooling-Systems',
@@ -47,10 +47,10 @@ class CategorySeeder extends Seeder
                             ['name' => 'Radiators', 'slug' => 'Radiators'],
                             ['name' => 'Water Pumps', 'slug' => 'Water-Pumps'],
                             ['name' => 'Thermostats', 'slug' => 'Thermostats'],
-                        ]
+                        ],
                     ],
                     'Exhaust Systems' => ['slug' => 'Exhaust-Systems', 'children' => []],
-                ]
+                ],
             ],
             'Body & Exterior' => [
                 'slug' => 'Body-Exterior',
@@ -59,7 +59,7 @@ class CategorySeeder extends Seeder
                     'Body Parts' => ['slug' => 'Body-Parts', 'children' => []],
                     'Mirrors & Glass' => ['slug' => 'Mirrors-Glass', 'children' => []],
                     'Accessories' => ['slug' => 'Accessories', 'children' => []],
-                ]
+                ],
             ],
             'Interior Parts' => [
                 'slug' => 'Interior-Parts',
@@ -68,7 +68,7 @@ class CategorySeeder extends Seeder
                     'Tires' => ['slug' => 'Tires', 'children' => []],
                     'Wheels & Rims' => ['slug' => 'Wheels-Rims', 'children' => []],
                     'Tire Accessories' => ['slug' => 'Tire-Accessories', 'children' => []],
-                ]
+                ],
             ],
             'Electrical & Lighting' => [
                 'slug' => 'Electrical-Lighting',
@@ -77,7 +77,7 @@ class CategorySeeder extends Seeder
                     'Lighting & Lamps' => ['slug' => 'Lighting-Lamps', 'children' => []],
                     'Ignition System' => ['slug' => 'Ignition-System', 'children' => []],
                     'Batteries & Cables' => ['slug' => 'Batteries-Cables', 'children' => []],
-                ]
+                ],
             ],
             'Brakes & Brake Parts' => [
                 'slug' => 'Brakes-Brake-Parts',
@@ -88,17 +88,17 @@ class CategorySeeder extends Seeder
                         'children' => [
                             ['name' => 'Front Brake Pads', 'slug' => 'Front-Brake-Pads'],
                             ['name' => 'Rear Brake Pads', 'slug' => 'Rear-Brake-Pads'],
-                        ]
+                        ],
                     ],
                     'Rotors & Drums' => [
                         'slug' => 'Rotors-Drums',
                         'children' => [
                             ['name' => 'Brake Rotors', 'slug' => 'Brake-Rotors'],
                             ['name' => 'Brake Drums', 'slug' => 'Brake-Drums'],
-                        ]
+                        ],
                     ],
                     'Brake Lines & Hoses' => ['slug' => 'Brake-Lines-Hoses', 'children' => []],
-                ]
+                ],
             ],
             'Transmission & Drivetrain' => [
                 'slug' => 'Transmission-Drivetrain',
@@ -110,24 +110,24 @@ class CategorySeeder extends Seeder
                             ['name' => 'Clutch Discs', 'slug' => 'Clutch-Discs'],
                             ['name' => 'Pressure Plates', 'slug' => 'Pressure-Plates'],
                             ['name' => 'Flywheels', 'slug' => 'Flywheels'],
-                        ]
+                        ],
                     ],
                     'Differentials' => [
                         'slug' => 'Differentials',
                         'children' => [
                             ['name' => 'Differential Covers', 'slug' => 'Differential-Covers'],
                             ['name' => 'Gears', 'slug' => 'Gears'],
-                        ]
+                        ],
                     ],
                     'Transmission Parts' => [
                         'slug' => 'Transmission-Parts',
                         'children' => [
                             ['name' => 'Transmission Filters', 'slug' => 'Transmission-Filters'],
                             ['name' => 'Seals', 'slug' => 'Seals'],
-                        ]
+                        ],
                     ],
                     'Suspension Kits' => ['slug' => 'Suspension-Kits', 'children' => []],
-                ]
+                ],
             ],
             'Suspension & Steering' => [
                 'slug' => 'Suspension-Steering',
@@ -139,7 +139,7 @@ class CategorySeeder extends Seeder
                             ['name' => 'Steering Racks', 'slug' => 'Steering-Racks'],
                             ['name' => 'Tie Rod Ends', 'slug' => 'Tie-Rod-Ends'],
                             ['name' => 'Steering Columns', 'slug' => 'Steering-Columns'],
-                        ]
+                        ],
                     ],
                     'Shocks & Struts' => [
                         'slug' => 'Shocks-Struts',
@@ -147,9 +147,9 @@ class CategorySeeder extends Seeder
                             ['name' => 'Shock Absorbers', 'slug' => 'Shock-Absorbers'],
                             ['name' => 'Coil Springs', 'slug' => 'Coil-Springs'],
                             ['name' => 'Mounts', 'slug' => 'Mounts'],
-                        ]
+                        ],
                     ],
-                ]
+                ],
             ],
         ];
 
@@ -160,14 +160,14 @@ class CategorySeeder extends Seeder
                 $sub = Category::create([
                     'name' => $subName,
                     'slug' => $subData['slug'],
-                    'parent_id' => $parent->id
+                    'parent_id' => $parent->id,
                 ]);
 
                 foreach ($subData['children'] as $child) {
                     Category::create([
                         'name' => $child['name'],
                         'slug' => $child['slug'],
-                        'parent_id' => $sub->id
+                        'parent_id' => $sub->id,
                     ]);
                 }
             }

@@ -2,11 +2,10 @@
 
 namespace App\Models;
 
+use App\Traits\TracksIsDeleted;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
-use App\Traits\TracksIsDeleted; 
 
 class Image extends Model
 {
@@ -54,7 +53,7 @@ class Image extends Model
      */
     public function usageLocations(): array
     {
-        if (!$this->relationLoaded('products')) {
+        if (! $this->relationLoaded('products')) {
             $this->load('products');
         }
 
@@ -63,13 +62,14 @@ class Image extends Model
             if ($value === null || trim((string) $value) === '') {
                 return false;
             }
+
             return (static::normalizePath($value) ?? $value) === $norm;
         };
 
         $locations = [];
         $add = function ($type, $id, $label = '', $route = null, $usage = null) use (&$locations) {
-            $key = $type . ':' . $id;
-            if (!isset($locations[$key])) {
+            $key = $type.':'.$id;
+            if (! isset($locations[$key])) {
                 $locations[$key] = [
                     'type' => $type,
                     'id' => $id,
@@ -125,13 +125,13 @@ class Image extends Model
             }
             $dealImage = $item->extra_data['deal_image'] ?? null;
             if ($matches($dealImage)) {
-                $add('Home Page Section', $item->id, $item->section_name . ' (Deal Image)', route('admin.home-page.edit'));
+                $add('Home Page Section', $item->id, $item->section_name.' (Deal Image)', route('admin.home-page.edit'));
             }
         }
 
         // Header/footer settings
         foreach (['header_logo', 'header_favicon', 'mobile_logo', 'footer_logo', 'admin_header_bg'] as $key) {
-            $value = \App\Models\Setting::get($key);
+            $value = Setting::get($key);
             if ($matches($value)) {
                 $add('Site Setting', $key, ucwords(str_replace('_', ' ', $key)), route('admin.settings.header'));
             }
@@ -152,7 +152,7 @@ class Image extends Model
 
     public function getSizeInKbAttribute(): string
     {
-        return $this->size ? round($this->size / 1024, 1) . ' KB' : '-';
+        return $this->size ? round($this->size / 1024, 1).' KB' : '-';
     }
 
     public function getThumbUrlAttribute(): string
@@ -160,20 +160,22 @@ class Image extends Model
         if (str_starts_with($this->path, 'assets/')) {
             return asset($this->path);
         }
-        return asset('storage/' . $this->path);
+
+        return asset('storage/'.$this->path);
     }
 
     public function getFilePathAttribute(): string
     {
         $paths = [
             public_path($this->path),
-            storage_path('app/public/' . $this->path),
+            storage_path('app/public/'.$this->path),
         ];
         foreach ($paths as $p) {
             if (file_exists($p)) {
                 return $p;
             }
         }
+
         return $paths[0];
     }
 
@@ -190,7 +192,8 @@ class Image extends Model
     public function hasWebpVersion(): bool
     {
         $baseName = pathinfo($this->filename, PATHINFO_FILENAME);
-        return static::where('filename', $baseName . '.webp')->exists();
+
+        return static::where('filename', $baseName.'.webp')->exists();
     }
 
     public static function storeFromUpload(
@@ -200,8 +203,8 @@ class Image extends Model
         ?string $altText = null,
         ?string $title = null
     ): self {
-        $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-        $path = $file->storeAs('uploads/' . now()->format('Y/m'), $filename, 'public');
+        $filename = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
+        $path = $file->storeAs('uploads/'.now()->format('Y/m'), $filename, 'public');
 
         $dimensions = @getimagesize($file->getPathname());
 
@@ -209,7 +212,7 @@ class Image extends Model
             'original_name' => $file->getClientOriginalName(),
             'filename' => $filename,
             'path' => $path,
-            'url' => 'storage/' . $path,
+            'url' => 'storage/'.$path,
             'mime_type' => $file->getMimeType(),
             'size' => $file->getSize(),
             'width' => $dimensions[0] ?? null,
@@ -224,7 +227,7 @@ class Image extends Model
 
     public static function normalizePath(?string $path): ?string
     {
-        if (!$path) {
+        if (! $path) {
             return null;
         }
 
@@ -245,12 +248,12 @@ class Image extends Model
     public static function markUsed(string $path, ?Model $attachable = null, bool $attach = true): void
     {
         $norm = static::normalizePath($path);
-        if (!$norm) {
+        if (! $norm) {
             return;
         }
 
         $image = static::where('path', $norm)->first();
-        if (!$image) {
+        if (! $image) {
             return;
         }
 
@@ -273,7 +276,7 @@ class Image extends Model
             'original_name' => basename($path),
             'filename' => basename($path),
             'path' => $path,
-            'url' => 'storage/' . ltrim($path, '/'),
+            'url' => 'storage/'.ltrim($path, '/'),
             'mime_type' => $info ? ($info['mime'] ?? 'image/jpeg') : 'image/jpeg',
             'size' => $full ? filesize($full) : null,
             'width' => $info[0] ?? null,
@@ -289,12 +292,12 @@ class Image extends Model
     public static function attachToProduct(string $path, Product $product): self
     {
         $norm = static::normalizePath($path);
-        if (!$norm) {
+        if (! $norm) {
             throw new \InvalidArgumentException('Invalid image path.');
         }
 
         $image = static::where('path', $norm)->first();
-        if (!$image) {
+        if (! $image) {
             $image = static::createFromPath($norm);
         }
 

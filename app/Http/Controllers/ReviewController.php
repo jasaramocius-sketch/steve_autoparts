@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Product;
 use App\Models\OrderItem;
-use App\Models\Order;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -19,21 +18,21 @@ class ReviewController extends Controller
         $product = Product::where('slug', $slug)->firstOrFail();
 
         $validated = $request->validate([
-            'rating'  => 'required|integer|min:1|max:5',
-            'text'    => 'required|string|max:1000',
-            'images'  => 'nullable|array|max:5',
-            'images.*'=> 'image|mimes:jpg,jpeg,png,webp|max:2048',
+            'rating' => 'required|integer|min:1|max:5',
+            'text' => 'required|string|max:1000',
+            'images' => 'nullable|array|max:5',
+            'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         $hasPurchased = $this->hasPurchased(auth()->id(), $product->id);
-        if (!$hasPurchased) {
+        if (! $hasPurchased) {
             return response()->json(['success' => false, 'message' => 'You must purchase this product to write a review.'], 403);
         }
 
         $reviews = $product->reviews_data ?? [];
 
         $existingReview = collect($reviews)->first(function ($r) {
-            return ($r['user_id'] ?? null) == auth()->id() && !($r['deleted'] ?? false);
+            return ($r['user_id'] ?? null) == auth()->id() && ! ($r['deleted'] ?? false);
         });
         if ($existingReview) {
             return response()->json(['success' => false, 'message' => 'You have already reviewed this product. You can edit your existing review.'], 403);
@@ -47,14 +46,14 @@ class ReviewController extends Controller
         }
 
         $review = [
-            'id'       => 'r_' . time() . '_' . Str::random(6),
-            'user_id'  => auth()->id(),
-            'name'     => auth()->user()->name,
-            'rating'   => (int) $validated['rating'],
-            'text'     => $validated['text'],
-            'images'   => $imagePaths,
-            'date'     => now()->format('M d, Y'),
-            'deleted'  => false,
+            'id' => 'r_'.time().'_'.Str::random(6),
+            'user_id' => auth()->id(),
+            'name' => auth()->user()->name,
+            'rating' => (int) $validated['rating'],
+            'text' => $validated['text'],
+            'images' => $imagePaths,
+            'date' => now()->format('M d, Y'),
+            'deleted' => false,
         ];
 
         $reviews[] = $review;
@@ -62,10 +61,10 @@ class ReviewController extends Controller
         $this->recomputeRating($product, $reviews);
 
         return response()->json([
-            'success'  => true,
-            'review'   => $review,
-            'rating'   => $product->rating,
-            'count'    => $product->reviews,
+            'success' => true,
+            'review' => $review,
+            'rating' => $product->rating,
+            'count' => $product->reviews,
         ]);
     }
 
@@ -88,7 +87,7 @@ class ReviewController extends Controller
         }
         unset($r);
 
-        if (!$found) {
+        if (! $found) {
             return response()->json(['success' => false, 'message' => 'Review not found'], 404);
         }
 
@@ -96,8 +95,8 @@ class ReviewController extends Controller
 
         return response()->json([
             'success' => true,
-            'rating'  => $product->rating,
-            'count'   => $product->reviews,
+            'rating' => $product->rating,
+            'count' => $product->reviews,
         ]);
     }
 
@@ -106,10 +105,10 @@ class ReviewController extends Controller
         $product = Product::where('slug', $slug)->firstOrFail();
 
         $validated = $request->validate([
-            'rating'  => 'required|integer|min:1|max:5',
-            'text'    => 'required|string|max:1000',
-            'images'  => 'nullable|array|max:5',
-            'images.*'=> 'image|mimes:jpg,jpeg,png,webp|max:2048',
+            'rating' => 'required|integer|min:1|max:5',
+            'text' => 'required|string|max:1000',
+            'images' => 'nullable|array|max:5',
+            'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         $reviews = $product->reviews_data ?? [];
@@ -137,7 +136,7 @@ class ReviewController extends Controller
         }
         unset($r);
 
-        if (!$found) {
+        if (! $found) {
             return response()->json(['success' => false, 'message' => 'Review not found'], 404);
         }
 
@@ -147,20 +146,22 @@ class ReviewController extends Controller
 
         return response()->json([
             'success' => true,
-            'review'  => $updatedReview,
-            'rating'  => $product->rating,
-            'count'   => $product->reviews,
+            'review' => $updatedReview,
+            'rating' => $product->rating,
+            'count' => $product->reviews,
         ]);
     }
 
     public static function hasPurchased($userId, $productId)
     {
-        if (!$userId) return false;
+        if (! $userId) {
+            return false;
+        }
 
         return OrderItem::where('product_id', $productId)
             ->whereHas('order', function ($q) use ($userId) {
                 $q->where('user_id', $userId)
-                  ->where('status', '!=', 'cancelled');
+                    ->where('status', '!=', 'cancelled');
             })
             ->exists();
     }

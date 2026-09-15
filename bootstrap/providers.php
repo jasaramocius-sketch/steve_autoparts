@@ -1,8 +1,9 @@
 <?php
 
 use App\Providers\AppServiceProvider;
+use SteveStore\PageBuilder\PageBuilderServiceProvider;
 
 return [
-    SteveStore\PageBuilder\PageBuilderServiceProvider::class,
+    PageBuilderServiceProvider::class,
     AppServiceProvider::class,
 ];

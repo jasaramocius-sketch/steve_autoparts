@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class OrderController extends Controller
 {
@@ -31,6 +32,7 @@ class OrderController extends Controller
             'sortDir'
         ));
     }
+
     public function show($idOrNumber)
     {
         $user = auth()->user();
@@ -41,7 +43,7 @@ class OrderController extends Controller
             $order = $isNumeric
                 ? $orderQuery->findOrFail($idOrNumber)
                 : $orderQuery->where('order_number', $idOrNumber)->firstOrFail();
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        } catch (ModelNotFoundException $e) {
             abort(404);
         }
 
@@ -54,11 +56,11 @@ class OrderController extends Controller
         $userId = auth()->id();
         $reviewedSlugs = [];
         foreach ($order->items as $item) {
-            if (!$item->product || empty($item->product->reviews_data)) {
+            if (! $item->product || empty($item->product->reviews_data)) {
                 continue;
             }
             foreach ($item->product->reviews_data as $review) {
-                if (($review['user_id'] ?? null) == $userId && !($review['deleted'] ?? false)) {
+                if (($review['user_id'] ?? null) == $userId && ! ($review['deleted'] ?? false)) {
                     $reviewedSlugs[$item->product->id] = true;
                     break;
                 }
@@ -67,11 +69,13 @@ class OrderController extends Controller
 
         return view('user.orders.show', compact('order', 'reviewedSlugs'));
     }
+
     public function destroy($id)
     {
         $user = auth()->user();
         $order = Order::where('user_id', Auth::id())->findOrFail($id);
         $order->update(['status' => 'cancelled']);
+
         return redirect()->back()->with('success', 'Order cancelled successfully.');
     }
 
@@ -88,7 +92,7 @@ class OrderController extends Controller
             $order = Order::with(['items.product', 'user'])
                 ->where(function ($q) use ($request) {
                     $q->where('order_number', $request->order_number)
-                      ->orWhere('id', $request->order_number);
+                        ->orWhere('id', $request->order_number);
                 })
                 ->first();
 
@@ -115,11 +119,11 @@ class OrderController extends Controller
 
         // Load the blade view file and pass the order data to it
         $pdf = Pdf::loadView('user.orders.invoice', compact('order'));
-        
+
         // Set the paper size to A4 (optional but recommended for invoices)
         $pdf->setPaper('a4', 'portrait');
 
         // Force the browser to directly download the PDF file
-        return $pdf->stream('Invoice-' . ($order->order_number ?? $order->id) . '.pdf');
+        return $pdf->stream('Invoice-'.($order->order_number ?? $order->id).'.pdf');
     }
 }

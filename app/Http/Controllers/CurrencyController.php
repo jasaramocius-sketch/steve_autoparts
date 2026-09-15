@@ -15,7 +15,7 @@ class CurrencyController extends Controller
         }
 
         return response()->json([
-            'error' => 'Unable to fetch exchange rates'
+            'error' => 'Unable to fetch exchange rates',
         ], 500);
     }
 
@@ -25,12 +25,12 @@ class CurrencyController extends Controller
             'https://api.unirateapi.com/api/widget/v1/convert',
             [
                 'amount' => $amount,
-                'from'   => strtoupper($from),
-                'to'     => strtoupper($to),
+                'from' => strtoupper($from),
+                'to' => strtoupper($to),
             ]
         );
 
-        if (!$response->successful()) {
+        if (! $response->successful()) {
             return response()->json([
                 'success' => false,
             ]);
@@ -38,14 +38,15 @@ class CurrencyController extends Controller
 
         return $response->json();
     }
+
     public function convert($amount, $from, $to)
     {
         $response = Http::get(
             'https://api.unirateapi.com/api/widget/v1/convert',
             [
                 'amount' => $amount,
-                'from'   => strtoupper($from),
-                'to'     => strtoupper($to),
+                'from' => strtoupper($from),
+                'to' => strtoupper($to),
             ]
         );
 

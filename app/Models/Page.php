@@ -2,15 +2,15 @@
 
 namespace App\Models;
 
+use App\Traits\Revisable;
+use App\Traits\TracksIsDeleted;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\TracksIsDeleted;
-use App\Traits\Revisable;
 use SteveStore\PageBuilder\Traits\HasBlocks;
 
 class Page extends Model
 {
-    use SoftDeletes, TracksIsDeleted, Revisable, HasBlocks;
+    use HasBlocks, Revisable, SoftDeletes, TracksIsDeleted;
 
     protected $fillable = [
         'title',
@@ -26,7 +26,7 @@ class Page extends Model
     ];
 
     protected $casts = [
-        'status'     => 'boolean',
+        'status' => 'boolean',
         'show_title' => 'boolean',
     ];
 }

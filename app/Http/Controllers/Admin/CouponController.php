@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Coupon;
+use App\Models\Order;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class CouponController extends Controller
 {
@@ -13,7 +13,7 @@ class CouponController extends Controller
     {
         $sortBy = in_array($request->sort_by, ['id', 'code', 'type', 'value', 'status', 'expires_at', 'created_at']) ? $request->sort_by : 'created_at';
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
-        $perPage = in_array((int)$request->per_page, [10, 20, 50, 100]) ? (int)$request->per_page : 10;
+        $perPage = in_array((int) $request->per_page, [10, 20, 50, 100]) ? (int) $request->per_page : 10;
 
         $coupons = Coupon::orderBy($sortBy, $sortDir)->paginate($perPage);
         $coupons->appends($request->query())->onEachSide(1);
@@ -50,6 +50,7 @@ class CouponController extends Controller
     public function edit($id)
     {
         $coupon = Coupon::findOrFail($id);
+
         return view('admin.coupons.edit', compact('coupon'));
     }
 
@@ -58,7 +59,7 @@ class CouponController extends Controller
         $coupon = Coupon::findOrFail($id);
 
         $request->validate([
-            'code' => 'required|string|max:50|unique:coupons,code,' . $id,
+            'code' => 'required|string|max:50|unique:coupons,code,'.$id,
             'type' => 'required|in:fixed,percentage',
             'value' => 'required|numeric|min:0',
             'min_order_amount' => 'nullable|numeric|min:0',
@@ -79,6 +80,7 @@ class CouponController extends Controller
     public function destroy($id)
     {
         Coupon::findOrFail($id)->delete();
+
         return redirect()->route('admin.coupons.index')->with('success', 'Coupon deleted successfully.');
     }
 
@@ -86,14 +88,14 @@ class CouponController extends Controller
     {
         $coupon = Coupon::findOrFail($id);
 
-        $perPage = in_array((int)$request->per_page, [10, 20, 50, 100]) ? (int)$request->per_page : 20;
-        $orders = \App\Models\Order::where('coupon_code', $coupon->code)
+        $perPage = in_array((int) $request->per_page, [10, 20, 50, 100]) ? (int) $request->per_page : 20;
+        $orders = Order::where('coupon_code', $coupon->code)
             ->with(['user', 'items.product'])
             ->orderByDesc('created_at')
             ->paginate($perPage);
         $orders->appends($request->query())->onEachSide(1);
 
-        $totalDiscount = \App\Models\Order::where('coupon_code', $coupon->code)->sum('coupon_discount');
+        $totalDiscount = Order::where('coupon_code', $coupon->code)->sum('coupon_discount');
         $orderCount = $orders->total();
 
         return view('admin.coupons.show', compact('coupon', 'orders', 'totalDiscount', 'orderCount'));

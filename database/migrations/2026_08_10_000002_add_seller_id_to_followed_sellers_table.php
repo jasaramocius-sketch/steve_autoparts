@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasColumn('followed_sellers', 'seller_id')) {
+        if (! Schema::hasColumn('followed_sellers', 'seller_id')) {
             Schema::table('followed_sellers', function (Blueprint $table) {
                 $table->foreignId('seller_id')->nullable()->after('user_id')->constrained()->nullOnDelete();
                 $table->unique(['user_id', 'seller_id']);

@@ -258,92 +258,19 @@
                     <div class="lh-edit"><i class="fas fa-pen"></i></div>
                 </div> -->
                 <div id="images-container" class="grid-view">
-                    @foreach($images as $image)
-                    @php $hasWebp = $image->hasWebpVersion(); @endphp
-                    <div class="grid-item">
-                        <div class="card border h-100 image-card" data-id="{{ $image->id }}">
-                            <div class="select-overlay">
-                                <div class="check-circle">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                                        <polyline points="20 6 9 17 4 12"></polyline>
-                                    </svg>
-                                </div>
-                            </div>
-                            <div class="list-bulk-check">
-                                <div class="bulk-check"></div>
-                            </div>
-                            @if($hasWebp && $image->mime_type !== 'image/webp')
-                                <span class="position-absolute top-0 start-0 m-2 badge bg-success z-3" title="Already converted to WebP"><i class="fas fa-check"></i> WebP</span>
-                            @endif
-                            <a href="{{ route('admin.images.edit', $image->id) }}" class="text-decoration-none text-dark image-edit-link d-flex gap-1">
-                                <div class="thumb-wrap admin-image-thumb-wrap">
-                                    <img src="{{ $image->thumb_url }}" alt="{{ $image->alt_text ?? $image->original_name }}" class="admin-image-cover" loading="lazy" onerror="this.onerror=null;this.src='{{ asset("assets/images/placeholder.png") }}'">
-                                </div>
-                                <div class="card-info p-2 small">
-                                    <div class="info-name">
-                                        <div class="text-truncate fw-medium" title="{{ $image->original_name }}">{{ $image->original_name }}</div>
-                                    </div>
-                                    <div class="info-meta grid-view-only">{{ $image->size_in_kb }} | {{ $image->width }}x{{ $image->height }}</div>
-                                    <div class="info-meta grid-view-only"></div>
-                                    <div class="card-badges d-flex justify-content-between mt-1 gap-1 flex-wrap grid-view-only">
-                                        <span class="badge {{ $image->attachable_type ? 'bg-light text-success border border-success-subtle' : 'bg-light text-secondary border border-secondary-subtle' }}">
-                                            {{ $image->attachable_type ? class_basename($image->attachable_type) : 'Unused' }}
-                                        </span>
-                                        @if(in_array($image->mime_type, ['image/jpeg', 'image/pjpeg', 'image/jpg']))
-                                            <span class="badge bg-light text-warning border border-warning-subtle">JPEG</span>
-                                        @elseif($image->mime_type === 'image/png')
-                                            <span class="badge bg-light text-primary border border-primary-subtle">PNG</span>
-                                        @elseif($image->mime_type === 'image/gif')
-                                            <span class="badge bg-light text-purple border border-purple-subtle admin-gif-badge">GIF</span>
-                                        @elseif($image->mime_type === 'image/webp')
-                                            <span class="badge bg-light text-info border border-info-subtle">WebP</span>
-                                        @elseif($image->mime_type === 'image/svg+xml')
-                                            <span class="badge bg-light text-secondary border border-secondary-subtle">SVG</span>
-                                        @endif
-                                    </div>
-                                    <div class="info-meta list-view-only">{{ $image->size_in_kb }} | {{ $image->width }}x{{ $image->height }}</div>
-                                    <div class="card-badges d-flex justify-content-between mt-1 gap-1 flex-wrap list-view-only">
-                                        <div class="info-type list-view-only">
-                                            @if(in_array($image->mime_type, ['image/jpeg', 'image/pjpeg', 'image/jpg']))
-                                                <span class="badge bg-light text-warning border border-warning-subtle">JPEG</span>
-                                            @elseif($image->mime_type === 'image/png')
-                                                <span class="badge bg-light text-primary border border-primary-subtle">PNG</span>
-                                            @elseif($image->mime_type === 'image/gif')
-                                                <span class="badge bg-light border admin-gif-badge">GIF</span>
-                                            @elseif($image->mime_type === 'image/webp')
-                                                <span class="badge bg-light text-info border border-info-subtle">WebP</span>
-                                            @elseif($image->mime_type === 'image/svg+xml')
-                                                <span class="badge bg-light text-secondary border border-secondary-subtle">SVG</span>
-                                            @endif
-                                        </div>
-                                        <div class="info-usage list-view-only">
-                                            <span class="badge {{ $image->attachable_type ? 'bg-light text-success border border-success-subtle' : 'bg-light text-secondary border border-secondary-subtle' }}">
-                                                {{ $image->attachable_type ? class_basename($image->attachable_type) : 'Unused' }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <!-- <div class="info-webp list-view-only" style="display:none;">
-                                        @if($hasWebp)
-                                            <span class="badge bg-success text-white"><i class="fas fa-check"></i></span>
-                                        @else
-                                            <span class="text-muted">-</span>
-                                        @endif
-                                    </div>
-                                    <div class="info-edit list-view-only" style="display:none;">
-                                        <a href="{{ route('admin.images.edit', $image->id) }}"><i class="fas fa-pen"></i></a>
-                                    </div> -->
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                    @endforeach
+                    @include('admin.images._cards', ['images' => $images])
                 </div>
             </div>
         </div>
     </form>
 
-    <div class="mt-3 d-flex justify-content-center">
-        {{ $images->links('vendor.pagination.gs-pagination') }}
+    <div class="mt-3 d-flex justify-content-center flex-column align-items-center gap-2">
+        <button type="button" id="load-more-btn" class="btn btn-outline-primary steve-btn px-4 {{ $images->hasMorePages() ? '' : 'd-none' }}"
+                data-next-url="{{ $images->nextPageUrl() }}"
+                data-total="{{ $images->total() }}">
+            <i class="fas fa-sync-alt me-1"></i> Load More
+        </button>
+        <small class="text-muted" id="load-more-info">Showing {{ $images->count() }} of {{ $images->total() }} images</small>
     </div>
     @else
     <div class="card border-0 shadow-sm">
@@ -367,7 +294,7 @@
                     <div class="mb-3 flex-wrap flex-md-nowrap">
                         <label class="form-label">Select Images <span class="text-danger">*</span></label>
                         <input type="file" name="images[]" class="form-control" multiple accept="image/*" required>
-                        <div class="form-text">Allowed: jpeg, png, jpg, gif, svg, webp. Max 10MB per file.</div>
+                        <div class="form-text">Allowed: jpeg, png, jpg, gif, svg, webp. Max 40MB per file.</div>
                     </div>
                     <div id="upload-preview" class="row g-2"></div>
                     <hr>
@@ -579,6 +506,45 @@
         bulkForm.action = url;
         bulkForm.submit();
     };
+
+    var loadMoreBtn = document.getElementById('load-more-btn');
+    var loadMoreInfo = document.getElementById('load-more-info');
+    if (loadMoreBtn) {
+        loadMoreBtn.addEventListener('click', function() {
+            var nextUrl = loadMoreBtn.getAttribute('data-next-url');
+            if (!nextUrl) return;
+            var originalHtml = loadMoreBtn.innerHTML;
+            loadMoreBtn.disabled = true;
+            loadMoreBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Loading...';
+            fetch(nextUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } })
+                .then(function(r) { return r.json(); })
+                .then(function(res) {
+                    var total = (res && res.total) ? res.total : (loadMoreBtn.getAttribute('data-total') || 0);
+                    if (res && res.html) {
+                        container.insertAdjacentHTML('beforeend', res.html);
+                    }
+                    if (loadMoreInfo) {
+                        var loaded = document.querySelectorAll('#images-container .image-card').length;
+                        if (res && res.next_page_url) {
+                            loadMoreInfo.textContent = 'Showing ' + loaded + ' of ' + total + ' images';
+                        } else {
+                            loadMoreInfo.textContent = 'All ' + total + ' images loaded';
+                        }
+                    }
+                    if (res && res.next_page_url) {
+                        loadMoreBtn.setAttribute('data-next-url', res.next_page_url);
+                        loadMoreBtn.innerHTML = originalHtml;
+                        loadMoreBtn.disabled = false;
+                    } else {
+                        loadMoreBtn.classList.add('d-none');
+                    }
+                })
+                .catch(function() {
+                    loadMoreBtn.innerHTML = originalHtml;
+                    loadMoreBtn.disabled = false;
+                });
+        });
+    }
 
     var savedView = localStorage.getItem('image-manager-view') || 'grid';
     setView(savedView);

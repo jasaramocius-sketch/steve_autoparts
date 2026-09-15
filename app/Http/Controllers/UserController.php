@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
-
 
 class UserController extends Controller
 {
@@ -15,7 +14,7 @@ class UserController extends Controller
     {
         $sortBy = in_array($request->sort_by, ['id', 'name', 'email', 'status', 'city', 'created_at']) ? $request->sort_by : 'created_at';
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
-        $perPage = in_array((int)$request->per_page, [10, 20, 50, 100]) ? (int)$request->per_page : 10;
+        $perPage = in_array((int) $request->per_page, [10, 20, 50, 100]) ? (int) $request->per_page : 10;
 
         $customers = User::where('role', 'customer')
             ->with('followedSellers.seller')
@@ -24,6 +23,7 @@ class UserController extends Controller
 
         return view('admin.customers.index', compact('customers', 'sortBy', 'sortDir'));
     }
+
     public function edit($id)
     {
         $customer = User::findOrFail($id);
@@ -37,7 +37,7 @@ class UserController extends Controller
 
     public function profile()
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return redirect()->route('login')->with('error', 'Please login to access your profile.');
         }
 
@@ -50,11 +50,12 @@ class UserController extends Controller
 
     public function editProfile()
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return redirect()->route('login')->with('error', 'Please login to edit your profile.');
         }
 
         $profile = Auth::user();
+
         return view('user.profile-edit', compact('profile'));
     }
 
@@ -70,11 +71,12 @@ class UserController extends Controller
 
         return redirect()->route('admin.customers.index');
     }
-    
+
     public function dashboard()
-    {   
+    {
         return view('user.dashboard');
     }
+
     public function updateProfile(Request $request)
     {
         $user = Auth::user();
@@ -110,7 +112,7 @@ class UserController extends Controller
         }
 
         if ($request->filled('current_password') || $request->filled('new_password')) {
-            if (!Hash::check($request->current_password, $user->password)) {
+            if (! Hash::check($request->current_password, $user->password)) {
                 return back()->withErrors(['current_password' => 'Incorrect current password']);
             }
 
@@ -140,7 +142,7 @@ class UserController extends Controller
             'new_password' => 'required|min:8|confirmed',
         ]);
 
-        if (!Hash::check($request->current_password, auth()->user()->password)) {
+        if (! Hash::check($request->current_password, auth()->user()->password)) {
             return back()->withErrors(['current_password' => 'Incorrect current password']);
         }
 
@@ -149,12 +151,13 @@ class UserController extends Controller
         ]);
 
         return back()->with('success', 'Password changed successfully.');
-    }   
+    }
+
     public function customers(Request $request)
     {
         $sortBy = in_array($request->sort_by, ['id', 'name', 'email', 'status', 'city', 'created_at']) ? $request->sort_by : 'created_at';
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
-        $perPage = in_array((int)$request->per_page, [10, 20, 50, 100]) ? (int)$request->per_page : 10;
+        $perPage = in_array((int) $request->per_page, [10, 20, 50, 100]) ? (int) $request->per_page : 10;
 
         $users = User::where('role', 'customer')->orderBy($sortBy, $sortDir)->paginate($perPage);
         $users->appends($request->query())->onEachSide(1);
@@ -166,7 +169,7 @@ class UserController extends Controller
     {
         $sortBy = in_array($request->sort_by, ['id', 'name', 'email', 'role', 'created_at']) ? $request->sort_by : 'created_at';
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
-        $perPage = in_array((int)$request->per_page, [10, 20, 50, 100]) ? (int)$request->per_page : 10;
+        $perPage = in_array((int) $request->per_page, [10, 20, 50, 100]) ? (int) $request->per_page : 10;
 
         $users = User::whereIn('role', ['master_admin', 'admin', 'staff'])->orderBy($sortBy, $sortDir)->paginate($perPage);
         $users->appends($request->query())->onEachSide(1);
@@ -232,7 +235,7 @@ class UserController extends Controller
         ]);
 
         $data = $request->only(['name', 'email', 'phone', 'address', 'city', 'state', 'country', 'postal_code', 'status']);
-        if (!isset($data['status'])) {
+        if (! isset($data['status'])) {
             $data['status'] = 'active';
         }
         $user->update($data);
@@ -268,12 +271,14 @@ class UserController extends Controller
         ]);
 
         $label = ucfirst($request->role);
+
         return redirect()->route('admin.staff.index')->with('success', "{$label} created successfully.");
     }
 
     public function editStaff($id)
     {
         $user = User::findOrFail($id);
+
         return view('admin.staff.edit', compact('user'));
     }
 
@@ -302,12 +307,14 @@ class UserController extends Controller
         }
 
         $user->update($data);
+
         return redirect()->route('admin.staff.index')->with('success', 'User updated successfully.');
     }
 
     public function destroyStaff($id)
     {
         User::findOrFail($id)->delete();
+
         return redirect()->route('admin.staff.index')->with('success', 'Staff deleted successfully.');
     }
 
@@ -321,6 +328,7 @@ class UserController extends Controller
 
         $user->status = $user->status === 'active' ? 'inactive' : 'active';
         $user->save();
+
         return back()->with('success', 'Customer status updated successfully.');
     }
 }

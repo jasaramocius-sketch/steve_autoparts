@@ -22,7 +22,7 @@ class LogSiteChange
         }
 
         // Log only write operations — GET requests are pure noise.
-        if (!in_array($method, ['POST', 'PUT', 'PATCH', 'DELETE'], true)) {
+        if (! in_array($method, ['POST', 'PUT', 'PATCH', 'DELETE'], true)) {
             return $response;
         }
 

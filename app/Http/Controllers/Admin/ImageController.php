@@ -163,7 +163,7 @@ class ImageController extends Controller
     {
         $request->validate([
             'images' => 'required|array|max:10',
-            'images.*' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
+            'images.*' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:20480',
         ]);
 
         $uploaded = [];
@@ -268,7 +268,7 @@ class ImageController extends Controller
     {
         $request->validate([
             'images' => 'required|array',
-            'images.*' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
+            'images.*' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:20480',
         ]);
 
         $uploaded = 0;
@@ -334,6 +334,16 @@ class ImageController extends Controller
             ? collect()
             : Image::whereIn('path', $pathList)->orderBy('created_at', 'desc')->get()->groupBy('path')->map->first();
         $paths->setCollection($pathList->map(fn ($p) => $representatives[$p] ?? null)->filter()->values());
+
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('admin.images._cards', ['images' => $paths])->render(),
+                'current_page' => $paths->currentPage(),
+                'last_page' => $paths->lastPage(),
+                'total' => $paths->total(),
+                'next_page_url' => $paths->nextPageUrl(),
+            ]);
+        }
 
         $statsQuery = (new Image)->newQuery()->tap($exists);
         $sizeQuery = (clone $statsQuery)->selectRaw('path, MAX(size) AS max_size')->groupBy('path')->get();

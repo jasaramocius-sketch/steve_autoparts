@@ -25,9 +25,9 @@ class AdminAuthController extends Controller
 
         $credentials = $request->only('email', 'password');
 
-        if (!Auth::attempt($credentials, $request->boolean('remember'))) {
+        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
             return back()->withErrors([
-                'email' => 'Invalid email or password'
+                'email' => 'Invalid email or password',
             ]);
         }
 

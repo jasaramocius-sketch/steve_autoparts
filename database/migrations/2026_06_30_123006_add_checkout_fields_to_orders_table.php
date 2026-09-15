@@ -36,7 +36,7 @@ return new class extends Migration
                 'payment_method',
                 'additional_info',
                 'shipping_fee',
-                'tax'
+                'tax',
             ]);
         });
     }

@@ -30,7 +30,7 @@ class PurgeTrash extends Command
         $fileCount = 0;
         foreach ($fileRevs as $rev) {
             if ($rev->backup_path) {
-                $path = storage_path('file-backups/archive/' . $rev->backup_path);
+                $path = storage_path('file-backups/archive/'.$rev->backup_path);
                 if (is_file($path)) {
                     @unlink($path);
                 }
@@ -47,7 +47,7 @@ class PurgeTrash extends Command
                 if (! preg_match('/\.log$/', $file)) {
                     continue;
                 }
-                $path = $logDir . DIRECTORY_SEPARATOR . $file;
+                $path = $logDir.DIRECTORY_SEPARATOR.$file;
                 if (filemtime($path) < $cutoff->getTimestamp()) {
                     @unlink($path);
                     $logCount++;

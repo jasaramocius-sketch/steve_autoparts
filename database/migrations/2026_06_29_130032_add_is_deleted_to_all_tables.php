@@ -22,7 +22,7 @@ return new class extends Migration
         foreach ($tables as $tableName) {
 
             // deleted_at nahi hai to skip
-            if (!Schema::hasColumn($tableName, 'deleted_at')) {
+            if (! Schema::hasColumn($tableName, 'deleted_at')) {
                 continue;
             }
 
@@ -33,8 +33,8 @@ return new class extends Migration
 
             Schema::table($tableName, function (Blueprint $table) {
                 $table->tinyInteger('is_deleted')
-                      ->default(0)
-                      ->after('deleted_at');
+                    ->default(0)
+                    ->after('deleted_at');
             });
         }
     }
@@ -53,7 +53,7 @@ return new class extends Migration
 
         foreach ($tables as $tableName) {
 
-            if (!Schema::hasColumn($tableName, 'is_deleted')) {
+            if (! Schema::hasColumn($tableName, 'is_deleted')) {
                 continue;
             }
 

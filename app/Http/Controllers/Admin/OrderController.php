@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\NotificationHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
-use App\Models\OrderItem;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -13,7 +13,7 @@ class OrderController extends Controller
     {
         $sortBy = in_array($request->sort_by, ['id', 'order_number', 'total_amount', 'total', 'status', 'payment_status', 'created_at']) ? $request->sort_by : 'created_at';
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
-        $perPage = in_array((int)$request->per_page, [10, 20, 50, 100]) ? (int)$request->per_page : 10;
+        $perPage = in_array((int) $request->per_page, [10, 20, 50, 100]) ? (int) $request->per_page : 10;
 
         $query = Order::with('user');
 
@@ -36,6 +36,7 @@ class OrderController extends Controller
     public function show($id)
     {
         $order = Order::with(['user', 'items.product'])->findOrFail($id);
+
         return view('admin.orders.show', compact('order'));
     }
 
@@ -68,7 +69,7 @@ class OrderController extends Controller
         }
 
         // Transaction ID only makes sense when the payment is Paid.
-        $paidOrder = $newPaymentStatus === 'paid' || ($order->payment_status === 'paid' && !$request->has('payment_status'));
+        $paidOrder = $newPaymentStatus === 'paid' || ($order->payment_status === 'paid' && ! $request->has('payment_status'));
 
         if ($paidOrder && $request->has('transaction_id')) {
             $transactionId = trim((string) $request->transaction_id);
@@ -95,11 +96,11 @@ class OrderController extends Controller
             }
         }
 
-        if (!empty($update)) {
+        if (! empty($update)) {
             $order->update($update);
         }
 
-        \App\Helpers\NotificationHelper::orderStatusChanged($order, $oldStatus);
+        NotificationHelper::orderStatusChanged($order, $oldStatus);
 
         return redirect()->route('admin.orders.show', $id)->with('success', 'Order updated successfully.');
     }

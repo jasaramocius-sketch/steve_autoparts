@@ -10,13 +10,14 @@ class AdminMiddleware
     public function handle($request, Closure $next)
     {
         // 1. Check login
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return redirect()->route('login');
         }
 
         // 2. Check role
-        if (!in_array(Auth::user()->role, ['master_admin', 'admin', 'staff'])) {
+        if (! in_array(Auth::user()->role, ['master_admin', 'admin', 'staff'])) {
             Auth::logout();
+
             return redirect()->route('login');
         }
 

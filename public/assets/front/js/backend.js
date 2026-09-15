@@ -21,7 +21,6 @@
                     var raw = editor.value.replace(/^[ \t]*\u2022[ \t]+/gm, '- ');
                     editor.value = marked.parse(raw);
                 }
-                $(editor).summernote({ placeholder: 'WYSIWYG rich text editor', tabsize: 2, height: 250 });
             });
         }
 

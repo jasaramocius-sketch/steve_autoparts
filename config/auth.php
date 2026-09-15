@@ -43,8 +43,8 @@ return [
             'provider' => 'users',
         ],
         'admin' => [
-        'driver' => 'session',
-        'provider' => 'admins',
+            'driver' => 'session',
+            'provider' => 'admins',
         ],
 
         'staff' => [
@@ -81,8 +81,8 @@ return [
         //     'table' => 'users',
         // ],
         'admins' => [
-        'driver' => 'eloquent',
-        'model' => env('AUTH_MODEL', Admin::class),
+            'driver' => 'eloquent',
+            'model' => env('AUTH_MODEL', Admin::class),
         ],
 
         'staff' => [

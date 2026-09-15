@@ -12,7 +12,7 @@ class UserManagementController extends Controller
     {
         $sortBy = in_array($request->sort_by, ['id', 'name', 'email', 'role', 'status', 'city', 'created_at']) ? $request->sort_by : 'created_at';
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
-        $perPage = in_array((int)$request->per_page, [10, 20, 50, 100]) ? (int)$request->per_page : 10;
+        $perPage = in_array((int) $request->per_page, [10, 20, 50, 100]) ? (int) $request->per_page : 10;
 
         $users = User::whereIn('role', ['staff', 'admin'])->orderBy($sortBy, $sortDir)->paginate($perPage);
         $users->appends($request->query())->onEachSide(1);
@@ -57,6 +57,7 @@ class UserManagementController extends Controller
     public function edit($id)
     {
         $user = User::findOrFail($id);
+
         return view('admin.users.form', compact('user'));
     }
 
@@ -66,7 +67,7 @@ class UserManagementController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $id,
+            'email' => 'required|email|unique:users,email,'.$id,
             'password' => 'nullable|min:6',
             'role' => 'required|in:master_admin,staff,customer',
             'status' => 'nullable|in:active,inactive',
@@ -106,6 +107,7 @@ class UserManagementController extends Controller
 
         $user->status = $user->status === 'active' ? 'inactive' : 'active';
         $user->save();
+
         return back()->with('success', 'User status updated successfully.');
     }
 
@@ -118,6 +120,7 @@ class UserManagementController extends Controller
         }
 
         $user->delete();
+
         return redirect()->route('admin.users.index')->with('success', 'User deleted successfully.');
     }
 }

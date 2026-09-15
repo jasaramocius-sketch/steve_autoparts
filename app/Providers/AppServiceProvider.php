@@ -2,14 +2,16 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use App\Models\Wishlist;
+use App\Models\Category;
 use App\Models\Compare;
 use App\Models\Notification;
-use Illuminate\Support\Facades\View;
-use Illuminate\Support\Facades\Auth;
+use App\Models\Product;
+use App\Models\Wishlist;
 use Illuminate\Pagination\Paginator;
-use App\Helpers\SiteChangeLogger;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -37,7 +39,7 @@ class AppServiceProvider extends ServiceProvider
             $dynamicCurrencies = cache()->remember('dynamic_currency_rates', 43200, function () {
                 $defaultCurrencies = config('currencies', []);
 
-                $response = \Illuminate\Support\Facades\Http::timeout(5)->get('https://api.unirateapi.com/api/widget/v1/rates?base=USD');
+                $response = Http::timeout(5)->get('https://api.unirateapi.com/api/widget/v1/rates?base=USD');
                 if ($response->successful()) {
                     $data = $response->json();
                     if (isset($data['rates'])) {
@@ -49,12 +51,13 @@ class AppServiceProvider extends ServiceProvider
                         }
                     }
                 }
+
                 return $defaultCurrencies;
             });
 
             config(['currencies' => $dynamicCurrencies]);
         } catch (\Exception $e) {
-            logger()->error('Failed to fetch/apply dynamic currencies: ' . $e->getMessage());
+            logger()->error('Failed to fetch/apply dynamic currencies: '.$e->getMessage());
         }
 
         View::composer('*', function ($view) {
@@ -66,11 +69,11 @@ class AppServiceProvider extends ServiceProvider
 
             $loggedIn = session('user_logged_in') && session('user_profile.id');
 
-            if (!$loggedIn && Auth::check()) {
+            if (! $loggedIn && Auth::check()) {
                 $user = Auth::user();
                 session()->put([
                     'user_logged_in' => true,
-                    'user_profile'   => $user->only(['id', 'name', 'email', 'role', 'phone', 'address', 'city', 'country']),
+                    'user_profile' => $user->only(['id', 'name', 'email', 'role', 'phone', 'address', 'city', 'country']),
                 ]);
                 $loggedIn = true;
             }
@@ -89,15 +92,15 @@ class AppServiceProvider extends ServiceProvider
 
             $cart = session('cart', []);
             $cartCount = count($cart);
-            $cartTotal = array_sum(array_map(fn($item) => ($item['price'] ?? 0) * ($item['qty'] ?? ($item['quantity'] ?? 0)), $cart));
+            $cartTotal = array_sum(array_map(fn ($item) => ($item['price'] ?? 0) * ($item['qty'] ?? ($item['quantity'] ?? 0)), $cart));
 
             $mobileCategoryTree = cache()->remember('front_mobile_category_tree_v1', 21600, function () {
-                $tree = \App\Models\Category::topLevel()
+                $tree = Category::topLevel()
                     ->where('status', true)
                     ->with('childrenRecursive')
                     ->get();
 
-                $productCounts = \App\Models\Product::where('status', true)
+                $productCounts = Product::where('status', true)
                     ->selectRaw('category_id, COUNT(*) as count')
                     ->groupBy('category_id')
                     ->pluck('count', 'category_id');
@@ -108,6 +111,7 @@ class AppServiceProvider extends ServiceProvider
                         $total += $setDescendantCount($child, $counts);
                     }
                     $category->descendant_count = $total;
+
                     return $total;
                 };
 
@@ -133,7 +137,7 @@ class AppServiceProvider extends ServiceProvider
             // (console boot logging intentionally removed — it was pure noise)
         }
 
-        \App\Models\Category::saved(fn () => cache()->forget('front_mobile_category_tree_v1'));
-        \App\Models\Category::deleted(fn () => cache()->forget('front_mobile_category_tree_v1'));
+        Category::saved(fn () => cache()->forget('front_mobile_category_tree_v1'));
+        Category::deleted(fn () => cache()->forget('front_mobile_category_tree_v1'));
     }
 }

@@ -2,24 +2,23 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Blog;
+use App\Models\Brand;
+use App\Models\Category;
+use App\Models\HomePageSection;
+use App\Models\Image;
+use App\Models\Page;
+use App\Models\Product;
+use App\Models\Setting;
+use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
-use App\Models\Image;
-use App\Models\Product;
-use App\Models\Category;
-use App\Models\Brand;
-use App\Models\Blog;
-use App\Models\Page;
-use App\Models\User;
-use App\Models\HomePageSection;
-use App\Models\Setting;
 
 class MigrateImagesToMonthFolders extends Command
 {
     protected $signature = 'images:migrate-to-month-folders {--dry-run : Show what would be done without making changes} {--skip-backup : Skip database backup}';
+
     protected $description = 'Migrate all images to WordPress-style uploads/Y/m folder structure and update DB paths';
 
     private $stats = [
@@ -28,11 +27,12 @@ class MigrateImagesToMonthFolders extends Command
         'errors' => 0,
         'updated_db' => 0,
     ];
+
     private $fileMap = []; // source physical path -> target relative path
 
     public function handle()
     {
-        if (!$this->option('dry-run') && !$this->option('skip-backup')) {
+        if (! $this->option('dry-run') && ! $this->option('skip-backup')) {
             $this->info('Creating database backup...');
             $this->backupDatabase();
         }
@@ -62,12 +62,12 @@ class MigrateImagesToMonthFolders extends Command
 
     private function backupDatabase()
     {
-        $filename = 'database/stautoparts_migration_backup_' . now()->format('Ymd_His') . '.sql';
+        $filename = 'database/stautoparts_migration_backup_'.now()->format('Ymd_His').'.sql';
         exec("mysqldump -u root stautoparts > $filename 2>&1", $output, $returnVar);
         if ($returnVar === 0) {
             $this->info("Backup saved to $filename");
         } else {
-            $this->error('Backup failed: ' . implode("\n", $output));
+            $this->error('Backup failed: '.implode("\n", $output));
         }
     }
 
@@ -81,6 +81,7 @@ class MigrateImagesToMonthFolders extends Command
         $mtime = $this->getFileMtime($physicalPath);
         $year = date('Y', $mtime);
         $month = date('m', $mtime);
+
         return "uploads/$year/$month/$filename";
     }
 
@@ -90,24 +91,30 @@ class MigrateImagesToMonthFolders extends Command
         if (str_contains($relativePath, '/')) {
             $candidates = [
                 public_path($relativePath),
-                storage_path('app/public/' . $relativePath),
+                storage_path('app/public/'.$relativePath),
             ];
             foreach ($candidates as $c) {
-                if (file_exists($c)) return $c;
+                if (file_exists($c)) {
+                    return $c;
+                }
             }
+
             return null;
         }
 
         // Bare filename - check base dirs
         foreach ($baseDirs as $dir) {
             $candidates = [
-                public_path($dir . $relativePath),
-                storage_path('app/public/' . $dir . $relativePath),
+                public_path($dir.$relativePath),
+                storage_path('app/public/'.$dir.$relativePath),
             ];
             foreach ($candidates as $c) {
-                if (file_exists($c)) return $c;
+                if (file_exists($c)) {
+                    return $c;
+                }
             }
         }
+
         return null;
     }
 
@@ -118,30 +125,33 @@ class MigrateImagesToMonthFolders extends Command
         }
 
         $filename = basename($sourcePath);
-        $targetPath = storage_path('app/public/' . $targetRelativePath);
+        $targetPath = storage_path('app/public/'.$targetRelativePath);
 
-        if (!$this->option('dry-run')) {
+        if (! $this->option('dry-run')) {
             File::ensureDirectoryExists(dirname($targetPath));
             File::copy($sourcePath, $targetPath);
 
             // Also move .webp sibling if exists
-            $webpSource = dirname($sourcePath) . '/' . pathinfo($filename, PATHINFO_FILENAME) . '.webp';
+            $webpSource = dirname($sourcePath).'/'.pathinfo($filename, PATHINFO_FILENAME).'.webp';
             if (file_exists($webpSource)) {
-                $webpTarget = dirname($targetPath) . '/' . pathinfo($filename, PATHINFO_FILENAME) . '.webp';
+                $webpTarget = dirname($targetPath).'/'.pathinfo($filename, PATHINFO_FILENAME).'.webp';
                 File::copy($webpSource, $webpTarget);
             }
         }
 
         $this->fileMap[$sourcePath] = $targetRelativePath;
         $this->stats['moved']++;
+
         return $targetRelativePath;
     }
 
     private function updateDB($table, $column, $oldValue, $newValue, $where = [])
     {
-        if ($oldValue === $newValue) return false;
+        if ($oldValue === $newValue) {
+            return false;
+        }
 
-        if (!$this->option('dry-run')) {
+        if (! $this->option('dry-run')) {
             $query = DB::table($table)->where($column, $oldValue);
             foreach ($where as $k => $v) {
                 $query->where($k, $v);
@@ -150,9 +160,11 @@ class MigrateImagesToMonthFolders extends Command
             if ($updated) {
                 $this->stats['updated_db'] += $updated;
             }
+
             return $updated > 0;
         }
         $this->stats['updated_db']++;
+
         return true;
     }
 
@@ -164,23 +176,25 @@ class MigrateImagesToMonthFolders extends Command
         foreach ($images as $img) {
             $oldPath = $img->path;
             $sourcePath = $this->findPhysicalFile($oldPath);
-            if (!$sourcePath) {
+            if (! $sourcePath) {
                 $this->warn("  File not found for: $oldPath");
                 $this->stats['errors']++;
+
                 continue;
             }
 
             $targetPath = $this->getTargetPath($sourcePath, basename($oldPath));
             if ($oldPath === $targetPath) {
                 $this->stats['skipped']++;
+
                 continue;
             }
 
             $newPath = $this->moveFile($sourcePath, $targetPath);
 
-            if (!$this->option('dry-run')) {
+            if (! $this->option('dry-run')) {
                 $img->path = $newPath;
-                $img->url = 'storage/' . $newPath;
+                $img->url = 'storage/'.$newPath;
                 $img->save();
             }
             $this->stats['updated_db']++;
@@ -197,15 +211,17 @@ class MigrateImagesToMonthFolders extends Command
         foreach ($products as $product) {
             $oldValue = $product->image;
             $sourcePath = $this->findPhysicalFile($oldValue, [$baseDir]);
-            if (!$sourcePath) {
+            if (! $sourcePath) {
                 $this->warn("  File not found for product {$product->id}: $oldValue");
                 $this->stats['errors']++;
+
                 continue;
             }
 
             $targetPath = $this->getTargetPath($sourcePath, basename($oldValue));
             if ($oldValue === $targetPath) {
                 $this->stats['skipped']++;
+
                 continue;
             }
 
@@ -224,15 +240,17 @@ class MigrateImagesToMonthFolders extends Command
         foreach ($items as $item) {
             $oldValue = $item->image;
             $sourcePath = $this->findPhysicalFile($oldValue, [$baseDir]);
-            if (!$sourcePath) {
+            if (! $sourcePath) {
                 $this->warn("  File not found for category {$item->id}: $oldValue");
                 $this->stats['errors']++;
+
                 continue;
             }
 
             $targetPath = $this->getTargetPath($sourcePath, basename($oldValue));
             if ($oldValue === $targetPath) {
                 $this->stats['skipped']++;
+
                 continue;
             }
 
@@ -251,15 +269,17 @@ class MigrateImagesToMonthFolders extends Command
         foreach ($items as $item) {
             $oldValue = $item->image;
             $sourcePath = $this->findPhysicalFile($oldValue, [$baseDir]);
-            if (!$sourcePath) {
+            if (! $sourcePath) {
                 $this->warn("  File not found for brand {$item->id}: $oldValue");
                 $this->stats['errors']++;
+
                 continue;
             }
 
             $targetPath = $this->getTargetPath($sourcePath, basename($oldValue));
             if ($oldValue === $targetPath) {
                 $this->stats['skipped']++;
+
                 continue;
             }
 
@@ -278,15 +298,17 @@ class MigrateImagesToMonthFolders extends Command
         foreach ($items as $item) {
             $oldValue = $item->image;
             $sourcePath = $this->findPhysicalFile($oldValue, [$baseDir]);
-            if (!$sourcePath) {
+            if (! $sourcePath) {
                 $this->warn("  File not found for blog {$item->id}: $oldValue");
                 $this->stats['errors']++;
+
                 continue;
             }
 
             $targetPath = $this->getTargetPath($sourcePath, basename($oldValue));
             if ($oldValue === $targetPath) {
                 $this->stats['skipped']++;
+
                 continue;
             }
 
@@ -305,15 +327,17 @@ class MigrateImagesToMonthFolders extends Command
         foreach ($items as $item) {
             $oldValue = $item->image;
             $sourcePath = $this->findPhysicalFile($oldValue, [$baseDir]);
-            if (!$sourcePath) {
+            if (! $sourcePath) {
                 $this->warn("  File not found for page {$item->id}: $oldValue");
                 $this->stats['errors']++;
+
                 continue;
             }
 
             $targetPath = $this->getTargetPath($sourcePath, basename($oldValue));
             if ($oldValue === $targetPath) {
                 $this->stats['skipped']++;
+
                 continue;
             }
 
@@ -331,15 +355,17 @@ class MigrateImagesToMonthFolders extends Command
         foreach ($users as $user) {
             $oldValue = $user->avatar;
             $sourcePath = $this->findPhysicalFile($oldValue);
-            if (!$sourcePath) {
+            if (! $sourcePath) {
                 $this->warn("  File not found for user {$user->id}: $oldValue");
                 $this->stats['errors']++;
+
                 continue;
             }
 
             $targetPath = $this->getTargetPath($sourcePath, basename($oldValue));
             if ($oldValue === $targetPath) {
                 $this->stats['skipped']++;
+
                 continue;
             }
 
@@ -356,12 +382,13 @@ class MigrateImagesToMonthFolders extends Command
 
         // Main image column
         foreach ($sections as $section) {
-            if (!empty($section->image)) {
+            if (! empty($section->image)) {
                 $oldValue = $section->image;
                 $sourcePath = $this->findPhysicalFile($oldValue, ['assets/images/home/', 'assets/images/']);
-                if (!$sourcePath) {
+                if (! $sourcePath) {
                     $this->warn("  File not found for home_section {$section->id}: $oldValue");
                     $this->stats['errors']++;
+
                     continue;
                 }
 
@@ -378,17 +405,18 @@ class MigrateImagesToMonthFolders extends Command
         // extra_data banners - search multiple possible locations
         $bannerBaseDirs = ['assets/images/home/', 'assets/images/categories/', 'assets/images/brands/', 'assets/images/blogs/', 'assets/images/pages/', 'assets/images/thumbnails/', 'assets/images/'];
         foreach ($sections as $section) {
-            if (!empty($section->extra_data)) {
+            if (! empty($section->extra_data)) {
                 $data = is_string($section->extra_data) ? json_decode($section->extra_data, true) : $section->extra_data;
                 if (isset($data['banners']) && is_array($data['banners'])) {
                     $modified = false;
                     foreach ($data['banners'] as &$banner) {
-                        if (!empty($banner['image'])) {
+                        if (! empty($banner['image'])) {
                             $oldValue = $banner['image'];
                             $sourcePath = $this->findPhysicalFile($oldValue, $bannerBaseDirs);
-                            if (!$sourcePath) {
+                            if (! $sourcePath) {
                                 $this->warn("  Banner file not found for section {$section->id}: $oldValue");
                                 $this->stats['errors']++;
+
                                 continue;
                             }
 
@@ -402,7 +430,7 @@ class MigrateImagesToMonthFolders extends Command
                             }
                         }
                     }
-                    if ($modified && !$this->option('dry-run')) {
+                    if ($modified && ! $this->option('dry-run')) {
                         $section->extra_data = json_encode($data);
                         $section->save();
                         $this->stats['updated_db']++;
@@ -421,19 +449,22 @@ class MigrateImagesToMonthFolders extends Command
 
         foreach ($keys as $key) {
             $oldValue = Setting::get($key);
-            if (empty($oldValue)) continue;
+            if (empty($oldValue)) {
+                continue;
+            }
 
             $sourcePath = $this->findPhysicalFile($oldValue, [$baseDir]);
-            if (!$sourcePath) {
+            if (! $sourcePath) {
                 $this->warn("  File not found for setting $key: $oldValue");
                 $this->stats['errors']++;
+
                 continue;
             }
 
             $targetPath = $this->getTargetPath($sourcePath, basename($oldValue));
             if ($oldValue !== $targetPath) {
                 $newPath = $this->moveFile($sourcePath, $targetPath);
-                if (!$this->option('dry-run')) {
+                if (! $this->option('dry-run')) {
                     Setting::set($key, $newPath);
                 }
                 $this->stats['updated_db']++;
@@ -441,7 +472,7 @@ class MigrateImagesToMonthFolders extends Command
                 $this->stats['skipped']++;
             }
         }
-        $this->info("  Processed " . count($keys) . " settings");
+        $this->info('  Processed '.count($keys).' settings');
     }
 
     private function migrateReviewImages()
@@ -455,13 +486,14 @@ class MigrateImagesToMonthFolders extends Command
             $productModified = false;
 
             foreach ($data as &$review) {
-                if (!empty($review['images']) && is_array($review['images'])) {
+                if (! empty($review['images']) && is_array($review['images'])) {
                     foreach ($review['images'] as &$img) {
                         $oldValue = $img;
                         $sourcePath = $this->findPhysicalFile($oldValue);
-                        if (!$sourcePath) {
+                        if (! $sourcePath) {
                             $this->warn("  Review image file not found: $oldValue");
                             $this->stats['errors']++;
+
                             continue;
                         }
 
@@ -478,7 +510,7 @@ class MigrateImagesToMonthFolders extends Command
             }
 
             if ($productModified) {
-                if (!$this->option('dry-run')) {
+                if (! $this->option('dry-run')) {
                     $product->reviews_data = json_encode($data);
                     $product->save();
                 }

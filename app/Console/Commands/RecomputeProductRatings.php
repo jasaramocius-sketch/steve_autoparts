@@ -2,12 +2,13 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\Product;
+use Illuminate\Console\Command;
 
 class RecomputeProductRatings extends Command
 {
     protected $signature = 'products:recompute-ratings';
+
     protected $description = 'Recalculate rating and reviews count from reviews_data for all products';
 
     public function handle()
@@ -23,7 +24,7 @@ class RecomputeProductRatings extends Command
 
             if ($product->rating !== $newRating || $product->reviews !== $newReviews) {
                 $product->update([
-                    'rating'  => $newRating,
+                    'rating' => $newRating,
                     'reviews' => $newReviews,
                 ]);
                 $updated++;

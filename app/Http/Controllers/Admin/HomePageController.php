@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\HomePageSection;
+use App\Models\Image;
 use Illuminate\Http\Request;
 
 class HomePageController extends Controller
@@ -12,7 +13,7 @@ class HomePageController extends Controller
     {
         $sortBy = in_array($request->sort_by, ['section_name', 'title', 'status', 'order', 'created_at']) ? $request->sort_by : 'order';
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
-        $perPage = in_array((int)$request->per_page, [10, 20, 50, 100]) ? (int)$request->per_page : 10;
+        $perPage = in_array((int) $request->per_page, [10, 20, 50, 100]) ? (int) $request->per_page : 10;
 
         $sections = HomePageSection::orderBy($sortBy, $sortDir)->paginate($perPage);
         $sections->appends($request->query())->onEachSide(1);
@@ -23,6 +24,7 @@ class HomePageController extends Controller
     public function edit($id)
     {
         $section = HomePageSection::findOrFail($id);
+
         return view('admin.home-page.edit', compact('section'));
     }
 
@@ -51,18 +53,18 @@ class HomePageController extends Controller
         if ($request->hasFile('image')) {
             $validated['image'] = saveImageWithWebp($request->file('image'));
         } elseif ($request->filled('image_from_manager')) {
-            $validated['image'] = 'storage/' . ltrim($request->image_from_manager, '/');
+            $validated['image'] = 'storage/'.ltrim($request->image_from_manager, '/');
             $pickedPaths[] = $request->image_from_manager;
         }
 
-        if ($request->has('remove_section_image') && $request->boolean('remove_section_image') && !isset($validated['image'])) {
+        if ($request->has('remove_section_image') && $request->boolean('remove_section_image') && ! isset($validated['image'])) {
             $validated['image'] = null;
         }
 
         if ($request->has('tabs')) {
             $tabs = $request->input('tabs');
             // Clean up empty tabs
-            $tabs = array_values(array_filter($tabs, fn($t) => !empty(trim($t['label'] ?? ''))));
+            $tabs = array_values(array_filter($tabs, fn ($t) => ! empty(trim($t['label'] ?? ''))));
             $validated['extra_data'] = ['tabs' => $tabs];
         }
 
@@ -98,11 +100,11 @@ class HomePageController extends Controller
 
         if ($section->section_name === 'deal_of_day') {
             if ($request->filled('deal_bg_image_from_manager')) {
-                $existing['deal_image'] = 'storage/' . ltrim($request->deal_bg_image_from_manager, '/');
+                $existing['deal_image'] = 'storage/'.ltrim($request->deal_bg_image_from_manager, '/');
                 $pickedPaths[] = $request->deal_bg_image_from_manager;
             }
 
-            if ($request->has('remove_deal_bg_image') && $request->boolean('remove_deal_bg_image') && !$request->filled('deal_bg_image_from_manager')) {
+            if ($request->has('remove_deal_bg_image') && $request->boolean('remove_deal_bg_image') && ! $request->filled('deal_bg_image_from_manager')) {
                 $existing['deal_image'] = null;
             }
         }
@@ -110,7 +112,7 @@ class HomePageController extends Controller
         if ($section->section_name === 'offers' && $request->has('banners')) {
             $savedBanners = [];
             foreach ((array) $request->input('banners') as $row) {
-                if (!is_array($row)) {
+                if (! is_array($row)) {
                     continue;
                 }
 
@@ -119,11 +121,11 @@ class HomePageController extends Controller
                 $newImage = null;
 
                 if ($imageFromManager) {
-                    $newImage = 'storage/' . ltrim($imageFromManager, '/');
+                    $newImage = 'storage/'.ltrim($imageFromManager, '/');
                     $pickedPaths[] = $imageFromManager;
                 }
 
-                if (!$newImage && $existingImage) {
+                if (! $newImage && $existingImage) {
                     $newImage = $existingImage;
                 }
 
@@ -159,7 +161,7 @@ class HomePageController extends Controller
         $section->update($validated);
 
         foreach ($pickedPaths as $pickedPath) {
-            \App\Models\Image::markUsed($pickedPath, $section);
+            Image::markUsed($pickedPath, $section);
         }
 
         return redirect()->route('admin.home-page.index')
@@ -169,7 +171,7 @@ class HomePageController extends Controller
     public function toggleStatus($id)
     {
         $section = HomePageSection::findOrFail($id);
-        $section->status = !$section->status;
+        $section->status = ! $section->status;
         $section->save();
 
         return back()->with('success', 'Section status updated successfully.');
@@ -178,7 +180,7 @@ class HomePageController extends Controller
     public function reorder(Request $request)
     {
         $order = $request->get('order', []);
-        
+
         foreach ($order as $position => $id) {
             HomePageSection::where('id', $id)->update(['order' => $position]);
         }

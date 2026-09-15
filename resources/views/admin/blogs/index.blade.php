@@ -79,14 +79,14 @@
                                 <form action="{{ route('admin.blogs.toggle-status', $blog->id) }}" method="POST" class="d-inline featured-status-btn">
                                     @csrf
                                     <button type="submit" class="btn btn-sm border-0 p-0 steve-btn">
-                                        <span class="badge admin-clickable {{ $blog->status === 'published' ? 'bg-success' : 'bg-danger border border-danger-subtle' }}">
+                                        <span class="badge admin-clickable {{ $blog->status === 'published' ? 'bg-success' : ($blog->status === 'scheduled' ? 'bg-warning text-dark border border-warning-subtle' : 'bg-danger border border-danger-subtle') }}">
                                             {{ ucfirst($blog->status ?? 'draft') }}
                                         </span>
                                     </button>
                                 </form>
                             @endif
                         </td>
-                        <td>{{ $blog->created_at ? $blog->created_at->format('d M Y') : '—' }}</td>
+                        <td>{{ $blog->post_date ? $blog->post_date->format('d M Y') : '—' }}</td>
                         <td class="pe-3 table-action-col">
                             <div class="action-buttons">
                             @if(request()->has('trashed'))

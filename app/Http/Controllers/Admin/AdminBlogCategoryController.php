@@ -13,7 +13,7 @@ class BlogCategoryController extends Controller
     {
         $sortBy = in_array($request->sort_by, ['id', 'name', 'slug', 'status', 'created_at']) ? $request->sort_by : 'created_at';
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
-        $perPage = in_array((int)$request->per_page, [10, 20, 50, 100]) ? (int)$request->per_page : 10;
+        $perPage = in_array((int) $request->per_page, [10, 20, 50, 100]) ? (int) $request->per_page : 10;
 
         $categories = BlogCategory::withCount('blogs')->orderBy($sortBy, $sortDir)->paginate($perPage);
         $categories->appends($request->query())->onEachSide(1);
@@ -34,7 +34,7 @@ class BlogCategoryController extends Controller
         ]);
 
         $data = $request->only(['name', 'status']);
-        $data['slug'] = Str::slug($request->name) . '-' . time();
+        $data['slug'] = Str::slug($request->name).'-'.time();
 
         BlogCategory::create($data);
 
@@ -44,6 +44,7 @@ class BlogCategoryController extends Controller
     public function edit($id)
     {
         $category = BlogCategory::findOrFail($id);
+
         return view('admin.blog-categories.edit', compact('category'));
     }
 
@@ -57,7 +58,7 @@ class BlogCategoryController extends Controller
         ]);
 
         $data = $request->only(['name', 'status']);
-        $data['slug'] = Str::slug($request->name) . '-' . time();
+        $data['slug'] = Str::slug($request->name).'-'.time();
 
         $category->update($data);
 
@@ -68,6 +69,7 @@ class BlogCategoryController extends Controller
     {
         $category = BlogCategory::findOrFail($id);
         $category->delete();
+
         return redirect()->route('admin.blog-categories.index')->with('success', 'Blog category deleted successfully.');
     }
 }

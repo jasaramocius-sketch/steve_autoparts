@@ -26,13 +26,13 @@ return new class extends Migration
         'pages',
         'blog_categories',
         'home_page_sections',
-        'contacts'
+        'contacts',
     ];
 
     public function up(): void
     {
         foreach ($this->tables as $tableName) {
-            if (Schema::hasTable($tableName) && !Schema::hasColumn($tableName, 'deleted_at')) {
+            if (Schema::hasTable($tableName) && ! Schema::hasColumn($tableName, 'deleted_at')) {
                 Schema::table($tableName, function (Blueprint $table) {
                     $table->softDeletes();
                     $table->boolean('is_deleted')->default(false)->after('deleted_at');
@@ -53,4 +53,3 @@ return new class extends Migration
         }
     }
 };
-

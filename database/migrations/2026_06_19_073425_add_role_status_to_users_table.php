@@ -10,35 +10,35 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-       {
+    {
         Schema::table('users', function (Blueprint $table) {
 
-            if (!Schema::hasColumn('users', 'status')) {
+            if (! Schema::hasColumn('users', 'status')) {
 
                 $table->string('status')
                     ->default('active')
                     ->after('role');
 
+            }
+
+        });
+
     }
-
-});
-
-}
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-    Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table) {
 
-        if (Schema::hasColumn('users', 'status')) {
+            if (Schema::hasColumn('users', 'status')) {
 
-            $table->dropColumn('status');
+                $table->dropColumn('status');
 
-        }
+            }
 
-    });
+        });
 
     }
 };

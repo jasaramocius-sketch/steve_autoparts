@@ -37,15 +37,19 @@ return new class extends Migration
 
         foreach ($this->statelessCountries as $countryName => $cities) {
             $country = DB::table('countries')->whereRaw('LOWER(name) = ?', [mb_strtolower($countryName)])->first();
-            if (!$country) continue;
+            if (! $country) {
+                continue;
+            }
 
             $existingStates = DB::table('states')->where('country_id', $country->id)->count();
-            if ($existingStates > 0) continue;
+            if ($existingStates > 0) {
+                continue;
+            }
 
             $stateName = $countryName;
             DB::table('states')->insert([
                 'country_id' => $country->id,
-                'name'       => $stateName,
+                'name' => $stateName,
                 'created_at' => $now,
                 'updated_at' => $now,
             ]);
@@ -54,10 +58,12 @@ return new class extends Migration
 
             foreach ($cities as $city) {
                 $city = trim($city);
-                if ($city === '') continue;
+                if ($city === '') {
+                    continue;
+                }
                 $cityInserts[] = [
-                    'state_id'   => $stateId,
-                    'name'       => $city,
+                    'state_id' => $stateId,
+                    'name' => $city,
                     'created_at' => $now,
                     'updated_at' => $now,
                 ];
@@ -74,10 +80,14 @@ return new class extends Migration
         $countryNames = array_keys($this->statelessCountries);
         foreach ($countryNames as $countryName) {
             $country = DB::table('countries')->whereRaw('LOWER(name) = ?', [mb_strtolower($countryName)])->first();
-            if (!$country) continue;
+            if (! $country) {
+                continue;
+            }
 
             $stateIds = DB::table('states')->where('country_id', $country->id)->pluck('id');
-            if ($stateIds->isEmpty()) continue;
+            if ($stateIds->isEmpty()) {
+                continue;
+            }
 
             DB::table('cities')->whereIn('state_id', $stateIds)->delete();
             DB::table('states')->where('country_id', $country->id)->delete();

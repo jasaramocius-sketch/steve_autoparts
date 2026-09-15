@@ -1,49 +1,40 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
-
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\ShopController;
-use App\Http\Controllers\CartController;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\DashboardController;
-
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\BlogController;
-
-use App\Http\Controllers\AdminAuthController;
-use App\Http\Controllers\AdminController;
-
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\StaffController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\UserManagementController;
-use App\Http\Controllers\Admin\HomePageController;
-use App\Http\Controllers\Admin\BrandController;
+use App\Http\Controllers\AddressController;
+use App\Http\Controllers\Admin\BlogCategoryController;
 use App\Http\Controllers\Admin\BlogController as AdminBlogController;
-use App\Http\Controllers\Admin\PageController;
+use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\FaqController;
-use App\Http\Controllers\Admin\OrderController as AdminOrderController;
-
-use App\Http\Controllers\WishlistController;
-use App\Http\Controllers\NewsletterController;
-use App\Http\Controllers\CompareController;
-
-use App\Http\Controllers\CheckoutController;
-use App\Http\Controllers\AddressController;
-
-use Illuminate\Support\Facades\Artisan;
-
-use App\Http\Controllers\ContactController;
-
+use App\Http\Controllers\Admin\HomePageController;
 use App\Http\Controllers\Admin\ImageController;
-
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Admin\PageController;
+use App\Http\Controllers\Admin\SellerController;
+use App\Http\Controllers\AdminAuthController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BlogController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CompareController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CurrencyController;
-
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LocationController;
+use App\Http\Controllers\NewsletterController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\ShopController;
+use App\Http\Controllers\StaffController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserManagementController;
+use App\Http\Controllers\WishlistController;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -63,9 +54,9 @@ Route::get('/api/search/suggestions', [ShopController::class, 'suggestions'])->n
 Route::get('/product/{slug}', [ProductController::class, 'show'])->name('product');
 Route::post('/contact-seller', [ProductController::class, 'contactSeller'])->name('contact.seller');
 
-Route::match(['get', 'post'], '/product/{slug}/review', [\App\Http\Controllers\ReviewController::class, 'store'])->middleware('auth')->name('product.review');
-Route::put('/product/{slug}/review/{reviewId}', [\App\Http\Controllers\ReviewController::class, 'update'])->middleware('auth')->name('product.review.update');
-Route::delete('/product/{slug}/review/{reviewId}', [\App\Http\Controllers\ReviewController::class, 'destroy'])->middleware('auth')->name('product.review.delete');
+Route::match(['get', 'post'], '/product/{slug}/review', [ReviewController::class, 'store'])->middleware('auth')->name('product.review');
+Route::put('/product/{slug}/review/{reviewId}', [ReviewController::class, 'update'])->middleware('auth')->name('product.review.update');
+Route::delete('/product/{slug}/review/{reviewId}', [ReviewController::class, 'destroy'])->middleware('auth')->name('product.review.delete');
 
 Route::get('/category/{slug}', [ShopController::class, 'category'])->name('category');
 
@@ -139,7 +130,7 @@ Route::get('/compare/add', [CompareController::class, 'add'])->name('compare.add
 
 Route::get('/compare', [CompareController::class, 'index'])->name('compare.index');
 Route::delete('/compare/clear', [CompareController::class, 'clear'])
-->name('compare.clear');
+    ->name('compare.clear');
 Route::delete('/compare/{id}', [CompareController::class, 'remove'])->name('compare.remove');
 
 /*
@@ -200,7 +191,7 @@ Route::get('/admin', function () {
 */
 
 Route::prefix('admin')
-    ->middleware(['auth','nocache','role:master_admin,admin,staff'])
+    ->middleware(['auth', 'nocache', 'role:master_admin,admin,staff'])
     ->group(function () {
 
         Route::get('/dashboard', [AdminController::class, 'index'])
@@ -278,21 +269,21 @@ Route::prefix('admin')
         Route::post('/brands/{id}/toggle-status', [BrandController::class, 'toggleStatus'])
             ->name('admin.brands.toggle-status');
 
-        Route::get('/sellers', [\App\Http\Controllers\Admin\SellerController::class, 'index'])
+        Route::get('/sellers', [SellerController::class, 'index'])
             ->name('admin.sellers.index');
-        Route::get('/sellers/create', [\App\Http\Controllers\Admin\SellerController::class, 'create'])
+        Route::get('/sellers/create', [SellerController::class, 'create'])
             ->name('admin.sellers.create');
-        Route::post('/sellers', [\App\Http\Controllers\Admin\SellerController::class, 'store'])
+        Route::post('/sellers', [SellerController::class, 'store'])
             ->name('admin.sellers.store');
-        Route::get('/sellers/{id}/edit', [\App\Http\Controllers\Admin\SellerController::class, 'edit'])
+        Route::get('/sellers/{id}/edit', [SellerController::class, 'edit'])
             ->name('admin.sellers.edit');
-        Route::put('/sellers/{id}', [\App\Http\Controllers\Admin\SellerController::class, 'update'])
+        Route::put('/sellers/{id}', [SellerController::class, 'update'])
             ->name('admin.sellers.update');
-        Route::delete('/sellers/{id}', [\App\Http\Controllers\Admin\SellerController::class, 'destroy'])
+        Route::delete('/sellers/{id}', [SellerController::class, 'destroy'])
             ->name('admin.sellers.destroy');
-        Route::post('/sellers/{id}/toggle-status', [\App\Http\Controllers\Admin\SellerController::class, 'toggleStatus'])
+        Route::post('/sellers/{id}/toggle-status', [SellerController::class, 'toggleStatus'])
             ->name('admin.sellers.toggle-status');
-        Route::get('/sellers/{id}/followers', [\App\Http\Controllers\Admin\SellerController::class, 'followers'])
+        Route::get('/sellers/{id}/followers', [SellerController::class, 'followers'])
             ->name('admin.sellers.followers');
 
         Route::get('/blogs', [AdminBlogController::class, 'index'])
@@ -314,14 +305,14 @@ Route::prefix('admin')
         Route::post('/blogs/{id}/toggle-status', [AdminBlogController::class, 'toggleStatus'])
             ->name('admin.blogs.toggle-status');
 
-        Route::get('/blog-categories', [\App\Http\Controllers\Admin\BlogCategoryController::class, 'index'])->name('admin.blog-categories.index');
-        Route::get('/blog-categories/create', [\App\Http\Controllers\Admin\BlogCategoryController::class, 'create'])->name('admin.blog-categories.create');
-        Route::post('/blog-categories', [\App\Http\Controllers\Admin\BlogCategoryController::class, 'store'])->name('admin.blog-categories.store');
-        Route::get('/blog-categories/{id}/edit', [\App\Http\Controllers\Admin\BlogCategoryController::class, 'edit'])->name('admin.blog-categories.edit');
-        Route::put('/blog-categories/{id}', [\App\Http\Controllers\Admin\BlogCategoryController::class, 'update'])->name('admin.blog-categories.update');
-        Route::delete('/blog-categories/{id}', [\App\Http\Controllers\Admin\BlogCategoryController::class, 'destroy'])->name('admin.blog-categories.destroy');
-        Route::post('/blog-categories/{id}/restore', [\App\Http\Controllers\Admin\BlogCategoryController::class, 'restore'])->name('admin.blog-categories.restore');
-        Route::delete('/blog-categories/{id}/force-delete', [\App\Http\Controllers\Admin\BlogCategoryController::class, 'forceDelete'])->name('admin.blog-categories.force-delete');
+        Route::get('/blog-categories', [BlogCategoryController::class, 'index'])->name('admin.blog-categories.index');
+        Route::get('/blog-categories/create', [BlogCategoryController::class, 'create'])->name('admin.blog-categories.create');
+        Route::post('/blog-categories', [BlogCategoryController::class, 'store'])->name('admin.blog-categories.store');
+        Route::get('/blog-categories/{id}/edit', [BlogCategoryController::class, 'edit'])->name('admin.blog-categories.edit');
+        Route::put('/blog-categories/{id}', [BlogCategoryController::class, 'update'])->name('admin.blog-categories.update');
+        Route::delete('/blog-categories/{id}', [BlogCategoryController::class, 'destroy'])->name('admin.blog-categories.destroy');
+        Route::post('/blog-categories/{id}/restore', [BlogCategoryController::class, 'restore'])->name('admin.blog-categories.restore');
+        Route::delete('/blog-categories/{id}/force-delete', [BlogCategoryController::class, 'forceDelete'])->name('admin.blog-categories.force-delete');
 
         Route::get('/pages', [PageController::class, 'index'])
             ->name('admin.pages.index');
@@ -361,13 +352,13 @@ Route::prefix('admin')
         Route::post('/faqs/{id}/toggle-status', [FaqController::class, 'toggleStatus'])
             ->name('admin.faqs.toggle-status');
 
-        Route::get('/contacts', [\App\Http\Controllers\Admin\ContactController::class, 'index'])
+        Route::get('/contacts', [App\Http\Controllers\Admin\ContactController::class, 'index'])
             ->name('admin.contacts.index');
-        Route::get('/contacts/{id}', [\App\Http\Controllers\Admin\ContactController::class, 'show'])
+        Route::get('/contacts/{id}', [App\Http\Controllers\Admin\ContactController::class, 'show'])
             ->name('admin.contacts.show');
-        Route::post('/contacts/{id}/reply', [\App\Http\Controllers\Admin\ContactController::class, 'reply'])
+        Route::post('/contacts/{id}/reply', [App\Http\Controllers\Admin\ContactController::class, 'reply'])
             ->name('admin.contacts.reply');
-        Route::delete('/contacts/{id}', [\App\Http\Controllers\Admin\ContactController::class, 'destroy'])
+        Route::delete('/contacts/{id}', [App\Http\Controllers\Admin\ContactController::class, 'destroy'])
             ->name('admin.contacts.destroy');
 
         Route::get('/coupons', [CouponController::class, 'index'])
@@ -485,7 +476,7 @@ Route::prefix('admin')
 */
 
 Route::prefix('admin')
-    ->middleware(['auth','nocache','role:master_admin,admin'])
+    ->middleware(['auth', 'nocache', 'role:master_admin,admin'])
     ->group(function () {
 
         Route::delete('/logs/{file}', [AdminController::class, 'logClear'])
@@ -520,7 +511,7 @@ Route::prefix('admin')
 */
 
 Route::prefix('admin')
-    ->middleware(['auth','nocache','role:master_admin,admin'])
+    ->middleware(['auth', 'nocache', 'role:master_admin,admin'])
     ->group(function () {
 
         Route::get('/staff/create', [UserController::class, 'createStaff'])
@@ -542,7 +533,7 @@ Route::prefix('admin')
 */
 
 Route::prefix('admin')
-    ->middleware(['auth','nocache','role:master_admin'])
+    ->middleware(['auth', 'nocache', 'role:master_admin'])
     ->group(function () {
 
         Route::resource('users', UserManagementController::class)->names([
@@ -574,14 +565,13 @@ Route::prefix('admin')
 */
 
 Route::prefix('staff')
-    ->middleware(['auth','nocache','role:staff'])
+    ->middleware(['auth', 'nocache', 'role:staff'])
     ->group(function () {
 
-        Route::get('/dashboard', [DashboardController::class,'staffDashboard'])
+        Route::get('/dashboard', [DashboardController::class, 'staffDashboard'])
             ->name('staff.dashboard');
 
     });
-
 
 /*
 |--------------------------------------------------------------------------
@@ -589,7 +579,7 @@ Route::prefix('staff')
 |--------------------------------------------------------------------------
 */
 Route::prefix('admin')
-    ->middleware(['auth','nocache','role:master_admin,admin,staff'])
+    ->middleware(['auth', 'nocache', 'role:master_admin,admin,staff'])
     ->group(function () {
 
         Route::get('/categories', [CategoryController::class, 'index'])
@@ -622,10 +612,12 @@ Route::post('/newsletter', [NewsletterController::class, 'store'])
     ->name('newsletter.store');
 Route::get('/categories', [CategoryController::class, 'showCategories'])
     ->name('categories.index');
-Route::get('/brands', [\App\Http\Controllers\BrandController::class, 'brands'])
+Route::get('/brands', [App\Http\Controllers\BrandController::class, 'brands'])
     ->name('brands');
 // ─── Public / Storefront Routes ──────────────────────────────────────
-Route::get('/category', function () { return redirect('/categories'); });
+Route::get('/category', function () {
+    return redirect('/categories');
+});
 Route::get('/customer_products', [ShopController::class, 'customerProducts'])->name('customer.pr    oducts');
 Route::get('/category/{parent}/{child}/{subchild?}', [ShopController::class, 'subcategory'])->name('subcategory');
 Route::get('/faq', [HomeController::class, 'faq'])->name('faq');
@@ -638,38 +630,38 @@ Route::get('/support-policy', [HomeController::class, 'supportPolicy'])->name('s
 
 Route::middleware(['auth', 'nocache'])->prefix('user')->name('user.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'userDashboard'])->name('dashboard');
-    Route::get('/orders', [DashboardController::class,'orders'])->name('orders');
+    Route::get('/orders', [DashboardController::class, 'orders'])->name('orders');
     Route::get('/reviews', [DashboardController::class, 'reviews'])->name('reviews');
     Route::get('/orders/{id}', [OrderController::class, 'show'])->name('orders.show');
     Route::get('/orders/invoice/{id}', [OrderController::class, 'invoice'])->name('orders.invoice');
     Route::delete('/orders/{id}', [OrderController::class, 'destroy'])->name('orders.destroy');
     Route::match(['get', 'post'], '/order/tracking', [OrderController::class, 'tracking'])->name('order.tracking');
-    Route::get('/wishlist', [DashboardController::class,'wishlist'])->name('wishlist');
-    Route::get('/vehicles', [DashboardController::class,'vehicles'])->name('vehicles');
-    Route::post('/vehicles', [DashboardController::class,'storeVehicle'])->name('vehicles.store');
-    Route::put('/vehicles/{id}', [DashboardController::class,'updateVehicle'])->name('vehicles.update');
-    Route::delete('/vehicles/{id}', [DashboardController::class,'destroyVehicle'])->name('vehicles.destroy');
-    Route::post('/vehicles/select/{id}', [DashboardController::class,'selectVehicle'])->name('vehicles.select');
-    Route::get('/followed-seller', [DashboardController::class,'followedSellers'])->name('followed-sellers');
-    Route::post('/followed-seller', [DashboardController::class,'storeFollowedSeller'])->name('followed-sellers.store');
-    Route::delete('/followed-seller/{id}', [DashboardController::class,'destroyFollowedSeller'])->name('followed-sellers.destroy');
-    Route::get('/api/seller/{id}', [DashboardController::class,'getSellerDetails'])->name('api.seller.details');
-    Route::get('/api/seller/{id}/products', [DashboardController::class,'getSellerProducts'])->name('api.seller.products');
-    Route::get('/addresses', [DashboardController::class,'addresses'])->name('addresses');
-    Route::post('/addresses', [DashboardController::class,'storeAddress'])->name('addresses.store');
-    Route::put('/addresses/{id}', [DashboardController::class,'updateAddress'])->name('addresses.update');
-    Route::delete('/addresses/{id}', [DashboardController::class,'destroyAddress'])->name('addresses.destroy');
-    Route::get('/notifications', [DashboardController::class,'notifications'])->name('notifications');
-    Route::post('/notifications/{id}/read', [DashboardController::class,'markNotificationRead'])->name('notifications.read');
-    Route::post('/notifications/read-all', [DashboardController::class,'markAllNotificationsRead'])->name('notifications.read-all');
-    Route::get('/inquiries', [DashboardController::class,'inquiries'])->name('inquiries');
-    Route::put('/inquiries/{id}', [DashboardController::class,'updateInquiry'])->name('inquiries.update');
-    Route::delete('/inquiries/{id}', [DashboardController::class,'destroyInquiry'])->name('inquiries.destroy');
+    Route::get('/wishlist', [DashboardController::class, 'wishlist'])->name('wishlist');
+    Route::get('/vehicles', [DashboardController::class, 'vehicles'])->name('vehicles');
+    Route::post('/vehicles', [DashboardController::class, 'storeVehicle'])->name('vehicles.store');
+    Route::put('/vehicles/{id}', [DashboardController::class, 'updateVehicle'])->name('vehicles.update');
+    Route::delete('/vehicles/{id}', [DashboardController::class, 'destroyVehicle'])->name('vehicles.destroy');
+    Route::post('/vehicles/select/{id}', [DashboardController::class, 'selectVehicle'])->name('vehicles.select');
+    Route::get('/followed-seller', [DashboardController::class, 'followedSellers'])->name('followed-sellers');
+    Route::post('/followed-seller', [DashboardController::class, 'storeFollowedSeller'])->name('followed-sellers.store');
+    Route::delete('/followed-seller/{id}', [DashboardController::class, 'destroyFollowedSeller'])->name('followed-sellers.destroy');
+    Route::get('/api/seller/{id}', [DashboardController::class, 'getSellerDetails'])->name('api.seller.details');
+    Route::get('/api/seller/{id}/products', [DashboardController::class, 'getSellerProducts'])->name('api.seller.products');
+    Route::get('/addresses', [DashboardController::class, 'addresses'])->name('addresses');
+    Route::post('/addresses', [DashboardController::class, 'storeAddress'])->name('addresses.store');
+    Route::put('/addresses/{id}', [DashboardController::class, 'updateAddress'])->name('addresses.update');
+    Route::delete('/addresses/{id}', [DashboardController::class, 'destroyAddress'])->name('addresses.destroy');
+    Route::get('/notifications', [DashboardController::class, 'notifications'])->name('notifications');
+    Route::post('/notifications/{id}/read', [DashboardController::class, 'markNotificationRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [DashboardController::class, 'markAllNotificationsRead'])->name('notifications.read-all');
+    Route::get('/inquiries', [DashboardController::class, 'inquiries'])->name('inquiries');
+    Route::put('/inquiries/{id}', [DashboardController::class, 'updateInquiry'])->name('inquiries.update');
+    Route::delete('/inquiries/{id}', [DashboardController::class, 'destroyInquiry'])->name('inquiries.destroy');
     Route::get('/profile', [UserController::class, 'profile'])->name('profile');
     Route::get('/profile/edit', [UserController::class, 'editProfile'])->name('profile.edit');
     Route::post('/profile/update', [UserController::class, 'updateProfile'])->name('profile.update');
     Route::get('/change-password', function () {
-    abort(404);
+        abort(404);
     })->name('change.password');
     Route::post('/change-password', [UserController::class, 'updatePassword'])->name('change.password.update');
 });
@@ -690,11 +682,11 @@ Route::middleware(['auth', 'nocache'])->group(function () {
 
 });
 
-
 Route::get('/language/{locale}', function ($locale) {
     if (array_key_exists($locale, config('languages', []))) {
         session(['locale' => $locale]);
     }
+
     return back();
 })->name('language.change');
 
@@ -704,9 +696,9 @@ Route::get('/convert/{amount}/{from}/{to}', [CurrencyController::class, 'convert
 
 Route::get('/currency/{currency}', function ($currency) {
     session(['currency' => $currency]);
+
     return back();
 })->name('currency.change');
-
 
 Route::get('/contact-us', [ContactController::class, 'index'])
     ->name('contact');
