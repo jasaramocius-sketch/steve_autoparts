@@ -3944,7 +3944,7 @@ The discount was computed once at apply-time and never revalidated. Cart changes
 
 **Note:** 7 products now use thumbnail-as-main-image fallback. Original hi-res files are permanently lost; recommend re-upload when possible.
 
-**Task (2026-09-07): Duplicate image cleanup + modal search improvements**
+## 289. (2026-09-07): Duplicate image cleanup + modal search improvements**
 
 1. **Avatar fix:** `uploads/users/` was an orphan folder (arrived via backup restore, Aug 12). Restored Jasa (id 9), Purvi (id 2), test (id 7) avatars from `uploads/users/` → correct `uploads/2026/07/` paths; removed orphan folder (moved to /tmp backup).
 
@@ -3959,14 +3959,14 @@ The discount was computed once at apply-time and never revalidated. Cart changes
 
 4. **Pre-existing broken references (not caused by cleanup):** 319 referenced images still missing on disk (product images pointing to `2026/08` files that never existed in `2026/07` backup, 2 home banners, 1 test.webp). These were broken before this task. If needed, re-upload or restore from earlier DB/file backups.
 
-**Task (2026-09-07, follow-up): Thumbnail fallback for permanently-lost images**
+## 290. (2026-09-07, follow-up): Thumbnail fallback for permanently-lost images**
 
 - 303 referenced-but-missing image rows (media library `images` table, categories, pages, home banners) remapped to their existing `_250.webp`/`_500.webp` respavailableure variant (`artisan images:fallback-missing`, 5,382 references rewritten). DB backup: `database/stautoparts_dupcleanup_backup_20260907_061055.sql`.
 - Restored 1 home banner (`home_page_sections#5` → `uploads/2026/08/17821312686a392a448fe5c.png`) from `2026/07` copy.
 - 3 avatar `_250.webp` variants referenced in images table fixed (these were soft-delete rows anyway).
 - Verified: only ~8 non-variant missing refs remain — all are test/junk media rows already soft-deleted (`is_deleted=1`, no product/gallery pivot), plus `category#70 (Body)` image `1786523970_6a7c3142132bc.png` which has no file or variant anywhere (needs re-upload).
 
-**Task (2026-09-07): Content-level image consolidation + shared-file delete protection**
+## 291. (2026-09-07): Content-level image consolidation + shared-file delete protection**
 
 - New command `artisan images:consolidate-content` (app/Console/Commands/ConsolidateContentDuplicates.php, extends CleanupDuplicateImages): MD5-hash scan of `uploads/`, groups byte-identical files regardless of filename.
 - Dry-run verified 326 groups / 12,161 files / 623.54 MB. Real run rewrote 10,696 `images.path` + product/brand/category/blog/page/user/seller/settings refs to one canonical copy per group, moved 12,161 exact duplicates to `storage/app/cleanup_trash/content_dedup_20260907_091641/` (reversible via MANIFEST.json). DB backup: `database/stautoparts_dupcleanup_backup_20260907_091543.sql`. `uploads/` shrank ~648 MB → 25 MB.
@@ -3976,11 +3976,11 @@ The discount was computed once at apply-time and never revalidated. Cart changes
 - Residual: 33 leftover 2-file groups (mostly `_250/_500.webp` pairs regenerated on-demand + restored banner) — normal, not referenced-missing.
 - Known bug (pre-existing, unrelated): any non-existent URL renders errors/404.blade.php which uses undefined `$page` (`partials.page-attributes`) → 500. commit 53f71c55.
 
-**Task (2026-09-07): Image Manager counts real unique files**
+## 292. (2026-09-07): Image Manager counts real unique files**
 
 - `ImageController::index` now counts/displays one entry per unique file path instead of raw `images` rows. After content consolidation 10,635 rows pointed to only ~296 files; the stats grid now shows Total ~296 / Attached ~294 / Unused ~2 (previously 10,635 / 10,634 / 1). Grid pages unique paths (representative = newest row for that path) so the same image no longer repeats; filter=attached/unused uses EXISTS/NOT EXISTS subqueries; total_size sums max size per unique path.
 
-**Task (2026-09-07): unreferenced files + test.webp cleanup**
+## 293. (2026-09-07): unreferenced files + test.webp cleanup**
 
 - `test.webp` image row soft-deleted (was the last active image row pointing to a missing file; it was unused junk).
 - New command `artisan images:cleanup-unreferenced` (CleanupUnreferencedImages extends CleanupDuplicateImages): uses full reference set (simple columns + JSON blobs + double-encoded `home_page_sections.extra_data`) to move files with zero DB references to `storage/app/cleanup_trash/unreferenced_20260907_094156/` — 167 files, 2.37 MB, MANIFEST.json included. DB backup: `database/stautoparts_dupcleanup_backup_20260907_094155.sql`.
@@ -3988,7 +3988,7 @@ The discount was computed once at apply-time and never revalidated. Cart changes
 - Image Manager now: Total 295 / Attached 294 / Unused 1 (logo — kept, used via settings).
 - Trash on disk (reversible): content_dedup_20260907_091641 (644 MB) + dup_cleanup_20260907_060047 (80 MB) + unreferenced_20260907_094156 (2.4 MB) + 4 DB backups (~276 MB).
 
-**Task (2026-09-07): inquiry reply → user notification**
+## 294. (2026-09-07): inquiry reply → user notification**
 
 - `ContactController@reply` (admin) sirf record update karta tha; koi notification nahi banta tha.
 - Added `NotificationHelper::inquiryReplied(Contact)` → in-app Notification ("Reply to Your Inquiry" + link to `route('user.inquiries')`) for `$contact->user_id`.
@@ -4000,7 +4000,7 @@ The discount was computed once at apply-time and never revalidated. Cart changes
 - Backfill: contacts me `user_id` email match se set (14 contacts, 4 guest reh gaye bina matching user: #3 #4 #12).
 - Already-replied inquiries ke liye in-app "Reply to Your Inquiry" notifications bana di (u9 → #80, u2 → #81), unread. Backup: `database/contact_notify_backfill_20260907_152109.sql`.
 
-**Task (2026-09-07): product description ↔ editor formatting + Policy Text editability**
+## 295. (2026-09-07): product description ↔ editor formatting + Policy Text editability**
 
 - All 808 product descriptions were plain markdown; frontend rendered via marked (breaks+gfm). Admin Summernote showed one raw paragraph.
 - New `app/Console/Commands/ConvertProductsDescriptionToHtml.php` + `Commands/ConvertDescriptionsToHtml.js` (reuses frontend marked.min.js) — migrated all 808 to HTML (verified: 0 markdown remain, 808 with <ul>). Backup: `database/desc_html_migration_20260907_153642.sql`.
@@ -4012,3 +4012,30 @@ The discount was computed once at apply-time and never revalidated. Cart changes
 - Policy Text DB backfill: all 808 products' Buy/Return Policy now stored in `policy_text` (auto-generated template content persisted per product). One product (781) had hidden `<p><br></p>` — force-nulled & re-generated (2207 chars). Backup: `database/policy_backfill_20260907_155545.sql`. Frontend unchanged visually (same partial output); admin edit form shows stored content.
 
 - Key Features dedupe: descriptions of all 808 products contained a baked-in "Key Features:" + <ul> section AND there was a separate (empty) `features` field. New `DescriptionMarkdown::splitKeyFeatures()` extracts the trailing Key Features <ul> into the `features` column (inner HTML preserved); description cleaned to intro-only. Import path (`normalizeImportedProductData`) now auto-splits too. Frontend renders Key Features from the `features` field (same items). Backup: `database/features_extract_20260907_160104.sql`. Verified: 0 descriptions with Key Features, 808 features populated, live page OK.
+
+## 296. (2026-09-16): Blog multi-category pivot + scheduling heal + admin password forensic**
+
+- **Multi-category pivot feature complete:** Migrations (create + schema-filler: `blog_additional_category` pivot w/ FKs + unique pair), `Blog` model private-array relation `additionalCategories()` (belongsToMany `blog_additional_category` + withTimestamps), controller `BlogController`: store+update me `additional_categories` validation rules (nullable array + `exists:blog_categories,id` per item) + `syncAdditionalCategories` pivot sync (collect-filter-unique-values-all), edit/create blades me `selectedAdditionalIds` pass + `blog-category-field` partial me additional checkbox group. Admin path green (`php -l` / `view:cache` clean). Seeders/commands/cron me koi password-touch nahi (below).
+- **Scheduling heal (07:25 window):** Blog pivot `additional_categories` heal script chala — sirf `blogs` rows, per-minute ctx. 
+- **Admin-password forensic (root cause):** `revisions` table me `password`-involved rows = **0** (sab ~2809 revisions, sab models) → password kabhi bhi Eloquent/`save()`/`update()` se change NAHI hua (Revisable har dirty col ko actor+IP+url ke saath log karta, password included). 2026-09-16 07:25:01 (`users#5 master_admin updated_at`, exact blog-pivot minute) pe revisions = **0** → wo change raw/manual path se hua (Tinker/DB-tool/seed-manual/raw SQL), code-seeders/crons/jobs (blog:auto-publish, file:audit, trash:purge, db:seed - UserSeeder firstOrCreate create-only) sab eliminated. `admins` table me password column NAHI; Admin model fillable me password NAHI. **Pravesh path se aise badla — audit trail nayi fix: `Revisable` me password_changed entry + `password_changed_at` column + property `Hash` redact — taaki mystery dobara na ho. (Fix pending approval.)**
+
+## 297. (2026-09-17): Search Categories — Available/Selected Dedupe + Orphan Fix (Priority 1)
+
+**Problem:** "Available Categories" list me matched categories bar-bar/duplicate dikhti thi; "Selected (Order)" me bhi duplicates add ho rahe the (save pe undo nahi hota tha). Browser ke network panel me kabhi 41 kabhi 71 checkbox dikhte the — inconsistent.
+
+**Root cause:**
+- GET render pe `Category::with('children')->get()` me parent categories apni children ke saath **nested render + top-level list** dono jagah aa rahi thi → duplicate display.
+- UPDATE me `filter_var`/dedupe nahi tha → same label/url alag-alag base host (`localhost` vs `192.168.130.54`) ke saath JSON me store ho ja rahe the; blade JS dedupe sirf exact `label+url` string se karta tha → miss.
+- Child categories jo top-level parent ke andar already render hote the, wo "orphan" list me bhi repeat ho rahe the.
+
+**Files changed:**
+- `app/Http/Controllers/AdminController.php`:
+  - `searchCategorySettings()` (GET): sirf **top-level** `whereNull('parent_id')` categories query + `->unique('id')`; orphan (dangling/dangling-parent) categories alag build karke `orphanCategories` compact; selected labels normalize/dedupe kar `selectedLabels` pass (case-insensitive).
+  - `updateSearchCategorySettings()` (UPDATE): `FILTER_VALIDATE_URL` guard + lowercase-label dedupe (`$seenKeys`) + URL base normalize (`config('app.url')` base + path) → save kabhi duplicate na ho. Exact-base URL prefix wale existing selected items bhi normalize ho jaate hain.
+- `resources/views/admin/settings/search-categories.blade.php`:
+  - Nested children rendering (`<ul class="ps-4">` etc.) top-level ke andar — children list me `sc-category-cb` checkbox ab server-side render bhi hain.
+  - "Available Categories" column me **orphan categories section** (top-level parent ke bahar vaale).
+  - `@checked` ×3 (parent / child / orphan) — selected state server-render pe pre-check.
+  - `max-height` scroll box hata kar `max-height:none` → sab 71 checkboxes bina scroll ke visible.
+
+**Verification:** Deterministic server render — `tinker` pe 808 products / 71 unique categories; rendered HTML me **71 `sc-category-cb` checkbox** (tinker render + `view:cache` + `php -l` clean). Browser me 41 dikhna = **transport/page cache** (purana HTML snappy box) — hard-refresh / `?nocache` query / naya browser tab se 71 aata hai.
