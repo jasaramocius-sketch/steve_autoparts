@@ -695,13 +695,48 @@ class AdminController extends Controller
     public function searchCategorySettings()
     {
         $settings = Setting::getAllAsArray();
-        $categories = Category::with('children')->orderBy('name')->get();
+        $categories = Category::with('children')
+            ->whereNull('parent_id')
+            ->orderBy('name')
+            ->get()
+            ->unique('id')
+            ->values();
+        $categoryIds = Category::query()->pluck('id');
+        $orphanCategories = Category::with('children')
+            ->whereNotNull('parent_id')
+            ->whereNotIn('parent_id', $categoryIds)
+            ->orderBy('name')
+            ->get()
+            ->unique('id')
+            ->values();
+
         $selected = json_decode((string) ($settings['search_category_menu'] ?? '[]'), true);
         if (! is_array($selected)) {
             $selected = [];
         }
+        $appBase = rtrim((string) config('app.url'), '/');
+        $normalizedSelected = [];
+        $seen = [];
+        foreach ($selected as $item) {
+            if (! is_array($item)) {
+                continue;
+            }
+            $label = trim((string) ($item['label'] ?? ''));
+            $url = trim((string) ($item['url'] ?? ''));
+            $key = mb_strtolower($label);
+            if ($label === '' || $url === '' || isset($seen[$key])) {
+                continue;
+            }
+            $seen[$key] = true;
+            if (preg_match('#^https?://[^/]+(/.*)$#', $url, $m)) {
+                $url = $appBase . $m[1];
+            }
+            $normalizedSelected[] = ['label' => $label, 'url' => $url];
+        }
+        $selected = $normalizedSelected;
+        $selectedLabels = collect($normalizedSelected)->pluck('label');
 
-        return view('admin.settings.search-categories', compact('settings', 'categories', 'selected'));
+        return view('admin.settings.search-categories', compact('settings', 'categories', 'selected', 'selectedLabels', 'orphanCategories'));
     }
 
     public function updateSearchCategorySettings(Request $request)
@@ -711,7 +746,9 @@ class AdminController extends Controller
             return back()->with('error', 'Invalid search categories data.');
         }
 
+        $appBase = rtrim((string) config('app.url'), '/');
         $searchCategories = [];
+        $seenKeys = [];
         foreach ($items as $item) {
             if (! is_array($item)) {
                 continue;
@@ -721,7 +758,22 @@ class AdminController extends Controller
             if ($label === '' || $url === '') {
                 continue;
             }
-            $searchCategories[] = ['label' => $label, 'url' => $url];
+            if (! filter_var($url, FILTER_VALIDATE_URL)) {
+                continue;
+            }
+            if (str_starts_with($url, $appBase)) {
+                $normalizedUrl = $url;
+            } elseif (preg_match('#^https?://[^/]+(/.*)$#', $url, $m)) {
+                $normalizedUrl = $appBase . $m[1];
+            } else {
+                $normalizedUrl = $appBase . '/' . ltrim($url, '/');
+            }
+            $key = mb_strtolower($label);
+            if (isset($seenKeys[$key])) {
+                continue;
+            }
+            $seenKeys[$key] = true;
+            $searchCategories[] = ['label' => $label, 'url' => $normalizedUrl];
         }
 
         Setting::set('search_category_menu', json_encode($searchCategories));

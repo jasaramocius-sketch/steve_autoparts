@@ -30,14 +30,15 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold small text-muted text-uppercase">Available Categories</label>
                                 <input type="text" id="searchCategoriesFilter" class="form-control mb-2" placeholder="Filter categories...">
-                                <div class="border rounded p-3" style="max-height:420px;overflow-y:auto;background:#f8f9fa;">
+                                <div class="border rounded p-3" style="max-height:none;overflow-y:visible;background:#f8f9fa;">
                                     <ul class="list-unstyled mb-0">
                                         @forelse($categories as $cat)
                                         <li>
                                             <label class="form-check-label sc-checkbox">
                                                 <input type="checkbox" class="form-check-input me-2 sc-category-cb"
                                                        data-label="{{ $cat->name }}"
-                                                       data-url="{{ route('category', $cat->slug) }}">
+                                                       data-url="{{ route('category', $cat->slug) }}"
+                                                       @checked($selectedLabels->contains($cat->name))>
                                                 {{ $cat->name }}
                                             </label>
                                             @if($cat->children->count())
@@ -47,7 +48,8 @@
                                                     <label class="form-check-label sc-checkbox">
                                                         <input type="checkbox" class="form-check-input me-2 sc-category-cb"
                                                                data-label="{{ $child->name }}"
-                                                               data-url="{{ route('category', $child->slug) }}">
+                                                               data-url="{{ route('category', $child->slug) }}"
+                                                               @checked(collect($selected)->pluck('label')->contains($child->name))>
                                                         {{ $child->name }}
                                                     </label>
                                                 </li>
@@ -59,6 +61,22 @@
                                         <li class="text-muted">No active categories found. Create categories first.</li>
                                         @endforelse
                                     </ul>
+                                    @if($orphanCategories->count())
+                                    <div class="mt-3 fw-semibold small text-muted text-uppercase">Other Categories</div>
+                                    <ul class="list-unstyled mb-0">
+                                        @foreach($orphanCategories as $orphan)
+                                        <li>
+                                            <label class="form-check-label sc-checkbox">
+                                                <input type="checkbox" class="form-check-input me-2 sc-category-cb"
+                                                       data-label="{{ $orphan->name }}"
+                                                       data-url="{{ route('category', $orphan->slug) }}"
+                                                       @checked($selectedLabels->contains($orphan->name))>
+                                                {{ $orphan->name }}
+                                            </label>
+                                        </li>
+                                        @endforeach
+                                    </ul>
+                                    @endif
                                 </div>
                                 <button type="button" class="btn btn-primary steve-btn gap-1 mt-2" id="scAddSelected">
                                     <i class="fas fa-plus me-1"></i> Add Selected to Dropdown
@@ -70,7 +88,7 @@
                                 <label class="form-label fw-semibold small text-muted text-uppercase">Selected (Order)</label>
                                 <div id="scSelectedContainer" class="border rounded p-3 gap-1 d-flex flex-direction-col" style="min-height:160px;background:#fff;">
                                     @if(count($selected))
-                                        @foreach($selected as $item)
+                                    @foreach(collect($selected)->unique('label')->values() as $item)
                                             <div class="sc-selected-item" data-label="{{ $item['label'] ?? '' }}" data-url="{{ $item['url'] ?? '' }}">
                                                 <span class="sc-handle" title="Drag to reorder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
                                                 <span class="sc-label">{{ $item['label'] ?? '' }}</span>
@@ -170,7 +188,7 @@
 
     function addItem(label, url) {
         var exists = Array.prototype.some.call(selectedContainer.querySelectorAll('.sc-selected-item'), function(row) {
-            return row.getAttribute('data-label') === label && row.getAttribute('data-url') === url;
+            return row.getAttribute('data-label') === label;
         });
         if (exists) return;
 
