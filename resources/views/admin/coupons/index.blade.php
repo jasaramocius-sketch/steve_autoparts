@@ -35,7 +35,7 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th class="ps-3"><a href="{{ sortUrl('id', $sortBy, $sortDir) }}" class="text-decoration-none text-dark"># {!! sortIndicator('id', $sortBy, $sortDir) !!}</a></th>
+                        <th class="ps-3"><a href="{{ sortUrl('id', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">No. {!! sortIndicator('id', $sortBy, $sortDir) !!}</a></th>
                         <th><a href="{{ sortUrl('code', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Code {!! sortIndicator('code', $sortBy, $sortDir) !!}</a></th>
                         <th><a href="{{ sortUrl('type', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Type {!! sortIndicator('type', $sortBy, $sortDir) !!}</a></th>
                         <th><a href="{{ sortUrl('value', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Value {!! sortIndicator('value', $sortBy, $sortDir) !!}</a></th>
@@ -49,7 +49,7 @@
                 <tbody>
                     @forelse($coupons as $coupon)
                     <tr>
-                        <td class="ps-3">{{ $coupon->id }}</td>
+                        <td class="ps-3">{{ $coupons->firstItem() + $loop->index }}</td>
                         <td><strong>{{ $coupon->code }}</strong></td>
                         <td>{{ ucfirst($coupon->type) }}</td>
                         <td>

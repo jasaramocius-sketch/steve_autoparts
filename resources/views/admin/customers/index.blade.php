@@ -36,7 +36,7 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th class="ps-3"><a href="{{ sortUrl('id', $sortBy, $sortDir) }}" class="text-decoration-none text-dark"># {!! sortIndicator('id', $sortBy, $sortDir) !!}</a></th>
+                        <th class="ps-3"><a href="{{ sortUrl('id', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">No. {!! sortIndicator('id', $sortBy, $sortDir) !!}</a></th>
                         <th><a href="{{ sortUrl('name', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Name {!! sortIndicator('name', $sortBy, $sortDir) !!}</a></th>
                         <th><a href="{{ sortUrl('email', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Email Address {!! sortIndicator('email', $sortBy, $sortDir) !!}</a></th>
                         <th>Phone</th>
@@ -50,7 +50,7 @@
                 <tbody>
                     @forelse($customerList as $c)
                     <tr>
-                        <td class="ps-3">{{ $c->id }}</td>
+                        <td class="ps-3">{{ $customerList->firstItem() + $loop->index }}</td>
                         <td class="user-name-tb">{{ $c->name }}</td>
                         <td>{{ $c->email }}</td>
                         <td>{{ $c->phone ?? '—' }}</td>

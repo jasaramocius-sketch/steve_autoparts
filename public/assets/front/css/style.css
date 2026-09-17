@@ -1205,7 +1205,15 @@ p.text-lg {
     width: 100%;
   }
 }
-
+.min-width-30{
+  min-width: 30px;
+}
+.min-height-30{
+  min-height: 30px;
+}
+.width-25{
+  width: 25%;
+}
 .info-bar-btn {
   padding: 2px 8px;
   font-size: 16px;
@@ -2984,41 +2992,52 @@ p.text-lg {
 }
 
 .gs-main-single-blog .right-side-content .date-wrapper {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 32px;
-  margin-top: 16px;
+  gap: .375rem;
+  padding: .26rem .8rem;
+  margin-bottom: .75rem;
+  border-radius: 999px;
+  background: rgba(208, 42, 3, .08);
+  color: var(--primary);
+  font-size: .75rem;
+  font-weight: 600;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  line-height: 1.2;
+  -webkit-transition: all .3s ease-in;
+  -o-transition: all .3s ease-in;
+  transition: all .3s ease-in;
 }
 
 .gs-main-single-blog .right-side-content .date-wrapper .date-text {
-  font-size: 18px;
+  font-size: .75rem;
   color: #4c3533;
 }
 
-@media (max-width:1289.99px) {
+/* @media (max-width:1289.99px) {
   .gs-main-single-blog .right-side-content .date-wrapper {
     margin-bottom: 24px;
   }
-}
+} */
 
 @media (max-width:1239.99px) {
   .gs-main-single-blog .right-side-content .title {
     margin-bottom: 10px;
   }
 
-  .gs-main-single-blog .right-side-content .date-wrapper {
+  /* .gs-main-single-blog .right-side-content .date-wrapper {
     margin-bottom: 20px;
     margin-top: 10px;
   }
 
   .gs-main-single-blog .right-side-content .date-wrapper .date-text {
-    font-size: 16px;
-  }
+    font-size: 12px;
+  } */
 }
 
 .gs-main-single-blog:hover .right-side-content .title {
@@ -3217,6 +3236,7 @@ p.text-lg {
   flex-wrap: wrap;
   gap: .5rem;
   margin: .5rem 0 1rem;
+  text-transform: capitalize;
 }
 
 .gs-main-single-blog .blog-card-tag {
@@ -3248,7 +3268,7 @@ p.text-lg {
   align-items: center;
   gap: .375rem;
   padding: .26rem .8rem;
-  margin-bottom: .875rem;
+  margin-bottom: .75rem;
   border-radius: 999px;
   background: rgba(208, 42, 3, .08);
   color: var(--primary);
@@ -4711,6 +4731,7 @@ tbody tr:last-child {
 .form-select {
   background-image: none;
   padding-right: 2.25rem;
+  cursor: pointer;
 }
 
 .form-select-wrapper::after {
@@ -17909,3 +17930,11 @@ td.admin-product-name a {
 .flex-direction-col{
   flex-direction: column !important;
 }
+/* .Go-to-page{
+  margin-top: -55px;
+}
+@media (max-width: 999px) {
+  .Go-to-page{
+    margin-top: 0px;
+  }
+} */

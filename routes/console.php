@@ -15,3 +15,8 @@ Schedule::command('file:audit --truncate-diffs --max-archive-days=90')
 Schedule::command('trash:purge --days=15')
     ->dailyAt('03:30')
     ->withoutOverlapping();
+
+Schedule::call(fn () => App\Models\Blog::autoPublishDueScheduled())
+    ->name('blog:auto-publish-due-scheduled')
+    ->everyMinute()
+    ->withoutOverlapping();

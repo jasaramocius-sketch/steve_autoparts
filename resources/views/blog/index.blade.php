@@ -79,7 +79,7 @@
           </div>
 
           <!-- Popular Tags Widget -->
-          @if($tags->count())
+          <!-- @if($tags->count())
           <div class="single-blog-widget popular-tags">
             <h5 class="widget-title">Popular Tags</h5>
             <ul class="cat-wrapper">
@@ -88,7 +88,7 @@
               @endforeach
             </ul>
           </div>
-          @endif
+          @endif -->
 
           <!-- Clear Filters -->
           @if(!empty(request('search')) || isset($category) || isset($tag))
@@ -134,33 +134,38 @@
             </a>
           </div>
           <div class="right-side-content">
+            <div class="d-flex gap-1">
             @if($blog->category)
             <a href="{{ route('blog.category', $blog->category->slug) }}" class="blog-card-category">
               <i class="fas fa-folder me-1"></i> {{ $blog->category->name }}
             </a>
             @endif
+            <div class="date-wrapper">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none">
+                <path d="M8 2V4M16 2V4M3 10.5H21M5 4H19C20.1046 4 21 4.89543 21 6V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V6C3 4.89543 3.89543 4 5 4Z" stroke="#292D32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="date-text">{{ $blog->post_date->format('M d - Y') }}</span>
+            </div>
+            </div>
             <h4>
               <a class="title" href="{{ route('blog.show', $blog->slug) }}">
                 {{ Str::limit($blog->title, 70) }}
               </a>
             </h4>
-            <p class="des">
+            <p class="des pb-4">
               {{ Str::limit(strip_tags(html_entity_decode($blog->details ?? '')), 180) }}
             </p>
-            <div class="date-wrapper">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M8 2V4M16 2V4M3 10.5H21M5 4H19C20.1046 4 21 4.89543 21 6V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V6C3 4.89543 3.89543 4 5 4Z" stroke="#292D32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <span class="date-text">{{ $blog->post_date->format('M d - Y') }}</span>
-            </div>
-            @if($blog->tags->count())
+            <!-- @if($blog->tags->count())
             <div class="blog-card-tags">
               @foreach($blog->tags as $blogTag)
               <a href="{{ route('blog.tag', $blogTag->slug) }}" class="blog-card-tag">{{ $blogTag->name }}</a>
               @endforeach
             </div>
-            @endif
-            <a class="template-btn steve-btn outlinee-btn" href="{{ route('blog.show', $blog->slug) }}">read more</a>
+            @endif -->
+            <a href="{{ route('blog.show', $blog->slug) }}" class="a-tag-hover-color">
+              Read More
+              <i class="fas fa-arrow-right ms-1"></i> 
+            </a>  
           </div>
         </div>
         @empty
@@ -171,7 +176,7 @@
 
         <!-- Pagination -->
         @if($blogs->hasPages())
-        <div class="d-flex justify-content-center mt-60">
+        <div class="d-flex justify-content-center mt-30">
           {{ $blogs->links('vendor.pagination.gs-pagination') }}
         </div>
         @endif

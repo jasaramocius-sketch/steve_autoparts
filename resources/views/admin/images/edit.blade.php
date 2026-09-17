@@ -19,14 +19,14 @@
                     <hr>
                     <div class="table-responsive">
                     <table class="table table-sm table-borderless text-start small mb-0 responsive-table">
-                        <tr><th class="text-muted">Filename</th><td data-label="Filename">{{ $image->original_name }}</td></tr>
-                        <tr><th class="text-muted">URL</th><td class="text-break" data-label="URL"><a href="{{ $image->thumb_url }}" target="_blank"><code>{{ $image->thumb_url }}</code></a></td></tr>
-                        <tr><th class="text-muted">MIME Type</th><td data-label="MIME Type">{{ $image->mime_type }}</td></tr>
-                        <tr><th class="text-muted">Size</th><td data-label="Size">{{ $image->size_in_kb }}</td></tr>
-                        <tr><th class="text-muted">Dimensions</th><td data-label="Dimensions">{{ $image->width }} x {{ $image->height }} px</td></tr>
+                        <tr><th class="text-muted width-25">Filename</th><td data-label="Filename">{{ $image->original_name }}</td></tr>
+                        <tr><th class="text-muted width-25">URL</th><td class="text-break" data-label="URL"><a href="{{ $image->thumb_url }}" target="_blank"><code class="text-break">{{ $image->thumb_url }}</code></a></td></tr>
+                        <tr><th class="text-muted width-25">MIME Type</th><td data-label="MIME Type">{{ $image->mime_type }}</td></tr>
+                        <tr><th class="text-muted width-25">Size</th><td data-label="Size">{{ $image->size_in_kb }}</td></tr>
+                        <tr><th class="text-muted width-25">Dimensions</th><td data-label="Dimensions">{{ $image->width }} x {{ $image->height }} px</td></tr>
                         <tr>
-                            <th class="text-muted align-top">Attached To</th>
-                            <td data-label="Attached To">
+                            <th class="text-muted align-top width-25">Attached To</th>
+                            <td data-label="">
                                 @forelse($usageLocations as $loc)
                                     <div class="mb-1">
                                         @if(!empty($loc['route']))
@@ -35,7 +35,7 @@
                                             <span>{{ $loc['type'] }} #{{ $loc['id'] }}</span>
                                         @endif
                                         @if(!empty($loc['label']))
-                                            <span class="text-muted">({{ $loc['label'] }})</span>
+                                            <span class="text-muted width-25">({{ $loc['label'] }})</span>
                                         @endif
                                         @if(!empty($loc['usages']))
                                             <small class="text-success">— {{ implode(', ', $loc['usages']) }}</small>
@@ -74,7 +74,7 @@
                     <div class="card-body text-center">
                         <form action="{{ route('admin.images.convert', $image->id) }}" method="POST">
                             @csrf
-                            <button type="submit" class="btn btn-success w-100 steve-btn">
+                            <button type="submit" class="btn btn-success w-100 steve-btn gap-1">
                                 <i class="fas fa-exchange-alt"></i> Convert to WebP
                             </button>
                         </form>

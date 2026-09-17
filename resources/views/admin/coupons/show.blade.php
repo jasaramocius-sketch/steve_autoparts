@@ -73,7 +73,7 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th class="ps-3">Order #</th>
+                        <th class="ps-3">Order No.</th>
                         <th>Customer</th>
                         <th>Date</th>
                         <th>Products (with coupon discount)</th>

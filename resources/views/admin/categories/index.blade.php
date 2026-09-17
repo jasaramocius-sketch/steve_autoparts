@@ -14,13 +14,10 @@
 
 <div class="d-flex justify-content-between align-items-center mb-3 cat-topbar">
     <div class=""></div>
-
-    <div class="d-flex gap-2">
-        
+    <div class="d-flex gap-2">        
         <a href="{{ route('admin.categories.create') }}" class="btn btn-primary"><i class="fas fa-plus"></i> Add Category</a>
     </div>
 </div>
-
 <ul class="nav nav-tabs">
     <li class="nav-item">
         <a class="nav-link {{ !request()->has('trashed') ? 'active' : '' }}" href="{{ route('admin.categories.index') }}">Active</a>
@@ -35,10 +32,8 @@
         ])
     </li>
 </ul>
-
 <div class="card border-0 shadow-sm">
     <div class="card-body p-0">
-
         <div class="d-flex justify-content-between align-items-center p-2 cat-controls">
             <div class="d-flex align-items-center gap-2">
                 <span class="text-muted small">Show</span>
@@ -53,14 +48,12 @@
                 Showing {{ $categories->firstItem() }}-{{ $categories->lastItem() }} of {{ $categories->total() }}
             </div>
         </div>
-
         <div class="table-responsive">
         <table class="table table-hover mb-0">
-
             <thead class="table-light">
             <tr>
                 @if(request()->has('trashed'))
-                <th>ID</th>
+                <th>No.</th>
                 <th>Image</th>
                 <th>Name</th>
                 <th>Slug</th>
@@ -68,7 +61,7 @@
                 <th>Parent Category</th>
                 <th width="200">Action</th>
                 @else
-                <th><a href="{{ sortUrl('id', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">ID {!! sortIndicator('id', $sortBy, $sortDir) !!}</a></th>
+                <th><a href="{{ sortUrl('id', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">No. {!! sortIndicator('id', $sortBy, $sortDir) !!}</a></th>
                 <th>Image</th>
                 <th><a href="{{ sortUrl('name', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Name {!! sortIndicator('name', $sortBy, $sortDir) !!}</a></th>
                 <th>Slug</th>
@@ -79,26 +72,18 @@
                 @endif
             </tr>
             </thead>
-
             <tbody>
-
             @forelse($categories as $category)
-
             <tr class="categoryRow">
-
-                <td>{{ $category->id }}</td>
-
+                <td>{{ $categories->firstItem() + $loop->index }}</td>
                 <td>
                     <img src="{{ storedImageUrl($category->image, 'assets/images/categories') }}"
                         width="50"
                         alt="{{ $category->name }}"
                         onerror="this.onerror=null;this.src='{{ asset('assets/images/placeholder.png') }}'">
                 </td>
-
                 <td>{{ $category->name }}</td>
-
                 <td>{{ $category->slug }}</td>
-
                 <td>
                     @if(request()->has('trashed'))
                         <span class="badge bg-light text-secondary border border-secondary-subtle">Deleted</span>
@@ -113,13 +98,10 @@
                         </form>
                     @endif
                 </td>
-
                 <td>{{ $category->products_count ?? 0 }}</td>
-
                 <td>
                     {{ $category->parent_category?->name ??  'None' }}
                 </td>
-
                 <td class="table-action-col">
                   <div class="action-buttons">
                     @if(request()->has('trashed'))
@@ -140,24 +122,18 @@
                     @endif
                     </div>
                 </td>
-
             </tr>
-
             @empty
             <tr>
                 <td colspan="8" class="text-center py-4 text-muted">{{ request()->has('trashed') ? 'Trash is empty.' : 'No results found.' }}</td>
             </tr>
             @endforelse
-
             </tbody>
-
         </table>
         </div>
-
         @if($categories->hasPages())
             <div class="d-flex justify-content-center py-3">{{ $categories->links('vendor.pagination.gs-pagination') }}</div>
         @endif
-
     </div>
 </div>
 

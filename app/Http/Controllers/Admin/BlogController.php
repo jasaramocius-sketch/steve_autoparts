@@ -67,6 +67,8 @@ class BlogController extends Controller
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'image_url' => 'nullable|url',
             'blog_category_id' => 'nullable|exists:blog_categories,id',
+            'additional_categories' => 'nullable|array',
+            'additional_categories.*' => 'nullable|exists:blog_categories,id',
             'new_category' => 'nullable|string|max:255',
             'new_category_parent_id' => 'nullable|exists:blog_categories,id',
             'published_at' => 'required_if:status,scheduled|nullable|date',
@@ -111,6 +113,7 @@ class BlogController extends Controller
         $blog = Blog::create($data);
 
         $this->syncTags($request, $blog);
+        $this->syncAdditionalCategories($request, $blog);
 
         if ($request->filled('image_from_manager')) {
             Image::markUsed($request->image_from_manager, $blog);
@@ -143,6 +146,8 @@ class BlogController extends Controller
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'image_url' => 'nullable|url',
             'blog_category_id' => 'nullable|exists:blog_categories,id',
+            'additional_categories' => 'nullable|array',
+            'additional_categories.*' => 'nullable|exists:blog_categories,id',
             'new_category' => 'nullable|string|max:255',
             'new_category_parent_id' => 'nullable|exists:blog_categories,id',
             'published_at' => 'required_if:status,scheduled|nullable|date',
@@ -181,6 +186,7 @@ class BlogController extends Controller
         $blog->update($data);
 
         $this->syncTags($request, $blog);
+        $this->syncAdditionalCategories($request, $blog);
 
         if ($request->filled('image_from_manager')) {
             Image::markUsed($request->image_from_manager, $blog);
@@ -229,7 +235,14 @@ class BlogController extends Controller
             $tagIds[] = $tag->id;
         }
 
-        $blog->tags()->sync($tagIds);
+            $blog->tags()->sync($tagIds);
+    }
+
+    protected function syncAdditionalCategories(Request $request, Blog $blog)
+    {
+        $blog->additionalCategories()->sync(
+            collect($request->input('additional_categories', []))->filter()->unique()->values()->all()
+        );
     }
 
     public function toggleStatus($id)

@@ -35,7 +35,7 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th class="ps-3"><a href="{{ sortUrl('id', $sortBy, $sortDir) }}" class="text-decoration-none text-dark"># {!! sortIndicator('id', $sortBy, $sortDir) !!}</a></th>
+                        <th class="ps-3"><a href="{{ sortUrl('id', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">No. {!! sortIndicator('id', $sortBy, $sortDir) !!}</a></th>
                         <th>Image</th>
                         <th><a href="{{ sortUrl('name', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Name {!! sortIndicator('name', $sortBy, $sortDir) !!}</a></th>
                         <th>Website</th>
@@ -46,7 +46,7 @@
                 <tbody>
                     @forelse($brands as $brand)
                     <tr>
-                        <td class="ps-3">{{ $brand->id }}</td>
+                        <td class="ps-3">{{ $brands->firstItem() + $loop->index }}</td>
                         <td>
                             @if($brand->image)
                                 <img src="{{ storedImageUrl($brand->image, 'assets/images/brands') }}" width="50" height="50" class="admin-image-thumb" onerror="this.onerror=null;this.src='{{ asset('assets/images/placeholder.png') }}'">

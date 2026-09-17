@@ -1,5 +1,6 @@
 <div class="item-pagination-container px-1">
 @if ($paginator->hasPages())
+    @include('vendor.pagination._go-to-page', ['paginator' => $paginator])
     <div class="small text-muted">
         {!! __('Showing') !!}
         <span class="fw-semibold">{{ $paginator->firstItem() }}</span>

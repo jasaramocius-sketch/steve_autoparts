@@ -45,6 +45,7 @@ class Kernel extends HttpKernel
             SubstituteBindings::class,
             VerifyActiveUser::class,
             SetPageAttributes::class,
+            PublishDueScheduledBlogs::class,
         ],
 
         'api' => [

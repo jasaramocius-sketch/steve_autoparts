@@ -125,7 +125,7 @@
                         <th class="ps-3">
                             <input type="checkbox" class="form-check-input m-0 bulk-select-all" aria-label="Select all on this page">
                         </th>
-                        <th><a href="{{ sortUrl('id', $sortBy, $sortDir) }}" class="text-decoration-none text-dark"># {!! sortIndicator('id', $sortBy, $sortDir) !!}</a></th>
+                        <th><a href="{{ sortUrl('id', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">No. {!! sortIndicator('id', $sortBy, $sortDir) !!}</a></th>
                         <th><a href="{{ sortUrl('file_path', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">File {!! sortIndicator('file_path', $sortBy, $sortDir) !!}</a></th>
                         <th><a href="{{ sortUrl('event', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Event {!! sortIndicator('event', $sortBy, $sortDir) !!}</a></th>
                         <th>User</th>
@@ -139,7 +139,7 @@
                         <td class="ps-3">
                             <input type="checkbox" class="form-check-input m-0 bulk-select-row" value="{{ $rev->id }}" aria-label="Select revision {{ $rev->id }}">
                         </td>
-                        <td>{{ $rev->id }}</td>
+                        <td>{{ $fileRevisions->firstItem() + $loop->index }}</td>
                         <td class="file-path-cell">
                             <code>{{ $rev->file_path }}</code>
                         </td>

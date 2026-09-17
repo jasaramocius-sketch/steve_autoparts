@@ -61,6 +61,18 @@ class Blog extends Model
         });
     }
 
+    /**
+     * Koi scheduled blog jiska publish-time nikal gaya ho usse turant "published"
+     * transition kar deta hai (status + DB dono) — bina cron ke, cheap idempotent UPDATE.
+     */
+    public static function autoPublishDueScheduled(): void
+    {
+        static::where('status', 'scheduled')
+            ->whereNotNull('published_at')
+            ->where('published_at', '<=', now())
+            ->update(['status' => 'published']);
+    }
+
     public function getPostDateAttribute(): Carbon
     {
         return $this->published_at ?? $this->created_at;

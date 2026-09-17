@@ -2729,3 +2729,11 @@ button.add-to-cart,
     padding: 2px 6px;
   }
 }
+
+
+/* 2026-09-16 (Task #296): dropdown-select pointer cursor */
+.form-select:not([disabled]) { cursor: pointer; }
+
+
+/* 2026-09-16 (Task #296): native <option> list — open dropdown lines bhi pointer (Chrome/FF; Safari native) */
+option:hover { cursor: pointer; }

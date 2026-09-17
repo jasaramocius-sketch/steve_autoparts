@@ -84,7 +84,7 @@
                         <th class="ps-3">
                             <input type="checkbox" class="form-check-input m-0 bulk-select-all" aria-label="Select all on this page">
                         </th>
-                        <th><a href="{{ sortUrl('id', $sortBy, $sortDir) }}" class="text-decoration-none text-dark"># {!! sortIndicator('id', $sortBy, $sortDir) !!}</a></th>
+                        <th><a href="{{ sortUrl('id', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">No. {!! sortIndicator('id', $sortBy, $sortDir) !!}</a></th>
                         <th>User</th>
                         <th><a href="{{ sortUrl('model_type', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Model {!! sortIndicator('model_type', $sortBy, $sortDir) !!}</a></th>
                         <th>Record ID</th>
@@ -100,7 +100,7 @@
                         <td class="ps-3">
                             <input type="checkbox" class="form-check-input m-0 bulk-select-row" value="{{ $rev->id }}" aria-label="Select revision {{ $rev->id }}">
                         </td>
-                        <td>{{ $rev->id }}</td>
+                        <td>{{ $revisions->firstItem() + $loop->index }}</td>
                         <td>
                             @if($rev->user)
                                 {{ $rev->user->name }}

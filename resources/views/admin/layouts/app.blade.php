@@ -36,6 +36,8 @@
             cursor: pointer;
             font-size: 13px;
             padding: 7px 12px;
+            border-radius: 5px 5px 0 0;
+            width:65px;
         }
         .admin-editor-tab.active {
             background: #ffffff;
@@ -54,6 +56,12 @@
         }
         .admin-rich-editor .tox-edit-area__iframe {
             min-height: 220px;
+        }
+        .tox .tox-toolbar__group{
+            padding: 0px !important;
+        }
+        .tox .tox-toolbar-overlord .tox-toolbar{
+            padding: 0 11px 0 12px;
         }
     </style>
 
@@ -125,8 +133,8 @@
                 content_style: '#tinymce.mce-content-body { padding: 0 !important; } body { font-family: Arial, sans-serif; font-size: 15px; line-height: 1.65; }',
                 setup: function(editor) {
                     editor.ui.registry.addButton('extendedtoolbar', {
-                        text: 'Extended Toolbar',
-                        tooltip: 'Show extended toolbar',
+                        icon: 'more-drawer',
+                        tooltip: 'Extended toolbar',
                         onAction: function() {
                             var toolbar = editor.getContainer().querySelector('.tox-toolbar:nth-child(2)');
                             if (toolbar) toolbar.hidden = !toolbar.hidden;

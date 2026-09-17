@@ -65,7 +65,7 @@
 
                             <tr>
 
-                                <td>{{ $user->id }}</td>
+                                <td>{{ $staffList->firstItem() + $loop->index }}</td>
 
                                 <td>
                                     <img

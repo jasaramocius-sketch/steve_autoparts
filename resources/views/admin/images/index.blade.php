@@ -264,13 +264,8 @@
         </div>
     </form>
 
-    <div class="mt-3 d-flex justify-content-center flex-column align-items-center gap-2">
-        <button type="button" id="load-more-btn" class="btn btn-outline-primary steve-btn px-4 {{ $images->hasMorePages() ? '' : 'd-none' }}"
-                data-next-url="{{ $images->nextPageUrl() }}"
-                data-total="{{ $images->total() }}">
-            <i class="fas fa-sync-alt me-1"></i> Load More
-        </button>
-        <small class="text-muted" id="load-more-info">Showing {{ $images->count() }} of {{ $images->total() }} images</small>
+    <div class="mt-3 d-flex justify-content-center align-items-center flex-wrap">
+        {{ $images->links() }}
     </div>
     @else
     <div class="card border-0 shadow-sm">
@@ -506,45 +501,6 @@
         bulkForm.action = url;
         bulkForm.submit();
     };
-
-    var loadMoreBtn = document.getElementById('load-more-btn');
-    var loadMoreInfo = document.getElementById('load-more-info');
-    if (loadMoreBtn) {
-        loadMoreBtn.addEventListener('click', function() {
-            var nextUrl = loadMoreBtn.getAttribute('data-next-url');
-            if (!nextUrl) return;
-            var originalHtml = loadMoreBtn.innerHTML;
-            loadMoreBtn.disabled = true;
-            loadMoreBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Loading...';
-            fetch(nextUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } })
-                .then(function(r) { return r.json(); })
-                .then(function(res) {
-                    var total = (res && res.total) ? res.total : (loadMoreBtn.getAttribute('data-total') || 0);
-                    if (res && res.html) {
-                        container.insertAdjacentHTML('beforeend', res.html);
-                    }
-                    if (loadMoreInfo) {
-                        var loaded = document.querySelectorAll('#images-container .image-card').length;
-                        if (res && res.next_page_url) {
-                            loadMoreInfo.textContent = 'Showing ' + loaded + ' of ' + total + ' images';
-                        } else {
-                            loadMoreInfo.textContent = 'All ' + total + ' images loaded';
-                        }
-                    }
-                    if (res && res.next_page_url) {
-                        loadMoreBtn.setAttribute('data-next-url', res.next_page_url);
-                        loadMoreBtn.innerHTML = originalHtml;
-                        loadMoreBtn.disabled = false;
-                    } else {
-                        loadMoreBtn.classList.add('d-none');
-                    }
-                })
-                .catch(function() {
-                    loadMoreBtn.innerHTML = originalHtml;
-                    loadMoreBtn.disabled = false;
-                });
-        });
-    }
 
     var savedView = localStorage.getItem('image-manager-view') || 'grid';
     setView(savedView);

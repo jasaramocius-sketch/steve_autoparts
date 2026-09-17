@@ -12,7 +12,7 @@
         .scroll-box::-webkit-scrollbar-thumb:hover {background: var(--hov-primary);}
         .admin-sidebar-scroll-box.scroll-box {direction: ltr;}
         .admin-sidebar .nav-section { font-size:10px; text-transform:uppercase; letter-spacing:1.2px; color:var(--primary); padding:16px 20px 6px; font-weight:600; }
-        .admin-sidebar .nav-item { display:flex; align-items:center; gap:12px; padding:10px 20px; color:rgba(255,255,255,.6); text-decoration:none; font-size:14px; transition:all .15s; border-left:3px solid transparent; }
+        .admin-sidebar .nav-item { display:flex; align-items:center; gap:12px; padding:10px 15px; color:rgba(255,255,255,.6); text-decoration:none; font-size:14px; transition:all .15s; border-left:3px solid transparent; }
         .admin-sidebar .nav-item:hover { background:rgba(255,255,255,.05); color:#fff; }
         .admin-sidebar .nav-item.active { background:rgba(255,255,255,.1); color:#fff; border-left-color:#4bc5e7; }
         .admin-sidebar .nav-item i { width:18px; text-align:center; font-size:15px; }

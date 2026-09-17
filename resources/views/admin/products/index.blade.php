@@ -63,7 +63,7 @@
                 <thead class="table-light">
                     <tr>
                         <th class="ps-3"><a href="{{ sortUrl('id', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">
-                            # {!! sortIndicator('id', $sortBy, $sortDir) !!}
+                            No. {!! sortIndicator('id', $sortBy, $sortDir) !!}
                         </a></th>
                         <th>Image</th>
                         <th><a href="{{ sortUrl('name', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">
@@ -92,7 +92,7 @@
                 <tbody>
                     @forelse($products as $product)
                     <tr>
-                        <td class="ps-3">{{ $product->id }}</td>
+                        <td class="ps-3">{{ $products->firstItem() + $loop->index }}</td>
                         <td>
                             <img src="{{ storedImageUrl($product->image, 'assets/images/thumbnails') }}" width="50" height="50" class="admin-image-thumb">
                         </td>
@@ -109,8 +109,12 @@
                                 <form action="{{ route('admin.products.toggle-featured', $product->id) }}" method="POST" class="d-inline featured-status-btn">
                                     @csrf
                                     <button type="submit" class="btn btn-sm border-0 p-0 steve-btn">
-                                        <span class="badge admin-clickable {{ $product->featured ? 'bg-warning' : 'bg-secondary' }}">
-                                            {{ $product->featured ? 'Yes' : 'No' }}
+                                        <span class="badge admin-clickable {{ $product->featured ? 'bg-warning text-dark' : 'bg-secondary' }}">
+                                            @if($product->featured)
+                                                <i class="fa-solid fa-star"><span class="visually-hidden">Featured</span></i> Yes
+                                            @else
+                                                <i class="fa-regular fa-star"><span class="visually-hidden">Not featured</span></i> No
+                                            @endif
                                         </span>
                                     </button>
                                 </form>

@@ -55,7 +55,7 @@
             <table class="table table-hover mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th class="ps-3"><a href="{{ sortUrl('id', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Order # {!! sortIndicator('id', $sortBy, $sortDir) !!}</a></th>
+                        <th class="ps-3"><a href="{{ sortUrl('id', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Order No. {!! sortIndicator('id', $sortBy, $sortDir) !!}</a></th>
                         <th>Customer</th>
                         <th><a href="{{ sortUrl('total_amount', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Total {!! sortIndicator('total_amount', $sortBy, $sortDir) !!}</a></th>
                         <th><a href="{{ sortUrl('status', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Status {!! sortIndicator('status', $sortBy, $sortDir) !!}</a></th>

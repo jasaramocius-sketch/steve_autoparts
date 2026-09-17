@@ -442,7 +442,7 @@
 <div class="gs-order-track-section">
 
     <div class="track-page-header">
-        <h2 class="track-page-title">Order Tracking</h2>
+        <h4 class="h4-style mb-0">Order Tracking</h4>
         <p class="track-page-subtitle">
             Enter your order number to view the latest delivery status and order details.
         </p>
