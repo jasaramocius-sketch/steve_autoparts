@@ -4039,3 +4039,39 @@ The discount was computed once at apply-time and never revalidated. Cart changes
   - `max-height` scroll box hata kar `max-height:none` → sab 71 checkboxes bina scroll ke visible.
 
 **Verification:** Deterministic server render — `tinker` pe 808 products / 71 unique categories; rendered HTML me **71 `sc-category-cb` checkbox** (tinker render + `view:cache` + `php -l` clean). Browser me 41 dikhna = **transport/page cache** (purana HTML snappy box) — hard-refresh / `?nocache` query / naya browser tab se 71 aata hai.
+
+
+## 298. Admin Search Categories — Recursive Category Tree Fix (17 Sep 2026)
+
+**Problem:** Admin Search Categories ke "Available Categories" list me sirf partial categories dikh rahi thi, jabki database me total 71 categories hain.
+
+**Fix:** Search Categories ke liye full recursive category tree load aur render kiya, taaki nested child categories kisi bhi depth par available list me show hon.
+
+**Files changed:**
+- `app/Models/Category.php` — recursive search-category tree helper
+- `app/Http/Controllers/AdminController.php` — full recursive tree pass kiya
+- `resources/views/admin/settings/search-categories.blade.php` — recursive tree renderer use kiya
+- `resources/views/admin/settings/search-categories-tree.blade.php` — nested categories ke liye recursive partial
+
+**Verified:** Database category count 71; controller PHP syntax valid; nested categories ab available list me include hoti hain.
+## 297. (2026-09-17): Product URL Rebase — Stored vs Display Host Normalization
+
+**Problem:** "My Inquiries" / admin contact show me product URL kabhi `http://localhost/stautoparts/...` kabhi `http://192.168.130.54/stautoparts/...` dikhti thi — mixed host, kyunki stored Contact message body me `Product URL:` line par **baked literal URL** he (jab contact bake hua tha us waqt ke APP_URL host ke saath). Display blade bhi wo raw stored string dikhata tha → non-deterministic aur Copilot/Copilot transport diff.
+
+**Root cause:** Message store time pe `route('product', $slug)` se full URL bana kar message me bake kiya gaya tha. Purane inquiries `localhost` (purana APP_URL), naye `192.168.130.54` (current APP_URL). Blade ne regex-se `$productUrl` parse karke **raw** render kar diya.
+
+**Fix (display-side, data untouched):**
+- `app/helpers.php` — added `normalizeStoredUrl(?string $url): ?string`: parse_url se path nikaal ke `config('app.url')` base pe **rebase** karta he (stored host/dir ignore; APP_URL base + stored path ke saath rebuild; port-NULL; localhost/127.0.0.1 likha ho to bhi wahi base milta he). External absolute URLs (app dir pe nahi) wapas unchanged.
+- `resources/views/user/inquiries.blade.php` — `$productUrl = normalizeStoredUrl(trim($m[2]))`
+- `resources/views/admin/contacts/show.blade.php` — `$productUrl = normalizeStoredUrl(trim($m[2]))`
+
+**Determinism proof:** Server-render me har product URL ab hosted pe `app.url` (= `192.168.130.54/stautoparts`) → 0 `localhost`, 0 `127.0.0.1` rendered; stored data me har host ko display-time normalize kiye jaate hain (naya inquiry `192.168.130.54` se banane par direct, purana `localhost` wala bhi display rebase ho jata). **Backfill (DB data rewrite) = NAYI — sirf display-side, deterministic.**
+
+**Same-login-host requirement:** Jo bhi host se login karo (`192.168.130.54`) — sab product URLs wahi host host ke saath dikhte hain (server-side render, view:cache clean).
+
+**Files changed:**
+- `app/helpers.php` — `normalizeStoredUrl()` added
+- `resources/views/user/inquiries.blade.php`
+- `resources/views/admin/contacts/show.blade.php`
+
+**Audit result:** user inquiries me 8 product-msg rows; 2 rows stored `localhost` baked (contact#8, #14) — display-rebase se dono ab `192.168.130.54` pe render hote hain (deterministic, koi data rewrite nahi).

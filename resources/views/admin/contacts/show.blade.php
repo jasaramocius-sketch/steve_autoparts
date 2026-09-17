@@ -34,7 +34,7 @@
                         $messageBody = trim($contact->message ?? '');
                         if (preg_match('/^Product:\s*(.+?)\nProduct URL:\s*(\S+)(?:\n\n|\n)(.*)$/is', $messageBody, $m)) {
                             $productName = trim($m[1]);
-                            $productUrl = trim($m[2]);
+                            $productUrl = normalizeStoredUrl(trim($m[2]));
                             $messageBody = trim($m[3]);
                         }
                     @endphp

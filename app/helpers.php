@@ -183,3 +183,21 @@ if (! function_exists('generateTransactionId')) {
         return 'pay_'.Str::random(24);
     }
 }
+
+if (! function_exists('normalizeStoredUrl')) {
+    function normalizeStoredUrl(?string $url): ?string
+    {
+        if (! $url) {
+            return null;
+        }
+        $path = parse_url($url, PHP_URL_PATH);
+        if (! is_string($path) || $path === '') {
+            return $url;
+        }
+        $appBasePath = parse_url((string) config('app.url'), PHP_URL_PATH);
+        if ($appBasePath && $appBasePath !== '/' && str_starts_with($path, $appBasePath)) {
+            $path = substr($path, strlen($appBasePath));
+        }
+        return rtrim(url('/'), '/') . $path;
+    }
+}
