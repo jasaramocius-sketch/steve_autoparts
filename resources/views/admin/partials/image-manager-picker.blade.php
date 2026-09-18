@@ -111,7 +111,6 @@
     var urlStoreUrl = '{{ route("admin.images.picker-store-url") }}';
     var csrfTokenEl = document.querySelector('meta[name="csrf-token"]');
     var csrfToken = csrfTokenEl ? csrfTokenEl.getAttribute('content') : '';
-
     var state = { page: 1, search: '', selected: null, chosen: [], data: null };
     var timer = null;
     var opener = null;
@@ -322,14 +321,27 @@
         else if (current <= half + 1) { start = 1; end = window; }
         else if (current >= last - half) { start = last - window + 1; end = last; }
         else { start = current - half; end = current + half; }
+        var svgFirst = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline><polyline points="9 18 3 12 9 6"></polyline></svg>';
+        var svgPrev = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>';
+        var svgNext = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>';
+        var svgLast = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline><polyline points="15 18 21 12 15 6"></polyline></svg>';
+
         var html = '<ul class="gs-pagination">';
-        html += '<li>' + (current <= 1 ? '<span>&laquo;</span>' : '<a href="javascript:void(0)" onclick="impPage_' + pid + '(1)">&laquo;</a>') + '</li>';
-        html += '<li>' + (current <= 1 ? '<span>&lsaquo;</span>' : '<a href="javascript:void(0)" onclick="impPage_' + pid + '(' + (current - 1) + ')">&lsaquo;</a>') + '</li>';
+        html += current <= 1
+            ? '<li class="disabled" aria-disabled="true" aria-label="First page"><span class="pagination-arrow-left-right-icon">' + svgFirst + '</span></li>'
+            : '<li><a href="javascript:void(0)" onclick="impPage_' + pid + '(1)" aria-label="First page" class="pagination-arrow-left-right-icon">' + svgFirst + '</a></li>';
+        html += current <= 1
+            ? '<li class="disabled" aria-disabled="true" aria-label="Previous"><span class="pagination-arrow-left-right-icon">' + svgPrev + '</span></li>'
+            : '<li><a href="javascript:void(0)" onclick="impPage_' + pid + '(' + (current - 1) + ')" rel="prev" aria-label="Previous" class="pagination-arrow-left-right-icon">' + svgPrev + '</a></li>';
         for (var i = start; i <= end; i++) {
             html += '<li class="' + (i === current ? 'active' : '') + '">' + (i === current ? '<span>' + i + '</span>' : '<a href="javascript:void(0)" onclick="impPage_' + pid + '(' + i + ')">' + i + '</a>') + '</li>';
         }
-        html += '<li>' + (current >= last ? '<span>&rsaquo;</span>' : '<a href="javascript:void(0)" onclick="impPage_' + pid + '(' + (current + 1) + ')">&rsaquo;</a>') + '</li>';
-        html += '<li>' + (current >= last ? '<span>&raquo;</span>' : '<a href="javascript:void(0)" onclick="impPage_' + pid + '(' + last + ')">&raquo;</a>') + '</li>';
+        html += current >= last
+            ? '<li class="disabled" aria-disabled="true" aria-label="Next"><span class="pagination-arrow-left-right-icon">' + svgNext + '</span></li>'
+            : '<li><a href="javascript:void(0)" onclick="impPage_' + pid + '(' + (current + 1) + ')" rel="next" aria-label="Next" class="pagination-arrow-left-right-icon">' + svgNext + '</a></li>';
+        html += current >= last
+            ? '<li class="disabled" aria-disabled="true" aria-label="Last page"><span class="pagination-arrow-left-right-icon">' + svgLast + '</span></li>'
+            : '<li><a href="javascript:void(0)" onclick="impPage_' + pid + '(' + last + ')" aria-label="Last page" class="pagination-arrow-left-right-icon">' + svgLast + '</a></li>';
         html += '</ul>';
         container.innerHTML = html;
     }

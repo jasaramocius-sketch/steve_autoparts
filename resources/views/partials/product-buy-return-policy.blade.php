@@ -31,7 +31,7 @@
         <p class="mb-3"><strong>{{ $subject }}</strong>
             @if($pBrand) ({{ $pBrand }})@endif
             @if($pCat) — {{ $pCat }}@endif
-            @if($pPrice) — <span class="text-muted">USD {{ $pPrice }}</span>@endif
+            @if($pPrice) — <span class="text-muted">USD {{ $pPrice }} @endif</span>
         </p>
 
         <h6 class="mb-2">Buy / Return Policy</h6>

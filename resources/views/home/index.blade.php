@@ -291,7 +291,7 @@
 <!-- Featured Products Section Started -->
 <section class="gs-explore-product-section bg-white" {!! $sections->get('featured_products_heading')?->bgStyle() !!}>
     <div class="container section-with-padding">
-        <div class="d-flex justify-content-between align-items-center pb-20 featured-title-row-first">
+        <div class="d-flex justify-content-between align-items-center pb-20 featured-title-row-first gap-2">
             <div class="gs-title-box">
                 <h2 class="title">{{ $sections->get('featured_products_heading')?->title ??  'Featured Products' }}</h2>
                 <div class="gs-title-box">
@@ -683,6 +683,5 @@
             observeSwiperAutoplay(postsSwiper);
         }
     });
-
 </script>
 @endsection

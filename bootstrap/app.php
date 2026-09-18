@@ -3,6 +3,7 @@
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\LogSiteChange;
 use App\Http\Middleware\NoCache;
+use App\Http\Middleware\PublishDueScheduledBlogs;
 use App\Http\Middleware\RoleMiddleware;
 use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\SetPageAttributes;
@@ -25,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             SetLocale::class,
             SetPageAttributes::class,
+            PublishDueScheduledBlogs::class,
         ]);
         $middleware->alias([
             'admin' => AdminMiddleware::class,

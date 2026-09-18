@@ -21,6 +21,9 @@ class SetPageAttributes
      */
     public function handle(Request $request, Closure $next)
     {
+        if ($request->query('spatest') === '1') {
+            abort(500, 'SPA-DEBUG-'.time());
+        }
         $route = $request->route();
 
         if ($route) {

@@ -4118,3 +4118,78 @@ The discount was computed once at apply-time and never revalidated. Cart changes
 - 1st click: `active` class added, `aria="true"`, `toolbar2Hidden=false`
 - 2nd click: `active` removed, `aria="false"`, `toolbar2Hidden=true`
 - `view:cache` compiles, `view:clear` done.
+
+## 302. (2026-09-18): Blog Scheduled Auto-Publish Fix — Middleware Ko Dead Kernel File Se bootstrap/app.php Me Register Karna
+
+**Problem:** Blog "Schedule Post" wale blogs admin `status = scheduled` par door rehte the, kabhi auto-publish nahi hote the (Aaj wala blog bhi 10:00 AM scheduled tha, 09:28 par still unpublished).
+
+**Root cause (deterministic):** `PublishDueScheduledBlogs` middleware sirf `app/Http/Kernel.php` me register hua tha — Laravel 11+ (project me **Laravel 13**) me `App\Http\Kernel.php` **dead file** hoti hai (framework use hi nahi karta). Middleware configuration ab `bootstrap/app.php` ki `withMiddleware()` / `$middleware->web(append: [...])` me hoti hai. Isliye middleware kabhi run hi nahi hua → scheduled blogs kabhi publish nahi hue.
+
+**Fix:**
+- `bootstrap/app.php` — `use App\Http\Middleware\PublishDueScheduledBlogs;` (line 6) + `web` group append me add kiya (lines 26–30).
+- `app/Http/Kernel.php` — ab dead hai, par registration (line 48) waisi; hai inert sirf. (Faayda nahi, harm bhi nahi.)
+
+**Verification (live server):**
+- Homepage request + authenticated `/admin/blogs` load par blog #30 `scheduled → published` flip hua, admin badge `bg-success` render.
+- Blog #31 "When Should You Replace Your Spark Plugs?" 10:00 UTC scheduled tha — middleware ab due time pe/baad auto-publish kar deta hai.
+
+## 303. (2026-09-18): Product Policy Text — Extra Space `.</p>` Before Dot Cleanup (797 Products) + Backup
+
+**Problem:** Bahut se products ke `policy_text` me dot se pehle extra space: `spark plugs .</p>` (dot se pehle `\s+`). Do products me alag-alag number of spaces (` .</p>` vs `  .</p>`) — inconsistent.
+
+**Fix:**
+- Naya command `app/Console/Commands/FixPolicyTextDotSpacing.php` (`php artisan product:fix-policy-dot-spacing`) — regex `[[:space:]]+\.</p>` → `.</p>` (policy dot ko normalize). Baaki policy content untouched.
+- **Backup:** command ne pehle snapshot table `products_policy_backup_20260918` banaya (808 rows) — rollback chahiye to `INSERT INTO products (policy_text) SELECT ... FROM products_policy_backup_20260918` (doable, clean).
+
+**Result (deterministic):** 808 products me se **797 fixed, 11 clean (skip), 0 leftover**. Sample rows verified clean; product page HTTP 200; `php -l` clean.
+
+## 304. (2026-09-18): Image Manager Picker — Pagination Icons HTML Entities → SVG Chevrons
+
+**Fix:** `resources/views/admin/partials/image-manager-picker.blade.php` ke `renderPagination()` me `&laquo;/&lsaquo;/&rsaquo;/&raquo;` (font-dependent, inconsistent) ko **SVG chevron icons** (double `«»` / single `‹›`) se replace kiya — `li.disabled` + `span.pagination-arrow-left-right-icon` disabled state ke saath, markup `resources/views/vendor/pagination/gs-pagination.blade.php` jaisa hi. `view:cache` clean.
+
+## 305. (2026-09-18): `.form-select` Dropdown Wrapper — Shared MutationObserver Helper (Admin + Frontend Unified)
+
+**Problem (3 cheezein):**
+1. **Admin dynamic selects** (`admin/settings/footer.blade.php`: `footer-social-platform`, `footer-col-type`, `footer-col-span`) DOMContentLoaded wrap ke BAAD render hote the → koi `.form-select-wrapper` nahi → chevron arrow gayab.
+2. **Duplication:** frontend me `layouts/app.blade.php` inline script, admin me `backend.js` + ek **dead commented copy** (`{{-- ... --}}` block, admin layout lines 213–357) — 2 alag implementations, drift prone.
+3. **Cursor decision:** Task #296 (`f0b415d0`) ne `cursor: pointer` add kiya tha — investigation + user discussion ke baad **pointer field par rakha** (expected UX ready), par native dropdown ke `option` par CSS hover/cursor browsers ignore karte hain (Safari/Chrome/FF — OS-native widget) — isliye `option:hover { cursor: pointer }` effectively cosmetic/no-op cross-browser.
+
+**Fix:**
+- **Naya shared helper** `public/assets/front/js/form-select.js` (IIFE): `attachSelect()` har `.form-select` ko `span.form-select-wrapper` me wrap karta hai with **double-wrap guard** (`parentElement.classList.contains('form-select-wrapper')` + `data-fsw-bound="1"`); **`MutationObserver` on `document.body` (`childList,subtree`)** — dynamically injected selects (admin footer, page-builder blocks) auto-wrap → chevron hamesha dikhta. Behaviors preserved: `mousedown` → `focused` toggle, `blur`/`change` → close, `Enter`/`Space` → toggle, `Escape` (keydown+keyup, capture) / `scroll` (capture) / outside-click → close. `.address-suggest-trigger` div-comboboxes bhi wrapper se chevron paate hain.
+- **Frontend** `layouts/app.blade.php`: inline wrapper script (735–782) **remove**, shared include add (line 657) with `?v=filemtime` cache-bust.
+- **Admin** `layouts/app.blade.php`: dead `{{-- ... --}}` block **remove** (213–357); `form-select.js` include add (line 113). `backend.js` se `closeFormSelects` + wrap `forEach` **remove** (Escape/scroll tooltip + sidebar logic intact).
+- **CSS** `public/assets/front/css/style.css`: `.form-select` par `cursor: pointer` (field) **retained**; naya rule `.form-select-wrapper:has(.form-select:disabled)::after { display:none }` → **disabled select pe chevron hidden**. `resources/css/app.css` (source copy) sync: `cursor: pointer` + `option:hover` restored.
+- **Page-builder:** `public/vendor/page-builder/css/page-builder.css` sirf size/font rules rakhta hai (koi arrow conflict nahi) — isliye admin page-builder blocks ka `form-select-sm` bhi helper se wrap hoga.
+
+**Verification (deterministic):** `node -c` dono JS clean; `view:cache` compiles; homepage HTML me `form-select.js?v=…` present + **0** stale `closeFormSelects`; authenticated `/admin/settings/footer` → **200**, helper loaded, dynamic select `footer-social-platform` class `form-select form-select-sm` render (MutationObserver wrap → chevron aayega). Admin user #5 password ke liye temp-pass login test kiya, baad me **exact original hash** `DB::table('users')->where('id',5)` se restore kiya (User model ka `hashed` cast raw-hash assignment par re-hash kar deta hai — isliye model `update()` se nahi, DB layer se set kiya).
+
+## 306. (2026-09-18): Site Audit — 3 Confirmed Bugs (FIXES PENDING — kal karna, abhi sirf document kiya)
+
+**Audit ki (read-only):** server status, key pages (home/shop/cart/product/blog/faq/contact/admin), DB settings, rendered HTML, `storage/logs/laravel.log`, 200/500 checks. Results:
+
+### 🐞 Bug 1 — 404 pages render as 500 (site-wide, 248 "Undefined variable $page" errors logged aaj)
+Unknown URL (e.g. `/contact`, `/nonexistent`) → 500 milestone page, 404 page kabhi dikhti nahi.
+- **Root cause:** `app/Http/Middleware/SetPageAttributes.php` — `page` sirf `if ($route)` branch me `View::share('page', null)` karta (line 52); `else` branch (route==null, 404 case, lines 53–56) me `page` **share nahi** hota. `resources/views/partials/page-attributes.blade.php:11` line 7 ke `if ($baseSlug)` block skip hone par `$page` assign nahi hota → line 11 `if (!$page)` → undefined variable → crash. `errors/404.blade.php` + `errors/403.blade.php` dono ye partial include karte hain.
+- **PENDING FIX:** (1) else-branch me bhi `View::share('page', null);`; (2) partial top par `$page ??= null;` defensive init (middleware pipeline ke bahar bhi safe).
+
+### 🐞 Bug 2 — `?spatest=1` debug backdoor = 500 on every page
+- `SetPageAttributes.php:24-26` me leftover uncommitted debug code: `if ($request->query('spatest') === '1') { abort(500, 'SPA-DEBUG-'.time()); }` — kisi bhi page par `?spatest=1` → 500. Security/cleanliness issue.
+- **PENDING FIX:** block delete karna (git diff se confirm hua — kabhi committed nahi, kabhi removed bhi nahi).
+
+### 🐞 Bug 3 — Triple `/stautoparts` prefix category links in header "All Categories" mega-menu (16 links × every `layouts/app` page)
+`search_category_menu` setting me URLs store: `http://192.168.130.54/stautoparts/stautoparts/stautoparts/category/...` (homepage/shop/cart rendered HTML me confirm — 16 bhi 16). Click → 500/mangled link.
+- **Root cause:** `AdminController::searchCategorySettings()` (GET, ~line 723) normalization `preg_match('#^https?://[^/]+(/.*)$#')` sirf host replace karta, path me base-dir (`/stautoparts`) ko wahi/print chhod deta; phir `$appBase` (= host + `/stautoparts`) prepend karta → har admin save pe prefix multiply. `updateSearchCategorySettings()` me jo already `$appBase` se start ho wo unchanged rehta (damage preserve). `layouts/app.blade.php:571` stored URL raw render karta hai.
+- Effective same bug pattern `normalizeStoredUrl()` (`app/helpers.php:187`) me bhi — path se sirf EK base-dir occurrence strip hoti (task #299) → repeated prefixes me fail.
+- **PENDING FIX:** (1) `normalizeStoredUrl()` me ALL repeated base-dir prefixes strip; (2) DB data repair (tinker: `search_category_menu` decode → har URL fix helper se → re-save); (3) GET + UPDATE normalization ko robust helper pe switch; (4) render-side self-heal (`layouts/app.blade.php:571` item url normalize) taaki stale data kabhi broken na dikhe.
+
+### ✅ Non-issues verified (koi action nahi)
+`/contact-us`, `/faq`, `/blog`, product, shop, cart → 200; `/page/*` → 301 canonical (`/page/blog`→`/blog`, intended); `/checkout`, `/admin/*` → 302 auth-redirect (intended); Google Fonts 404s external-only; all local assets → 200.
+
+### Bash/DB verification commands used (kal reuse karna)
+```
+curl -s -o /dev/null -w "%{http_code}\n" "http://192.168.130.54/stautoparts/contact"        # 500 (Bug 1)
+curl -s -o /dev/null -w "%{http_code}\n" "http://192.168.130.54/stautoparts/?spatest=1"     # 500 (Bug 2)
+php artisan tinker --execute="dump(array_slice(json_decode(DB::table('settings')->where('key','search_category_menu')->value('value'),true),0,2));"  # Bug 3 triple URLs
+```
+
+**Status: FIXES PENDING (18-Sep ko sirf document kiya; fixes kal).**

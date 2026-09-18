@@ -654,6 +654,8 @@
 
     <script src="{{ asset('assets/front/js/myscript.js') }}?v={{ filemtime(public_path('assets/front/js/myscript.js')) }}" defer></script>
 
+    <script src="{{ asset('assets/front/js/form-select.js') }}?v={{ filemtime(public_path('assets/front/js/form-select.js')) }}"></script>
+
     <!-- Session Flash Notifications (must remain inline for Blade PHP) -->
     <script>
     var PLACEHOLDER_IMG = '{{ asset("assets/images/placeholder.png") }}';
@@ -730,55 +732,6 @@
             document.querySelector('.front-header-search')?.classList.remove('show');
         }
     });
-</script>
-
-<script>
-var closeFormSelects = function() {
-    document.querySelectorAll('.form-select-wrapper.focused').forEach(function(w) {
-        w.classList.remove('focused');
-    });
-};
-
-document.querySelectorAll('.form-select').forEach(function(el) {
-    var wrapper = document.createElement('span');
-    wrapper.className = 'form-select-wrapper';
-    el.parentNode.insertBefore(wrapper, el);
-    wrapper.appendChild(el);
-
-    el.addEventListener('mousedown', function() {
-        wrapper.classList.toggle('focused');
-    });
-    el.addEventListener('blur', function() {
-        wrapper.classList.remove('focused');
-    });
-    el.addEventListener('change', function() {
-        wrapper.classList.remove('focused');
-    });
-    el.addEventListener('keydown', function(e) {
-        if (e.key === ' ' || e.key === 'Enter') {
-            wrapper.classList.toggle('focused');
-        }
-    });
-});
-
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closeFormSelects();
-}, true);
-document.addEventListener('keyup', function(e) {
-    if (e.key === 'Escape') closeFormSelects();
-}, true);
-
-document.addEventListener('scroll', function() {
-    closeFormSelects();
-}, true);
-
-// Close on outside click — single click outside removes focused class
-document.addEventListener('click', function(e) {
-    if (!e.target.closest('.form-select-wrapper')) {
-        closeFormSelects();
-    }
-});
-
 </script>
     @yield('scripts')
     @stack('page-builder-js')

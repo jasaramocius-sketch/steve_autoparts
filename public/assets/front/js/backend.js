@@ -1,12 +1,6 @@
 (function() {
     'use strict';
 
-    function closeFormSelects() {
-        document.querySelectorAll('.form-select-wrapper.focused').forEach(function(wrapper) {
-            wrapper.classList.remove('focused');
-        });
-    }
-
     function initializeAdmin() {
         if (window.jQuery) {
             var flashMessages = document.body.dataset;
@@ -48,19 +42,8 @@
         if (closeButton) closeButton.addEventListener('click', closeSidebar);
         if (overlay) overlay.addEventListener('click', closeSidebar);
 
-        document.querySelectorAll('.form-select').forEach(function(element) {
-            var wrapper = document.createElement('span');
-            wrapper.className = 'form-select-wrapper';
-            element.parentNode.insertBefore(wrapper, element);
-            wrapper.appendChild(element);
-            element.addEventListener('mousedown', function() { wrapper.classList.toggle('focused'); });
-            element.addEventListener('blur', function() { wrapper.classList.remove('focused'); });
-            element.addEventListener('change', function() { wrapper.classList.remove('focused'); });
-        });
-
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
-                closeFormSelects();
                 document.querySelectorAll('.tooltip.show').forEach(function(tooltip) {
                     tooltip.classList.remove('show');
                     tooltip.style.display = '';
@@ -69,7 +52,6 @@
             }
         });
         document.addEventListener('scroll', function() {
-            closeFormSelects();
             document.querySelectorAll('.tooltip.show').forEach(function(tooltip) {
                 tooltip.classList.remove('show');
                 tooltip.style.pointerEvents = 'none';

@@ -159,7 +159,7 @@
     }
 }
 .shop_details_text {
-    padding: 0px 50px;
+    padding: 0px 0px;
 }
 
 .shop_details_text .category {
