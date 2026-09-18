@@ -695,14 +695,9 @@ class AdminController extends Controller
     public function searchCategorySettings()
     {
         $settings = Setting::getAllAsArray();
-        $categories = Category::with('children')
-            ->whereNull('parent_id')
-            ->orderBy('name')
-            ->get()
-            ->unique('id')
-            ->values();
+        $categories = Category::searchCategoryTree();
         $categoryIds = Category::query()->pluck('id');
-        $orphanCategories = Category::with('children')
+        $orphanCategories = Category::with('childrenRecursive')
             ->whereNotNull('parent_id')
             ->whereNotIn('parent_id', $categoryIds)
             ->orderBy('name')

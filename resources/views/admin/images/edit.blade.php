@@ -23,7 +23,7 @@
                         <tr><th class="text-muted width-25">URL</th><td class="text-break" data-label="URL"><a href="{{ $image->thumb_url }}" target="_blank"><code class="text-break">{{ $image->thumb_url }}</code></a></td></tr>
                         <tr><th class="text-muted width-25">MIME Type</th><td data-label="MIME Type">{{ $image->mime_type }}</td></tr>
                         <tr><th class="text-muted width-25">Size</th><td data-label="Size">{{ $image->size_in_kb }}</td></tr>
-                        <tr><th class="text-muted width-25">Dimensions</th><td data-label="Dimensions">@if($image->width && $image->height){{ $image->width }} x {{ $image->height }} px@else—@endif</td></tr>
+                        <tr><th class="text-muted width-25">Dimensions</th><td data-label="Dimensions">{{ $image->width && $image->height ? $image->width.' x '.$image->height.' px' : '—' }}</td></tr>
                         <tr>
                             <th class="text-muted align-top width-25">Attached To</th>
                             <td data-label="">

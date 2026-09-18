@@ -63,6 +63,17 @@
         .tox .tox-toolbar-overlord .tox-toolbar{
             padding: 0 11px 0 12px;
         }
+        .tox .tox-toolbar .tox-tbtn.extendedtoolbar-btn.active {
+            background-color: var(--primary);
+            color: #fff;
+        }
+        .tox .tox-toolbar .tox-tbtn.extendedtoolbar-btn.active .tox-icon svg path{
+            color: #fff;
+            fill: #fff;
+        }
+        .tox .tox-toolbar .tox-tbtn.extendedtoolbar-btn.active:hover {
+            background-color: var(--hov-primary);
+        }
     </style>
 
     {{-- Admin-wide layout styles (.admin-sidebar, .main-content, .admin-navbar,
@@ -132,20 +143,39 @@
                 toolbar: false,
                 content_style: '#tinymce.mce-content-body { padding: 0 !important; } body { font-family: Arial, sans-serif; font-size: 15px; line-height: 1.65; }',
                 setup: function(editor) {
+                    var extOpen = false;
                     editor.ui.registry.addButton('extendedtoolbar', {
                         icon: 'more-drawer',
                         tooltip: 'Extended toolbar',
                         onAction: function() {
-                            var toolbar = editor.getContainer().querySelector('.tox-toolbar:nth-child(2)');
+                            var container = editor.getContainer();
+                            var toolbar = container.querySelector('.tox-toolbar:nth-child(2)');
                             if (toolbar) toolbar.hidden = !toolbar.hidden;
+                            extOpen = !extOpen;
+                            var btn = container.querySelector('button[data-mce-name="extendedtoolbar"]');
+                            if (btn) {
+                                btn.classList.toggle('active', extOpen);
+                                btn.setAttribute('aria-pressed', extOpen ? 'true' : 'false');
+                            }
                         }
                     });
                     editor.on('change keyup', function() { editor.save(); });
                     editor.on('init', function() {
                         var container = editor.getContainer();
                         var codeMode = false;
-                        var toolbarRows = container.querySelectorAll('.tox-toolbar');
-                        if (toolbarRows[1]) toolbarRows[1].hidden = true;
+
+                        function syncExtendedBtn() {
+                            var trows = container.querySelectorAll('.tox-toolbar');
+                            if (trows[1]) trows[1].hidden = !extOpen;
+                            var btn = container.querySelector('button[data-mce-name="extendedtoolbar"]');
+                            if (!btn) return;
+                            btn.classList.add('extendedtoolbar-btn');
+                            btn.classList.toggle('active', extOpen);
+                            btn.setAttribute('aria-pressed', extOpen ? 'true' : 'false');
+                        }
+                        var extendedObs = new MutationObserver(syncExtendedBtn);
+                        extendedObs.observe(container, { childList: true, subtree: true });
+                        syncExtendedBtn();
                         tabs.addEventListener('click', function(event) {
                             var tab = event.target.closest('.admin-editor-tab');
                             if (!tab) return;

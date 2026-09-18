@@ -66,6 +66,14 @@ class Category extends Model
         return $query->whereNull('parent_id')->orderBy('name');
     }
 
+    public static function searchCategoryTree()
+    {
+        return static::whereNull('parent_id')
+            ->with('childrenRecursive')
+            ->orderBy('name')
+            ->get();
+    }
+
     public function parent_category()
     {
         return $this->belongsTo(Category::class, 'parent_id');

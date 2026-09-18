@@ -53,7 +53,7 @@
             <thead class="table-light">
             <tr>
                 @if(request()->has('trashed'))
-                <th>No.</th>
+                <th class="ps-3">No.</th>
                 <th>Image</th>
                 <th>Name</th>
                 <th>Slug</th>
@@ -61,7 +61,7 @@
                 <th>Parent Category</th>
                 <th width="200">Action</th>
                 @else
-                <th><a href="{{ sortUrl('id', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">No. {!! sortIndicator('id', $sortBy, $sortDir) !!}</a></th>
+                <th class="ps-3">No.</th>
                 <th>Image</th>
                 <th><a href="{{ sortUrl('name', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Name {!! sortIndicator('name', $sortBy, $sortDir) !!}</a></th>
                 <th>Slug</th>

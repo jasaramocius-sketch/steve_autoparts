@@ -1761,7 +1761,9 @@ p.text-lg {
   color: #fff;
   border: var(--primary);
 }
-
+.gs-pagination .disabled span, .gs-pagination .active{
+  cursor: text;
+}
 .gs-pagination li a,
 .gs-pagination li span {
   display: -webkit-box;
@@ -17938,3 +17940,7 @@ td.admin-product-name a {
     margin-top: 0px;
   }
 } */
+
+button.filter-chip-clear i.las.la-times{
+  font-size: 12px;
+}

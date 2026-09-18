@@ -1,5 +1,5 @@
 @if ($paginator->lastPage() > 1)
-    <form method="GET" action="{{ $paginator->path() }}" class="d-flex align-items-center gap-2 mb-2 Go-to-page">
+    <form method="GET" action="{{ $paginator->path() }}" class="d-flex align-items-center gap-2 Go-to-page">
         @foreach(request()->except('page') as $key => $value)
             @if(is_scalar($value) && $value !== '')
                 <input type="hidden" name="{{ $key }}" value="{{ $value }}">

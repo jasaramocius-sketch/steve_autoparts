@@ -23,7 +23,7 @@
                 <div class="info-name">
                     <div class="text-truncate fw-medium" title="{{ $image->original_name }}">{{ $image->original_name }}</div>
                 </div>
-                <div class="info-meta grid-view-only">{{ $image->size_in_kb }} | {{ $image->width }}x{{ $image->height }}</div>
+                <div class="info-meta grid-view-only">{{ $image->size_in_kb }} | {{ $image->width && $image->height ? $image->width.'x'.$image->height : '—' }}</div>
                 <div class="info-meta grid-view-only"></div>
                 <div class="card-badges d-flex justify-content-between mt-1 gap-1 flex-wrap grid-view-only">
                     <span class="badge {{ $image->attachable_type ? 'bg-light text-success border border-success-subtle' : 'bg-light text-secondary border border-secondary-subtle' }}">
@@ -41,7 +41,7 @@
                         <span class="badge bg-light text-secondary border border-secondary-subtle">SVG</span>
                     @endif
                 </div>
-                <div class="info-meta list-view-only">{{ $image->size_in_kb }} | {{ $image->width }}x{{ $image->height }}</div>
+                <div class="info-meta list-view-only">{{ $image->size_in_kb }} | {{ $image->width && $image->height ? $image->width.'x'.$image->height : '—' }}</div>
                 <div class="card-badges d-flex justify-content-between mt-1 gap-1 flex-wrap list-view-only">
                     <div class="info-type list-view-only">
                         @if(in_array($image->mime_type, ['image/jpeg', 'image/pjpeg', 'image/jpg']))

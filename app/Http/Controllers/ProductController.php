@@ -681,6 +681,7 @@ class ProductController extends Controller
                         }
                         $filename = time().'_'.uniqid().'.'.$ext;
                         file_put_contents($destDir.'/'.$filename, $response->body());
+                        $info = @getimagesize($destDir.'/'.$filename);
                         Image::create([
                             'original_name' => $filename,
                             'filename' => $filename,
@@ -688,8 +689,8 @@ class ProductController extends Controller
                             'url' => 'storage/'.$subdir.'/'.$filename,
                             'mime_type' => $contentType,
                             'size' => filesize($destDir.'/'.$filename),
-                            'width' => null,
-                            'height' => null,
+                            'width' => $info[0] ?? null,
+                            'height' => $info[1] ?? null,
                             'is_unused' => false,
                             'attachable_type' => Product::class,
                             'attachable_id' => $product->id,

@@ -4085,7 +4085,36 @@ The discount was computed once at apply-time and never revalidated. Cart changes
 - Kiyo? width/height sirf **upload/store path** me `getimagesize()` se set hote hain (ImageController store/update). Bulk/seed/import ke images (`Image::create()` with no width/height) me NULL rehte hain.
 - Blade `admin/images/edit.blade.php:26` render: `{{ $image->width }} x {{ $image->height }} px` → width/height NULL pe empty → " x  px".
 
-**Fix (display-side, data untouched — deterministic):**
-- `resources/views/admin/images/edit.blade.php` — row me fallback: `@if($image->width && $image->height){{ $image->width }} x {{ $image->height }} px@else—@endif` → null-dim images pe "—" dikhta he, kabhi khali " x  px" nahi. Stored data ko koi rewrite nahi.
+**Fix (completed — data backfill + display fallback):**
+- **Data backfill:** naya command `app/Console/Commands/BackfillImageDimensions.php` (`php artisan images:backfill-dimensions`, `--dry-run` supported) — NULL width/height wali har image ka `file_path` resolve karke `getimagesize()` se width/height update karta hai. **Result: 6,245 NULL → 4** (sirf genuinely missing/unreadable files). Sample: #7800 ab 800x450.
+- **Root-cause hardening:** `ProductController.php` product-image import ab `getimagesize()` se dims compute karta hai (pehle `width/height = null` hardcoded the).
+- **Display fallback (sab jagah):**
+  - `resources/views/admin/images/edit.blade.php` — Dimensions row pe ternary fallback: `{{ $image->width && $image->height ? $image->width.' x '.$image->height.' px' : '—' }}` → null-dim images pe "—" dikhta he, kabhi khali " x  px" nahi. (Gotcha: pehle `px@else—@endif` me `@else` ke baad space nahi thi → Blade directive compile nahi ho rahi thi, literal `px@else—` render hota tha. Ternary fix.)
+  - `resources/views/admin/images/_cards.blade.php` (grid `:26` + list `:44`) — `{{ $image->width }}x{{ $image->height }}` → `{{ $image->width && $image->height ? $image->width.'x'.$image->height : '—' }}` taaki Image Manager cards me kabhi khali "x" na dikhe.
 
-**Verification (deterministic):** null-dim image (#7800, #7054, #5834, #7939...) render me "Dimensions | —"; set-dim image (4412 rows) me "W x H px". Blade render check karta he ki 0 blank " x  px" rows hain.
+**Verification (deterministic):** `App\Models\Image::whereNull('width')->whereNull('height')->count()` → **4** (2 test files + 2 missing thumbnails + 4 broken webp ke liye 1 file missing — files hi maujood nahi). Baaki 10,649 images me real "W x H" render hota he. `php -l` clean; `view:cache` compiles.
+
+## 301. (2026-09-18): TinyMCE "Extended toolbar" — Active/Inactive (highlight) State on Toggle Button
+
+**Problem:** Admin text editor ke "Extended toolbar" button se toolbar2 (extended row) show/hide hoti thi, lekin button pe koi **active/inactive indication** nahi tha — user ko pata nahi chalta tha ki extended toolbar khuli he ya band. Request: button pe `active` class add/remove ho (visual highlight).
+
+**Root cause (deterministic — headless Chrome + puppeteer verified, TinyMCE 7.9.1):**
+- `resources/views/admin/layouts/app.blade.php` me `addToggleButton('extendedtoolbar')` + `api.setActive()` se active state dikhane ki koshish ki, per:
+  1. **`classes: 'extendedtoolbar-btn'` spec option DOM me apply NAHI hota** (button class sirf `tox-tbtn` rehti).
+  2. TinyMCE toolbar buttons **`init` event ke BAAD lazy render** hote hain → `init` handler me `querySelector('button[data-mce-name="extendedtoolbar"]')` se `null` milta hai.
+  3. Toggle button ka `api` **`getEl()` expose nahi karta** (`typeof getEl === 'undefined'`).
+  4. Programmatic/synthetic click pe setActive ka `tox-tbtn--enabled` add nahi hota (TinyMCE internal DOM ownership).
+
+**Fix (manual, deterministic):**
+- `addToggleButton` → **`addButton`** switch kiya (koi TinyMCE state API reliance nahi).
+- Closure variable `extOpen` (per editor) mein toolbar2 open/close state rakha.
+- `onAction:` `container.querySelector('.tox-toolbar:nth-child(2)')` se toolbar2 toggle + `extOpen` flip + `button[data-mce-name="extendedtoolbar"]` pe class/aria set:
+  `btn.classList.toggle('active', extOpen)` + `aria-pressed='true'/'false'`.
+- `MutationObserver` (`childList, subtree` on `editor.getContainer()`) lazy-render ko handle karta he: har mutation pe `syncExtendedBtn()` — `extendedtoolbar-btn` marker class re-add, `active`/`aria-pressed` per `extOpen`, aur **toolbar2 default-hidden sync** (`trows[1].hidden = !extOpen`) — isse pehle default hide bhi lazy-render ke karan fail ho rahi thi.
+- CSS (`admin/layouts/app.blade.php` style block): `.tox .tox-toolbar .tox-tbtn.extendedtoolbar-btn.active { background-color:#0d6efd; color:#fff; }` (+ hover `#0a58ca`).
+
+**Verification (deterministic — puppeteer real trusted clicks on headless Chrome):**
+- initial: `classes="tox-tbtn extendedtoolbar-btn"`, `aria="false"`, `toolbar2Hidden=true`
+- 1st click: `active` class added, `aria="true"`, `toolbar2Hidden=false`
+- 2nd click: `active` removed, `aria="false"`, `toolbar2Hidden=true`
+- `view:cache` compiles, `view:clear` done.

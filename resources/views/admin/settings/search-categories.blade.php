@@ -30,35 +30,12 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold small text-muted text-uppercase">Available Categories</label>
                                 <input type="text" id="searchCategoriesFilter" class="form-control mb-2" placeholder="Filter categories...">
-                                <div class="border rounded p-3" style="max-height:none;overflow-y:visible;background:#f8f9fa;">
+                                <div class="border rounded p-3 available-categories-list" style="max-height:none;overflow-y:auto;background:#f8f9fa;height:100vh;">
                                     <ul class="list-unstyled mb-0">
                                         @forelse($categories as $cat)
-                                        <li>
-                                            <label class="form-check-label sc-checkbox">
-                                                <input type="checkbox" class="form-check-input me-2 sc-category-cb"
-                                                       data-label="{{ $cat->name }}"
-                                                       data-url="{{ route('category', $cat->slug) }}"
-                                                       @checked($selectedLabels->contains($cat->name))>
-                                                {{ $cat->name }}
-                                            </label>
-                                            @if($cat->children->count())
-                                            <ul class="list-unstyled ps-4">
-                                                @foreach($cat->children as $child)
-                                                <li>
-                                                    <label class="form-check-label sc-checkbox">
-                                                        <input type="checkbox" class="form-check-input me-2 sc-category-cb"
-                                                               data-label="{{ $child->name }}"
-                                                               data-url="{{ route('category', $child->slug) }}"
-                                                               @checked(collect($selected)->pluck('label')->contains($child->name))>
-                                                        {{ $child->name }}
-                                                    </label>
-                                                </li>
-                                                @endforeach
-                                            </ul>
-                                            @endif
-                                        </li>
+                                            @include('admin.settings.search-categories-tree', ['category' => $cat, 'selectedLabels' => $selectedLabels])
                                         @empty
-                                        <li class="text-muted">No active categories found. Create categories first.</li>
+                                            <li class="text-muted">No active categories found. Create categories first.</li>
                                         @endforelse
                                     </ul>
                                     @if($orphanCategories->count())

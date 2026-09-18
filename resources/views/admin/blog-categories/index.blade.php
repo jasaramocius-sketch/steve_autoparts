@@ -53,7 +53,7 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th class="ps-3"><a href="{{ sortUrl('id', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">No. {!! sortIndicator('id', $sortBy, $sortDir) !!}</a></th>
+                        <th class="ps-3">No.</th>
                         <th><a href="{{ sortUrl('name', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Name {!! sortIndicator('name', $sortBy, $sortDir) !!}</a></th>
                         <th>Parent Category</th>
                         <th><a href="{{ sortUrl('slug', $sortBy, $sortDir) }}" class="text-decoration-none text-dark">Slug {!! sortIndicator('slug', $sortBy, $sortDir) !!}</a></th>
