@@ -4054,7 +4054,7 @@ The discount was computed once at apply-time and never revalidated. Cart changes
 - `resources/views/admin/settings/search-categories-tree.blade.php` — nested categories ke liye recursive partial
 
 **Verified:** Database category count 71; controller PHP syntax valid; nested categories ab available list me include hoti hain.
-## 297. (2026-09-17): Product URL Rebase — Stored vs Display Host Normalization
+## 299. (2026-09-17): Product URL Rebase — Stored vs Display Host Normalization
 
 **Problem:** "My Inquiries" / admin contact show me product URL kabhi `http://localhost/stautoparts/...` kabhi `http://192.168.130.54/stautoparts/...` dikhti thi — mixed host, kyunki stored Contact message body me `Product URL:` line par **baked literal URL** he (jab contact bake hua tha us waqt ke APP_URL host ke saath). Display blade bhi wo raw stored string dikhata tha → non-deterministic aur Copilot/Copilot transport diff.
 
@@ -4075,3 +4075,17 @@ The discount was computed once at apply-time and never revalidated. Cart changes
 - `resources/views/admin/contacts/show.blade.php`
 
 **Audit result:** user inquiries me 8 product-msg rows; 2 rows stored `localhost` baked (contact#8, #14) — display-rebase se dono ab `192.168.130.54` pe render hote hain (deterministic, koi data rewrite nahi).
+
+## 300. (2026-09-18): Image Manager — Empty Dimensions "× px" Root Cause + Display Fallback
+
+**Problem:** Admin Image Manager me bahut si images me "Dimensions:" row khali " x  px" dikhti thi (dono width/height ke beech koi numeric value nahi).
+
+**Root cause (deterministic, DB audit via tinker):**
+- `images` table me 10,653 total images me se **6,241 (~58.6%) me width/height dono NULL** (width-NULL same count — dono connected).
+- Kiyo? width/height sirf **upload/store path** me `getimagesize()` se set hote hain (ImageController store/update). Bulk/seed/import ke images (`Image::create()` with no width/height) me NULL rehte hain.
+- Blade `admin/images/edit.blade.php:26` render: `{{ $image->width }} x {{ $image->height }} px` → width/height NULL pe empty → " x  px".
+
+**Fix (display-side, data untouched — deterministic):**
+- `resources/views/admin/images/edit.blade.php` — row me fallback: `@if($image->width && $image->height){{ $image->width }} x {{ $image->height }} px@else—@endif` → null-dim images pe "—" dikhta he, kabhi khali " x  px" nahi. Stored data ko koi rewrite nahi.
+
+**Verification (deterministic):** null-dim image (#7800, #7054, #5834, #7939...) render me "Dimensions | —"; set-dim image (4412 rows) me "W x H px". Blade render check karta he ki 0 blank " x  px" rows hain.
