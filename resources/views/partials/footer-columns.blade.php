@@ -64,11 +64,12 @@
             @endif
             <div class="newslatter-area mb-3">
                 <div class="newslatter-form">
-                    <form action="javascript:void(0);">
+                    <form class="newsletter-form" action="{{ route('newsletter.store') }}" method="POST">
                         @csrf
                         <input class="news-latter-input" type="email" placeholder="Your Email" name="email" required>
                         <button class="newsletter-btn steve-btn steve-btn-hover" type="submit">Subscribe</button>
                     </form>
+                    <p class="newsletter-msg d-none mt-2 mb-0 small text-white"></p>
                 </div>
                 @php
                     $socialIcons = ['facebook' => 'fab fa-facebook-f', 'instagram' => 'fab fa-instagram', 'twitter' => 'fab fa-twitter', 'linkedin' => 'fab fa-linkedin-in', 'youtube' => 'fab fa-youtube', 'whatsapp' => 'fab fa-whatsapp', 'pinterest' => 'fab fa-pinterest-p', 'tiktok' => 'fab fa-tiktok', 'telegram' => 'fab fa-telegram-plane'];
@@ -103,3 +104,46 @@
         @endif
     </div>
 @endforeach
+
+<script>
+(function () {
+    var forms = document.querySelectorAll('.newsletter-form');
+    var msgMap = { 'Subscribed successfully!': 'success', 'You are already subscribed!': 'success', 'The email field must be a valid email address.': 'error' };
+    forms.forEach(function (form) {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var btn = form.querySelector('button[type=submit]');
+            var msg = form.parentElement.querySelector('.newsletter-msg');
+            var email = form.querySelector('input[name=email]').value.trim();
+            if (!email) { return; }
+            btn.disabled = true;
+            msg.classList.remove('d-none', 'text-danger', 'text-success');
+            msg.textContent = 'Subscribing...';
+            fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': form.querySelector('input[name=_token]').value
+                },
+                body: new URLSearchParams(new FormData(form)).toString()
+            })
+            .then(function (r) { return r.json().catch(function () { return null; }); })
+            .then(function (data) {
+                btn.disabled = false;
+                var key = (data && data.message) ? data.message : 'error';
+                var cls = msgMap[key] === 'error' ? 'text-danger' : 'text-success';
+                msg.classList.remove('text-danger', 'text-success');
+                msg.classList.add(cls);
+                msg.textContent = (data && data.message) ? data.message : 'Invalid email address.';
+            })
+            .catch(function () {
+                btn.disabled = false;
+                msg.classList.remove('text-danger', 'text-success');
+                msg.classList.add('text-danger');
+                msg.textContent = 'Something went wrong. Please try again.';
+            });
+        });
+    });
+})();
+</script>

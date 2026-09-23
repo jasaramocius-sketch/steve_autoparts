@@ -101,10 +101,11 @@ class DashboardController extends Controller
         $total_spent = $orders->where('status', '!=', 'cancelled')->sum('total_amount');
         $wishlist = Wishlist::with('product')
             ->where('user_id', auth()->id())->get();
+        $userVehicles = Vehicle::where('user_id', $userId)->latest()->get();
 
         return view('user.dashboard', compact(
             'orders', 'total_orders', 'pending_orders',
-            'completed_orders', 'total_spent', 'profile', 'wishlist'
+            'completed_orders', 'total_spent', 'profile', 'wishlist', 'userVehicles'
         ));
     }
 

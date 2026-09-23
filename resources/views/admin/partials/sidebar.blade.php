@@ -16,8 +16,14 @@
         <a href="{{ route('admin.orders.index') }}" class="nav-item {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
             <i class="fas fa-shopping-cart"></i> Orders
         </a>
-        <a href="{{ route('admin.products.index') }}" class="nav-item {{ request()->routeIs('admin.products.*') && !request()->routeIs('admin.products.import-form') ? 'active' : '' }}">
+        <a href="{{ route('admin.returns.index') }}" class="nav-item {{ request()->routeIs('admin.returns.*') ? 'active' : '' }}">
+            <i class="fas fa-undo"></i> Returns
+        </a>
+        <a href="{{ route('admin.products.index') }}" class="nav-item {{ request()->routeIs('admin.products.*') && !request()->routeIs('admin.products.import-form') && !request()->routeIs('admin.products.stock') ? 'active' : '' }}">
             <i class="fas fa-box"></i> Products
+        </a>
+        <a href="{{ route('admin.products.stock') }}" class="nav-item {{ request()->routeIs('admin.products.stock') ? 'active' : '' }}">
+            <i class="fas fa-warehouse"></i> Stock Management
         </a>
         <!-- <a href="{{ route('admin.products.import-form') }}" class="nav-item nav-item-sub {{ request()->routeIs('admin.products.import-form') ? 'active' : '' }}">
             <i class="fas fa-upload"></i> Import Products -->
@@ -57,6 +63,9 @@
         <a href="{{ route('admin.coupons.index') }}" class="nav-item {{ request()->routeIs('admin.coupons.*') ? 'active' : '' }}">
             <i class="fas fa-percent"></i> Coupons
         </a>
+        <a href="{{ route('admin.reviews.index') }}" class="nav-item {{ request()->routeIs('admin.reviews.*') ? 'active' : '' }}">
+            <i class="fas fa-star"></i> Reviews
+        </a>
 
         <div class="nav-section">Settings</div>
         <a href="{{ route('admin.home-page.index') }}" class="nav-item {{ request()->routeIs('admin.home-page.*') ? 'active' : '' }}">
@@ -73,6 +82,9 @@
         </a>
         <a href="{{ route('admin.logs.index') }}" class="nav-item {{ request()->routeIs('admin.logs.*') ? 'active' : '' }}">
             <i class="fas fa-file-alt"></i> Logs
+        </a>
+        <a href="{{ route('admin.subscribers.index') }}" class="nav-item {{ request()->routeIs('admin.subscribers.*') ? 'active' : '' }}">
+            <i class="fas fa-envelope"></i> Subscribers
         </a>
         <a href="{{ route('admin.revisions.index') }}" class="nav-item {{ request()->routeIs('admin.revisions.*') ? 'active' : '' }}">
             <i class="fas fa-history"></i> Revisions

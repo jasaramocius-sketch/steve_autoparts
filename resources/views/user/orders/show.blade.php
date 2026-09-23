@@ -599,18 +599,27 @@
         </p>
     </div>
 
-    <a href="{{ route('user.orders.invoice', $order->id) }}"
-       target="_blank"
-       class="template-btn outline-btn lg-btn steve-btn steve-btn-sm order-print-btn">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-             stroke-linejoin="round" style="margin-right:6px;">
-            <polyline points="6 9 6 2 18 2 18 9"></polyline>
-            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-            <rect x="6" y="14" width="12" height="8"></rect>
-        </svg>
-        Print Order
-    </a>
+    <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end">
+        <a href="{{ route('user.orders.invoice', $order->id) }}"
+           target="_blank"
+           class="template-btn outline-btn lg-btn steve-btn steve-btn-sm order-print-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                 stroke-linejoin="round" style="margin-right:6px;">
+                <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                <rect x="6" y="14" width="12" height="8"></rect>
+            </svg>
+            Print Order
+        </a>
+        @if($currentStatus === 'delivered')
+            <a href="{{ route('user.returns.create', $order->id) }}"
+               class="template-btn lg-btn steve-btn steve-btn-sm order-print-btn"
+               style="background:var(--primary);color:#fff;">
+                <i class="fas fa-undo me-1"></i> Request Return
+            </a>
+        @endif
+    </div>
 </div>
 
 <div class="order-status-card">
@@ -657,6 +666,13 @@
         </div>
     @endif
 </div>
+
+@if(count($order->getStatusHistory()) > 1)
+<div class="order-status-card mt-4">
+    <h4 class="order-status-title">Status History</h4>
+    @include('partials.order-status-timeline', ['order' => $order])
+</div>
+@endif
 
 <div class="row g-4 mt-0">
     <div class="col-lg-6">
@@ -796,6 +812,19 @@
                     <p class="order-shipping-subtitle">
                         {{ $currentStatus === 'delivered' ? 'Order delivered successfully' : 'Delivery information' }}
                     </p>
+                    @if(!empty($order->tracking_number))
+                        <div class="mt-3 p-3" style="background:#f8fafc;border:1px dashed #dbe2ea;border-radius:8px;">
+                            <p class="order-shipping-subtitle mb-1">
+                                <strong>Tracking Number:</strong>
+                                <span class="fw-bold" style="color:var(--order-text);">{{ $order->tracking_number }}</span>
+                            </p>
+                            @if(!empty($order->tracking_carrier))
+                                <p class="order-shipping-subtitle mb-0">
+                                    <strong>Carrier:</strong> {{ $order->tracking_carrier }}
+                                </p>
+                            @endif
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

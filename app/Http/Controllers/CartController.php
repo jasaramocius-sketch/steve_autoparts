@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\NotificationHelper;
+use App\Mail\OrderConfirmationMail;
 use App\Models\Address;
 use App\Models\Cart;
 use App\Models\Coupon;
@@ -13,6 +14,7 @@ use App\Models\Product;
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class CartController extends Controller
 {
@@ -282,6 +284,12 @@ class CartController extends Controller
         if (count($cart) === 0) {
             return redirect()->route('cart')->with('error', 'Your cart is empty.');
         }
+
+        // Guests enter their delivery details directly on the checkout page.
+        if (! auth()->check()) {
+            return view('checkout.guest', compact('cart'));
+        }
+
         $total = array_sum(array_map(fn ($item) => $item['price'] * $item['qty'], $cart));
         $couponData = $this->recomputeCoupon($cart) ?? [];
         $couponDiscount = $couponData['discount'] ?? 0;
@@ -290,6 +298,41 @@ class CartController extends Controller
         $selectedVehicleId = session('selected_vehicle_id');
 
         return view('checkout.index', compact('cart', 'total', 'addresses', 'vehicles', 'selectedVehicleId', 'couponData', 'couponDiscount'));
+    }
+
+    public function checkoutSubmitGuest(Request $request)
+    {
+        $request->validate([
+            'full_name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'phone' => 'required|string|max:50',
+            'address' => 'required|string|max:500',
+            'city' => 'required|string|max:150',
+            'state' => 'nullable|string|max:150',
+            'country' => 'required|string|max:150',
+            'zip_code' => 'nullable|string|max:20',
+        ]);
+
+        $cart = session('cart', []);
+        if (count($cart) === 0) {
+            return redirect()->route('cart')->with('error', 'Your cart is empty.');
+        }
+
+        session([
+            'billing_info' => [
+                'name' => $request->full_name,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'address' => $request->address,
+                'city' => $request->city,
+                'state' => $request->state,
+                'country' => $request->country,
+                'zip_code' => $request->zip_code,
+            ],
+        ]);
+        session(['checkout_vehicle_id' => null]);
+
+        return redirect()->route('checkout.delivery-info');
     }
 
     public function checkoutSubmit(Request $request)
@@ -431,8 +474,23 @@ class CartController extends Controller
         $couponDiscount = $couponData['discount'] ?? 0;
         $grandTotal = max($total + $shippingCost - $couponDiscount, 0);
 
+        // Stock availability check against the database (source of truth)
+        $productIds = array_map('intval', array_keys($cart));
+        $products = Product::whereIn('id', $productIds)->get()->keyBy('id');
+        foreach ($cart as $id => $item) {
+            $product = $products[(int) $id] ?? null;
+            if (! $product) {
+                return back()->with('error', "Sorry, \"{$item['name']}\" is no longer available.");
+            }
+            if ((int) $product->stock < (int) $item['qty']) {
+                session()->put('stock_error_'.$product->id, $product->stock);
+
+                return back()->with('error', "Sorry, only {$product->stock} unit(s) of \"{$product->name}\" are available. Please adjust the quantity.");
+            }
+        }
+
         // Save to database
-        $dbOrder = DB::transaction(function () use ($request, $cart, $billing, $shipping, $grandTotal, $shippingCost, $paymentDetails, $couponData, $couponDiscount, $total) {
+        $dbOrder = DB::transaction(function () use ($request, $cart, $billing, $shipping, $grandTotal, $shippingCost, $paymentDetails, $couponData, $couponDiscount, $total, $products) {
 
             $orderNumber = 'ORD'.strtoupper(uniqid());
 
@@ -453,6 +511,8 @@ class CartController extends Controller
                 'additional_info' => $request->input('additional_info'),
                 'shipping_details' => json_encode($billing),
             ]);
+
+            $dbOrder->recordStatusChange('pending', 'Order placed');
 
             // Proportional coupon split: each item's share = discount * (line subtotal / order subtotal)
             $distributedDiscount = 0.0;
@@ -486,10 +546,24 @@ class CartController extends Controller
                 }
             }
 
+            // Deduct the ordered quantity from stock (locked rows prevent overselling)
+            foreach ($cart as $id => $item) {
+                $product = $products[(int) $id] ?? null;
+                if ($product) {
+                    $product->whereKey($product->id)->lockForUpdate()->decrement('stock', (int) $item['qty']);
+                }
+            }
+            $dbOrder->update(['stock_deducted' => true]);
+
             return $dbOrder;
         });
 
         NotificationHelper::orderPlaced($dbOrder);
+
+        $toEmail = $billing['email'] ?? null ?: ($dbOrder->user?->email ?? null);
+        if ($toEmail) {
+            Mail::to($toEmail)->queue(new OrderConfirmationMail($dbOrder->load('items.product')));
+        }
 
         // Build session data for the confirmation page
         $order = [

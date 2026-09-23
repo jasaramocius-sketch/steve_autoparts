@@ -10,6 +10,7 @@ use App\Models\Image;
 use App\Models\Product;
 use App\Models\Seller;
 use App\Models\User;
+use App\Models\Vehicle;
 use App\Models\Wishlist;
 use App\Support\DescriptionMarkdown;
 use Illuminate\Http\Request;
@@ -92,12 +93,25 @@ class ProductController extends Controller
         ];
     }
 
+    public static function resolveImportedSku(array $data, string $name, ?Product $existing = null): string
+    {
+        if (! empty($data['sku'])) {
+            return trim($data['sku']);
+        }
+
+        if ($existing?->sku) {
+            return $existing->sku;
+        }
+
+        return Product::generateSku($name, $existing ? (int) $existing->id : null);
+    }
+
     public function index(Request $request)
     {
         $sortBy = $request->query('sort_by', 'created_at');
         $sortDir = $request->query('sort_dir', 'desc');
 
-        if (! in_array($sortBy, ['id', 'name', 'price', 'old_price', 'stock', 'category_id', 'featured', 'status', 'created_at'])) {
+        if (! in_array($sortBy, ['id', 'name', 'sku', 'price', 'old_price', 'stock', 'category_id', 'featured', 'status', 'rating', 'created_at'])) {
             $sortBy = 'created_at';
         }
         $sortDir = $sortDir === 'asc' ? 'asc' : 'desc';
@@ -118,15 +132,56 @@ class ProductController extends Controller
             $query = Product::with(['category', 'seller']);
         }
 
-        if ($search = $request->query('search')) {
-            $query->where('name', 'like', "%{$search}%");
+        if ($search = trim((string) $request->query('search'))) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('sku', 'like', "%{$search}%")
+                    ->orWhere('make', 'like', "%{$search}%")
+                    ->orWhere('model', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->query('category_id'));
+        }
+
+        if ($request->filled('brand_id')) {
+            $query->where('brand_id', $request->query('brand_id'));
+        }
+
+        if ($request->filled('seller_id')) {
+            $query->where('seller_id', $request->query('seller_id'));
+        }
+
+        if ($request->filled('product_type') && $request->query('product_type') !== 'all') {
+            $query->where('product_type', $request->query('product_type'));
+        }
+
+        if ($request->filled('stock_filter') && $request->query('stock_filter') !== 'all') {
+            if ($request->query('stock_filter') === 'in_stock') {
+                $query->where('stock', '>', 0);
+            } elseif ($request->query('stock_filter') === 'out_of_stock') {
+                $query->where('stock', '<=', 0);
+            }
+        }
+
+        if ($request->filled('status') && in_array($request->query('status'), ['0', '1'])) {
+            $query->where('status', $request->query('status'));
+        }
+
+        if ($request->filled('featured') && in_array($request->query('featured'), ['0', '1'])) {
+            $query->where('featured', $request->query('featured'));
         }
 
         $products = $query->orderBy($sortBy, $sortDir)->paginate($perPage);
 
         $products->appends($request->query())->onEachSide(1);
 
-        return view('admin.products.index', compact('products', 'sortBy', 'sortDir'));
+        $categories = Category::orderBy('name')->get();
+        $brands = Brand::orderBy('name')->get();
+        $sellers = Seller::orderBy('name')->get();
+
+        return view('admin.products.index', compact('products', 'sortBy', 'sortDir', 'categories', 'brands', 'sellers'));
     }
 
     public function restore($id)
@@ -200,7 +255,38 @@ class ProductController extends Controller
 
         $hasPurchased = ReviewController::hasPurchased(auth()->id(), $product->id);
 
-        return view('product.show', compact('product', 'related', 'inWishlist', 'wishedProductIds', 'hasPurchased', 'similar'));
+        // Fitment badge against the user's selected/default saved vehicle
+        $userVehicle = null;
+        $vehicleFit = null;
+        if (auth()->check()) {
+            $selectedVehicleId = session('selected_vehicle_id');
+            if ($selectedVehicleId) {
+                $userVehicle = Vehicle::where('user_id', auth()->id())->where('id', $selectedVehicleId)->first();
+            }
+            if (! $userVehicle) {
+                $userVehicle = Vehicle::where('user_id', auth()->id())->first();
+            }
+            if ($userVehicle && $product->year && $product->make && $product->model) {
+                $vehicleFit = (
+                    strtolower(trim((string) $userVehicle->year)) === strtolower(trim((string) $product->year)) &&
+                    strtolower(trim((string) $userVehicle->make)) === strtolower(trim((string) $product->make)) &&
+                    strtolower(trim((string) $userVehicle->model)) === strtolower(trim((string) $product->model))
+                );
+            }
+        }
+
+        // Recently viewed (session-based, most recent first, max 10)
+        $recentlyViewed = collect(session('recently_viewed', []))
+            ->filter(fn ($id) => (int) $id !== (int) $product->id)
+            ->values()
+            ->prepend($product->id)
+            ->unique()
+            ->take(10)
+            ->values()
+            ->all();
+        session(['recently_viewed' => $recentlyViewed]);
+
+        return view('product.show', compact('product', 'related', 'inWishlist', 'wishedProductIds', 'hasPurchased', 'similar', 'userVehicle', 'vehicleFit'));
     }
 
     public function create()
@@ -216,6 +302,7 @@ class ProductController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'sku' => 'nullable|string|max:100',
             'price' => 'required|numeric|min:0',
             'old_price' => 'nullable|numeric|min:0',
             'stock' => 'nullable|integer|min:0',
@@ -230,20 +317,23 @@ class ProductController extends Controller
             'tab_label_3' => 'nullable|string|max:100',
             'policy_text' => 'nullable|string',
             'features' => 'nullable|string',
+            'specifications' => 'nullable|string',
             'reviews_data' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,gif,webp|max:2048',
         ]);
 
         $data = $request->only(['name', 'description', 'price', 'old_price', 'category_id', 'brand_id', 'seller_id', 'year', 'make', 'model', 'badge', 'product_type', 'stock', 'status', 'tab_label_1', 'tab_label_2', 'tab_label_3', 'policy_text']);
         $data['featured'] = $request->boolean('featured');
-        $data['added_by'] = 'admin';
         [$data['description'], $data['policy_text']] = $this->normalizeEditorContent(
             (string) ($data['description'] ?? ''),
             (string) ($data['policy_text'] ?? '')
         );
+        $data['sku'] = $request->filled('sku') ? trim($request->sku) : null;
         $data['features'] = $request->filled('features') ? array_filter(explode("\n", str_replace("\r", '', $request->features))) : null;
+        $data['specifications'] = $this->parseSpecifications($request->specifications);
         $data['reviews_data'] = $request->filled('reviews_data') ? json_decode($request->reviews_data, true) : null;
         $data['slug'] = Str::slug($request->name).'-'.time();
+        $data['sku'] = $data['sku'] ?: Product::generateSku((string) $request->name);
 
         if ($request->filled('image_from_manager')) {
             $data['image'] = 'storage/'.ltrim($request->image_from_manager, '/');
@@ -302,6 +392,7 @@ class ProductController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
+            'sku' => 'nullable|string|max:100',
             'price' => 'required|numeric|min:0',
             'old_price' => 'nullable|numeric|min:0',
             'stock' => 'nullable|integer|min:0',
@@ -316,6 +407,7 @@ class ProductController extends Controller
             'tab_label_3' => 'nullable|string|max:100',
             'policy_text' => 'nullable|string',
             'features' => 'nullable|string',
+            'specifications' => 'nullable|string',
             'reviews_data' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,gif,webp|max:2048',
         ]);
@@ -326,7 +418,9 @@ class ProductController extends Controller
             (string) ($data['description'] ?? ''),
             (string) ($data['policy_text'] ?? '')
         );
+        $data['sku'] = $request->filled('sku') ? trim($request->sku) : ($product->sku ?: Product::generateSku((string) $request->name, (int) $product->id));
         $data['features'] = $request->filled('features') ? array_filter(explode("\n", str_replace("\r", '', $request->features))) : null;
+        $data['specifications'] = $this->parseSpecifications($request->specifications);
         $data['reviews_data'] = $request->filled('reviews_data') ? json_decode($request->reviews_data, true) : null;
 
         if ($request->filled('image_from_manager')) {
@@ -445,6 +539,95 @@ class ProductController extends Controller
         return back()->with('success', 'Product featured status updated successfully.');
     }
 
+    public function duplicate($id)
+    {
+        $product = Product::findOrFail($id);
+
+        $copy = $product->replicate();
+        $copy->name = $product->name.' (Copy)';
+        $copy->slug = Str::slug($copy->name).'-'.time();
+        $copy->status = false;
+        $copy->created_at = now();
+        $copy->updated_at = now();
+        $copy->save();
+
+        return back()->with('success', 'Product duplicated successfully! You can now edit the copy.');
+    }
+
+    public function bulkDelete(Request $request)
+    {
+        $ids = array_filter(array_map('intval', (array) $request->input('ids', [])));
+        if (empty($ids)) {
+            return back()->with('error', 'No products selected.');
+        }
+
+        Product::whereIn('id', $ids)->delete();
+
+        return back()->with('success', count($ids).' product(s) moved to trash.');
+    }
+
+    public function bulkRestore(Request $request)
+    {
+        $ids = array_filter(array_map('intval', (array) $request->input('ids', [])));
+        if (empty($ids)) {
+            return back()->with('error', 'No products selected.');
+        }
+
+        Product::onlyTrashed()->whereIn('id', $ids)->restore();
+
+        return back()->with('success', count($ids).' product(s) restored.');
+    }
+
+    public function bulkForceDelete(Request $request)
+    {
+        $ids = array_filter(array_map('intval', (array) $request->input('ids', [])));
+        if (empty($ids)) {
+            return back()->with('error', 'No products selected.');
+        }
+
+        Product::onlyTrashed()->whereIn('id', $ids)->forceDelete();
+
+        return back()->with('success', count($ids).' product(s) permanently deleted.');
+    }
+
+    public function bulkStatus(Request $request)
+    {
+        $ids = array_filter(array_map('intval', (array) $request->input('ids', [])));
+        if (empty($ids)) {
+            return back()->with('error', 'No products selected.');
+        }
+
+        $status = $request->integer('status') === 1 ? 1 : 0;
+        Product::whereIn('id', $ids)->update(['status' => $status]);
+
+        return back()->with('success', count($ids).' product(s) '.($status ? 'activated' : 'deactivated').'.');
+    }
+
+    public function bulkFeatured(Request $request)
+    {
+        $ids = array_filter(array_map('intval', (array) $request->input('ids', [])));
+        if (empty($ids)) {
+            return back()->with('error', 'No products selected.');
+        }
+
+        $featured = $request->integer('featured') === 1 ? 1 : 0;
+        Product::whereIn('id', $ids)->update(['featured' => $featured]);
+
+        return back()->with('success', count($ids).' product(s) updated as '.($featured ? 'featured' : 'not featured').'.');
+    }
+
+    public function bulkCategory(Request $request)
+    {
+        $ids = array_filter(array_map('intval', (array) $request->input('ids', [])));
+        if (empty($ids) || ! $request->filled('category_id')) {
+            return back()->with('error', 'Select at least one product and a destination category.');
+        }
+
+        Product::whereIn('id', $ids)->update(['category_id' => $request->input('category_id')]);
+
+        return back()->with('success', count($ids).' product(s) moved to the selected category.');
+    }
+
     public function contactSeller(Request $request)
     {
         $request->validate([
@@ -490,7 +673,7 @@ class ProductController extends Controller
         $header = fgetcsv($handle, 0, ',');
 
         $header = array_map('trim', $header);
-        $expected = ['id', 'name', 'price', 'old_price', 'category', 'stock', 'description', 'badge', 'product_type', 'status', 'featured', 'image', 'brand', 'seller', 'year', 'make', 'model', 'gallery_images', 'policy_text', 'buy_return_policy', 'return_policy', 'features', 'feature_list', 'reviews', 'reviews_data'];
+        $expected = ['id', 'name', 'sku', 'price', 'old_price', 'category', 'stock', 'description', 'badge', 'product_type', 'status', 'featured', 'image', 'brand', 'seller', 'year', 'make', 'model', 'gallery_images', 'policy_text', 'buy_return_policy', 'return_policy', 'features', 'feature_list', 'reviews', 'reviews_data', 'specifications', 'tab_label_1', 'tab_label_2', 'tab_label_3'];
 
         $colMap = [];
         foreach ($header as $i => $col) {
@@ -623,13 +806,19 @@ class ProductController extends Controller
                 'policy_text' => $normalized['policy_text'],
                 'features' => $normalized['features'],
                 'reviews_data' => $normalized['reviews_data'],
+                'specifications' => $this->parseSpecifications($data['specifications'] ?? null),
+                'tab_label_1' => $data['tab_label_1'] ?? null,
+                'tab_label_2' => $data['tab_label_2'] ?? null,
+                'tab_label_3' => $data['tab_label_3'] ?? null,
             ];
 
             if ($existingProduct) {
                 $insertData['slug'] = $existingProduct->slug;
+                $insertData['sku'] = self::resolveImportedSku($data, $data['name'], $existingProduct);
             } else {
                 $insertData['slug'] = Str::slug($data['name']).'-'.time().'-'.$imported;
                 $insertData['added_by'] = 'admin';
+                $insertData['sku'] = self::resolveImportedSku($data, $data['name']);
             }
 
             if (! empty($data['image']) && filter_var($data['image'], FILTER_VALIDATE_URL)) {
@@ -734,11 +923,11 @@ class ProductController extends Controller
 
     public function downloadSampleCsv()
     {
-        $headers = ['id', 'name', 'price', 'old_price', 'category', 'stock', 'description', 'badge', 'product_type', 'status', 'featured', 'image', 'brand', 'seller', 'year', 'make', 'model', 'gallery_images', 'policy_text', 'reviews_data'];
+        $headers = ['id', 'name', 'sku', 'price', 'old_price', 'category', 'stock', 'description', 'badge', 'product_type', 'status', 'featured', 'image', 'brand', 'seller', 'year', 'make', 'model', 'gallery_images', 'policy_text', 'features', 'specifications', 'reviews_data', 'tab_label_1', 'tab_label_2', 'tab_label_3'];
         $rows = [
-            ['', 'Brake Pads Set', '49.99', '69.99', 'Brakes', '100', 'High quality ceramic brake pads', 'New', 'none', '1', '1', 'https://example.com/images/brake-pads.jpg', 'Duralast', 'AutoZone Seller', '2020', 'Toyota', 'Camry', 'https://example.com/images/brake-pads-2.jpg|https://example.com/images/brake-pads-3.jpg', '<p>We offer a 30-day return policy for unused items in original packaging.</p>', '[{"name":"Ava","rating":5,"text":"Perfect fit and fast delivery.","deleted":false}]'],
-            ['', 'Oil Filter', '12.99', '', 'Engine', '250', '', 'Sale', 'none', '1', '0', '', 'Apex Gasket', 'AutoZone Seller', '2019', 'Honda', 'Civic', '', '<p>Items can be returned within 14 days if they are not installed or damaged.</p>', '[{"name":"Noah","rating":4,"text":"Works well and shipped quickly.","deleted":false}]'],
-            ['', 'LED Headlight Bulb', '29.99', '39.99', 'Lighting', '75', 'Bright 12000LM LED bulbs', '', 'none', '1', '1', '', '', '', '', '', '', '<p>All purchases include a 12-month warranty and a simple return process.</p>', '[{"name":"Mila","rating":5,"text":"Great brightness and easy install.","deleted":false}]'],
+            ['', 'Brake Pads Set', 'bp-1001', '49.99', '69.99', 'Brakes', '100', 'High quality ceramic brake pads', 'New', 'none', '1', '1', 'https://example.com/images/brake-pads.jpg', 'Duralast', 'AutoZone Seller', '2020', 'Toyota', 'Camry', 'https://example.com/images/brake-pads-2.jpg|https://example.com/images/brake-pads-3.jpg', '<p>We offer a 30-day return policy for unused items in original packaging.</p>', "Premium quality\nEasy installation", "Material::Ceramic\nFriction::Low dust", '[{"name":"Ava","rating":5,"text":"Perfect fit and fast delivery.","deleted":false}]', 'Overview', 'Specifications', 'Reviews'],
+            ['', 'Oil Filter', '', '12.99', '', 'Engine', '250', '', 'Sale', 'none', '1', '0', '', 'Apex Gasket', 'AutoZone Seller', '2019', 'Honda', 'Civic', '', '<p>Items can be returned within 14 days if they are not installed or damaged.</p>', '', 'Thread::M20x1.5', '[{"name":"Noah","rating":4,"text":"Works well and shipped quickly.","deleted":false}]', '', '', ''],
+            ['', 'LED Headlight Bulb', '', '29.99', '39.99', 'Lighting', '75', 'Bright 12000LM LED bulbs', '', 'none', '1', '1', '', '', '', '', '', '', '', '<p>All purchases include a 12-month warranty and a simple return process.</p>', "6000K bright\nPlug and play", 'Voltage::12V', '[{"name":"Mila","rating":5,"text":"Great brightness and easy install.","deleted":false}]', '', '', ''],
         ];
 
         $callback = function () use ($headers, $rows) {
@@ -758,7 +947,7 @@ class ProductController extends Controller
 
     public function exportCsv()
     {
-        $headers = ['id', 'name', 'price', 'old_price', 'category', 'stock', 'description', 'badge', 'product_type', 'status', 'featured', 'image', 'brand', 'seller', 'year', 'make', 'model', 'gallery_images'];
+        $headers = ['id', 'name', 'sku', 'price', 'old_price', 'category', 'stock', 'description', 'badge', 'product_type', 'status', 'featured', 'image', 'brand', 'seller', 'year', 'make', 'model', 'gallery_images', 'policy_text', 'features', 'specifications', 'reviews_data', 'tab_label_1', 'tab_label_2', 'tab_label_3'];
 
         $products = Product::with('category', 'brand', 'seller', 'galleryImages')->get();
 
@@ -771,9 +960,22 @@ class ProductController extends Controller
                     return $img->url ? url($img->url) : '';
                 })->filter()->values()->implode('|');
 
+                $features = is_array($p->features) ? implode("\n", array_filter($p->features)) : '';
+
+                $specsLines = [];
+                foreach ((array) $p->specifications as $spec) {
+                    $label = trim($spec['label'] ?? '');
+                    $value = trim($spec['value'] ?? '');
+                    $specsLines[] = ($label !== '' && $value !== '') ? $label.'::'.$value : ($label ?: $value);
+                }
+                $specs = implode("\n", array_filter($specsLines));
+
+                $reviewsData = is_array($p->reviews_data) && $p->reviews_data ? json_encode($p->reviews_data) : '';
+
                 fputcsv($handle, [
                     $p->id,
                     $p->name,
+                    $p->sku ?? '',
                     $p->price,
                     $p->old_price ?? '',
                     $p->category->name ?? '',
@@ -790,6 +992,13 @@ class ProductController extends Controller
                     $p->make ?? '',
                     $p->model ?? '',
                     $galleryUrls,
+                    $p->policy_text ?? '',
+                    $features,
+                    $specs,
+                    $reviewsData,
+                    $p->tab_label_1 ?? '',
+                    $p->tab_label_2 ?? '',
+                    $p->tab_label_3 ?? '',
                 ]);
             }
 
@@ -812,5 +1021,95 @@ class ProductController extends Controller
         }
 
         return [$description, $policyText];
+    }
+
+    private function parseSpecifications(?string $raw): ?array
+    {
+        if ($raw === null || trim($raw) === '') {
+            return null;
+        }
+
+        $specs = [];
+        $lines = preg_split('/\r\n|\n/', $raw);
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if ($line === '') {
+                continue;
+            }
+            if (str_contains($line, '::')) {
+                [$label, $value] = array_map('trim', explode('::', $line, 2));
+            } else {
+                $label = $line;
+                $value = '';
+            }
+            if ($label === '') {
+                continue;
+            }
+            $specs[] = ['label' => $label, 'value' => $value];
+        }
+
+        return $specs ?: null;
+    }
+
+    public function stockIndex(Request $request)
+    {
+        $threshold = max(0, (int) $request->query('threshold', 5));
+        $perPage = in_array((int) $request->query('per_page'), [10, 20, 50, 100], true) ? (int) $request->query('per_page') : 20;
+
+        $query = Product::with(['category', 'seller'])->where('stock', '<=', $threshold);
+
+        if ($search = trim((string) $request->query('search'))) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('sku', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('stock_filter') && in_array($request->query('stock_filter'), ['low', 'out_of_stock'], true)) {
+            if ($request->query('stock_filter') === 'out_of_stock') {
+                $query->where('stock', '<=', 0);
+            } else {
+                $query->whereBetween('stock', [1, $threshold]);
+            }
+        }
+
+        $products = $query->orderBy('stock', 'asc')->paginate($perPage);
+        $products->appends($request->query())->onEachSide(1);
+
+        return view('admin.products.stock', compact('products', 'threshold'));
+    }
+
+    public function bulkStockUpdate(Request $request)
+    {
+        $request->validate([
+            'product_id' => 'required|array',
+            'product_id.*' => 'integer',
+            'stock_qty' => 'required|array',
+            'stock_qty.*' => 'integer|min:0',
+            'mode' => 'required|in:add,set',
+        ]);
+
+        $ids = $request->input('product_id');
+        $quantities = $request->input('stock_qty');
+        $mode = $request->mode;
+
+        $count = 0;
+        DB::transaction(function () use ($ids, $quantities, $mode, &$count) {
+            foreach ($ids as $i => $id) {
+                $product = Product::find($id);
+                if (! $product) {
+                    continue;
+                }
+                $qty = (int) ($quantities[$i] ?? 0);
+                if ($mode === 'add') {
+                    $product->increment('stock', $qty);
+                } else {
+                    $product->update(['stock' => $qty]);
+                }
+                $count++;
+            }
+        });
+
+        return back()->with('success', "Stock updated for {$count} product(s).");
     }
 }

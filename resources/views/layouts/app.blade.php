@@ -735,5 +735,7 @@
 </script>
     @yield('scripts')
     @stack('page-builder-js')
+
+    @include('partials.whatsapp-button')
 </body>
 </html>

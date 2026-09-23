@@ -83,7 +83,7 @@
             @endif
         </div>
         @php
-            $visibleCardReviews = collect($p->reviews_data ?? [])->where('deleted', false);
+            $visibleCardReviews = collect($p->reviews_data ?? [])->filter(fn ($r) => ! ($r['deleted'] ?? false) && ($r['approved'] ?? true) !== false);
             if ($visibleCardReviews->isEmpty()) {
                 $displayRating = 0;
                 $displayReviews = 0;

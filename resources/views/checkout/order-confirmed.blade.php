@@ -39,7 +39,7 @@
             </g>
           </svg>
           <h1 class="mb-2 fs-28 fw-500 text-success">Thank You for Your Order!</h1>
-          <p class="fs-13 text-soft-dark">A copy or your order summary has been sent to <strong>{{ $order['customer_email'] ?? 'N/A' }}</strong></p>
+          <p class="fs-13 text-soft-dark">Your order has been confirmed and a confirmation has been sent to <strong>{{ $order['customer_email'] ?? 'N/A' }}</strong>. @auth You can view your order anytime from <a href="{{ route('user.orders') }}" class="text-primary">My Orders</a>. @else Track your order later with your order code and email on the <a href="{{ route('order.tracking') }}" class="text-primary">Order Tracking</a> page. @endauth</p>
         </div>
 
         <div class="mb-4 bg-white p-4 border">

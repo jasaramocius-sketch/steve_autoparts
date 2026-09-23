@@ -58,6 +58,15 @@
                         </div>
 
                         <div class="col-md-3">
+                            <label class="form-label">SKU / Part Number</label>
+                            <div class="input-group">
+                                <input type="text" name="sku" id="sku" class="form-control @error('sku') is-invalid @enderror" value="{{ old('sku') }}" placeholder="e.g. am-6113">
+                                <button type="button" class="btn btn-outline-secondary" id="sku-generate-btn" title="Generate SKU"><i class="fas fa-dice"></i> Auto</button>
+                                @error('sku') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
                             <label class="form-label">Old Price</label>
                             <input type="number" step="0.01" name="old_price" class="form-control" value="{{ old('old_price') }}">
                         </div>
@@ -184,6 +193,13 @@
                         </div>
                         
                         <div class="col-md-12">
+                            <label class="form-label">Specifications</label>
+                            <textarea name="specifications" class="form-control text-monospace" rows="4" placeholder="One per line, format:  Label :: Value&#10;e.g.&#10;Brand :: Duralast&#10;Material :: Ceramic">{{ old('specifications') }}</textarea>
+                            <small class="text-muted">Format: <code>Label :: Value</code> on each line (rendered as a specifications table on the product page).</small>
+                            @include('admin.partials.specifications-preview', ['initialSpecifications' => old('specifications', '')])
+                        </div>
+                        
+                        <div class="col-md-12">
                             <label class="form-label">Reviews Data (JSON array)</label>
                             <textarea name="reviews_data" class="form-control text-monospace" rows="4" placeholder='[{"name":"John","rating":5,"text":"Great product!"}]'>{{ old('reviews_data') }}</textarea>
                             <small class="text-muted">Format: [{"name":"John","rating":5,"text":"Great product!"}]</small>
@@ -239,5 +255,15 @@
 
 @include('admin.partials.image-manager-picker', ['pickerId' => 'product_image', 'targetInput' => 'image_from_manager'])
 @include('admin.partials.image-manager-picker', ['pickerId' => 'gallery_images', 'targetInput' => 'gallery_images_from_manager', 'multiple' => true])
+
+<script>
+document.getElementById('sku-generate-btn').addEventListener('click', function () {
+    const name = (document.querySelector('input[name="name"]')?.value || '').trim();
+    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    const prefix = ('SKU-' + slug.substring(0, 6)).toUpperCase();
+    const rand = Math.random().toString(36).substring(2, 8).toUpperCase();
+    document.getElementById('sku').value = prefix + '-' + rand;
+});
+</script>
 
 @endsection

@@ -89,7 +89,7 @@
                 <th>Rating</th>
                 @foreach($compareItems as $item)
                     @php
-                        $visibleReviews = collect($item->product->reviews_data ?? [])->where('deleted', false);
+                        $visibleReviews = collect($item->product->reviews_data ?? [])->filter(fn ($r) => ! ($r['deleted'] ?? false) && ($r['approved'] ?? true) !== false);
                         if ($visibleReviews->isEmpty()) {
                             $displayRating = 0;
                             $displayReviews = 0;

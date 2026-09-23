@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Helpers\NotificationHelper;
 use App\Http\Controllers\Controller;
+use App\Mail\ContactReplyMail;
 use App\Models\Contact;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class ContactController extends Controller
 {
@@ -55,6 +57,10 @@ class ContactController extends Controller
         // Notify the user (in-app bell) whenever a reply is saved on their inquiry.
         if ($contact->user_id) {
             NotificationHelper::inquiryReplied($contact);
+        }
+
+        if ($contact->email) {
+            Mail::to($contact->email)->send(new ContactReplyMail($contact->load('product')));
         }
 
         return redirect()->route('admin.contacts.show', $contact->id)

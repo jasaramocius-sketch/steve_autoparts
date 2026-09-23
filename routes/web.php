@@ -10,7 +10,10 @@ use App\Http\Controllers\Admin\HomePageController;
 use App\Http\Controllers\Admin\ImageController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\PageController;
+use App\Http\Controllers\Admin\ReturnController as AdminReturnController;
+use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\Admin\SellerController;
+use App\Http\Controllers\Admin\SubscriberController;
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
@@ -26,9 +29,9 @@ use App\Http\Controllers\LocationController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ReturnController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ShopController;
-use App\Http\Controllers\StaffController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\WishlistController;
@@ -46,6 +49,7 @@ Route::get('/currency', [CurrencyController::class, 'rates']);
 Route::get('/address/states', [LocationController::class, 'states'])->name('location.states');
 Route::get('/address/cities', [LocationController::class, 'cities'])->name('location.cities');
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/sitemap.xml', [HomeController::class, 'sitemap'])->name('sitemap');
 
 Route::get('/shop', [ShopController::class, 'index'])->name('shop');
 Route::post('/shop/clear-vehicle', [ShopController::class, 'clearVehicleFilter'])->middleware('auth')->name('shop.clear-vehicle');
@@ -87,19 +91,21 @@ Route::get('/cart/mini', [CartController::class, 'miniCart'])->name('cart.mini')
 Route::post('/cart/coupon/apply', [CartController::class, 'applyCoupon'])->name('cart.coupon.apply');
 Route::post('/cart/coupon/remove', [CartController::class, 'removeCoupon'])->name('cart.coupon.remove');
 
-Route::get('/checkout', [CartController::class, 'checkout'])->middleware(['auth', 'nocache'])->name('checkout');
+Route::get('/checkout', [CartController::class, 'checkout'])->middleware(['nocache'])->name('checkout');
 
-Route::post('/checkout', [CartController::class, 'checkoutSubmit'])->middleware(['auth', 'nocache'])->name('checkout.submit');
+Route::post('/checkout', [CartController::class, 'checkoutSubmit'])->middleware(['nocache'])->name('checkout.submit');
 
-Route::get('/checkout/delivery-info', [CartController::class, 'deliveryInfo'])->middleware(['auth', 'nocache'])->name('checkout.delivery-info');
+Route::post('/checkout/guest', [CartController::class, 'checkoutSubmitGuest'])->middleware(['nocache'])->name('checkout.guest.submit');
 
-Route::post('/checkout/delivery-info', [CartController::class, 'deliveryInfoSubmit'])->middleware(['auth', 'nocache'])->name('checkout.delivery-info.store');
+Route::get('/checkout/delivery-info', [CartController::class, 'deliveryInfo'])->middleware(['nocache'])->name('checkout.delivery-info');
 
-Route::get('/checkout/payment', [CartController::class, 'payment'])->middleware(['auth', 'nocache'])->name('checkout.payment');
+Route::post('/checkout/delivery-info', [CartController::class, 'deliveryInfoSubmit'])->middleware(['nocache'])->name('checkout.delivery-info.store');
 
-Route::post('/checkout/payment', [CartController::class, 'paymentSubmit'])->middleware(['auth', 'nocache'])->name('checkout.payment.submit');
+Route::get('/checkout/payment', [CartController::class, 'payment'])->middleware(['nocache'])->name('checkout.payment');
 
-Route::get('/checkout/order-confirmed', [CartController::class, 'orderConfirmed'])->middleware(['auth', 'nocache'])->name('checkout.confirmed');
+Route::post('/checkout/payment', [CartController::class, 'paymentSubmit'])->middleware(['nocache'])->name('checkout.payment.submit');
+
+Route::get('/checkout/order-confirmed', [CartController::class, 'orderConfirmed'])->middleware(['nocache'])->name('checkout.confirmed');
 
 /* Address management for checkout */
 Route::post('/checkout/address/store', [AddressController::class, 'store'])->middleware(['auth', 'nocache'])->name('checkout.address.store');
@@ -145,6 +151,11 @@ Route::match(['get', 'post'], '/logout', [AuthController::class, 'logout'])->nam
 
 Route::get('/register', [AuthController::class, 'registerForm'])->name('register');
 Route::post('/register', [AuthController::class, 'register'])->name('register.post');
+
+Route::get('/forgot-password', [AuthController::class, 'showForgot'])->name('password.request');
+Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->middleware('throttle:5,1')->name('password.email');
+Route::get('/reset-password/{token}', [AuthController::class, 'showReset'])->name('password.reset');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:5,1')->name('password.update');
 
 /*
 |--------------------------------------------------------------------------
@@ -229,6 +240,11 @@ Route::prefix('admin')
         Route::get('/products/export/csv', [ProductController::class, 'exportCsv'])
             ->name('admin.products.export-csv');
 
+        Route::get('/products/stock', [ProductController::class, 'stockIndex'])
+            ->name('admin.products.stock');
+        Route::post('/products/bulk/stock', [ProductController::class, 'bulkStockUpdate'])
+            ->name('admin.products.bulk-stock');
+
         Route::get('/products/{id}', [ProductController::class, 'details'])
             ->name('admin.products.details');
         Route::get('/products/{id}/edit', [ProductController::class, 'edit'])
@@ -245,6 +261,15 @@ Route::prefix('admin')
             ->name('admin.products.toggle-status');
         Route::post('/products/{id}/toggle-featured', [ProductController::class, 'toggleFeatured'])
             ->name('admin.products.toggle-featured');
+        Route::post('/products/{id}/duplicate', [ProductController::class, 'duplicate'])
+            ->name('admin.products.duplicate');
+
+        Route::post('/products/bulk/delete', [ProductController::class, 'bulkDelete'])->name('admin.products.bulk-delete');
+        Route::post('/products/bulk/restore', [ProductController::class, 'bulkRestore'])->name('admin.products.bulk-restore');
+        Route::post('/products/bulk/force-delete', [ProductController::class, 'bulkForceDelete'])->name('admin.products.bulk-force-delete');
+        Route::post('/products/bulk/status', [ProductController::class, 'bulkStatus'])->name('admin.products.bulk-status');
+        Route::post('/products/bulk/featured', [ProductController::class, 'bulkFeatured'])->name('admin.products.bulk-featured');
+        Route::post('/products/bulk/category', [ProductController::class, 'bulkCategory'])->name('admin.products.bulk-category');
 
         Route::get('/orders', [AdminOrderController::class, 'index'])
             ->name('admin.orders.index');
@@ -252,8 +277,21 @@ Route::prefix('admin')
             ->name('admin.orders.show');
         Route::post('/orders/{id}/status', [AdminOrderController::class, 'updateStatus'])
             ->name('admin.orders.update-status');
-        Route::get('/user/orders/invoice/{id}', [OrderController::class, 'invoice'])->name('admin.user.orders.invoice');
-        Route::get('/admin/orders/invoice/{id}', [OrderController::class, 'invoice'])->name('admin.orders.invoice');
+
+        Route::get('/returns', [AdminReturnController::class, 'index'])->name('admin.returns.index');
+        Route::get('/returns/{id}', [AdminReturnController::class, 'show'])->name('admin.returns.show');
+        Route::put('/returns/{id}/update', [AdminReturnController::class, 'update'])->name('admin.returns.update');
+
+        Route::get('/reviews', [AdminReviewController::class, 'index'])->name('admin.reviews.index');
+        Route::post('/reviews/{productId}/{reviewId}/toggle', [AdminReviewController::class, 'toggleApproved'])->name('admin.reviews.toggle');
+        Route::delete('/reviews/{productId}/{reviewId}', [AdminReviewController::class, 'destroy'])->name('admin.reviews.destroy');
+
+        Route::get('/subscribers', [SubscriberController::class, 'index'])->name('admin.subscribers.index');
+        Route::delete('/subscribers/{id}', [SubscriberController::class, 'destroy'])->name('admin.subscribers.destroy');
+        Route::get('/subscribers/export/csv', [SubscriberController::class, 'exportCsv'])->name('admin.subscribers.export-csv');
+        Route::get('/orders/export/csv', [AdminOrderController::class, 'exportCsv'])->name('admin.orders.export-csv');
+        Route::post('/orders/{id}/email-customer', [AdminOrderController::class, 'emailCustomer'])->name('admin.orders.email-customer');
+        Route::get('/orders/{id}/invoice', [AdminOrderController::class, 'invoice'])->name('admin.orders.invoice');
         Route::get('/brands', [BrandController::class, 'index'])
             ->name('admin.brands.index');
         Route::get('/brands/create', [BrandController::class, 'create'])
@@ -494,6 +532,8 @@ Route::prefix('admin')
             ->name('admin.customers.create');
         Route::post('/customers', [UserController::class, 'storeCustomer'])
             ->name('admin.customers.store');
+        Route::get('/customers/{id}', [UserController::class, 'show'])
+            ->name('admin.customers.show');
         Route::get('/customers/{id}/edit', [UserController::class, 'edit'])
             ->name('admin.customers.edit');
         Route::put('/customers/{id}', [UserController::class, 'update'])
@@ -547,16 +587,6 @@ Route::prefix('admin')
         ]);
         Route::post('/users/{id}/toggle-status', [UserManagementController::class, 'toggleStatus'])
             ->name('admin.users.toggle-status');
-
-        Route::resource('staffs', StaffController::class)->names([
-            'index' => 'admin.staffs.index',
-            'create' => 'admin.staffs.create',
-            'store' => 'admin.staffs.store',
-            'edit' => 'admin.staffs.edit',
-            'update' => 'admin.staffs.update',
-            'destroy' => 'admin.staffs.destroy',
-            'show' => 'admin.staffs.show',
-        ]);
     });
 /*
 |--------------------------------------------------------------------------
@@ -618,7 +648,7 @@ Route::get('/brands', [App\Http\Controllers\BrandController::class, 'brands'])
 Route::get('/category', function () {
     return redirect('/categories');
 });
-Route::get('/customer_products', [ShopController::class, 'customerProducts'])->name('customer.pr    oducts');
+Route::get('/customer_products', [ShopController::class, 'customerProducts'])->name('customer.products');
 Route::get('/category/{parent}/{child}/{subchild?}', [ShopController::class, 'subcategory'])->name('subcategory');
 Route::get('/faq', [HomeController::class, 'faq'])->name('faq');
 Route::get('/privacy', [HomeController::class, 'privacy'])->name('privacy');
@@ -628,6 +658,8 @@ Route::get('/terms-conditions', [HomeController::class, 'terms'])->name('terms.c
 Route::get('/return-policy', [HomeController::class, 'returnPolicy'])->name('return.policy');
 Route::get('/support-policy', [HomeController::class, 'supportPolicy'])->name('support.policy');
 
+Route::match(['get', 'post'], '/order/tracking', [OrderController::class, 'tracking'])->middleware(['nocache'])->name('order.tracking');
+
 Route::middleware(['auth', 'nocache'])->prefix('user')->name('user.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'userDashboard'])->name('dashboard');
     Route::get('/orders', [DashboardController::class, 'orders'])->name('orders');
@@ -635,7 +667,10 @@ Route::middleware(['auth', 'nocache'])->prefix('user')->name('user.')->group(fun
     Route::get('/orders/{id}', [OrderController::class, 'show'])->name('orders.show');
     Route::get('/orders/invoice/{id}', [OrderController::class, 'invoice'])->name('orders.invoice');
     Route::delete('/orders/{id}', [OrderController::class, 'destroy'])->name('orders.destroy');
-    Route::match(['get', 'post'], '/order/tracking', [OrderController::class, 'tracking'])->name('order.tracking');
+    Route::get('/returns', [ReturnController::class, 'index'])->name('returns.index');
+    Route::get('/returns/create/{orderId}', [ReturnController::class, 'create'])->name('returns.create');
+    Route::post('/returns/{orderId}', [ReturnController::class, 'store'])->name('returns.store');
+    Route::delete('/returns/{id}', [ReturnController::class, 'destroy'])->name('returns.destroy');
     Route::get('/wishlist', [DashboardController::class, 'wishlist'])->name('wishlist');
     Route::get('/vehicles', [DashboardController::class, 'vehicles'])->name('vehicles');
     Route::post('/vehicles', [DashboardController::class, 'storeVehicle'])->name('vehicles.store');
@@ -661,7 +696,7 @@ Route::middleware(['auth', 'nocache'])->prefix('user')->name('user.')->group(fun
     Route::get('/profile/edit', [UserController::class, 'editProfile'])->name('profile.edit');
     Route::post('/profile/update', [UserController::class, 'updateProfile'])->name('profile.update');
     Route::get('/change-password', function () {
-        abort(404);
+        return view('user.change-password');
     })->name('change.password');
     Route::post('/change-password', [UserController::class, 'updatePassword'])->name('change.password.update');
 });

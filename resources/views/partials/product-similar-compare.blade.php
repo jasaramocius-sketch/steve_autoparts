@@ -17,7 +17,7 @@
                 @foreach($all as $p)
                 <td class="similar-col p-0">
                     <div class="compare-product-image-wrapper">
-                        <a class="compare-product-image" href="{{ route('product', $p->slug) }}" style="width: 210px;height: 210px; display: flex; margin: 0 auto;">
+                        <a class="compare-product-image" href="{{ route('product', $p->slug) }}" style="display: flex; margin: 0 auto;">
                             {!! imgTag(storedPath($p->image, 'assets/images/thumbnails'), '', 'img-fluid mb-2', 'style="height:100%; width:100%; object-fit:cover;"') !!}
                         </a>
                     </div>
@@ -53,7 +53,7 @@
                 <th class="compare-row-label">Rating</th>
                 @foreach($all as $p)
                     @php
-                        $visReviews = collect($p->reviews_data ?? [])->where('deleted', false);
+                        $visReviews = collect($p->reviews_data ?? [])->filter(fn ($r) => ! ($r['deleted'] ?? false) && ($r['approved'] ?? true) !== false);
                         if ($visReviews->isEmpty()) { $dispRating = 0; $dispReviews = 0; }
                         else { $dispRating = round($visReviews->avg('rating')); $dispReviews = $visReviews->count(); }
                     @endphp

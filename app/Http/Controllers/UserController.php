@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -33,6 +34,29 @@ class UserController extends Controller
         }
 
         return view('admin.customers.edit', compact('customer'));
+    }
+
+    public function show(Request $request, $id)
+    {
+        $customer = User::with(['addresses'])->whereIn('role', ['customer', 'user'])->findOrFail($id);
+
+        $orders = Order::with(['items.product', 'user'])
+            ->where('user_id', $customer->id)
+            ->orderBy('created_at', 'desc')
+            ->paginate($request->integer('per_page', 10))
+            ->withQueryString();
+
+        $stats = [
+            'total_orders' => $orders->total(),
+            'total_spent' => (float) Order::where('user_id', $customer->id)
+                ->where('status', '!=', 'cancelled')
+                ->sum('total_amount'),
+            'pending_orders' => Order::where('user_id', $customer->id)
+                ->whereIn('status', ['pending', 'processing'])
+                ->count(),
+        ];
+
+        return view('admin.customers.show', compact('customer', 'orders', 'stats'));
     }
 
     public function profile()

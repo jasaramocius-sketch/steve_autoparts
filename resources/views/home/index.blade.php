@@ -9,6 +9,7 @@
         'pageTitle' => $page->meta_title ?? config('app.name', 'StAutoparts'),
         'metaTitle' => $page->meta_title ?? (config('app.name', 'StAutoparts') . ' | Spare Parts & Accessories'),
         'metaDescription' => $page->meta_description ?? ('Shop genuine auto spare parts and accessories at ' . config('app.name', 'StAutoparts') . '. Best prices, fast shipping and quality assurance.'),
+        'robots' => 'index, follow',
     ])
 @endsection
 @section('content')

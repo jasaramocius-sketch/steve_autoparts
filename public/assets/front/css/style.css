@@ -221,7 +221,7 @@ button.add-to-cart {
 
 .btn-outline-primary {
   color: var(--primary);
-  border-color: var(--primary);
+  border-color: var(--primary) !important;
 }
 
 .a-tag-hover-color:hover {
@@ -4736,6 +4736,13 @@ tbody tr:last-child {
   cursor: pointer;
 }
 
+.form-select-wrapper:has(.form-select.d-none) {
+  display: none;
+}
+.admin-product-index-filter-bar .form-select{
+  height: 40px;
+}
+
 .form-select-wrapper::after {
   content: '';
   position: absolute;
@@ -9226,7 +9233,7 @@ form .form-rows {
 .table-action-col .action-buttons {
   display: flex !important;
   justify-content: flex-start;
-  gap: 5px;
+  gap: 2px;
 }
 
 .user-table td .actions .actions-btns-wrapper,
@@ -17826,6 +17833,19 @@ td.admin-product-name a {
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 100%;
+    padding: 0 10px;
+}
+.gs-similar-compare-area .compare-product-image-wrapper a.compare-product-image{
+    width: 100%;
+    max-width: 210px;
+    height: auto;
+    aspect-ratio: 1 / 1;
+}
+.gs-similar-compare-area .compare-product-image-wrapper a.compare-product-image img{
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
 }
 /* .gs-similar-compare-area .compare-similar-table > thead th:first-child,
 .gs-similar-compare-area .compare-similar-table > tbody th:first-child,
@@ -17919,11 +17939,13 @@ td.admin-product-name a {
     flex: 1 1 auto;
   }
 .compare-similar-table .similar-col.p-0 .compare-product-image{
-    width: 210px !important;
-    height: 210px !important;
+    width: 100% !important;
+    max-width: 210px;
+    height: auto !important;
+    aspect-ratio: 1 / 1;
 }
 .compare-similar-table .similar-col.p-0 {
-    display: flex;
+    display: revert-rule;
     flex-direction: column;
     justify-content: space-between;
 }

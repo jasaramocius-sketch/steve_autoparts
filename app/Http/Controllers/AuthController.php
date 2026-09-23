@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\NotificationHelper;
+use App\Mail\WelcomeMail;
 use App\Models\Compare;
 use App\Models\User;
 use App\Models\Wishlist;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Password;
 
 class AuthController extends Controller
 {
@@ -137,6 +140,8 @@ class AuthController extends Controller
 
         NotificationHelper::welcomeUser($user);
 
+        Mail::to($user->email)->send(new WelcomeMail($user));
+
         return redirect()->route('user.dashboard')->with('success', 'Account created successfully!');
     }
 
@@ -158,5 +163,78 @@ class AuthController extends Controller
         }
 
         return view('auth.login');
+    }
+
+    public function showForgot()
+    {
+        if ($route = $this->dashboardRoute()) {
+            return redirect()->to($route);
+        }
+
+        return view('auth.forgot');
+    }
+
+    public function sendResetLink(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|string|email|max:255',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if ($user) {
+            $token = Password::broker()->createToken($user);
+            $user->sendPasswordResetNotification($token);
+
+            if (app()->environment('local')) {
+                session()->flash('reset_link', route('password.reset', [
+                    'token' => $token,
+                    'email' => $user->email,
+                ]));
+            }
+        }
+
+        return back()->with('status', 'If an account exists for that email, a password reset link has been sent.');
+    }
+
+    public function showReset(Request $request, string $token)
+    {
+        if ($route = $this->dashboardRoute()) {
+            return redirect()->to($route);
+        }
+
+        return view('auth.reset', [
+            'token' => $token,
+            'email' => $request->query('email'),
+        ]);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|string|email|max:255',
+            'password' => 'required|min:6|confirmed',
+        ]);
+
+        $response = Password::broker()->reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user, $password) {
+                $user->forceFill(['password' => Hash::make($password)])->save();
+                Auth::guard('web')->login($user);
+            }
+        );
+
+        if ($response === Password::PASSWORD_RESET) {
+            return redirect()->route('login')->with('status', 'Your password has been reset. You can now sign in.');
+        }
+
+        $message = match ($response) {
+            Password::INVALID_USER => 'We could not find an account with that email address.',
+            Password::INVALID_TOKEN => 'This password reset link is invalid or has expired. Please request a new one.',
+            default => 'Unable to reset your password. Please try again.',
+        };
+
+        return back()->withErrors(['email' => $message])->withInput(['email' => $request->email]);
     }
 }

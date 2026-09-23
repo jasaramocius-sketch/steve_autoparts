@@ -6,6 +6,7 @@
         'pageTitle' => 'All Categories - ' . config('app.name', 'StAutoparts'),
         'metaTitle' => 'All Categories | ' . config('app.name', 'StAutoparts'),
         'metaDescription' => 'Browse all auto parts categories at ' . config('app.name', 'StAutoparts') . '.',
+        'robots' => 'index, follow',
     ])
 @endsection
 

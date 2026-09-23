@@ -5,6 +5,7 @@
         'pageTitle' => $page->meta_title ?? ('FAQ - ' . config('app.name', 'StAutoparts')),
         'metaTitle' => $page->meta_title ?? ('FAQ | ' . config('app.name', 'StAutoparts')),
         'metaDescription' => $page->meta_description ?? 'Frequently asked questions about ST Auto Parts — orders, shipping, returns and support.',
+        'robots' => 'index, follow',
     ])
 @endsection
 @section('content')

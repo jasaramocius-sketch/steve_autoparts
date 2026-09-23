@@ -49,7 +49,7 @@
                       <button class="btn col-auto btn-icon btn-sm btn-circle btn-light change-qty steve-btn" type="button" data-action="decrease" data-id="{{ $key }}">
                         <i class="las la-minus"></i>
                       </button>
-                      <input type="text" class="col border-0 text-center flex-grow-1 fs-16 qty-input" value="{{ $item['qty'] }}" readonly>
+                      <input type="text" class="col border-0 text-center flex-grow-1 fs-16 qty-input" value="{{ $item['qty'] }}">
                       <button class="btn col-auto btn-icon btn-sm btn-circle btn-light change-qty steve-btn" type="button" data-action="increase" data-id="{{ $key }}">
                         <i class="las la-plus"></i>
                       </button>

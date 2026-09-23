@@ -6,6 +6,7 @@ use App\Traits\Revisable;
 use App\Traits\TracksIsDeleted;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 class Product extends Model
 {
@@ -14,6 +15,7 @@ class Product extends Model
     protected $fillable = [
         'name',
         'slug',
+        'sku',
         'description',
         'price',
         'old_price',
@@ -36,6 +38,7 @@ class Product extends Model
         'tab_label_3',
         'policy_text',
         'features',
+        'specifications',
         'reviews_data',
         'is_deleted',
         'added_by',
@@ -46,6 +49,7 @@ class Product extends Model
         'is_deleted' => 'boolean',
         'featured' => 'boolean',
         'features' => 'array',
+        'specifications' => 'array',
         'reviews_data' => 'array',
     ];
 
@@ -83,9 +87,37 @@ class Product extends Model
         return [];
     }
 
+    public function getSpecificationsAttribute($value)
+    {
+        if (is_array($value)) {
+            return $value;
+        }
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+
+            return is_array($decoded) ? $decoded : [];
+        }
+
+        return [];
+    }
+
     public function category()
     {
         return $this->belongsTo(Category::class, 'category_id', 'id');
+    }
+
+    public static function generateSku(string $name, ?int $excludeId = null): string
+    {
+        $base = 'SKU-'.strtoupper(Str::substr(Str::slug($name), 0, 6));
+
+        do {
+            $candidate = $base.'-'.strtoupper(Str::random(5));
+        } while (self::query()
+            ->when($excludeId, fn ($q) => $q->where('id', '!=', $excludeId))
+            ->where('sku', $candidate)
+            ->exists());
+
+        return $candidate;
     }
 
     public function brand()

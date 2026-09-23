@@ -48,11 +48,17 @@
         </div>
         <small class="text-muted">Placed on {{ $order->created_at->format('M d, Y \a\t h:i A') }}</small>
     </div>
-    <!-- <div class="d-flex gap-2">
+    <div class="d-flex gap-2">
         <a href="{{ route('admin.orders.invoice', $order->id) }}" target="_blank" class="btn btn-outline-secondary steve-btn">
             <i class="fas fa-print me-1"></i> Print Invoice
         </a>
-    </div> -->
+        <form action="{{ route('admin.orders.email-customer', $order->id) }}" method="POST">
+            @csrf
+            <button type="submit" class="btn btn-outline-primary steve-btn">
+                <i class="fas fa-envelope me-1"></i> Email Customer
+            </button>
+        </form>
+    </div>
 </div>
 
 <form action="{{ route('admin.orders.update-status', $order->id) }}" method="POST" id="updateOrderForm">
@@ -141,6 +147,15 @@
 
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white py-3">
+                    <h5 class="mb-0"><i class="fas fa-history me-2"></i>Status History</h5>
+                </div>
+                <div class="card-body">
+                    @include('partials.order-status-timeline', ['order' => $order])
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
                     <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Update Order Status</h5>
                 </div>
                 <div class="card-body">
@@ -182,6 +197,14 @@
                                 <input type="text" class="form-control" value="" disabled placeholder="Transaction ID">
                                 <small class="text-muted d-block">Transaction ID can only be set when Payment Status is Paid.</small>
                             </div>
+                        </div>
+                    <div class="col-md-6">
+                            <label class="form-label fw-semibold small text-muted text-uppercase">Tracking Number</label>
+                            <input type="text" name="tracking_number" class="form-control" value="{{ $order->tracking_number }}" placeholder="e.g. SPX123456789">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small text-muted text-uppercase">Tracking Carrier</label>
+                            <input type="text" name="tracking_carrier" class="form-control" value="{{ $order->tracking_carrier }}" placeholder="e.g. DHL / FedEx / USPS">
                         </div>
                     </div>
                     <div class="mt-3">

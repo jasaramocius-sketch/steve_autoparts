@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Mail\PasswordResetMail;
 use App\Traits\Revisable;
 use App\Traits\TracksIsDeleted;
 use Database\Factories\UserFactory;
@@ -13,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Mail;
 
 #[Fillable([
     'name', 'email', 'password', 'role', 'user_type',
@@ -64,5 +66,10 @@ class User extends Authenticatable
     public function followedSellers(): HasMany
     {
         return $this->hasMany(FollowedSeller::class);
+    }
+
+    public function sendPasswordResetNotification($token)
+    {
+        Mail::to($this->email)->send(new PasswordResetMail($token, $this->email));
     }
 }

@@ -7,6 +7,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
@@ -73,10 +74,28 @@ class OrderController extends Controller
     public function destroy($id)
     {
         $user = auth()->user();
-        $order = Order::where('user_id', Auth::id())->findOrFail($id);
-        $order->update(['status' => 'cancelled']);
+        $order = Order::with('items.product')->where('user_id', Auth::id())->findOrFail($id);
 
-        return redirect()->back()->with('success', 'Order cancelled successfully.');
+        if ($order->status === 'cancelled') {
+            return back()->with('info', 'This order is already cancelled.');
+        }
+        if (! in_array($order->status, ['pending', 'processing'], true)) {
+            return back()->with('error', 'Only pending or processing orders can be cancelled.');
+        }
+
+        $oldStatus = $order->status;
+
+        DB::transaction(function () use ($order) {
+            $order->update(['status' => 'cancelled']);
+            if ($order->stock_deducted) {
+                $order->restoreStock();
+                $order->update(['stock_deducted' => false]);
+            }
+        });
+
+        NotificationHelper::orderStatusChanged($order, $oldStatus);
+
+        return redirect()->back()->with('success', 'Order cancelled and stock restored.');
     }
 
     public function tracking(Request $request)
@@ -87,6 +106,7 @@ class OrderController extends Controller
         if ($request->isMethod('post')) {
             $request->validate([
                 'order_number' => 'required|string',
+                'email' => 'nullable|required_without:auth|email|max:255',
             ]);
 
             $order = Order::with(['items.product', 'user'])
@@ -96,9 +116,24 @@ class OrderController extends Controller
                 })
                 ->first();
 
-            // Users can only track their own orders
-            if ($order && $order->user_id !== $user->id) {
-                abort(403, 'You are not authorized to view this order.');
+            if (! $order) {
+                return back()->withErrors(['order_number' => 'No order found with that number.']);
+            }
+
+            if ($order->user_id !== null) {
+                // Account orders are only trackable by the owner.
+                if (! $user || $order->user_id !== $user->id) {
+                    abort(403, 'You are not authorized to view this order.');
+                }
+            } else {
+                // Guest orders require the billing email to confirm ownership.
+                $billing = json_decode((string) $order->shipping_details, true) ?: [];
+                $billingEmail = strtolower(trim((string) ($billing['email'] ?? '')));
+                $submittedEmail = strtolower(trim((string) $request->email));
+
+                if (! $billingEmail || $billingEmail !== $submittedEmail) {
+                    return back()->withErrors(['email' => 'The email does not match the one used for this order.']);
+                }
             }
         }
 

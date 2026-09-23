@@ -91,6 +91,14 @@
                                     <line x1="12" y1="15" x2="12" y2="3"></line>
                                 </svg>
                             </a>
+                            @if($status === 'delivered')
+                                <a href="{{ route('user.returns.create', $order->id) }}" class="action-btn btn-view" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Request Return" style="color:#198754;">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="1 4 1 10 7 10"></polyline>
+                                        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                                    </svg>
+                                </a>
+                            @endif
                             <form action="{{ route('user.orders.destroy', $order->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Are you sure you want to cancel this order?');">
                                 @csrf
                                 @method('DELETE')

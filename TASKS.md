@@ -4193,3 +4193,152 @@ php artisan tinker --execute="dump(array_slice(json_decode(DB::table('settings')
 ```
 
 **Status: FIXES PENDING (18-Sep ko sirf document kiya; fixes kal).**
+
+## 307. (2026-09-22): Admin Products — Index Filters + Bulk Actions + Duplicate + SKU/Specs Frontend (last-session work completed, power-off ke baad document)
+
+**Context:** Pichhli session me backend (controller + routes + migration) already ready tha, lekin system power-off hone se view UI adhura aur TASKS.md entry lost ho gayi. Isto ye entry + completion dono is task me.
+
+### Completed features (backend mostly khatam tha, pehle se)
+- Migration `2026_09_22_000000_add_sku_and_specifications_to_products_table.php` → `products.sku`, `products.specifications` (run ho chuka). `Product::sku` indexed.
+- `Product.php`: `sku` + `specifications` fillable/casts + `getSpecificationsAttribute()` accessor (JSON decode → array).
+- `ProductController::store()/update()`: SKU trim + `parseSpecifications()` (lines `Label :: Value` → `[['label'=>, 'value'=>]]` array).
+- `ProductController::index()`: search name/sku/make/model; filters `category_id`, `brand_id`, `seller_id`, `product_type`, `stock_filter`, `status`, `featured`; sort-by whitelist me `sku` + `rating` add; `$categories/$brands/$sellers` view me pass.
+- Bulk methods: `duplicate()`, `bulkDelete()`, `bulkRestore()`, `bulkForceDelete()`, `bulkStatus()`, `bulkFeatured()`, `bulkCategory()` + routes (`/products/bulk/*`, `/products/{id}/duplicate`).
+- Admin create/edit forms: SKU input + Specifications textarea + `admin.partials.specifications-preview` (live JS preview; `Label :: Value` format).
+- Password reset flow (ish session me nahi, pehle ki WIP): `AuthController` forgot/reset + `/forgot-password`, `/reset-password/*` routes + `auth/forgot.blade.php`, `auth/reset.blade.php` + login link. **NOTE:** is task scope me nahi tha, sirf working-tree me present; alag se verify/commit karna pending hota to YAGNI — sirf document kiya.
+
+### 🛠 Fixes completed is session (view UI gaps)
+1. **`admin/products/index.blade.php` (rewrite jo controller ke ready filters/bulk use kare):**
+   - Filter bar card: Category, Brand, Seller, Section (`product_type`), Stock (`in/out`), Status, Featured dropdowns + Filter/Clear Filters (GET, `trashed`/`search` preserved). Active/Trash tabs ab active filters carry karte hain.
+   - Table: checkbox column (`bulk-select-all` + `bulk-select-row`), sortable SKU + Rating columns (controller pehle se support karta tha, view ab use karti hain).
+   - Bulk toolbar (revisions `bulkTrashRun` pattern, `bulk-form` + hidden `ids[]` + count spans):
+     - Active tab: Delete→trash, Activate, Deactivate, Featured, Unfeature, **Move to Category** (dropdown required) — buttons `d-none` jab tak koi row selected nahi.
+     - Trash tab: Restore, Delete Permanently.
+   - Per-row `Duplicate` action button (POST `admin.products.duplicate`, copy copy confirm) in Active tab action column.
+   - Stray commented-out PHP block hataya; empty row `colspan="16"` sync.
+2. **`admin/products/show.blade.php`:** Product Summary me SKU row; Specifications tab (Label|Value table) jab non-empty.
+3. **Frontend `product/show.blade.php`:** `details_tags_sku` me SKU / Part # item; Description tab me "Specifications:" table (`product-specifications-table`) jab `specifications` non-empty.
+4. **`ProductController.php:258`:** `$request->validate([` indentation fix (cosmetic).
+5. **`cart/index.blade.php`:** qty input ab editable (`readonly` removed) — script.js `.change-qty` +/- buttons + manual typing dono handled (pehle se existing fetch POST `/cart/update/{id}`).
+
+### Files changed (this session)
+- `resources/views/admin/products/index.blade.php` (rewrite/filter+bulk+duplicate+SKU/rating)
+- `resources/views/admin/products/show.blade.php` (SKU row + Specifications tab)
+- `resources/views/product/show.blade.php` (SKU + specs table)
+- `app/Http/Controllers/ProductController.php` (store() indentation only — rest pehle se WIP)
+
+### Verification
+- `php -l` controller clean; `php artisan view:cache` compiles; admin `/admin/products` (filters + bulk UI), `/admin/products/{id}` (SKU + specs tab), product frontend page (SKU + specs) — 200s.
+
+## 308. (2026-09-22): Admin Product Index UI Fixes — Clear Filters Active State + Bulk Category Select Arrow
+
+**Context:** Admin products index ke do UI issues — (a) filter bar me "Clear Filters" button active filters hone par kabhi show nahi hota tha, (b) bulk "Move to Category" dropdown (`d-none`) par `form-select-wrapper::after` arrow visible rehta tha.
+
+### Fix 1 — Clear Filters ab active filter ke saath dikhta hai
+- **Root cause:** `admin/products/index.blade.php` top `@php` block `$hasActiveFilters` define karta tha (controller se override), lekin usme `search` parameter miss tha — `?search=...` hone par bhi button hidden rehta tha.
+- **Fix:** `index.blade.php:15` — `$hasActiveFilters` me `request()->filled('search')` add kiya (category/brand/seller/product_type/stock_filter/status/featured ke saath). No-op values (`product_type=all`, `stock_filter=all`) filter logic ke anusaar count nahi hote.
+- **Note:** Controller me pehle `compact('hasActiveFilters')` add kiya tha, phir remove kiya — blade ka `@php` variable anyway controller-val override karta hai, isliye duplicate source-of-truth rakhne ka fayda nahi.
+
+### Fix 2 — Hidden bulk-category-select par arrow ab nahi dikhta
+- **Root cause:** `public/assets/front/js/form-select.js` har `.form-select` ko auto `.form-select-wrapper` span me wrap karta hai; `d-none` inner `<select>` par lagti hai, par `::after` arrow wrapper span (`style.css .form-select-wrapper::after`) par render hota hai — wo kabhi hidden nahi hota tha. Purana rule `select#bulk-category-select.d-none::after` galat target tha (pseudo-element select par nahi, wrapper span par hai) → ineffective.
+- **Fix:** `public/assets/front/css/style.css:4739` — `.form-select-wrapper:has(.form-select.d-none) { display: none; }` — inner select hidden hone par poora wrapper (arrow samet) hide ho jata hai. `index.blade.php` ki `refresh()` JS `selected.length === 0` par `d-none` toggle karti hai, to arrow bulk-category dropdown ke saath sahi show/hide hota hai.
+
+### Files changed
+- `resources/views/admin/products/index.blade.php` (`$hasActiveFilters` me search + Clear Filters gate)
+- `public/assets/front/css/style.css` (`.form-select-wrapper:has(.form-select.d-none)`)
+
+### Verification
+- Clear Filters button: no-filter → hidden; `category_id=1`, `search=brake`, `trashed=1&category_id=1` → shown; `stock_filter=all`/`product_type=all` → hidden.
+- Arrow fix: served CSS me rule confirm; wrapper display:none jab select d-none.
+
+## 309. (2026-09-22): Auto SKU Generation + Backfill
+- **Context:** Products ko SKU auto-generate karna (koi bhi product SKU ke bina submit ho to lena) + existing products backfill karna.
+- **Details:**
+  1. **`Product::generateSku()`** model static helper — `SKU-{name-slug[0:6]}-{random5}` format, DB-unique loop. `app/Models/Product.php`.
+  2. **`ProductController::store()`** — `sku` blank rahe to auto-generate; **`update()`** — blank aane par existing preserve, warna generate. `app/Http/Controllers/ProductController.php`.
+  3. **Admin create + edit blades:** SKU input ke side **"Auto"** button (client-side same format preview, tab click). JS `sku-generate-btn`. `create.blade.php`, `edit.blade.php`.
+  4. **Backfill command** `products:backfill-skus` (+ `--dry-run`) — har SKU-less product ko auto SKU deta hai. `app/Console/Commands/BackfillProductSkus.php`.
+- **Files changed:**
+- `app/Models/Product.php`, `app/Http/Controllers/ProductController.php`,
+- `resources/views/admin/products/create.blade.php`, `resources/views/admin/products/edit.blade.php`,
+- `app/Console/Commands/BackfillProductSkus.php` (new)
+- **Verification:** dry-run = 808 products; real run — 808/808 SKU-assigned, total products 808, empty sku left 0. `php -l` clean (model, controller, command), `view:cache` OK. Note: password recovery temp-set/restored during admin page verification, original hash restored.
+
+## 310. (2026-09-23): Product Import/Export — SKU + Missing Columns (Policy, Features, Specifications, Reviews, Tab Labels)
+
+**Context:** Product form me SKU add hone ke baad bhi import/export me SKU support nahi tha; aur audit me pata chala ki "Buy/Return Policy" (`policy_text`), `features`, `reviews_data` sirf import me the (export me nahi → export→import round-trip me data lose hota tha), aur `specifications` + `tab_label_1/2/3` dono me kabhi add hi nahi hue the.
+
+### SKU in import/export
+- **`import()`**: `$expected` columns me `sku` add (CSV header recognized). New product → CSV sku empty to `Product::generateSku($data['name'])` auto-generate; existing product (update) → CSV empty par existing sku preserve, na ho to generate with `excludeId`.
+- **`exportCsv()`**: `sku` column name ke baad.
+- **`downloadSampleCsv()`**: `sku` header + sample (`bp-1001`); kuch rows blank — auto-generate ka demo.
+- **`resolveImportedSku(array $data, string $name, ?Product $existing = null): string`** — naya static helper (`ProductController.php`): CSV sku present → trimmed; nahi → existing sku ?? generateSku(name, excludeId). Form store/update ke SKU behavior se consistent.
+
+### Missing columns — ab pura round-trip
+| Column | Pehle | Ab |
+|---|---|---|
+| `policy_text` (Buy/Return Policy) | sirf import | export + sample bhi |
+| `features` | sirf import | export + sample bhi |
+| `reviews_data` | sirf import | export + sample bhi |
+| `specifications` | dono me missing | import + export + sample |
+| `tab_label_1/2/3` | dono me missing | import + export + sample |
+
+- **Export format:** `features` → newline-joined (`\n`), import split hone ka format; `specifications` → `Label::Value` lines (import ke `parseSpecifications()` se round-trip); `reviews_data` → JSON string; `policy_text`/tab labels → raw string.
+- **Import:** `$expected` me `specifications`, `tab_label_1/2/3` add; `$insertData` me `specifications` = `$this->parseSpecifications($data['specifications'] ?? null)`, tab labels passthrough.
+- **Sample CSV** headers/rows 26 columns me sync (headers count == row count, checked).
+- **Import blade docs** (`admin/products/import.blade.php`): `sku` (leave empty to auto-generate), `specifications` (`Label::Value` newline-separated), `tab_label_1/2/3` documented.
+
+### Files changed
+- `app/Http/Controllers/ProductController.php` — `$expected` (sku + specifications + tab labels), `resolveImportedSku()`, import insertData, `exportCsv()` (headers + values), `downloadSampleCsv()` (headers + sample rows)
+- `resources/views/admin/products/import.blade.php` — supported columns list update
+- `tests/Feature/ProductImportSkuTest.php` — **new**: provided-sku priority, trim, existing-sku preserve (DB-free tests, kyunki is env me sqlite driver nahi hai)
+- `TASKS.md` — ye entry
+
+### Notes
+- `slug`, `rating` (user aggregate), `added_by`/`is_deleted` intentionally import/export me nahi (internal/system).
+- `sku` column ka koi DB unique constraint nahi (sirf index) — duplicate CSV sku possible, manual form ke bahav ke saath consistent.
+
+### Verification
+- `php -l` controller clean; `vendor/bin/pint` clean (controller + test).
+- `php artisan test --filter "ProductImportSkuTest|ProductImportPolicyReviewsTest|AdminProductRoutesTest"` → 6/6 passed, 14 assertions.
+- Full suite ke 4 failures pre-existing environment issue hain (missing sqlite driver → DB-dependent tests: `ExampleTest`, `HomeTopBrandsTest`), mere changes se unrelated.
+
+## 311. (2026-09-23): Ecommerce Audit — Phase 1–4 Implementation Report
+
+**Source:** approved multi-phase audit plan (Phase 1 stock/returns/tracking/Mailables galat-tha earlier; Phase 2 gap list 2.8–2.15; Phase 3 fixes 3.18–3.21; Phase 4 = ye reporting entry). Sab kuch `/var/www/html/stautoparts` pe implement kiya, uncommitted.
+
+### Phase 1 (previously completed)
+- Stock deduct/restore (`stock_deducted`), returns (user+admin), 6 Mailables + mail blades with **log mailer** (no SMTP creds), order tracking fields, welcome/contact/review emails.
+
+### Phase 2 — shipped
+- **2.8 Review moderation** — `Admin\ReviewController` + `admin.reviews.*` routes/sidebar/view; `approved`/`deleted` filters honored across product card / similar / compare / product show.
+- **2.9 Newsletter** — subscribers migration + `Subscriber` model, AJAX footer form → `newsletter.store` (dedupe by lowercase trimmed email, JSON `{success,message}`), admin index/search/destroy/export CSV (`newsletter-subscribers-YYYY-MM-DD.csv`).
+- **2.10 Guest checkout** — `orders.user_id` nullable (FK dropped), `CartController::checkout()` guest branch → `checkout.guest`, session `billing_info` → existing delivery/payment/confirmed flow; checkout routes de-auth'd (`nocache` only); `POST /checkout/guest`; order-confirmed guest link; `tracking()` public (`GET|POST /order/tracking`), guest verified by billing email in `shipping_details`.
+- **2.11 Cancel guard** — pending/processing only + stock restore (earlier).
+- **2.12 Admin order gaps** — `Admin\OrderController` invoice (PDF), email-customer (queued `OrderConfirmationMail`), CSV export (filter-aware, 7-column order data); duplicate invoice routes removed.
+- **2.13 Stock management** — `admin/products/stock` + `/products/bulk/stock` (mode add|set, DB transaction), stock view with threshold/filter/search/bulk UI, sidebar link.
+- **2.14 Per-customer order history** — `admin.customers.show` with stats + paginated order history + per-status badges.
+- **2.15 Recently viewed** — session `recently_viewed` (max 10, dedupe, most-recent-first) + `partials/recently-viewed` on product page.
+
+### Phase 3 — fixes
+- **3.18 Bugs** — `change.password` GET was `abort(404)` → now renders `user/change-password`; dashboard `$userVehicles` was never passed → now included; **fits-vehicle badge**: `$userVehicle`/`$vehicleFit` were computed only in dead `ShopController::product` while `ProductController::show` renders the page → moved logic into `ProductController::show` (uses `session('selected_vehicle_id')` fallback to default vehicle; normalized lowercase trim compare).
+- **3.19 SEO** — `partials/meta-tags`: canonical + `og:site_name` + Twitter cards; `robots => 'index, follow'` on 15 public pages (home/shop/product/categories/brands/blog/blog.show/pages + 7 policy pages); dynamic XML `sitemap.xml` (home/shop/categories/brands/blog/policy/category-chains/active products/accessible blogs/blog categories/tags); `robots.txt` disallows admin/user/checkout/cart/compare + sitemap URL. Alt tags already covered by `imgTag()` helper.
+- **3.20 WhatsApp + order timeline** — floating WhatsApp button `partials/whatsapp-button` (driven by footer_columns whatsapp/WA link, `wa.me` with prefilled text) in `layouts/app`; order `status_history` JSON column + migration + `Order::recordStatusChange()`/`getStatusHistory()`; recorded on placement (`CartController`) and admin status change (`Admin\OrderController::updateStatus`); reusable `partials/order-status-timeline` rendered in tracking, user order show, admin order show.
+- **3.21 Cleanup** — `customer.pr    oducts` → `customer.products`; dead `Route::resource('staffs', StaffController)` (controller only had `index`, views used `admin.staff.*`) removed + root `StaffController` deleted; dev junk (`cart.blade.copy.php`, `test-watcher2.html`, `test-watcher3.html`) removed; no `docs/index.html` reference exists; no unused top-level blade views (errors/404, errors/403 auto-picked by Laravel).
+
+### Files changed (Phase 2.12–3.21)
+- `routes/web.php` — tracking public, guest submit, admin subscribers/orders/products-stock/customers routes, `sitemap.xml`, `customer.products`, staffs resource removal, `change.password` NOT here (controller-level).
+- Controllers: `CartController`, `OrderController`, `ProductController` (stock, recently-viewed, fits-vehicle), `UserController`, `DashboardController`, `NewsletterController`, `HomeController` (sitemap), `Admin\OrderController`, `Admin\SubscriberController`.
+- Models: `Subscriber`, `Order` (status_history + helpers).
+- Migrations: `2026_09_23_000002_create_subscribers_table`, `2026_09_23_000003_make_orders_user_id_nullable`, `2026_09_23_000004_add_status_history_to_orders_table` (all ran).
+- Views: guest checkout, tracking (dynamic layout), change-password, subscribers/stock/customers-show admin pages, newsletter footer AJAX, recently-viewed + whatsapp-button + order-status-timeline partials, order confirmed guest link, meta-tags/canonical + `robots` on public pages, admin/users/order show timeline, sidebar links.
+- `public/robots.txt` rewritten; `app/Http/Controllers/StaffController.php` deleted; 3 dev files deleted.
+
+### Scope decisions honored
+- Payment gateway **skipped** (simulated stays); shipping/tax stay free+0; emails → log mailer; seller dashboard (#16) & full i18n (#17) deferred.
+
+### Verification
+- `php artisan migrate --force` OK (3 new migrations).
+- `php -l` clean on all touched PHP; `vendor/bin/pint` clean (ProductController, HomeController, CartController, Admin\OrderController, Order model, routes/web.php).
+- `php artisan view:cache` OK; `route:list` clean (316 routes; sitemap + customer.products present; no staffs resource).
+- Known pre-existing failures unrelated: sqlite driver missing → DB-dependent tests fail (`ExampleTest`, `HomeTopBrandsTest`).

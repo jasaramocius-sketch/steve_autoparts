@@ -91,6 +91,13 @@
                         </a>
                     </li>
                     @endif
+                    @if(!empty($product->specifications) && count($product->specifications))
+                    <li class="nav-item">
+                        <a class="nav-link" id="specifications-tab" data-bs-toggle="tab" href="#specifications" role="tab">
+                            <i class="fas fa-sliders-h me-1"></i> Specifications
+                        </a>
+                    </li>
+                    @endif
                 </ul>
             </div>
             <div class="card-body">
@@ -112,6 +119,22 @@
                         </ul>
                     </div>
                     @endif
+                    @if(!empty($product->specifications) && count($product->specifications ?? []))
+                    <div class="tab-pane fade" id="specifications" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0 admin-specs-table">
+                                <thead class="table-light">
+                                    <tr><th>Label</th><th>Value</th></tr>
+                                </thead>
+                                <tbody>
+                                @foreach($product->specifications as $spec)
+                                    <tr><td>{{ $spec['label'] ?? '' }}</td><td>{{ $spec['value'] ?? '' }}</td></tr>
+                                @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -128,6 +151,10 @@
                     <tr>
                         <th class="text-muted admin-table-value">Name</th>
                         <td>{{ $product->name }}</td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted">SKU</th>
+                        <td>{{ $product->sku ?: '—' }}</td>
                     </tr>
                     <tr>
                         <th class="text-muted">Price</th>

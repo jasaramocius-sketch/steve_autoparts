@@ -6,6 +6,7 @@
         'pageTitle' => $page->meta_title ?? (($page->title ?? 'Contact') . ' - ' . config('app.name', 'StAutoparts')),
         'metaTitle' => $page->meta_title ?? null,
         'metaDescription' => $page->meta_description ?? null,
+        'robots' => 'index, follow',
     ])
 @endsection
 

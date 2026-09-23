@@ -7,6 +7,7 @@
         'pageTitle' => $blog->title . ' - ' . config('app.name', 'StAutoparts'),
         'metaTitle' => $blog->title . ' | ' . config('app.name', 'StAutoparts'),
         'metaDescription' => $blogDesc ?: null,
+        'robots' => 'index, follow',
     ])
 @endsection
 

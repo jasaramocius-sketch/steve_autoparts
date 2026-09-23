@@ -63,7 +63,7 @@
                 </div>
               </div>
               <div class="col d-flex justify-content-end login-forgot">
-                <a href="javascript:void(0)" onclick="toastr.info('Password reset is not enabled for local testing.')" class="a-tag-text-hover">Forgot Password?</a>
+                <a href="{{ route('password.request') }}" class="a-tag-text-hover">Forgot Password?</a>
               </div>
             </div>
             

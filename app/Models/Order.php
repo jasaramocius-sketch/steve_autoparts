@@ -28,6 +28,10 @@ class Order extends Model
         'tax',
         'coupon_code',
         'coupon_discount',
+        'stock_deducted',
+        'tracking_number',
+        'tracking_carrier',
+        'status_history',
         'is_deleted',
     ];
 
@@ -44,5 +48,74 @@ class Order extends Model
     public function items()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    /**
+     * Decrement product stock by each item's qty.
+     */
+    public function deductStock(): void
+    {
+        foreach ($this->items as $item) {
+            $item->product?->decrement('stock', $item->qty);
+        }
+    }
+
+    /**
+     * Increment product stock back by each item's qty.
+     */
+    public function restoreStock(): void
+    {
+        foreach ($this->items as $item) {
+            $item->product?->increment('stock', $item->qty);
+        }
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'status_history' => 'array',
+        ];
+    }
+
+    /**
+     * Append an entry to the order status history (skips consecutive duplicates).
+     */
+    public function recordStatusChange(string $status, ?string $note = null): void
+    {
+        $history = $this->status_history ?: [];
+        $last = end($history);
+
+        if ($last && ($last['status'] ?? null) === $status) {
+            return;
+        }
+
+        $history[] = [
+            'status' => $status,
+            'label' => ucfirst($status),
+            'note' => $note,
+            'at' => now()->toDateTimeString(),
+        ];
+
+        $this->status_history = $history;
+        $this->save();
+    }
+
+    /**
+     * History entries with a synthetic "Order Placed" entry anchored at creation time.
+     */
+    public function getStatusHistory(): array
+    {
+        $history = $this->status_history ?: [];
+
+        $placed = [
+            'status' => 'placed',
+            'label' => 'Order Placed',
+            'note' => null,
+            'at' => $this->created_at?->toDateTimeString() ?? now()->toDateTimeString(),
+        ];
+
+        array_unshift($history, $placed);
+
+        return $history;
     }
 }

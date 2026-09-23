@@ -32,6 +32,7 @@
                 <strong>Supported Columns:</strong>
                 <code>id</code> (leave empty for new product, provide ID to update existing),
                 <code>name</code> (required),
+                <code>sku</code> (leave empty to auto-generate),
                 <code>price</code> (required),
                 <code>old_price</code>,
                 <code>category</code> (matched by name — <strong>auto-created if missing</strong>),
@@ -50,7 +51,9 @@
                 <code>gallery_images</code> (pipe-separated URLs — e.g. <code>url1.jpg|url2.jpg|url3.jpg</code>),
                 <code>policy_text</code> or <code>buy_return_policy</code> or <code>return_policy</code> (HTML accepted for the product policy tab),
                 <code>features</code> or <code>feature_list</code> (newline or pipe-separated list),
-                <code>reviews</code> or <code>reviews_data</code> (JSON array or <code>name::rating::text|name::rating::text</code>)
+                <code>specifications</code> (newline-separated <code>Label::Value</code> pairs),
+                <code>reviews</code> or <code>reviews_data</code> (JSON array or <code>name::rating::text|name::rating::text</code>),
+                <code>tab_label_1</code>, <code>tab_label_2</code>, <code>tab_label_3</code> (custom tab titles)
             </div>
             <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-primary steve-btn gap-1">

@@ -6,6 +6,7 @@
         'pageTitle' => $page->meta_title ?: $page->title,
         'metaTitle' => $page->meta_title,
         'metaDescription' => $page->meta_description,
+        'robots' => 'index, follow',
     ])
 @endsection
 @section('content')

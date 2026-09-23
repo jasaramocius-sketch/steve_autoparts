@@ -34,9 +34,11 @@
 
             <li><a class="nav-link {{ request()->routeIs('user.orders', 'user.orders.show', 'user.orders.invoice') ? 'active' : '' }}" href="{{ route('user.orders') }}"><i class="fas fa-shopping-bag me-2"></i>Orders</a></li>
 
+            <li><a class="nav-link {{ request()->routeIs('user.returns.index', 'user.returns.create') ? 'active' : '' }}" href="{{ route('user.returns.index') }}"><i class="fas fa-undo me-2"></i>My Returns</a></li>
+
             <li><a class="nav-link {{ request()->routeIs('user.reviews') ? 'active' : '' }}" href="{{ route('user.reviews') }}"><i class="fas fa-star me-2"></i>My Reviews</a></li>
 
-            <li><a class="nav-link {{ request()->routeIs('user.order.tracking') ? 'active' : '' }}" href="{{ route('user.order.tracking') }}"><i class="fas fa-search me-2"></i>Order Tracking</a></li>
+            <li><a class="nav-link {{ request()->routeIs('order.tracking') ? 'active' : '' }}" href="{{ route('order.tracking') }}"><i class="fas fa-search me-2"></i>Order Tracking</a></li>
 
             <li><a class="nav-link {{ request()->routeIs('user.wishlist') ? 'active' : '' }}" href="{{ route('user.wishlist') }}"><i class="fas fa-heart me-2"></i>My Wishlist</a></li>
 
@@ -52,6 +54,9 @@
             <li><a class="nav-link {{ request()->routeIs('user.inquiries') ? 'active' : '' }}" href="{{ route('user.inquiries') }}"><i class="fas fa-question-circle me-2"></i>My Inquiries</a></li>
             <li class="nav-item mb-2 user-sidebar-my-profile">
                 <a class="nav-link {{ request()->routeIs('user.profile') ? 'active' : '' }}" href="{{ route('user.profile') }}"><i class="fas fa-user-cog"></i>My Profile</a>
+            </li>
+            <li class="nav-item mb-2">
+                <a class="nav-link {{ request()->routeIs('change.password') ? 'active' : '' }}" href="{{ route('change.password') }}"><i class="fas fa-key me-2"></i>Change Password</a>
             </li>
             @if(($profile['role'] ?? '') === 'master_admin')
             <li class="nav-item mb-2">

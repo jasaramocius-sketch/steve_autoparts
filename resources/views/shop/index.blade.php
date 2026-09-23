@@ -13,6 +13,7 @@
         'pageTitle' => $shopMeta ?: ($shopTitle . ' - StAutoparts'),
         'metaTitle' => $shopMeta ?: ($shopTitle . ' | StAutoparts'),
         'metaDescription' => $shopDesc ?: ($shopTitle . ' — browse auto spare parts and accessories at StAutoparts.'),
+        'robots' => 'index, follow',
     ])
 @endsection
 

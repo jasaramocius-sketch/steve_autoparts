@@ -10,6 +10,7 @@
         'pageTitle' => $prodName . ' - ' . config('app.name', 'StAutoparts'),
         'metaTitle' => $prodName . ' | ' . config('app.name', 'StAutoparts'),
         'metaDescription' => $prodDesc ?: ('Buy ' . $prodName . ' at ' . config('app.name', 'StAutoparts')),
+        'robots' => 'index, follow',
     ])
 @endsection
 
@@ -369,6 +370,19 @@
 .details_qty_input button:disabled:hover {
     background: #F5F5F5;
     color: #333;
+}
+
+.details_total_price {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.details_total_price .details_total_price_value {
+    font-size: 18px;
+    font-weight: 700;
+    color: #05A845;
 }
 
 .details_btn_area {
@@ -873,7 +887,7 @@
               <div class="d-flex flex-wrap align-items-center">
                 <p class="stock {{ $product['stock'] > 0 ? 'in-stock' : 'out-stock' }}">{{ $product['stock'] > 0 ? 'In Stock' : 'Out of Stock' }}</p>
                 @php
-                  $visibleReviews = collect($product['reviews_data'] ?? [])->where('deleted', false);
+                  $visibleReviews = collect($product['reviews_data'] ?? [])->filter(fn ($r) => ! ($r['deleted'] ?? false) && ($r['approved'] ?? true) !== false);
                   $avgRating = $visibleReviews->avg('rating');
                   $displayRating = round($avgRating);
                 @endphp
@@ -918,7 +932,7 @@
                 @endif
               </h3>
 
-              <div class="short_description">{!! $product['description'] ?? 'Auctor urna nunc id cursus. Scelerisque purus semper eget duis at pharetra vel turpis nunc eget.' !!}</div>
+              <!-- <div class="short_description">{!! $product['description'] ?? 'Auctor urna nunc id cursus. Scelerisque purus semper eget duis at pharetra vel turpis nunc eget.' !!}</div> -->
 
               <form action="{{ route('cart.add') }}" method="POST">
                 @csrf
@@ -927,12 +941,18 @@
                 <input type="hidden" name="product_price" value="{{ $product['price'] }}">
                 <input type="hidden" name="product_image" value="{{ storedImageUrl($product['image'], 'assets/images/thumbnails') }}">
 
-                <div class="d-flex flex-wrap align-items-center">
+                <div class="d-flex flex-column align-items-start">
                   <div class="details_qty_input">
                     <button type="button" class="minus" id="qty-minus" onclick="updateQty(-1)" disabled><i class="fas fa-minus"></i></button>
-                    <input type="text" readonly id="qty" name="qty" value="1" min="1" max="{{ $product['stock'] }}">
+                    <input type="text" id="qty" name="qty" value="1" min="1" max="{{ $product['stock'] }}"
+                           data-unit-price="{{ $product['price'] * config('currencies.' . session('currency', 'USD') . '.rate', config('currencies.USD.rate')) }}"
+                           data-currency-symbol="{{ config('currencies.' . session('currency', 'USD') . '.symbol', '$') }}">
                     <button type="button" class="plus" id="qty-plus" onclick="updateQty(1)"><i class="fas fa-plus"></i></button>
-                  </div>                  
+                  </div>
+                  <div class="details_total_price">
+                    <span class="details_total_price_label">Total Price:</span>
+                    <span class="details_total_price_value" id="total-price"></span>
+                  </div>
                 </div>
                 <div class="details_btn_area">
                   <div class="buy-now-btn">
@@ -963,6 +983,9 @@
               </ul>
 
               <ul class="details_tags_sku">
+                @if(!empty($product['sku']))
+                <!-- <li><span>SKU / Part #:</span> {{ $product['sku'] }}</li> -->
+                @endif
                 @if(isset($product['category']) && $product['category'])
                 <li><span>Category:</span> {{ $product['category']['name'] ?? $product['category']->name }}</li>
                 @endif
@@ -990,7 +1013,7 @@
               <button class="nav-link template-btn steve-btn" id="policy-tab" data-bs-toggle="tab" data-bs-target="#policy-tab-pane" type="button" role="tab" aria-controls="policy-tab-pane" aria-selected="false">Buy / Return Policy</button>
             </li>
             <li class="nav-item" role="presentation">
-              <button class="nav-link template-btn steve-btn" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews-tab-pane" type="button" role="tab" aria-controls="reviews-tab-pane" aria-selected="false">Reviews ({{ collect($product['reviews_data'] ?? [])->where('deleted', false)->count() }})</button>
+              <button class="nav-link template-btn steve-btn" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews-tab-pane" type="button" role="tab" aria-controls="reviews-tab-pane" aria-selected="false">Reviews ({{ collect($product['reviews_data'] ?? [])->filter(fn ($r) => ! ($r['deleted'] ?? false) && ($r['approved'] ?? true) !== false)->count() }})</button>
             </li>
           </ul>
           <div class="tab-content border px-4 " id="myTabContent">
@@ -1012,6 +1035,21 @@
                     <li>{!! $feature !!}</li>
                   @endforeach
                 </ul>
+              @endif
+              @if(!empty($product['specifications']))
+                <h5 class="mt-4 mb-3 fw-bold">Specifications:</h5>
+                <div class="table-responsive">
+                  <table class="table table-bordered product-specifications-table">
+                    <tbody>
+                      @foreach($product['specifications'] as $spec)
+                        <tr>
+                          <th class="text-muted" style="width: 40%;">{{ $spec['label'] ?? '' }}</th>
+                          <td>{{ $spec['value'] ?? '' }}</td>
+                        </tr>
+                      @endforeach
+                    </tbody>
+                  </table>
+                </div>
               @endif
             </div>
             <div class="tab-pane fade py-4" id="policy-tab-pane" role="tabpanel" aria-labelledby="policy-tab" tabindex="0">
@@ -1053,7 +1091,7 @@
 
                 <!-- Reviews List -->
                 <div id="reviewsList">
-                @php $reviews = collect($product['reviews_data'] ?? [])->where('deleted', false); @endphp
+                @php $reviews = collect($product['reviews_data'] ?? [])->filter(fn ($r) => ! ($r['deleted'] ?? false) && ($r['approved'] ?? true) !== false); @endphp
                 @forelse($reviews as $review)
                   <div class="d-flex gap-3 mb-4 pb-3 border-bottom review-item" data-review-id="{{ $review['id'] ?? '' }}">
                     <div class="flex-shrink-0">
@@ -1223,6 +1261,9 @@
 </section>
 @endif
 
+<!-- Recently Viewed Products -->
+@include('partials.recently-viewed')
+
 <!-- Contact Seller Modal -->
 <div class="modal fade" id="contactSellerModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
@@ -1355,7 +1396,20 @@ document.getElementById('contactSellerForm')?.addEventListener('submit', functio
 const qtyInput = document.getElementById('qty');
 const qtyMinus = document.getElementById('qty-minus');
 const qtyPlus = document.getElementById('qty-plus');
+const totalPriceEl = document.getElementById('total-price');
 const maxQty = {{ $product['stock'] }};
+const unitPrice = parseFloat(qtyInput.dataset.unitPrice) || 0;
+const currencySymbol = qtyInput.dataset.currencySymbol || '$';
+
+function formatPrice(amount) {
+  return currencySymbol + Number(amount).toFixed(2);
+}
+
+function updateTotalPrice(val) {
+  if (totalPriceEl) {
+    totalPriceEl.textContent = formatPrice(unitPrice * val);
+  }
+}
 
 function updateQty(change) {
   let val = parseInt(qtyInput.value) + change;
@@ -1364,7 +1418,18 @@ function updateQty(change) {
   qtyInput.value = val;
   qtyMinus.disabled = val <= 1;
   qtyPlus.disabled = val >= maxQty;
+  updateTotalPrice(val);
 }
+
+qtyInput.addEventListener('input', function () {
+  let val = parseInt(this.value) || 1;
+  if (val < 1) val = 1;
+  if (val > maxQty) val = maxQty;
+  this.value = val;
+  qtyMinus.disabled = val <= 1;
+  qtyPlus.disabled = val >= maxQty;
+  updateTotalPrice(val);
+});
 
 updateQty(0);
 

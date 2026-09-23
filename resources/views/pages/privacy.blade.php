@@ -5,6 +5,7 @@
         'pageTitle' => $page->meta_title ?? ('Privacy Policy - ' . config('app.name', 'StAutoparts')),
         'metaTitle' => $page->meta_title ?? ('Privacy Policy | ' . config('app.name', 'StAutoparts')),
         'metaDescription' => $page->meta_description ?? null,
+        'robots' => 'index, follow',
     ])
 @endsection
 @section('content')

@@ -1,4 +1,5 @@
-@extends('user.layouts.dashboard')
+@php($trackingIsGuest = !auth()->check())
+@extends($trackingIsGuest ? 'layouts.app' : 'user.layouts.dashboard')
 {{-- Add your custom page ID and classes right here --}}
 @include('partials.page-attributes', ['pageId' => 'user-order-tracking-page', 'pageClass' => 'user-order-tracking-page'])
 @section('meta_tags')
@@ -8,7 +9,7 @@
         'metaDescription' => 'Track your orders and view their status at StAutoparts.',
     ])
 @endsection
-@section('dashboard-content')
+@section($trackingIsGuest ? 'content' : 'dashboard-content')
 
 <style>
 /* =========================
@@ -459,7 +460,7 @@
             </div>
         </div>
 
-        <form method="POST" action="{{ route('user.order.tracking') }}">
+        <form method="POST" action="{{ route('order.tracking') }}">
             @csrf
 
             <div class="track-form-row">
@@ -476,12 +477,29 @@
                     >
                 </div>
 
+                <div class="track-form-field">
+                    <label for="track_email">Billing Email @guest<span class="text-danger">*</span>@endguest</label>
+                    <input
+                        type="email"
+                        name="email"
+                        id="track_email"
+                        class="form-control"
+                        value="{{ old('email', auth()->user()->email ?? '') }}"
+                        placeholder="you@example.com"
+                        autocomplete="off"
+                        @guest required @endguest
+                    >
+                </div>
+
                 <button type="submit" class="template-btn btn-forms steve-btn track-submit">
                     <i class="fas fa-search me-1"></i>
                     Track Order
                 </button>
             </div>
             @error('order_number')
+                <small class="track-error">{{ $message }}</small>
+            @enderror
+            @error('email')
                 <small class="track-error">{{ $message }}</small>
             @enderror
         </form>
@@ -568,7 +586,26 @@
                             @endforeach
                         </div>
                     @endif
+
+                    @if(!empty($order->tracking_number))
+                        <div class="mt-4 p-3" style="background:#fff;border:1px dashed #dbe2ea;border-radius:8px;">
+                            <p class="mb-1" style="color:#6b7280;font-size:13px;font-weight:600;">TRACKING NUMBER</p>
+                            <p class="mb-0" style="color:#111827;font-size:16px;font-weight:700;">
+                                {{ $order->tracking_number }}
+                                @if(!empty($order->tracking_carrier))
+                                    <span class="track-summary-label" style="display:inline-block;margin-left:8px;">({{ $order->tracking_carrier }})</span>
+                                @endif
+                            </p>
+                        </div>
+                    @endif
                 </div>
+
+                @if(count($order->getStatusHistory()) > 1)
+                <div class="track-status-box mt-4">
+                    <h4 class="track-status-heading">Status History</h4>
+                    @include('partials.order-status-timeline', ['order' => $order])
+                </div>
+                @endif
 
                 <div class="track-summary-grid">
                     <div class="track-summary-item">

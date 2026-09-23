@@ -11,6 +11,7 @@
             : (isset($tag)
                 ? 'Blogs tagged with "' . $tag->name . '" from ' . config('app.name', 'StAutoparts') . '.'
                 : 'Latest blogs, auto parts guides and tips from ' . config('app.name', 'StAutoparts') . '.'),
+        'robots' => 'index, follow',
     ])
 @endsection
 
@@ -24,8 +25,7 @@
         <h2 class="breadcrumb-title">{{ $blogTitle }}</h2>
         <ul class="bread-menu">
           <li><a href="{{ route('home') }}">Home</a></li>
-          <li><a href="{{ route('blog') }}">Blog</a></li>
-          <li style="color: var(--primary)">{{ $blogTitle }}</li>
+          <li style="color: var(--primary)">Blog</li> 
         </ul>
       </div>
     </div>
@@ -44,7 +44,6 @@
 <div class="gs-blog-wrapper">
   <div class="container">
     <div class="row flex-lg-row">
-
       <!-- Sidebar (first in DOM for mobile stacking) -->
       <div class="col-12 col-lg-4 mt-lg-0">
         <div class="blog-sidebar-overlay"></div>
@@ -119,13 +118,11 @@
               @endforeach
             </div>
           </div>
-
         </div>
       </div>
 
       <!-- Main Blog Content -->
       <div class="col-12 col-lg-8 gs-main-blog-wrapper">
-
         @forelse($blogs as $blog)
         <div class="gs-main-single-blog">
           <div class="left-side-content">
@@ -180,9 +177,7 @@
           {{ $blogs->links('vendor.pagination.gs-pagination') }}
         </div>
         @endif
-
       </div>
-
     </div>
   </div>
 

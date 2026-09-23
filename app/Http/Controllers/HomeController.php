@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Blog;
+use App\Models\BlogCategory;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Faq;
 use App\Models\HomePageSection;
 use App\Models\Page;
 use App\Models\Product;
+use App\Models\Tag;
 
 class HomeController extends Controller
 {
@@ -320,5 +322,81 @@ class HomeController extends Controller
         }
 
         return view('pages.support-policy');
+    }
+
+    public function sitemap()
+    {
+        $base = url('/');
+        $urls = [];
+
+        $register = function (string $loc, $lastmod = null, string $changefreq = 'weekly', float $priority = 0.5) use (&$urls) {
+            $urls[] = [
+                'loc' => $loc,
+                'lastmod' => $lastmod ? $lastmod->toAtomString() : null,
+                'changefreq' => $changefreq,
+                'priority' => $priority,
+            ];
+        };
+
+        $register($base, null, 'daily', 1.0);
+        $register($base.'/shop', null, 'daily', 0.9);
+        $register($base.'/categories', null, 'weekly', 0.7);
+        $register($base.'/brands', null, 'weekly', 0.6);
+        $register($base.'/blog', null, 'daily', 0.8);
+        $register($base.'/about-us', null, 'monthly', 0.4);
+        $register($base.'/contact-us', null, 'monthly', 0.4);
+        $register($base.'/faq', null, 'monthly', 0.3);
+        $register($base.'/privacy', null, 'monthly', 0.2);
+        $register($base.'/terms', null, 'monthly', 0.2);
+        $register($base.'/return-policy', null, 'monthly', 0.2);
+        $register($base.'/support-policy', null, 'monthly', 0.2);
+
+        Category::where('status', true)->get()->each(function ($category) use ($register, $base) {
+            $segments = [];
+            $current = $category;
+            for ($i = 0; $current && $i < 4; $i++) {
+                array_unshift($segments, $current->slug);
+                if (! $current->parent_id) {
+                    break;
+                }
+                $currentCategory = $current;
+                $current = Category::where('id', $currentCategory->parent_id)->where('status', true)->first();
+            }
+            $register($base.'/category/'.implode('/', $segments), $category->updated_at, 'weekly', 0.6);
+        });
+
+        Product::where('status', true)->select('slug', 'updated_at')->get()->each(function ($product) use ($register, $base) {
+            $register($base.'/product/'.$product->slug, $product->updated_at, 'daily', 0.9);
+        });
+
+        Blog::accessible()->select('slug', 'updated_at')->get()->each(function ($blog) use ($register, $base) {
+            $register($base.'/blog/'.$blog->slug, $blog->updated_at, 'weekly', 0.8);
+        });
+
+        BlogCategory::withCount(['blogs' => fn ($q) => $q->accessible()])->get()
+            ->filter(fn ($c) => $c->blogs_count > 0)
+            ->each(function ($category) use ($register, $base) {
+                $register($base.'/blog/category/'.$category->slug, $category->updated_at, 'weekly', 0.6);
+            });
+
+        Tag::whereHas('blogs', fn ($q) => $q->accessible())->get()->each(function ($tag) use ($register, $base) {
+            $register($base.'/blog/tag/'.$tag->slug, null, 'weekly', 0.4);
+        });
+
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>'."\n";
+        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'."\n";
+        foreach ($urls as $entry) {
+            $xml .= '  <url>'."\n";
+            $xml .= '    <loc>'.e($entry['loc']).'</loc>'."\n";
+            if ($entry['lastmod']) {
+                $xml .= '    <lastmod>'.$entry['lastmod'].'</lastmod>'."\n";
+            }
+            $xml .= '    <changefreq>'.$entry['changefreq'].'</changefreq>'."\n";
+            $xml .= '    <priority>'.number_format($entry['priority'], 1).'</priority>'."\n";
+            $xml .= '  </url>'."\n";
+        }
+        $xml .= '</urlset>'."\n";
+
+        return response($xml, 200, ['Content-Type' => 'application/xml']);
     }
 }
